@@ -17,6 +17,8 @@ jobs:
   backend:
     name: Backend tests
     runs-on: ubuntu-latest
+    env:
+      JWT_SECRET_KEY: ci-only-jwt-secret-key-change-me-32-bytes
     steps:
       - name: Check out source
         uses: actions/checkout@v5
