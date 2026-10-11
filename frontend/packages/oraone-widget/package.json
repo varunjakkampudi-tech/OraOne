@@ -1,0 +1,36 @@
+{
+  "name": "@oraone/widget",
+  "version": "1.0.0",
+  "description": "Official OraOne widget & SDK — drop a Universal AI Agent (chat, shared memory) into any modern web app.",
+  "keywords": [
+    "oraone",
+    "ai",
+    "chatbot",
+    "widget",
+    "conversational-ai",
+    "customer-support"
+  ],
+  "homepage": "https://oraone.in",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OraOneHQ/oraone-web.git"
+  }
+}

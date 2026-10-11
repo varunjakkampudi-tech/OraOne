@@ -1,0 +1,80 @@
+# OraOne backend — runtime dependencies.
+#
+# Pin philosophy:
+#   - Use `>=` floors with conservative upper bounds so the same file
+#     works on Emergent preview (Python 3.11), local laptops (3.10/3.11/3.12),
+#     and AWS EC2 (Amazon Linux 3.9/3.11).
+#   - No Emergent-internal / pre-release builds.
+#   - Generated automatically by `pip freeze`? Don't. Edit by hand.
+
+# ---- Web framework ----
+# Pinned >=0.141 / starlette >=1.6 to clear PYSEC-2026-161/248/249/1941/1942/2280/2281
+# (multiple starlette DoS/parsing CVEs found by pip-audit on 2026-08-20).
+fastapi>=0.141,<0.150
+starlette>=1.6,<2.0
+uvicorn[standard]>=0.25,<1.0
+gunicorn>=22.0,<24.0            # process supervision in production (see gunicorn.conf.py)
+python-multipart>=0.0.9,<1.0    # FastAPI form parsing
+
+# ---- Validation / schemas ----
+pydantic>=2.6,<3.0
+pydantic[email]>=2.6,<3.0       # pulls in email-validator for EmailStr
+python-dotenv>=1.0,<2.0
+
+# ---- HTTP clients ----
+requests>=2.31,<3.0
+httpx>=0.27,<1.0                 # used by connectors + website crawler
+
+# ---- PostgreSQL (system-of-record) ----
+SQLAlchemy[asyncio]>=2.0,<2.1
+asyncpg>=0.29,<1.0              # async driver used by the app
+psycopg2-binary>=2.9,<3.0       # sync driver used by Alembic
+alembic>=1.13,<2.0
+Mako>=1.3,<2.0                  # required by Alembic at runtime
+greenlet>=3.0,<4.0              # required by SQLAlchemy async
+pgvector>=0.3,<1.0             # pgvector column type + cosine search (Phase 9 RAG)
+
+# ---- AWS (optional — Bedrock embeddings provider only; no Cognito/DynamoDB) ----
+boto3>=1.34,<2.0
+botocore>=1.34,<2.0
+
+# ---- Document parsing (Phase 7) ----
+pypdf>=6.15,<7.0                # >=6.15 fixes PYSEC-2026-3613/3612/3655/3656
+python-docx>=1.0,<2.0
+openpyxl>=3.1,<4.0              # XLSX extraction (R2 knowledge)
+python-pptx>=0.6,<1.1          # PPTX extraction (R2 knowledge)
+
+# ---- JWT / crypto for self-hosted access tokens ----
+python-jose[cryptography]>=3.3,<4.0
+argon2-cffi>=23.1,<24.0        # password hashing (self-hosted auth)
+
+# ---- Timezones (business-hours calculations) ----
+# IANA tz database for zoneinfo on platforms without a system tzdata
+# (notably Windows). Required for business-hours / holiday evaluation.
+tzdata>=2024.1
+
+# ---- AI providers (Phase 8) ----
+# Optional at runtime: the agent runtime falls back to a built-in mock
+# provider when OPENAI_API_KEY is unset, so this is only required for
+# live model responses.
+openai>=1.40,<2.0
+
+# ---- Redis (distributed cache / rate limiting) ----
+# Optional at runtime: app/services/cache.py and the rate limiter fall back
+# to an in-process store when this package or REDIS_URL is unavailable.
+redis>=5.0,<6.0
+
+# ---- Dev / test (safe to leave installed in prod, very small footprint) ----
+pytest>=9.0.3,<10.0             # PYSEC-2026-1845 fixed in 9.0.3
+pytest-asyncio>=0.23,<2.0
+
+# ---- Structured logging ----
+structlog>=24.1,<25.0
+
+# ---- Distributed tracing (optional — no-op unless OTEL_EXPORTER_OTLP_ENDPOINT
+# is set; see app/core/tracing.py) ----
+opentelemetry-api>=1.27,<2.0
+opentelemetry-sdk>=1.27,<2.0
+opentelemetry-instrumentation-fastapi>=0.48b0
+opentelemetry-instrumentation-httpx>=0.48b0
+opentelemetry-exporter-otlp-proto-grpc>=1.27,<2.0

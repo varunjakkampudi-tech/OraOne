@@ -1,0 +1,11 @@
+<h1 style="margin:0 0 16px 0; font-size:24px; line-height:32px; font-weight:800; color:#0F172A;">New lead captured 🎯</h1>
+<p style="margin:0 0 24px 0; font-size:15px; line-height:24px; color:#334155;">
+  Your agent <strong>{{ agent_name }}</strong> just captured a new lead from {{ channel }}.
+</p>
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 24px 0; border:1px solid #E2E8F0; border-radius:12px;">
+  <tr><td style="padding:14px 16px; border-bottom:1px solid #F1F5F9; font-size:14px; color:#64748B; width:120px;">Name</td><td style="padding:14px 16px; border-bottom:1px solid #F1F5F9; font-size:14px; color:#0F172A; font-weight:600;">{{ lead_name }}</td></tr>
+  <tr><td style="padding:14px 16px; border-bottom:1px solid #F1F5F9; font-size:14px; color:#64748B;">Phone</td><td style="padding:14px 16px; border-bottom:1px solid #F1F5F9; font-size:14px; color:#0F172A;">{{ lead_phone }}</td></tr>
+  <tr><td style="padding:14px 16px; border-bottom:1px solid #F1F5F9; font-size:14px; color:#64748B;">Email</td><td style="padding:14px 16px; border-bottom:1px solid #F1F5F9; font-size:14px; color:#0F172A;">{{ lead_email }}</td></tr>
+  <tr><td style="padding:14px 16px; font-size:14px; color:#64748B;">Intent</td><td style="padding:14px 16px; font-size:14px; color:#0F172A;">{{ lead_intent }}</td></tr>
+</table>
+<a href="{{ cta_url }}" style="display:inline-block; background:linear-gradient(135deg,#2563EB 0%,#4F46E5 100%); color:#FFFFFF; text-decoration:none; font-weight:600; font-size:15px; padding:12px 28px; border-radius:10px;">View lead</a>

@@ -1,0 +1,69 @@
+# Local development infrastructure for OraOne — Postgres (system of record)
+# and Redis (cache / rate limiting, optional — the app falls back to an
+# in-process cache when REDIS_URL is unset). This does NOT run the
+# application itself; see LOCAL_SETUP.md for backend/frontend dev servers.
+services:
+  postgres:
+    # pgvector/pgvector ships Postgres + the pgvector extension pre-built —
+    # the app's RAG/embeddings schema requires `CREATE EXTENSION vector`,
+    # which a plain postgres:16 image does not provide.
+    image: pgvector/pgvector:pg16
+    container_name: oraone-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: oraone_admin
+      POSTGRES_PASSWORD: oraone_dev_password
+      POSTGRES_DB: oraone
+    ports:
+      # Host port 5433 so this never conflicts with a native Postgres install
+      # already listening on 5432.
+      - "5433:5432"
+    volumes:
+      - oraone_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oraone_admin -d oraone"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: oraone-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - oraone_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    # S3-compatible object storage — set S3_ENDPOINT_URL=http://localhost:9000
+    # (+ S3_BUCKET, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY) in backend/.env to
+    # use it instead of the local-disk storage fallback. Optional — the app
+    # works fine without it (documents/uploads go to UPLOAD_DIR instead).
+    image: minio/minio:latest
+    container_name: oraone-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: oraone_minio
+      MINIO_ROOT_PASSWORD: oraone_minio_password
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console
+    volumes:
+      - oraone_minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  oraone_postgres_data:
+  oraone_redis_data:
+  oraone_minio_data:
