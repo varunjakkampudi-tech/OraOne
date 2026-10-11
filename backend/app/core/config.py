@@ -101,7 +101,7 @@ class Settings:
     def cognito_userinfo_endpoint(self) -> str:
         if self.cognito_userinfo_url:
             return self.cognito_userinfo_url
-        return f"{self.cognito_token_issuer.rstrip('/')}/oauth2/userInfo"
+        return f"{self.cognito_domain}/oauth2/userInfo"
 
     @property
     def cognito_token_endpoint(self) -> str:

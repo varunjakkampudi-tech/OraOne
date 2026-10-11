@@ -372,10 +372,27 @@ async def establish_cognito_session(payload: CognitoSessionRequest, response: Re
 
 
 @router.post("/cognito/logout", response_model=MessageResponse)
-async def logout_cognito(response: Response):
+async def logout_cognito(request: Request, response: Response):
     if settings.auth_provider != "cognito":
         raise HTTPException(status_code=404, detail="Cognito authentication is not enabled.")
-    from app.core.cookies import clear_auth_cookies
+
+    # Revoke the provider session when the app client has token revocation enabled.
+    # Local cookies are cleared regardless, so logout remains fail-safe if Cognito is
+    # temporarily unavailable or the provider rejects revocation for this client.
+    refresh_token = request.cookies.get(REFRESH_COOKIE_NAME)
+    if refresh_token:
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                revoke_response = await client.post(
+                    f"{settings.cognito_domain}/oauth2/revoke",
+                    data={
+                        "token": refresh_token,
+                        "client_id": settings.cognito_client_id,
+                    },
+                )
+                revoke_response.raise_for_status()
+        except httpx.HTTPError as exc:
+            log.warning("cognito_revoke_failed: %s", exc)
 
     clear_auth_cookies(response)
     return MessageResponse(message="Logged out.")
