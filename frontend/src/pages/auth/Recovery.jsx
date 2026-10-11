@@ -25,14 +25,14 @@ import {
 
 const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
-function CognitoManagedAuthNotice({ title, message }) {
+function CognitoManagedAuthNotice({ title, message, endpoint = "login" }) {
   return (
     <AuthShell cardTestId="cognito-managed-auth">
       <IconBadge icon={Mail} />
       <h1 className="mt-5 text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">{title}</h1>
       <p className="mt-2 text-center text-sm leading-relaxed text-[#64748B]">{message}</p>
       <div className="mt-8">
-        <GradientButton type="button" trailingIcon={ArrowRight} onClick={() => beginCognitoLogin()}>
+        <GradientButton type="button" trailingIcon={ArrowRight} onClick={() => beginCognitoLogin({ endpoint })}>
           Continue to secure account access
         </GradientButton>
       </div>
@@ -200,11 +200,8 @@ export function ForgotPassword() {
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
-  useEffect(() => {
-    if (authProvider === "cognito") window.location.assign(`${window.location.origin}/login`);
-  }, [authProvider]);
   if (authProvider === "cognito") {
-    return <CognitoManagedAuthNotice title="Recover Your Account" message="Password recovery is completed securely in the Cognito account flow." />;
+    return <CognitoManagedAuthNotice endpoint="forgotPassword" title="Recover Your Account" message="Password recovery is completed securely in the Cognito account flow." />;
   }
 
   const submit = async (e) => {
@@ -275,7 +272,7 @@ export function ResetPassword() {
   const [resending, setResending] = useState(false);
 
   if (cognitoEnabled) {
-    return <CognitoManagedAuthNotice title="Reset Your Password" message="Password reset is completed securely in the Cognito account flow." />;
+    return <CognitoManagedAuthNotice endpoint="forgotPassword" title="Reset Your Password" message="Password reset is completed securely in the Cognito account flow." />;
   }
 
   const submit = async (e) => {

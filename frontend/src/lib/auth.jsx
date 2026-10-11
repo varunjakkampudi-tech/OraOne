@@ -186,10 +186,10 @@ export function AuthProvider({ children }) {
     }
   }, [fetchMe, fetchIdentity]);
 
-  const completeCognitoSession = useCallback(async (code) => {
+  const completeCognitoSession = useCallback(async (code, state) => {
     if (!cognitoEnabled) return { ok: false, error: "Cognito authentication is not enabled." };
     try {
-      const tokens = await completeCognitoLogin(code);
+      const tokens = await completeCognitoLogin(code, state);
       await api.post("/auth/cognito/session", {
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token,
