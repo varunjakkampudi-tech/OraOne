@@ -205,6 +205,86 @@ async def test_deliver_failure_retries_until_max_attempts(db_session, monkeypatc
 
 @REQUIRES_DB
 @pytest.mark.asyncio
+async def test_real_outbox_path_persists_http_failure_and_keeps_row_retryable(db_session, monkeypatch):
+    """Exercise deliver_event itself, not a mocked dispatcher result."""
+    from app.database.models.webhook import OutboxStatus, WebhookDelivery, WebhookEndpoint
+    from app.services import webhook_outbox, webhook_service
+    from sqlalchemy import delete, select
+
+    org_id = await _seed_org(db_session)
+    endpoint = await webhook_service.create_endpoint(
+        db_session, organization_id=org_id, url="https://example.com/hook"
+    )
+    row = webhook_outbox.enqueue(db_session, organization_id=org_id, event="agent.created", data={"x": 1})
+    await db_session.commit()
+
+    async def _http_500(*args, **kwargs):
+        return False, 500, "HTTP 500"
+
+    monkeypatch.setattr(webhook_service, "_deliver_once", _http_500)
+    try:
+        await webhook_outbox._deliver_outbox_row(row.id)
+        fresh = await db_session.get(type(row), row.id)
+        await db_session.refresh(fresh)
+        delivery = await db_session.scalar(
+            select(WebhookDelivery).where(WebhookDelivery.endpoint_id == endpoint.id)
+        )
+        assert fresh.status == OutboxStatus.PENDING
+        assert fresh.attempts == 1
+        assert delivery is not None
+        assert delivery.success is False
+        assert delivery.status_code == 500
+        assert delivery.attempts == 3
+    finally:
+        await db_session.execute(delete(WebhookEndpoint).where(WebhookEndpoint.organization_id == org_id))
+        await _cleanup_outbox(db_session, org_id)
+
+
+@REQUIRES_DB
+@pytest.mark.asyncio
+async def test_partial_fanout_retries_only_failed_endpoint(db_session, monkeypatch):
+    """A stable event id prevents duplicate delivery to an endpoint that won."""
+    from app.database.models.webhook import WebhookDelivery, WebhookEndpoint
+    from app.services import webhook_service
+    from sqlalchemy import delete, select
+
+    org_id = await _seed_org(db_session)
+    first = await webhook_service.create_endpoint(
+        db_session, organization_id=org_id, url="https://example.com/one"
+    )
+    second = await webhook_service.create_endpoint(
+        db_session, organization_id=org_id, url="https://example.com/two"
+    )
+    await db_session.commit()
+    calls: list = []
+
+    async def _partial(endpoint, body, event, *, delivery_id=None):
+        calls.append(endpoint.id)
+        return (endpoint.id == first.id, 200 if endpoint.id == first.id else 503, None if endpoint.id == first.id else "HTTP 503")
+
+    monkeypatch.setattr(webhook_service, "_deliver_once", _partial)
+    try:
+        first_result = await webhook_service.deliver_event(
+            db_session, org_id, "agent.created", {"x": 1}, event_id="evt-partial", isolated_delivery=True
+        )
+        second_result = await webhook_service.deliver_event(
+            db_session, org_id, "agent.created", {"x": 1}, event_id="evt-partial", isolated_delivery=True
+        )
+        rows = list(
+            (await db_session.scalars(select(WebhookDelivery).where(WebhookDelivery.organization_id == org_id))).all()
+        )
+        assert first_result.succeeded == 1 and first_result.failed == 1
+        assert second_result.succeeded == 0 and second_result.failed == 1
+        assert calls.count(first.id) == 1
+        assert calls.count(second.id) == 6  # three HTTP attempts per outbox delivery
+        assert len(rows) == 3  # one success plus one failed attempt per delivery run
+    finally:
+        await db_session.execute(delete(WebhookEndpoint).where(WebhookEndpoint.organization_id == org_id))
+        await db_session.commit()
+
+
+@REQUIRES_DB
+@pytest.mark.asyncio
 async def test_tick_claims_rows_so_a_second_tick_does_not_redeliver(db_session, monkeypatch):
     """_tick() flips PENDING -> PROCESSING in one commit before delivering,
     so a concurrent/overlapping tick sees nothing left to claim — this is
