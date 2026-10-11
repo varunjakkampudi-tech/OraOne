@@ -285,7 +285,13 @@ async def identity(
     full_name = claims.get("name") or None
     given_name = claims.get("given_name") or None
     avatar_url = claims.get("picture") or None
-    if settings.auth_provider == "cognito" and not email:
+    if settings.auth_provider == "cognito":
+        # Cognito access tokens are authoritative for the subject, but email
+        # must be positively verified before it can provision or link an app
+        # account. Some token shapes omit email claims, so use userinfo as a
+        # second source of verified profile data rather than trusting a
+        # missing flag as truth.
+        email = email if claims.get("email_verified") is True else None
         try:
             async with httpx.AsyncClient(timeout=5.0) as client:
                 profile_response = await client.get(
@@ -294,7 +300,7 @@ async def identity(
                 )
                 profile_response.raise_for_status()
                 profile = profile_response.json()
-            email = profile.get("email") if profile.get("email_verified", True) else None
+            email = profile.get("email") if profile.get("email_verified") is True else None
             full_name = full_name or profile.get("name")
             given_name = given_name or profile.get("given_name")
             avatar_url = avatar_url or profile.get("picture")

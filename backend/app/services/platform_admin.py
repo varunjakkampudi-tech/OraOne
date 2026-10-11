@@ -792,7 +792,6 @@ _SECRET_CATALOG: list[tuple[str, str, str]] = [
     ("S3_BUCKET", "storage", "S3 Bucket"),
     ("SMTP_HOST", "messaging", "SMTP Host"),
     ("SMTP_PASSWORD", "messaging", "SMTP Password"),
-    ("PLATFORM_ADMIN_EMAILS", "platform", "Platform Admin Allow-list"),
 ]
 
 

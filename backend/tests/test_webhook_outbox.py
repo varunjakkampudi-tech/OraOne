@@ -149,10 +149,10 @@ async def test_deliver_success_marks_completed(db_session, monkeypatch):
     await db_session.commit()
     row_id = row.id
 
-    async def _fake_dispatch(organization_id, event, data):
+    async def _fake_deliver_event(session, organization_id, event, data, *, event_id=None):
         return 1  # 1 endpoint scheduled
 
-    monkeypatch.setattr("app.services.webhook_service.dispatch", _fake_dispatch)
+    monkeypatch.setattr("app.services.webhook_service.deliver_event", _fake_deliver_event)
 
     try:
         await webhook_outbox._deliver_outbox_row(row_id)
@@ -179,10 +179,10 @@ async def test_deliver_failure_retries_until_max_attempts(db_session, monkeypatc
     await db_session.commit()
     row_id = row.id
 
-    async def _always_fails(organization_id, event, data):
+    async def _always_fails(session, organization_id, event, data, *, event_id=None):
         raise RuntimeError("simulated endpoint down")
 
-    monkeypatch.setattr("app.services.webhook_service.dispatch", _always_fails)
+    monkeypatch.setattr("app.services.webhook_service.deliver_event", _always_fails)
 
     try:
         for attempt in range(1, webhook_outbox._MAX_ATTEMPTS + 1):
@@ -218,11 +218,11 @@ async def test_tick_claims_rows_so_a_second_tick_does_not_redeliver(db_session, 
 
     calls: list[str] = []
 
-    async def _fake_dispatch(organization_id, event, data):
+    async def _fake_deliver_event(session, organization_id, event, data, *, event_id=None):
         calls.append(event)
         return 1
 
-    monkeypatch.setattr("app.services.webhook_service.dispatch", _fake_dispatch)
+    monkeypatch.setattr("app.services.webhook_service.deliver_event", _fake_deliver_event)
 
     try:
         # First tick: claims the pending row (-> PROCESSING) and delivers it (-> COMPLETED).
@@ -267,11 +267,11 @@ async def test_stale_processing_row_is_reclaimed_after_simulated_crash(db_sessio
 
         calls: list[str] = []
 
-        async def _fake_dispatch(organization_id, event, data):
+        async def _fake_deliver_event(session, organization_id, event, data, *, event_id=None):
             calls.append(event)
             return 1
 
-        monkeypatch.setattr("app.services.webhook_service.dispatch", _fake_dispatch)
+        monkeypatch.setattr("app.services.webhook_service.deliver_event", _fake_deliver_event)
 
         # This tick should reclaim the stale PROCESSING row back to PENDING,
         # then immediately claim + deliver it in the same pass.

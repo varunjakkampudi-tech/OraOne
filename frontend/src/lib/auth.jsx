@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { api, formatApiError, setTokens, clearTokens, getToken, getRefreshToken } from "./api";
 import { cognitoEnabled, completeCognitoLogin } from "./cognito";
 
@@ -179,13 +179,16 @@ export function AuthProvider({ children }) {
       await fetchMe();
       const identityResult = await fetchIdentity();
       if (!identityResult.ok) {
-        return { ok: true, identityError: identityResult.error };
+        clearTokens();
+        clearIdentity();
+        setUser(false);
+        return { ok: false, error: identityResult.error || "Could not load account identity." };
       }
       return { ok: true, identity: identityResult.identity };
     } catch (e) {
       return { ok: false, error: _err(e) };
     }
-  }, [fetchMe, fetchIdentity]);
+  }, [fetchMe, fetchIdentity, clearIdentity]);
 
   const completeCognitoSession = useCallback(async (code, state) => {
     if (!cognitoEnabled) return { ok: false, error: "Cognito authentication is not enabled." };
@@ -197,13 +200,17 @@ export function AuthProvider({ children }) {
       });
       await fetchMe();
       const identityResult = await fetchIdentity();
-      return identityResult.ok
-        ? { ok: true, identity: identityResult.identity }
-        : { ok: true, identityError: identityResult.error };
+      if (!identityResult.ok) {
+        clearTokens();
+        clearIdentity();
+        setUser(false);
+        return { ok: false, error: identityResult.error || "Could not load account identity." };
+      }
+      return { ok: true, identity: identityResult.identity };
     } catch (e) {
       return { ok: false, error: _err(e) };
     }
-  }, [fetchMe, fetchIdentity]);
+  }, [fetchMe, fetchIdentity, clearIdentity]);
 
   const verifyLoginOtp = useCallback(async ({ email, code } = {}) => {
     try {
@@ -214,13 +221,16 @@ export function AuthProvider({ children }) {
       // user + organization context are ready (Phase 4 requirement #6).
       const identityResult = await fetchIdentity();
       if (!identityResult.ok) {
-        return { ok: true, identityError: identityResult.error };
+        clearTokens();
+        clearIdentity();
+        setUser(false);
+        return { ok: false, error: identityResult.error || "Could not load account identity." };
       }
       return { ok: true, identity: identityResult.identity };
     } catch (e) {
       return { ok: false, error: _err(e) };
     }
-  }, [fetchMe, fetchIdentity]);
+  }, [fetchMe, fetchIdentity, clearIdentity]);
 
   const signup = useCallback(async ({ email, password, name } = {}) => {
     const normalizedEmail = String(email || "").trim().toLowerCase();

@@ -23,7 +23,6 @@ accepted by app/services/workflow_scheduler.py for this self-hosted scale.
 from __future__ import annotations
 
 import asyncio
-import inspect
 import logging
 import uuid
 from datetime import datetime, timezone
@@ -171,14 +170,12 @@ async def _deliver_outbox_row(outbox_id: uuid.UUID) -> None:
         row.status = OutboxStatus.PROCESSING
         await session.commit()
         try:
-            dispatch_kwargs = {}
-            if "event_id" in inspect.signature(webhook_service.dispatch).parameters:
-                dispatch_kwargs["event_id"] = f"evt_outbox_{row.id}"
-            scheduled = await webhook_service.dispatch(
+            scheduled = await webhook_service.deliver_event(
+                session,
                 row.organization_id,
                 row.event,
                 row.payload.get("data", row.payload),
-                **dispatch_kwargs,
+                event_id=f"evt_outbox_{row.id}",
             )
             row.status = OutboxStatus.COMPLETED
             row.processed_at = _utcnow()

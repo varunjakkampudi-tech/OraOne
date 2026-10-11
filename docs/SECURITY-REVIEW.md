@@ -8,11 +8,29 @@ This is a repository review, not a penetration test or certification.
 | Development MinIO credential fallback in production Compose | Critical | Fixed | Required MinIO substitutions |
 | Direct publication of stateful/app service ports | High | Fixed | Only Caddy publishes host ports |
 | Legacy EC2/Pages deployment paths | High | Fixed | Workflows and EC2 stack removed |
-| HS256-only authentication | High | Partial | Cognito JWKS path added; live cutover remains |
+| HS256-only authentication | High | Fixed in code / live cutover unverified | Cognito JWKS validation and email-only session flow are implemented; production live cutover remains untested |
 | Documented local admin default | High | Fixed in template | Empty values now required; no DB mutation performed |
-| Unsafe AI fallback in production | High | Open | Disable/isolate and verify provider failure behavior |
-| Billing, SSRF/crawler, uploads, webhooks, prompt injection | High | Open | Independent review and targeted tests required |
-| Secrets in repository history | High | Open | Scan history before destination migration |
+| Unsafe AI fallback in production | High | Open | Disable/isolate and verify provider failure behavior before hosting |
+| Billing, SSRF/crawler, uploads, prompt injection | High | Open | Independent review and targeted tests remain required |
+| Webhook delivery durability | High | Fixed in code / locally tested | Durable outbox worker performs delivery and records results; external endpoint delivery remains untested |
+| Secrets in repository history | High | Open | Scan history before any public-release decision |
+
+## Current local evidence
+
+- Backend: `133 passed, 2 warnings` from the configured backend test root.
+- Frontend E2E: `4 passed` covering Cognito entry points, PKCE/state binding,
+  recovery navigation, protected API access and logout.
+- Frontend production build: passed.
+- Frontend ESLint: `0 errors, 183 warnings`; the remaining warnings are legacy
+  unused imports/variables and unused suppression directives, not suppressed
+  security or hook errors.
+- Cognito identity provisioning now requires an explicit positive
+  `email_verified` signal from claims or the userinfo response.
+
+Hosting, production database migration/backup evidence, live inbox testing,
+external webhook delivery, billing-provider verification and deployment
+verification were intentionally not performed in this cleanup because hosting
+was explicitly deferred.
 
 No production GO is allowed until Critical and High findings are fixed and
 independently verified or explicitly accepted by the product owner.

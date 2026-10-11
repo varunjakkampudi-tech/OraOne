@@ -5,10 +5,11 @@ receive signed JSON ``POST`` requests when those events fire. Deliveries are
 signed with an HMAC-SHA256 signature derived from the endpoint's ``secret`` so
 receivers can verify authenticity (Stripe-style ``t=<ts>,v1=<sig>`` header).
 
-Dispatch is best-effort and fire-and-forget: a single delivery is attempted
-(with a couple of fast retries) in a background task so request latency on the
-triggering action is never affected. Every attempt is recorded as a
-``WebhookDelivery`` row for the developer dashboard.
+Delivery is durable: business events are written to ``WebhookOutbox`` in the
+same transaction as the triggering change, then the outbox worker performs
+delivery and records every result in ``WebhookDelivery``. The compatibility
+``dispatch`` entry point remains synchronous and never launches an untracked
+background task.
 """
 from __future__ import annotations
 
@@ -217,54 +218,53 @@ async def _deliver_once(
         return False, None, str(exc)[:500]
 
 
-async def _record_and_attempt(endpoint_id: uuid.UUID, organization_id: uuid.UUID, event: str, payload: dict[str, Any]) -> None:
-    """Run in a background task with its own DB session."""
+async def _deliver_endpoint(
+    session: AsyncSession,
+    endpoint: WebhookEndpoint,
+    organization_id: uuid.UUID,
+    event: str,
+    payload: dict[str, Any],
+) -> None:
+    """Deliver one endpoint and persist its result in the caller's session."""
     body = json.dumps(payload, default=str, separators=(",", ":")).encode("utf-8")
     success = False
     status_code: Optional[int] = None
     error: Optional[str] = None
     attempts = 0
 
-    try:
-        async with session_scope() as session:
-            endpoint = await session.get(WebhookEndpoint, endpoint_id)
-            if endpoint is None or endpoint.deleted_at is not None:
-                return
-            if endpoint.status != WebhookStatus.ACTIVE:
-                return
+    if endpoint.deleted_at is not None or endpoint.status != WebhookStatus.ACTIVE:
+        return
 
-            for idx in range(_MAX_ATTEMPTS):
-                if _RETRY_BACKOFF[idx]:
-                    await asyncio.sleep(_RETRY_BACKOFF[idx])
-                attempts = idx + 1
-                success, status_code, error = await _deliver_once(
-                    endpoint, body, event, delivery_id=payload.get("id")
-                )
-                if success:
-                    break
+    for idx in range(_MAX_ATTEMPTS):
+        if _RETRY_BACKOFF[idx]:
+            await asyncio.sleep(_RETRY_BACKOFF[idx])
+        attempts = idx + 1
+        success, status_code, error = await _deliver_once(
+            endpoint, body, event, delivery_id=payload.get("id")
+        )
+        if success:
+            break
 
-            delivery = WebhookDelivery(
-                endpoint_id=endpoint.id,
-                organization_id=organization_id,
-                event=event,
-                success=success,
-                status_code=status_code,
-                attempts=attempts,
-                error=error,
-                payload=payload,
-            )
-            session.add(delivery)
-
-            endpoint.last_delivery_at = _now()
-            endpoint.last_status = "success" if success else (error or "failed")[:40]
-            if success:
-                endpoint.failure_count = 0
-            else:
-                endpoint.failure_count = (endpoint.failure_count or 0) + 1
-                if endpoint.failure_count >= _AUTO_DISABLE_AFTER:
-                    endpoint.status = WebhookStatus.DISABLED
-    except Exception:  # noqa: BLE001
-        logger.exception("webhook delivery failed for endpoint=%s event=%s", endpoint_id, event)
+    session.add(
+        WebhookDelivery(
+            endpoint_id=endpoint.id,
+            organization_id=organization_id,
+            event=event,
+            success=success,
+            status_code=status_code,
+            attempts=attempts,
+            error=error,
+            payload=payload,
+        )
+    )
+    endpoint.last_delivery_at = _now()
+    endpoint.last_status = "success" if success else (error or "failed")[:40]
+    if success:
+        endpoint.failure_count = 0
+    else:
+        endpoint.failure_count = (endpoint.failure_count or 0) + 1
+        if endpoint.failure_count >= _AUTO_DISABLE_AFTER:
+            endpoint.status = WebhookStatus.DISABLED
 
 
 def _envelope(
@@ -279,6 +279,31 @@ def _envelope(
     }
 
 
+async def deliver_event(
+    session: AsyncSession,
+    organization_id: uuid.UUID,
+    event: str,
+    data: dict[str, Any],
+    *,
+    event_id: str | None = None,
+) -> int:
+    """Deliver an event using the caller's transaction and return its count."""
+    result = await session.execute(
+        select(WebhookEndpoint).where(
+            WebhookEndpoint.organization_id == organization_id,
+            WebhookEndpoint.status == WebhookStatus.ACTIVE,
+            WebhookEndpoint.deleted_at.is_(None),
+        )
+    )
+    payload = _envelope(event, organization_id, data, event_id=event_id)
+    delivered = 0
+    for endpoint in result.scalars().all():
+        if (not endpoint.events) or (event in endpoint.events):
+            await _deliver_endpoint(session, endpoint, organization_id, event, payload)
+            delivered += 1
+    return delivered
+
+
 async def dispatch(
     organization_id: uuid.UUID,
     event: str,
@@ -286,34 +311,15 @@ async def dispatch(
     *,
     event_id: str | None = None,
 ) -> int:
-    """Fan out ``event`` to all active subscribed endpoints. Returns # scheduled.
-
-    Non-blocking: each delivery runs in its own background task. Safe to call
-    from request handlers; never raises.
-    """
+    """Compatibility wrapper that delivers without an untracked task."""
     try:
         async with session_scope() as session:
-            result = await session.execute(
-                select(WebhookEndpoint).where(
-                    WebhookEndpoint.organization_id == organization_id,
-                    WebhookEndpoint.status == WebhookStatus.ACTIVE,
-                    WebhookEndpoint.deleted_at.is_(None),
-                )
+            return await deliver_event(
+                session, organization_id, event, data, event_id=event_id
             )
-            endpoints = list(result.scalars().all())
     except Exception:  # noqa: BLE001
-        logger.exception("webhook dispatch lookup failed org=%s event=%s", organization_id, event)
+        logger.exception("webhook dispatch failed org=%s event=%s", organization_id, event)
         return 0
-
-    payload = _envelope(event, organization_id, data, event_id=event_id)
-    scheduled = 0
-    for ep in endpoints:
-        subscribed = (not ep.events) or (event in ep.events)
-        if not subscribed:
-            continue
-        asyncio.create_task(_record_and_attempt(ep.id, organization_id, event, payload))
-        scheduled += 1
-    return scheduled
 
 
 async def send_test(session: AsyncSession, endpoint: WebhookEndpoint) -> WebhookDelivery:
