@@ -136,6 +136,10 @@ services:
       ENTITLEMENTS_CACHE_BACKEND: redis
       RUN_BACKGROUND_WORKERS: "true"
     command: ["python", "worker.py"]
+    # Workers do not expose the API health endpoint inherited from the shared
+    # backend image; their process is supervised by Compose instead.
+    healthcheck:
+      disable: true
     depends_on:
       postgres:
         condition: service_healthy
