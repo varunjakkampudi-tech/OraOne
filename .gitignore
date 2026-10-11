@@ -16,6 +16,7 @@ scripts/diagram/architecture-diagram.png
 node_modules/
 /node_modules
 **/package-lock.json
+!**/package-lock.json
 /.pnp
 .pnp.js
 .yarn/install-state.gz

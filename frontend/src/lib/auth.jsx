@@ -307,12 +307,20 @@ export function AuthProvider({ children }) {
   }, []);
 
   const logout = useCallback(async () => {
+    const refreshToken = getRefreshToken();
+    const shouldRevoke = cognitoEnabled || Boolean(getToken());
+
+    // Clear the browser session before waiting on the network. A stalled or
+    // unavailable revoke endpoint must never leave a usable local session.
+    clearTokens();
+    setUser(false);
+    clearIdentity();
+
     try {
       // Cognito browser sessions intentionally keep tokens out of JS storage;
       // the httpOnly refresh cookie is the session indicator. Always call the
       // provider logout endpoint in Cognito mode so that cookie is revoked.
-      if (cognitoEnabled || getToken()) {
-        const refreshToken = getRefreshToken();
+      if (shouldRevoke) {
         await api.post(
           cognitoEnabled ? "/auth/cognito/logout" : "/auth/logout",
           cognitoEnabled ? {} : (refreshToken ? { refresh_token: refreshToken } : {})
@@ -322,9 +330,6 @@ export function AuthProvider({ children }) {
       // Best-effort logout; always clear local session.
     }
 
-    clearTokens();
-    setUser(false);
-    clearIdentity();
   }, [clearIdentity]);
 
   const logoutAll = useCallback(async () => {

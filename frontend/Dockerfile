@@ -5,8 +5,8 @@ FROM node:20-alpine AS build
 
 WORKDIR /build
 
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts
 
 COPY . .
 
@@ -27,7 +27,7 @@ ENV REACT_APP_API_URL=${REACT_APP_API_URL} \
     REACT_APP_COGNITO_REDIRECT_URI=${REACT_APP_COGNITO_REDIRECT_URI} \
     CI=true
 
-RUN test -n "$REACT_APP_API_URL" && yarn build
+RUN test -n "$REACT_APP_API_URL" && npm run build
 
 # ---- Runtime stage: static files behind nginx ----
 FROM nginx:1.27-alpine AS runtime
@@ -35,7 +35,7 @@ FROM nginx:1.27-alpine AS runtime
 ARG APP_VERSION=v1.0.0
 LABEL org.opencontainers.image.title="oraone-frontend" \
       org.opencontainers.image.version="${APP_VERSION}" \
-      org.opencontainers.image.description="OraOne Chat Platform — static frontend (CRA)"
+      org.opencontainers.image.description="OraOne Chat Platform — static frontend (Vite)"
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /build/build /usr/share/nginx/html

@@ -54,8 +54,9 @@ export default function ProfileMenu() {
 
   const onLogout = async () => {
     setOpen(false);
-    await logout();
+    const pendingLogout = logout();
     nav("/login");
+    await pendingLogout;
   };
 
   const initial = (user?.full_name || "U").slice(0, 1).toUpperCase();

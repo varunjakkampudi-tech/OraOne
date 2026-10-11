@@ -157,9 +157,9 @@ In a second terminal:
 
 ```powershell
 cd frontend
-yarn install --frozen-lockfile
+npm ci
 $env:PORT = "3001"
-yarn start
+npm start
 ```
 
 The API is available at `http://localhost:8000`, and the frontend at `http://localhost:3001` when port 3000 is occupied. Keep local credentials in ignored `.env` files; never copy production secrets into the repository.
@@ -178,7 +178,7 @@ python -m pytest -q
 Frontend checks run from `frontend`:
 
 ```powershell
-yarn build
+npm run build
 npx eslint "src/**/*.{js,jsx}"
 npx playwright test
 ```

@@ -15,7 +15,7 @@ Frontend:
 ~~~powershell
 cd frontend
 npx eslint "src/**/*.{js,jsx}"
-yarn build
+npm run build
 npx playwright test
 ~~~
 

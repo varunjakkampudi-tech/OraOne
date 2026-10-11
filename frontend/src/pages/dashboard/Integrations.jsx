@@ -252,7 +252,6 @@ export default function Integrations() {
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
               <input
                 type="text"
-                type="text"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search integrations…"

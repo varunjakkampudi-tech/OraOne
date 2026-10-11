@@ -147,9 +147,9 @@ Open a second terminal at the repository root:
 ```powershell
 Copy-Item frontend/.env.example frontend/.env
 cd frontend
-yarn install --frozen-lockfile
+npm ci
 $env:PORT = "3000"
-yarn start
+npm start
 ```
 
 Linux/macOS:
@@ -157,8 +157,8 @@ Linux/macOS:
 ```bash
 cp frontend/.env.example frontend/.env
 cd frontend
-yarn install --frozen-lockfile
-PORT=3000 yarn start
+npm ci
+PORT=3000 npm start
 ```
 
 The frontend uses http://localhost:8000 from frontend/.env.example and runs at http://localhost:3000. If port 3000 is occupied, use port 3001 and set CORS_ORIGINS and FRONTEND_URL in backend/.env to include http://localhost:3001.
@@ -179,7 +179,7 @@ cd backend
 python -m pytest -q
 cd ..\frontend
 npx eslint "src/**/*.{js,jsx}"
-yarn build
+npm run build
 npx playwright test
 ```
 
