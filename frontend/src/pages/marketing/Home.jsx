@@ -28,7 +28,6 @@ import {
   TrendingUp,
   Headphones,
   Activity,
-  Star,
   Quote,
   Building2,
   ArrowUpRight,
@@ -65,16 +64,16 @@ const fadeUp = {
 
 const PLATFORM_METRICS = [
   {
-    value: "10,000+",
-    label: "Conversations Automated",
-    sub: "Across every website conversation",
-    note: "Platform metric",
+    value: "API-first",
+    label: "Deploy AI agents",
+    sub: "Connect chat, knowledge and workflows",
+    note: "Platform capability",
   },
   {
-    value: "500+",
-    label: "Businesses Exploring OraOne",
-    sub: "Currently in private & open beta",
-    note: "Beta metric",
+    value: "Your data",
+    label: "Knowledge-grounded answers",
+    sub: "Use approved documents and sources",
+    note: "Product capability",
   },
   {
     value: "24/7",
@@ -94,8 +93,8 @@ const TRUST_PILLARS = [
   },
   {
     icon: Activity,
-    title: "99.9% Uptime",
-    desc: "Built on AWS with redundancy and continuous health monitoring.",
+    title: "Operational visibility",
+    desc: "Health checks, audit logs and role-based access are built into the platform.",
     color: "#16A34A",
     bg: "#ECFDF5",
   },
@@ -171,33 +170,6 @@ const INDUSTRY_USE_CASES = [
   { icon: Headphones, name: "Customer Support", desc: "Tier-1 deflection & escalation routing." },
 ];
 
-const CASE_STUDY_HIGHLIGHTS = [
-  {
-    industry: "Healthcare",
-    metric: "3.2×",
-    result: "more appointments booked after deploying the Chat Agent on the website.",
-    icon: Stethoscope,
-    color: "#2563EB",
-    bg: "#EFF6FF",
-  },
-  {
-    industry: "Real Estate",
-    metric: "62%",
-    result: "of incoming website leads qualified before a human agent stepped in.",
-    icon: HomeIcon,
-    color: "#7C3AED",
-    bg: "#F5F3FF",
-  },
-  {
-    industry: "Finance",
-    metric: "<30s",
-    result: "average first-response time across web chat — down from 6+ minutes.",
-    icon: Wallet,
-    color: "#16A34A",
-    bg: "#ECFDF5",
-  },
-];
-
 const PRICING_PEEK = [
   {
     name: "Starter",
@@ -209,7 +181,7 @@ const PRICING_PEEK = [
   },
   {
     name: "Growth",
-    line: "5 AI Agents · 10,000 conversations/mo",
+    line: "Multiple AI agents · usage-based limits",
     post: "Indicative post-beta pricing announced at launch",
     icon: TrendingUp,
     color: "#7C3AED",
@@ -558,68 +530,6 @@ export default function HomePage() {
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#2563EB] hover:underline"
             >
               View all solutions <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ====================== CASE STUDIES / RESULTS ====================== */}
-      <section
-        data-testid={HOME.caseStudiesSnippet}
-        className="py-10 sm:py-12 bg-[#F8FAFC] border-t border-[#E2E8F0]"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeUp} className="text-center max-w-2xl mx-auto mb-10">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F1F5F9] text-[11px] font-bold tracking-[0.18em] text-[#475569] border border-[#E2E8F0] uppercase">
-              <Star size={11} /> Real Results
-            </span>
-            <h2 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tighter text-[#0F172A]">
-              Outcomes from real teams.
-            </h2>
-            <p className="mt-4 text-[#64748B] leading-relaxed">
-              Anonymised highlights from teams using OraOne in production.
-              Industry-level metrics shared with permission.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {CASE_STUDY_HIGHLIGHTS.map((c, i) => (
-              <motion.div
-                key={c.industry}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.05 }}
-                transition={{ delay: i * 0.06 }}
-                className="rounded-2xl bg-white border border-[#E2E8F0] p-6 hover:border-[#2563EB]/30 hover:shadow-premium transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="size-10 rounded-xl grid place-items-center shrink-0"
-                    style={{ background: c.bg }}
-                  >
-                    <c.icon size={18} style={{ color: c.color }} />
-                  </div>
-                  <p className="text-[12px] font-bold tracking-[0.16em] text-[#64748B] uppercase">
-                    {c.industry}
-                  </p>
-                </div>
-                <p className="mt-5 text-5xl font-black tracking-tighter text-[#0F172A]">
-                  {c.metric}
-                </p>
-                <p className="mt-3 text-[14px] text-[#475569] leading-relaxed">
-                  {c.result}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="mt-10 text-center">
-            <Link
-              to="/case-studies"
-              data-testid={HOME.caseStudiesSnippetCta}
-              className="inline-flex items-center gap-1.5 px-5 py-3 rounded-xl bg-white border border-[#E2E8F0] hover:border-[#2563EB]/40 text-sm font-semibold text-[#0F172A] transition-colors"
-            >
-              Explore all case studies <ArrowRight size={14} />
             </Link>
           </div>
         </div>

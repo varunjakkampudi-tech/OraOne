@@ -1,10 +1,9 @@
 # OraOne backend — runtime dependencies.
 #
 # Pin philosophy:
-#   - Use `>=` floors with conservative upper bounds so the same file
-#     works on Emergent preview (Python 3.11), local laptops (3.10/3.11/3.12),
-#     and AWS EC2 (Amazon Linux 3.9/3.11).
-#   - No Emergent-internal / pre-release builds.
+#   - Use `>=` floors with conservative upper bounds for supported Python 3.11+
+#     local and container runtimes.
+#   - No platform-specific or pre-release builds.
 #   - Generated automatically by `pip freeze`? Don't. Edit by hand.
 
 # ---- Web framework ----

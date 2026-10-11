@@ -31,7 +31,11 @@ Production also requires operator-managed `DB_PASSWORD`, `MINIO_ROOT_USER`, `MIN
 
 ## Local installation
 
-Run `docker compose -f docker-compose.dev.yml up -d`, create a Python 3.11+ virtual environment in `backend`, install `backend/requirements.txt`, copy `backend/.env.example` to `backend/.env`, set a random JWT secret and local database URLs, run `alembic upgrade head`, and start `uvicorn server:app --reload --port 8000`. In `frontend`, run `yarn install --frozen-lockfile` and `yarn start`. The local frontend is `http://localhost:3000`; the API is `http://localhost:8000`.
+Run `docker compose -f docker-compose.dev.yml up -d`, create a Python 3.11+ virtual environment in `backend`, install `backend/requirements.txt`, copy `backend/.env.example` to `backend/.env`, set a random JWT secret and local database URLs, run `alembic upgrade head`, and start `uvicorn server:app --reload --port 8000`. In `frontend`, run `yarn install --frozen-lockfile` and `yarn start` (use `PORT=3001` if port 3000 is already occupied). The local frontend is `http://localhost:3000` or `http://localhost:3001`; the API is `http://localhost:8000`.
+
+Production Compose requires explicit `AUTH_PROVIDER=cognito`, Cognito settings, a non-localhost `REACT_APP_API_URL`, database/object-storage secrets and Stripe credentials before it will start. HTTP containers do not run schedulers; the dedicated `workers` service runs scheduled workflows and the webhook outbox.
+
+For a reproducible local gate after services are running, execute `powershell -ExecutionPolicy Bypass -File backend/scripts/validate_local.ps1`.
 
 ## Docker production-like stack
 

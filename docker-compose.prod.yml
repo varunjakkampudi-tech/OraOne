@@ -4,7 +4,7 @@
 # provider; all secrets are mandatory and supplied by the operator environment.
 #
 # Usage:
-#   docker compose -f docker-compose.prod.yml up -d --build
+#   REACT_APP_API_URL=https://oraone.in docker compose -f docker-compose.prod.yml up -d --build
 services:
   postgres:
     image: pgvector/pgvector:pg16
@@ -35,7 +35,7 @@ services:
       retries: 10
 
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: oraone-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
@@ -61,10 +61,12 @@ services:
     env_file:
       - ./backend/.env
     environment:
+      ENVIRONMENT: production
       AUTH_PROVIDER: ${AUTH_PROVIDER:?AUTH_PROVIDER is required}
       COGNITO_USER_POOL_ID: ${COGNITO_USER_POOL_ID:?COGNITO_USER_POOL_ID is required}
       COGNITO_REGION: ${COGNITO_REGION:?COGNITO_REGION is required}
       COGNITO_CLIENT_ID: ${COGNITO_CLIENT_ID:?COGNITO_CLIENT_ID is required}
+      COGNITO_DOMAIN: ${COGNITO_DOMAIN:?COGNITO_DOMAIN is required}
       DATABASE_URL: postgresql+asyncpg://oraone_admin:${DB_PASSWORD:?DB_PASSWORD is required}@postgres:5432/oraone
       ALEMBIC_DATABASE_URL: postgresql+psycopg2://oraone_admin:${DB_PASSWORD:?DB_PASSWORD is required}@postgres:5432/oraone
       REDIS_URL: redis://redis:6379/0
@@ -73,6 +75,7 @@ services:
       S3_BUCKET: ${S3_BUCKET:?S3_BUCKET is required}
       S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
       S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+      RUN_BACKGROUND_WORKERS: "false"
     depends_on:
       postgres:
         condition: service_healthy
@@ -92,12 +95,45 @@ services:
       context: ./frontend
       args:
         APP_VERSION: v1.0.0
-        REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:8000}
+        REACT_APP_API_URL: ${REACT_APP_API_URL:?REACT_APP_API_URL is required}
+        REACT_APP_AUTH_PROVIDER: ${AUTH_PROVIDER:?AUTH_PROVIDER is required}
+        REACT_APP_COGNITO_DOMAIN: ${COGNITO_DOMAIN:?COGNITO_DOMAIN is required}
+        REACT_APP_COGNITO_CLIENT_ID: ${COGNITO_CLIENT_ID:?COGNITO_CLIENT_ID is required}
+        REACT_APP_COGNITO_REDIRECT_URI: ${COGNITO_REDIRECT_URI:?COGNITO_REDIRECT_URI is required}
     image: oraone-frontend:v1.0.0
     container_name: oraone-frontend
     restart: unless-stopped
     depends_on:
       - backend
+
+  workers:
+    build:
+      context: ./backend
+      args:
+        APP_VERSION: v1.0.0
+    image: oraone-backend:v1.0.0
+    container_name: oraone-workers
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      ENVIRONMENT: production
+      AUTH_PROVIDER: ${AUTH_PROVIDER:?AUTH_PROVIDER is required}
+      COGNITO_USER_POOL_ID: ${COGNITO_USER_POOL_ID:?COGNITO_USER_POOL_ID is required}
+      COGNITO_REGION: ${COGNITO_REGION:?COGNITO_REGION is required}
+      COGNITO_CLIENT_ID: ${COGNITO_CLIENT_ID:?COGNITO_CLIENT_ID is required}
+      COGNITO_DOMAIN: ${COGNITO_DOMAIN:?COGNITO_DOMAIN is required}
+      DATABASE_URL: postgresql+asyncpg://oraone_admin:${DB_PASSWORD:?DB_PASSWORD is required}@postgres:5432/oraone
+      ALEMBIC_DATABASE_URL: postgresql+psycopg2://oraone_admin:${DB_PASSWORD:?DB_PASSWORD is required}@postgres:5432/oraone
+      REDIS_URL: redis://redis:6379/0
+      ENTITLEMENTS_CACHE_BACKEND: redis
+      RUN_BACKGROUND_WORKERS: "true"
+    command: ["python", "worker.py"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   proxy:
     # Single edge entry point (TLS termination, gzip, security headers) —
@@ -117,6 +153,7 @@ services:
     depends_on:
       - backend
       - frontend
+      - workers
 
 volumes:
   oraone_postgres_data:

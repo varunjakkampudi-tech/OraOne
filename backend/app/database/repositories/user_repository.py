@@ -33,6 +33,11 @@ class UserRepository(BaseRepository[User]):
     ) -> User:
         """Find-or-create a user on first successful Cognito login."""
         user = await self.get_by_cognito_sub(cognito_sub)
+        by_email = await self.get_by_email(email)
+        if user is None and by_email is not None and by_email.cognito_sub != cognito_sub:
+            raise ValueError("An account already exists for this verified email address.")
+        if user is not None and by_email is not None and by_email.id != user.id:
+            raise ValueError("The verified email address belongs to another account.")
         now = datetime.now(timezone.utc)
         if user is None:
             user = User(

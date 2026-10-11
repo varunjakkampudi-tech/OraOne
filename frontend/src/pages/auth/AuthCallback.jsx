@@ -1,12 +1,26 @@
-﻿import React from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/lib/auth";
 
-/**
- * Legacy route — the app used to redirect here from an AWS Cognito Hosted UI
- * OAuth flow. Auth is now self-hosted (email/password + JWT), so nothing
- * ever navigates here anymore; kept only so an old bookmark/link doesn't
- * 404, bouncing straight to the login page instead.
- */
 export default function AuthCallback() {
-  return <Navigate to="/login" replace />;
+  const { search } = useLocation();
+  const navigate = useNavigate();
+  const { completeCognitoSession } = useAuth();
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+    const code = params.get("code");
+    if (!code) {
+      setError(params.get("error_description") || "Cognito sign-in was cancelled.");
+      return;
+    }
+    completeCognitoSession(code).then((result) => {
+      if (result.ok) navigate("/app/dashboard", { replace: true });
+      else setError(result.error || "Could not complete sign-in.");
+    });
+  }, [search, completeCognitoSession, navigate]);
+
+  if (error) return <div className="p-8 text-center text-red-600">{error}<br /><a href="/login">Return to login</a></div>;
+  return <div className="p-8 text-center">Completing secure sign-in…</div>;
 }

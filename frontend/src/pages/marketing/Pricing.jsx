@@ -47,7 +47,7 @@ const TIERS = [
     postPriceUnit: "announced at launch",
     features: [
       "5 AI Agents",
-      "10,000 conversations/mo",
+      "Usage-based conversation limits",
       "Priority support",
       "Advanced analytics",
       "CRM integrations (Salesforce, HubSpot, Zoho)",
@@ -102,7 +102,7 @@ const FAQ_PRICING = [
   },
   {
     q: "What's included with Enterprise SLA?",
-    a: "Enterprise SLA options cover 99.9% uptime guarantee, priority response (under 1 hour for severity 1 issues), dedicated escalation channel, quarterly business reviews and custom data-retention controls.",
+    a: "Enterprise plans can include negotiated support, response targets, data-retention controls and deployment requirements. Final terms are agreed in the order form.",
   },
 ];
 

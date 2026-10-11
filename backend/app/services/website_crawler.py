@@ -339,8 +339,24 @@ def classify_url(url: str) -> Optional[str]:
 # ────────────────────────── robots + sitemap ──────────────────────────
 
 async def _fetch(client, url: str) -> tuple[int, str, str]:
-    """GET a URL. Returns (status_code, content_type, text). Caps body size."""
-    resp = await client.get(url, follow_redirects=True)
+    """GET a URL with SSRF validation on every redirect hop.
+
+    Validating only the initial hostname is unsafe because an attacker can
+    redirect a public URL to loopback/private/link-local space. Each target is
+    resolved and checked before the next request.
+    """
+    current = validate_url(url)
+    resp = None
+    for _ in range(5):
+        resp = await client.get(current, follow_redirects=False)
+        if resp.status_code not in {301, 302, 303, 307, 308}:
+            break
+        location = resp.headers.get("location")
+        if not location:
+            break
+        current = validate_url(urljoin(current, location))
+    if resp is None:
+        raise URLValidationError("No response received.")
     ctype = resp.headers.get("content-type", "")
     raw = resp.content[:MAX_BYTES]
     try:

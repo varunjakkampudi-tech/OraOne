@@ -4,7 +4,7 @@ Endpoints
 ---------
 * ``GET  /api/billing/plans``         — public plan catalogue
 * ``GET  /api/billing/subscription``  — current org subscription (+plan)
-* ``POST /api/billing/checkout``      — upgrade (mock activates instantly)
+    * ``POST /api/billing/checkout``      — upgrade through Stripe Checkout
 * ``POST /api/billing/portal``        — Stripe customer-portal link
 * ``POST /api/billing/cancel``        — cancel at period end
 * ``GET  /api/billing/invoices``      — invoice history
@@ -101,6 +101,8 @@ async def checkout(
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(e))
 
     audit(
         "checkout",
@@ -187,7 +189,7 @@ async def stripe_webhook(
 ) -> dict:
     """Verify and process Stripe events (real mode only)."""
     if not billing_service.stripe_enabled():
-        return {"received": True, "mode": "mock"}
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Stripe billing is not configured.")
 
     import stripe
 

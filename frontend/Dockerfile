@@ -10,15 +10,24 @@ RUN yarn install --frozen-lockfile
 
 COPY . .
 
-# REACT_APP_* build args let a deployer point this image at their own
-# backend without rebuilding the Dockerfile itself.
-ARG REACT_APP_API_URL=http://localhost:8000
+# REACT_APP_* build args let a deployer point this image at an explicit
+# backend. Production Compose requires this value; there is no localhost
+# fallback in the release image.
+ARG REACT_APP_API_URL
 ARG REACT_APP_ENV=production
+ARG REACT_APP_AUTH_PROVIDER=cognito
+ARG REACT_APP_COGNITO_DOMAIN
+ARG REACT_APP_COGNITO_CLIENT_ID
+ARG REACT_APP_COGNITO_REDIRECT_URI
 ENV REACT_APP_API_URL=${REACT_APP_API_URL} \
     REACT_APP_ENV=${REACT_APP_ENV} \
+    REACT_APP_AUTH_PROVIDER=${REACT_APP_AUTH_PROVIDER} \
+    REACT_APP_COGNITO_DOMAIN=${REACT_APP_COGNITO_DOMAIN} \
+    REACT_APP_COGNITO_CLIENT_ID=${REACT_APP_COGNITO_CLIENT_ID} \
+    REACT_APP_COGNITO_REDIRECT_URI=${REACT_APP_COGNITO_REDIRECT_URI} \
     CI=true
 
-RUN yarn build
+RUN test -n "$REACT_APP_API_URL" && yarn build
 
 # ---- Runtime stage: static files behind nginx ----
 FROM nginx:1.27-alpine AS runtime

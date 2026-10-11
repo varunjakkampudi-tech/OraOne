@@ -1,21 +1,18 @@
 import axios from "axios";
+import { cognitoEnabled } from "./cognito";
 
-// Resolve the backend origin. Never fall back to a plain http:// URL when the
-// app itself is served over https — that would be a mixed-content request
-// that browsers block (and flag as insecure). If no explicit API URL was
-// baked in at build time, use the same origin so Caddy can route /api safely.
+// Resolve the backend origin. Production builds use same-origin `/api` unless
+// an explicit HTTPS API origin is supplied, so a missing build argument can
+// never silently point a customer's browser at localhost.
 function resolveBackendUrl() {
   const explicit = process.env.REACT_APP_API_URL || process.env.REACT_APP_BACKEND_URL;
   if (explicit) return explicit;
 
   if (typeof window !== "undefined" && window.location) {
     const { protocol, hostname } = window.location;
-    if (hostname === "localhost" || hostname === "127.0.0.1") {
-      return "http://127.0.0.1:8000";
-    }
     return `${protocol}//${hostname}`;
   }
-  return "http://127.0.0.1:8000";
+  return "";
 }
 
 const BACKEND_URL = resolveBackendUrl();
@@ -166,7 +163,7 @@ api.interceptors.response.use(
     }
 
     const refreshToken = getRefreshToken();
-    if (!refreshToken) {
+    if (!refreshToken && !cognitoEnabled) {
       clearTokens();
       return Promise.reject(error);
     }
@@ -177,14 +174,13 @@ api.interceptors.response.use(
       if (!refreshInFlight) {
         refreshInFlight = axios
           .post(
-            `${API_BASE}/auth/refresh`,
-            { refresh_token: refreshToken },
+            `${API_BASE}${cognitoEnabled ? "/auth/cognito/refresh" : "/auth/refresh"}`,
+            cognitoEnabled ? {} : { refresh_token: refreshToken },
             { headers: { "Content-Type": "application/json" }, withCredentials: true }
           )
           .then(({ data }) => {
-            setTokens(data.access_token, data.refresh_token || refreshToken, {
-              persistent: isPersistentSession(),
-            });
+            if (cognitoEnabled) return "cookie-session";
+            setTokens(data.access_token, data.refresh_token || refreshToken, { persistent: isPersistentSession() });
             return data.access_token;
           })
           .finally(() => {
@@ -194,7 +190,7 @@ api.interceptors.response.use(
 
       const newAccessToken = await refreshInFlight;
       original.headers = original.headers || {};
-      original.headers.Authorization = `Bearer ${newAccessToken}`;
+      if (newAccessToken !== "cookie-session") original.headers.Authorization = `Bearer ${newAccessToken}`;
       return api(original);
     } catch (refreshErr) {
       // Only sign out if the refresh was definitively rejected (the token is

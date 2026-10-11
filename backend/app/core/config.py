@@ -45,6 +45,9 @@ class Settings:
     cognito_region: str = os.environ.get("COGNITO_REGION", os.environ.get("AWS_REGION", "")).strip()
     cognito_client_id: str = os.environ.get("COGNITO_CLIENT_ID", "").strip()
     cognito_issuer: str = os.environ.get("COGNITO_ISSUER", "").strip()
+    cognito_userinfo_url: str = os.environ.get("COGNITO_USERINFO_URL", "").strip()
+    cognito_domain: str = os.environ.get("COGNITO_DOMAIN", "").strip().rstrip("/")
+    environment: str = os.environ.get("ENVIRONMENT", "development").strip().lower()
 
     # ---- Self-hosted migration auth ----
     jwt_secret_key: str = os.environ.get("JWT_SECRET_KEY", os.environ.get("LOCAL_AUTH_SECRET", ""))
@@ -69,10 +72,14 @@ class Settings:
                     "COGNITO_CLIENT_ID": self.cognito_client_id,
                 }.items() if not value
             ]
+            if not self.cognito_domain:
+                missing.append("COGNITO_DOMAIN")
             if missing:
                 raise RuntimeError(
                     "Cognito auth requires: " + ", ".join(missing)
                 )
+        if self.environment in {"production", "prod", "staging"} and self.auth_provider != "cognito":
+            raise RuntimeError("Production and staging must use AUTH_PROVIDER=cognito.")
 
     @property
     def jwt_issuer(self) -> str:
@@ -89,6 +96,16 @@ class Settings:
     @property
     def cognito_token_issuer(self) -> str:
         return self.cognito_issuer or self.cognito_jwks_url.removesuffix("/.well-known/jwks.json")
+
+    @property
+    def cognito_userinfo_endpoint(self) -> str:
+        if self.cognito_userinfo_url:
+            return self.cognito_userinfo_url
+        return f"{self.cognito_token_issuer.rstrip('/')}/oauth2/userInfo"
+
+    @property
+    def cognito_token_endpoint(self) -> str:
+        return f"{self.cognito_domain}/oauth2/token"
 
 
 settings = Settings()

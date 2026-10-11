@@ -226,7 +226,9 @@ class AgentRuntime:
         forced = os.environ.get("AI_FORCE_MODEL", "").strip()
         model = forced or agent.model or DEFAULT_MODEL
         temperature = float(cfg.temperature) if cfg and cfg.temperature is not None else 0.7
-        max_tokens = cfg.max_tokens if cfg and cfg.max_tokens else 1024
+        configured_max = cfg.max_tokens if cfg and cfg.max_tokens else 1024
+        hard_max = int(os.environ.get("AI_MAX_OUTPUT_TOKENS", "2048"))
+        max_tokens = max(1, min(int(configured_max), hard_max))
         return model, temperature, max_tokens
 
     async def _route_model(self, model: str) -> str:

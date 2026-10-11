@@ -5,6 +5,7 @@ import { useSEO } from "@/lib/seo";
 import { useAuth } from "@/lib/auth";
 import { Field, IconInput, PasswordInput, Checkbox, OtpInput } from "@/components/auth/AuthBits";
 import { AuthShell, GradientButton } from "@/components/auth/AuthShell";
+import { beginCognitoLogin, cognitoEnabled } from "@/lib/cognito";
 
 export default function Login() {
   useSEO({ title: "Login", description: "Sign in to your OraOne account" });
@@ -17,6 +18,20 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const [otpStep, setOtpStep] = useState(false);
   const [code, setCode] = useState("");
+
+  if (cognitoEnabled) {
+    return (
+      <AuthShell cardTestId="login-form">
+        <h1 className="text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">Welcome Back</h1>
+        <p className="mt-2 text-center text-sm text-[#64748B]">Sign in securely with your OraOne account.</p>
+        <div className="mt-8">
+          <GradientButton type="button" trailingIcon={ArrowRight} onClick={() => beginCognitoLogin()}>
+            Continue with Cognito
+          </GradientButton>
+        </div>
+      </AuthShell>
+    );
+  }
 
   const afterSignIn = (res) => {
     if (res.identityError) {

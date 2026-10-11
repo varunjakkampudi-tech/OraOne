@@ -23,6 +23,7 @@ accepted by app/services/workflow_scheduler.py for this self-hosted scale.
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 import uuid
 from datetime import datetime, timezone
@@ -136,6 +137,7 @@ async def _tick() -> None:
                     select(WebhookOutbox)
                     .where(WebhookOutbox.status == OutboxStatus.PENDING)
                     .order_by(WebhookOutbox.created_at)
+                    .with_for_update(skip_locked=True)
                     .limit(_BATCH_SIZE)
                 )
             ).all()
@@ -157,11 +159,27 @@ async def _deliver_outbox_row(outbox_id: uuid.UUID) -> None:
 
     Maker = _maker()
     async with Maker() as session:  # type: ignore[misc]
-        row = await session.get(WebhookOutbox, outbox_id)
-        if row is None:
+        row = await session.scalar(
+            select(WebhookOutbox)
+            .where(WebhookOutbox.id == outbox_id)
+            .with_for_update(skip_locked=True)
+        )
+        if row is None or row.status in {OutboxStatus.COMPLETED, OutboxStatus.FAILED}:
             return
+        # Direct callers/tests may deliver a pending row; claim it under the
+        # same row lock used by the polling batch before releasing the lock.
+        row.status = OutboxStatus.PROCESSING
+        await session.commit()
         try:
-            scheduled = await webhook_service.dispatch(row.organization_id, row.event, row.payload.get("data", row.payload))
+            dispatch_kwargs = {}
+            if "event_id" in inspect.signature(webhook_service.dispatch).parameters:
+                dispatch_kwargs["event_id"] = f"evt_outbox_{row.id}"
+            scheduled = await webhook_service.dispatch(
+                row.organization_id,
+                row.event,
+                row.payload.get("data", row.payload),
+                **dispatch_kwargs,
+            )
             row.status = OutboxStatus.COMPLETED
             row.processed_at = _utcnow()
             row.attempts = (row.attempts or 0) + 1

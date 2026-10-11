@@ -53,18 +53,16 @@ async def lifespan(app: FastAPI):
         log.info("Postgres engine initialised.")
     except Exception as e:
         log.warning(f"Postgres engine not initialised (will retry on first use): {e}")
-    # Phase 11 — start the in-process workflow scheduler (best-effort).
-    try:
-        from app.services.workflow_scheduler import start_scheduler
-        start_scheduler()
-    except Exception as e:
-        log.warning(f"Workflow scheduler not started: {e}")
-    # Transactional outbox drain worker for webhooks (best-effort).
-    try:
-        from app.services.webhook_outbox import start_outbox_worker
-        start_outbox_worker()
-    except Exception as e:
-        log.warning(f"Webhook outbox worker not started: {e}")
+    # Background loops run in the dedicated `worker.py` process in production.
+    # Keeping them opt-in here prevents duplicate schedulers under Gunicorn.
+    if os.environ.get("RUN_BACKGROUND_WORKERS", "false").strip().lower() == "true":
+        try:
+            from app.services.workflow_scheduler import start_scheduler
+            start_scheduler()
+            from app.services.webhook_outbox import start_outbox_worker
+            start_outbox_worker()
+        except Exception as e:
+            log.warning(f"Background workers not started: {e}")
     # OpenTelemetry tracing — no-op unless OTEL_EXPORTER_OTLP_ENDPOINT is set.
     try:
         from app.core.tracing import configure_tracing
@@ -90,16 +88,17 @@ async def lifespan(app: FastAPI):
     # shutdown, and a crash-only exit (no cancel) leaves whatever it was
     # doing (e.g. an outbox row claimed PROCESSING) to be reclaimed later
     # by the stale-PROCESSING sweep on the next process's first tick.
-    try:
-        from app.services.workflow_scheduler import stop_scheduler
-        await stop_scheduler()
-    except Exception:
-        pass
-    try:
-        from app.services.webhook_outbox import stop_outbox_worker
-        await stop_outbox_worker()
-    except Exception:
-        pass
+    if os.environ.get("RUN_BACKGROUND_WORKERS", "false").strip().lower() == "true":
+        try:
+            from app.services.workflow_scheduler import stop_scheduler
+            await stop_scheduler()
+        except Exception:
+            pass
+        try:
+            from app.services.webhook_outbox import stop_outbox_worker
+            await stop_outbox_worker()
+        except Exception:
+            pass
     try:
         from app.database.session import dispose_engine
         await dispose_engine()

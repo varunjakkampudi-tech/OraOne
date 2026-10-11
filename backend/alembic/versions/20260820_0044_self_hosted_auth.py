@@ -1,11 +1,9 @@
 """Self-hosted authentication — add password_hash + is_email_verified to users.
 
 Replaces AWS Cognito as the auth-of-record. Adds the two columns the new
-Argon2 + JWT auth service (app/services/auth_service.py) needs, and
-backfills a password hash for the local admin account (email from
-LOCAL_ADMIN_EMAIL / default admin@oraone.in, password from
-LOCAL_ADMIN_PASSWORD / default "admin") if that row already exists, so
-existing local deployments keep working without a manual step.
+Argon2 + JWT auth service (app/services/auth_service.py) needs. Any password
+backfill is strictly opt-in: both LOCAL_ADMIN_EMAIL and LOCAL_ADMIN_PASSWORD
+must be supplied by the operator. There is no fallback identity or password.
 """
 from __future__ import annotations
 
@@ -30,10 +28,12 @@ def upgrade() -> None:
         ),
     )
 
-    # Backfill the local admin account's password so existing deployments
-    # don't get locked out by this migration.
-    admin_email = os.environ.get("LOCAL_ADMIN_EMAIL", "admin@oraone.in").strip().lower()
-    admin_password = os.environ.get("LOCAL_ADMIN_PASSWORD", "admin")
+    # Backfill only when an operator explicitly supplies both values. Never
+    # create or assume a predictable admin identity during a migration.
+    admin_email = os.environ.get("LOCAL_ADMIN_EMAIL", "").strip().lower()
+    admin_password = os.environ.get("LOCAL_ADMIN_PASSWORD", "")
+    if not admin_email or not admin_password:
+        return
     try:
         from argon2 import PasswordHasher
 

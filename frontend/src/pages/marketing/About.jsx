@@ -16,8 +16,8 @@ const fadeUp = {
 };
 
 const STATS = [
-  { value: "500+",    label: "Businesses in beta", icon: Users, color: "#2563EB", bg: "#EFF6FF" },
-  { value: "10,000+", label: "Conversations automated", icon: MessageSquare, color: "#06B6D4", bg: "#ECFEFF" },
+  { value: "AI",      label: "Agents for customer conversations", icon: Users, color: "#2563EB", bg: "#EFF6FF" },
+  { value: "API",     label: "Integrations and webhooks", icon: MessageSquare, color: "#06B6D4", bg: "#ECFEFF" },
   { value: "50+",     label: "Languages supported", icon: Globe2, color: "#22C55E", bg: "#ECFDF5" },
   { value: "Free",    label: "During public beta", icon: Heart, color: "#EC4899", bg: "#FCE7F3" },
 ];

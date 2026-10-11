@@ -1,11 +1,9 @@
 """User — system-of-record identity.
 
-Authentication is self-hosted (Argon2 password hash + JWT access/refresh
-tokens, see app/core/security.py and app/services/auth_service.py).
-``cognito_sub`` is kept as the column name for backward compatibility with
-every downstream consumer that already reads it as "the auth subject id" /
-JWT ``sub`` claim, but it no longer refers to AWS Cognito — for accounts
-created through the self-hosted flow it holds a freshly generated UUID.
+Authentication is provider-selectable: self-hosted Argon2/JWT is for local
+migration work, while production uses AWS Cognito. ``cognito_sub`` is kept as
+the external subject column for backward compatibility; all application
+authorization resolves it to the internal ``users.id`` UUID.
 """
 from __future__ import annotations
 

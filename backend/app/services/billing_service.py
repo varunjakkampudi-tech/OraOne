@@ -1,14 +1,13 @@
 """Billing service (Phase 12, Module 1).
 
 Encapsulates the plan catalogue, idempotent plan seeding, and the
-subscription lifecycle. Stripe is optional:
+subscription lifecycle. Stripe is required for paid billing:
 
 * If ``STRIPE_SECRET_KEY`` is set **and** the ``stripe`` package is
   importable, real Checkout / Portal sessions are created and the
   subscription is activated by the webhook.
-* Otherwise the service runs in **mock mode** — ``create_checkout``
-  activates the subscription immediately and returns a local success URL,
-  so the whole upgrade flow is testable without any Stripe account.
+* Without Stripe, new workspaces remain on the Free plan and paid checkout is
+  rejected. No mock checkout grants entitlements or creates paid invoices.
 """
 from __future__ import annotations
 
@@ -172,25 +171,12 @@ async def get_or_create_subscription(
     )
 
     # Until real Stripe billing is integrated, every workspace runs on the
-    # Starter plan. We seed new subscriptions on Starter and coerce any other
-    # plan (e.g. legacy mock "upgrades") back to Starter so the dashboard,
-    # entitlements and usage limits stay consistent everywhere.
-    seed_code = PlanCode.starter if not stripe_enabled() else PlanCode.free
+    # Missing Stripe must never grant paid entitlements. Existing paid rows are
+    # left intact for reconciliation; new rows always start on Free.
+    environment = os.environ.get("ENVIRONMENT", "development").strip().lower()
+    seed_code = PlanCode.free if environment in {"production", "prod", "staging"} else PlanCode.starter
 
     if sub is not None:
-        if not stripe_enabled():
-            starter = await session.scalar(
-                select(Plan).where(Plan.code == PlanCode.starter)
-            )
-            if starter is not None and sub.plan_id != starter.id:
-                sub.plan_id = starter.id
-                sub.status = SubscriptionStatus.active
-                sub.cancel_at_period_end = False
-                org = await session.get(Organization, organization_id)
-                if org is not None:
-                    org.plan = _ORG_PLAN_MAP.get(PlanCode.starter, OrgPlan.starter)
-                await session.commit()
-                await session.refresh(sub)
         return sub
 
     base_plan = await session.scalar(select(Plan).where(Plan.code == seed_code))
@@ -283,24 +269,14 @@ async def create_checkout(
     success_url: str,
     cancel_url: str,
 ) -> dict:
-    """Begin an upgrade. Mock mode activates immediately."""
+    """Begin a real paid upgrade; unavailable billing fails closed."""
     plan = await session.scalar(select(Plan).where(Plan.code == plan_code))
     if plan is None:
         raise ValueError(f"Unknown plan '{plan_code}'.")
     cycle = _cycle(billing_cycle)
 
     if not stripe_enabled():
-        # Until Stripe is integrated, paid upgrades are disabled — every
-        # workspace stays on Starter. Return a friendly message instead of
-        # activating a different plan.
-        sub = await get_or_create_subscription(session, organization_id)
-        return {
-            "mode": "mock",
-            "checkout_url": cancel_url,
-            "activated": False,
-            "subscription": sub,
-            "message": "Paid plans are launching soon — your workspace is on the Starter plan for now.",
-        }
+        raise RuntimeError("Paid billing is not configured. Configure Stripe before enabling upgrades.")
 
     # Real Stripe Checkout.
     import stripe
@@ -372,9 +348,9 @@ async def create_portal(
 ) -> dict:
     if not stripe_enabled():
         return {
-            "mode": "mock",
+            "mode": "disabled",
             "portal_url": return_url,
-            "message": "Customer portal is available once Stripe is configured.",
+            "message": "Billing portal is unavailable until Stripe is configured.",
         }
     import stripe
     stripe.api_key = os.environ["STRIPE_SECRET_KEY"]

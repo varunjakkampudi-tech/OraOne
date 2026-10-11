@@ -14,13 +14,13 @@ from app.schemas.auth import UserProfile
 
 
 async def get_user_profile(session: AsyncSession, user_id: str) -> Optional[UserProfile]:
-    """``user_id`` is the JWT ``sub`` claim, stored as ``User.cognito_sub``."""
+    """Resolve the external subject and return the internal UUID identity."""
     users = UserRepository(session)
     user = await users.get_by_cognito_sub(user_id)
     if user is None:
         return None
     return UserProfile(
-        userId=user.cognito_sub,
+        userId=str(user.id),
         email=user.email,
         name=user.full_name or "",
         role=user.role.value,

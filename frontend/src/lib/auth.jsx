@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { api, formatApiError, setTokens, clearTokens, getToken, getRefreshToken } from "./api";
+import { cognitoEnabled, completeCognitoLogin } from "./cognito";
 
 const AuthContext = createContext(null);
 
@@ -76,11 +77,6 @@ export function AuthProvider({ children }) {
   }, []);
 
   const fetchIdentity = useCallback(async () => {
-    if (!getToken()) {
-      clearIdentity();
-      return { ok: false, error: "Not signed in." };
-    }
-
     if (identityInFlight.current) {
       return identityInFlight.current;
     }
@@ -109,16 +105,9 @@ export function AuthProvider({ children }) {
 
     identityInFlight.current = promise;
     return promise;
-  }, [clearIdentity]);
+  }, []);
 
   const fetchMe = useCallback(async () => {
-    if (!getToken()) {
-      setUser(false);
-      clearIdentity();
-      setLoading(false);
-      return;
-    }
-
     try {
       // /auth/me and /auth/identity are independent, token-only calls and the
       // dashboard needs both — fire them together instead of serially so the
@@ -134,7 +123,7 @@ export function AuthProvider({ children }) {
         clearTokens();
         setUser(false);
         clearIdentity();
-      } else if (getToken()) {
+      } else if (getToken() || loadIdentityFromStorage()?.user) {
         // Transient failure (backend restarting / network blip) but we still
         // hold a token — DON'T log the user out. Render from cached identity
         // so a deploy window doesn't kick everyone to the login screen; live
@@ -152,13 +141,12 @@ export function AuthProvider({ children }) {
   }, [fetchIdentity, clearIdentity]);
 
   useEffect(() => {
-    if (!getToken()) {
+    if (!getToken() && !cognitoEnabled) {
       setUser(false);
       clearIdentity();
       setLoading(false);
       return;
     }
-
     fetchMe();
   }, [fetchMe, clearIdentity]);
 
@@ -193,6 +181,24 @@ export function AuthProvider({ children }) {
         return { ok: true, identityError: identityResult.error };
       }
       return { ok: true, identity: identityResult.identity };
+    } catch (e) {
+      return { ok: false, error: _err(e) };
+    }
+  }, [fetchMe, fetchIdentity]);
+
+  const completeCognitoSession = useCallback(async (code) => {
+    if (!cognitoEnabled) return { ok: false, error: "Cognito authentication is not enabled." };
+    try {
+      const tokens = await completeCognitoLogin(code);
+      await api.post("/auth/cognito/session", {
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+      });
+      await fetchMe();
+      const identityResult = await fetchIdentity();
+      return identityResult.ok
+        ? { ok: true, identity: identityResult.identity }
+        : { ok: true, identityError: identityResult.error };
     } catch (e) {
       return { ok: false, error: _err(e) };
     }
@@ -284,7 +290,10 @@ export function AuthProvider({ children }) {
     try {
       if (getToken()) {
         const refreshToken = getRefreshToken();
-        await api.post("/auth/logout", refreshToken ? { refresh_token: refreshToken } : {});
+        await api.post(
+          cognitoEnabled ? "/auth/cognito/logout" : "/auth/logout",
+          cognitoEnabled ? {} : (refreshToken ? { refresh_token: refreshToken } : {})
+        );
       }
     } catch {
       // Best-effort logout; always clear local session.
@@ -364,6 +373,7 @@ export function AuthProvider({ children }) {
         verify,
         resend,
         login,
+        completeCognitoSession,
         verifyLoginOtp,
         forgotPassword,
         resetPassword,

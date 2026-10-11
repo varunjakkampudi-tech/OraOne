@@ -198,13 +198,15 @@ async def list_deliveries(
 
 
 # ── delivery ────────────────────────────────────────────────────────────────
-async def _deliver_once(endpoint: WebhookEndpoint, body: bytes, event: str) -> tuple[bool, Optional[int], Optional[str]]:
+async def _deliver_once(
+    endpoint: WebhookEndpoint, body: bytes, event: str, *, delivery_id: str | None = None
+) -> tuple[bool, Optional[int], Optional[str]]:
     headers = {
         "Content-Type": "application/json",
         "User-Agent": "OraOne-Webhooks/1.0",
         "X-OraOne-Event": event,
         "X-OraOne-Signature": signature_header(endpoint.secret, body),
-        "X-OraOne-Delivery": str(uuid.uuid4()),
+        "X-OraOne-Delivery": delivery_id or str(uuid.uuid4()),
     }
     try:
         async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
@@ -235,7 +237,9 @@ async def _record_and_attempt(endpoint_id: uuid.UUID, organization_id: uuid.UUID
                 if _RETRY_BACKOFF[idx]:
                     await asyncio.sleep(_RETRY_BACKOFF[idx])
                 attempts = idx + 1
-                success, status_code, error = await _deliver_once(endpoint, body, event)
+                success, status_code, error = await _deliver_once(
+                    endpoint, body, event, delivery_id=payload.get("id")
+                )
                 if success:
                     break
 
@@ -263,9 +267,11 @@ async def _record_and_attempt(endpoint_id: uuid.UUID, organization_id: uuid.UUID
         logger.exception("webhook delivery failed for endpoint=%s event=%s", endpoint_id, event)
 
 
-def _envelope(event: str, organization_id: uuid.UUID, data: dict[str, Any]) -> dict[str, Any]:
+def _envelope(
+    event: str, organization_id: uuid.UUID, data: dict[str, Any], *, event_id: str | None = None
+) -> dict[str, Any]:
     return {
-        "id": f"evt_{uuid.uuid4().hex}",
+        "id": event_id or f"evt_{uuid.uuid4().hex}",
         "type": event,
         "created": int(time.time()),
         "organization_id": str(organization_id),
@@ -273,7 +279,13 @@ def _envelope(event: str, organization_id: uuid.UUID, data: dict[str, Any]) -> d
     }
 
 
-async def dispatch(organization_id: uuid.UUID, event: str, data: dict[str, Any]) -> int:
+async def dispatch(
+    organization_id: uuid.UUID,
+    event: str,
+    data: dict[str, Any],
+    *,
+    event_id: str | None = None,
+) -> int:
     """Fan out ``event`` to all active subscribed endpoints. Returns # scheduled.
 
     Non-blocking: each delivery runs in its own background task. Safe to call
@@ -293,7 +305,7 @@ async def dispatch(organization_id: uuid.UUID, event: str, data: dict[str, Any])
         logger.exception("webhook dispatch lookup failed org=%s event=%s", organization_id, event)
         return 0
 
-    payload = _envelope(event, organization_id, data)
+    payload = _envelope(event, organization_id, data, event_id=event_id)
     scheduled = 0
     for ep in endpoints:
         subscribed = (not ep.events) or (event in ep.events)

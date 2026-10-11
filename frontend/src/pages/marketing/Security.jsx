@@ -82,7 +82,7 @@ const CONTROL_CARDS = [
   {
     icon: Cloud,
     title: "Secure Cloud Infrastructure",
-    desc: "Hosted on AWS with VPC isolation, private subnets, security groups, IAM least-privilege and continuous CloudTrail / GuardDuty monitoring.",
+    desc: "The deployable stack uses Docker Compose with private application services, Caddy at the edge, PostgreSQL, Redis and S3-compatible object storage. Deployment controls depend on the operator's environment.",
     badge: "Infrastructure",
     color: "#DB2777",
     bg: "#FCE7F3",
@@ -141,8 +141,8 @@ const COMPLIANCE = [
 ];
 
 const SUB_PROCESSORS = [
-  { name: "Amazon Web Services (AWS)", purpose: "Cloud hosting, storage, networking", region: "ap-south-1 / us-east-1", icon: Cloud },
-  { name: "MongoDB Atlas", purpose: "Managed database (encrypted, VPC-peered)", region: "ap-south-1", icon: Database },
+  { name: "PostgreSQL + pgvector", purpose: "Application database and vector search", region: "Operator selected", icon: Database },
+  { name: "MinIO / S3-compatible storage", purpose: "Document and asset storage", region: "Operator selected", icon: Cloud },
   { name: "Resend / Amazon SES", purpose: "Transactional emails (auth, notifications)", region: "us-east-1", icon: Mail },
   { name: "Sentry", purpose: "Error monitoring & performance", region: "EU", icon: Eye },
 ];
