@@ -675,7 +675,16 @@ async def widget_event(
     event = payload.event if payload.event in WidgetEventType.ALL else WidgetEventType.opened
     ws = None
     if payload.session_id is not None:
-        ws = await session.get(WidgetSession, payload.session_id)
+        ws = await session.scalar(
+            select(WidgetSession)
+            .where(WidgetSession.id == payload.session_id)
+            .where(WidgetSession.widget_id == widget.id)
+            .where(
+                WidgetSession.visitor_id == payload.visitor_id
+                if payload.visitor_id
+                else True
+            )
+        )
     await widget_service.log_event(
         session,
         widget=widget,

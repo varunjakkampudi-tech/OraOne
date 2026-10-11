@@ -951,6 +951,16 @@ async def _render_html(engine: "_Engine", url: str) -> Optional[str]:
             browser = await p.chromium.launch(headless=True)
             try:
                 page = await browser.new_page(user_agent=USER_AGENT)
+                async def guard_request(route, request) -> None:
+                    # Playwright follows redirects independently of httpx. Keep
+                    # every navigation/resource request behind the same SSRF
+                    # policy, including redirect targets and DNS-rebinding hops.
+                    if is_safe_render_request(request.url):
+                        await route.continue_()
+                        return
+                    await route.abort("blockedbyclient")
+
+                await page.route("**/*", guard_request)
                 await page.goto(url, wait_until="networkidle", timeout=int(FETCH_TIMEOUT * 1000))
                 return await page.content()
             finally:
@@ -958,6 +968,22 @@ async def _render_html(engine: "_Engine", url: str) -> Optional[str]:
     except Exception as e:  # noqa: BLE001
         log.warning("js_render_failed url=%s err=%s", url, e)
         return None
+
+
+def is_safe_render_request(url: str) -> bool:
+    """Return whether a browser-rendered request is safe to allow.
+
+    This pure helper keeps the Playwright SSRF policy directly testable
+    without requiring a browser binary in the backend unit-test environment.
+    """
+    scheme = urlparse(url).scheme.lower()
+    if scheme in {"about", "data", "blob"}:
+        return True
+    try:
+        validate_url(url)
+    except URLValidationError:
+        return False
+    return True
 
 
 async def _process_one(engine: "_Engine", session, client, fid, url: str, depth: int) -> None:

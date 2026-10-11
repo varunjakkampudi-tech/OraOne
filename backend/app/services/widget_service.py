@@ -9,7 +9,6 @@ from __future__ import annotations
 import os
 import time
 import uuid
-from collections import defaultdict, deque
 from datetime import datetime, timezone
 from typing import Optional
 from urllib.parse import urlparse
@@ -22,6 +21,7 @@ from app.database.models.widget import Widget, WidgetStatus
 from app.database.models.widget_domain import WidgetDomain
 from app.database.models.widget_event import WidgetEvent
 from app.database.models.widget_session import WidgetSession
+from app.services.cache import get_shared_cache
 
 
 def widget_cdn_base() -> str:
@@ -86,20 +86,15 @@ def domain_allowed(allowed: list[str], host: str) -> bool:
     return False
 
 
-# ── In-memory sliding-window rate limiter (per process) ──
-_BUCKETS: dict[str, deque] = defaultdict(deque)
-
-
 def rate_limited(key: str, *, limit: int, window_seconds: int = 60) -> bool:
-    """Return True if ``key`` has exceeded ``limit`` hits in the window."""
-    now = time.time()
-    q = _BUCKETS[key]
-    cutoff = now - window_seconds
-    while q and q[0] < cutoff:
-        q.popleft()
-    if len(q) >= max(1, limit):
+    """Return True if ``key`` has exceeded the shared fixed-window limit."""
+    bucket = int(time.time() // window_seconds)
+    cache = get_shared_cache("widget-ratelimit")
+    cache_key = f"{key}:{bucket}"
+    count = int(cache.get(cache_key) or 0)
+    if count >= max(1, limit):
         return True
-    q.append(now)
+    cache.set(cache_key, count + 1, ttl_seconds=window_seconds * 2)
     return False
 
 

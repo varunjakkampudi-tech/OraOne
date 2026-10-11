@@ -21,6 +21,7 @@ throttle everyone behind it.
 from __future__ import annotations
 
 import logging
+import ipaddress
 import os
 import time
 
@@ -36,11 +37,33 @@ def _cache():
     return get_shared_cache("ratelimit")
 
 
+def _trusted_proxy_networks() -> tuple[ipaddress.IPv4Network | ipaddress.IPv6Network, ...]:
+    networks = []
+    for raw in os.environ.get("TRUSTED_PROXY_IPS", "").split(","):
+        value = raw.strip()
+        if not value:
+            continue
+        try:
+            networks.append(ipaddress.ip_network(value, strict=False))
+        except ValueError:
+            log.warning("Ignoring invalid TRUSTED_PROXY_IPS entry: %s", value)
+    return tuple(networks)
+
+
+def _is_trusted_proxy(peer: str) -> bool:
+    try:
+        address = ipaddress.ip_address(peer)
+    except ValueError:
+        return False
+    return any(address in network for network in _trusted_proxy_networks())
+
+
 def _client_ip(request: Request) -> str:
+    peer = request.client.host if request.client else "unknown"
     fwd = request.headers.get("x-forwarded-for")
-    if fwd:
+    if fwd and _is_trusted_proxy(peer):
         return fwd.split(",")[0].strip()
-    return request.client.host if request.client else "unknown"
+    return peer
 
 
 def _caller_id(request: Request) -> str:
