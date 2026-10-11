@@ -21,6 +21,7 @@ import logging
 import secrets
 import time
 import uuid
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Iterable, Optional
 
@@ -34,6 +35,7 @@ from app.database.models.webhook import (
     WebhookEventType,
     WebhookStatus,
 )
+from app.schemas.webhooks import validate_public_webhook_url
 from app.database.session import session_scope
 
 logger = logging.getLogger("oraone.webhooks")
@@ -210,7 +212,12 @@ async def _deliver_once(
         "X-OraOne-Delivery": delivery_id or str(uuid.uuid4()),
     }
     try:
-        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+        async with httpx.AsyncClient(timeout=_TIMEOUT, follow_redirects=False) as client:
+            # Re-resolve and reject unsafe destinations immediately before the
+            # request. Registration-time validation alone is vulnerable to DNS
+            # rebinding. Redirects are deliberately disabled so each hop must
+            # be explicitly registered and validated.
+            validate_public_webhook_url(endpoint.url)
             resp = await client.post(endpoint.url, content=body, headers=headers)
         ok = 200 <= resp.status_code < 300
         return ok, resp.status_code, None if ok else f"HTTP {resp.status_code}"
@@ -224,7 +231,7 @@ async def _deliver_endpoint(
     organization_id: uuid.UUID,
     event: str,
     payload: dict[str, Any],
-) -> None:
+) -> bool:
     """Deliver one endpoint and persist its result in the caller's session."""
     body = json.dumps(payload, default=str, separators=(",", ":")).encode("utf-8")
     success = False
@@ -233,7 +240,7 @@ async def _deliver_endpoint(
     attempts = 0
 
     if endpoint.deleted_at is not None or endpoint.status != WebhookStatus.ACTIVE:
-        return
+        return False
 
     for idx in range(_MAX_ATTEMPTS):
         if _RETRY_BACKOFF[idx]:
@@ -265,6 +272,7 @@ async def _deliver_endpoint(
         endpoint.failure_count = (endpoint.failure_count or 0) + 1
         if endpoint.failure_count >= _AUTO_DISABLE_AFTER:
             endpoint.status = WebhookStatus.DISABLED
+    return success
 
 
 def _envelope(
@@ -279,6 +287,13 @@ def _envelope(
     }
 
 
+@dataclass(frozen=True)
+class DeliveryResult:
+    attempted: int = 0
+    succeeded: int = 0
+    failed: int = 0
+
+
 async def deliver_event(
     session: AsyncSession,
     organization_id: uuid.UUID,
@@ -286,8 +301,8 @@ async def deliver_event(
     data: dict[str, Any],
     *,
     event_id: str | None = None,
-) -> int:
-    """Deliver an event using the caller's transaction and return its count."""
+) -> DeliveryResult:
+    """Deliver an event and report endpoint-level success/failure."""
     result = await session.execute(
         select(WebhookEndpoint).where(
             WebhookEndpoint.organization_id == organization_id,
@@ -296,12 +311,29 @@ async def deliver_event(
         )
     )
     payload = _envelope(event, organization_id, data, event_id=event_id)
-    delivered = 0
+    attempted = 0
+    succeeded = 0
+    failed = 0
     for endpoint in result.scalars().all():
         if (not endpoint.events) or (event in endpoint.events):
-            await _deliver_endpoint(session, endpoint, organization_id, event, payload)
-            delivered += 1
-    return delivered
+            already_succeeded = await session.scalar(
+                select(WebhookDelivery.id)
+                .where(
+                    WebhookDelivery.endpoint_id == endpoint.id,
+                    WebhookDelivery.event == event,
+                    WebhookDelivery.success.is_(True),
+                    WebhookDelivery.payload["id"].as_string() == payload["id"],
+                )
+                .limit(1)
+            )
+            if already_succeeded is not None:
+                continue
+            attempted += 1
+            if await _deliver_endpoint(session, endpoint, organization_id, event, payload):
+                succeeded += 1
+            else:
+                failed += 1
+    return DeliveryResult(attempted=attempted, succeeded=succeeded, failed=failed)
 
 
 async def dispatch(
@@ -314,9 +346,10 @@ async def dispatch(
     """Compatibility wrapper that delivers without an untracked task."""
     try:
         async with session_scope() as session:
-            return await deliver_event(
+            result = await deliver_event(
                 session, organization_id, event, data, event_id=event_id
             )
+            return result.succeeded
     except Exception:  # noqa: BLE001
         logger.exception("webhook dispatch failed org=%s event=%s", organization_id, event)
         return 0

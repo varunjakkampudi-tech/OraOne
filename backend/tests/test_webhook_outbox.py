@@ -150,7 +150,9 @@ async def test_deliver_success_marks_completed(db_session, monkeypatch):
     row_id = row.id
 
     async def _fake_deliver_event(session, organization_id, event, data, *, event_id=None):
-        return 1  # 1 endpoint scheduled
+        from app.services.webhook_service import DeliveryResult
+
+        return DeliveryResult(attempted=1, succeeded=1)
 
     monkeypatch.setattr("app.services.webhook_service.deliver_event", _fake_deliver_event)
 
@@ -180,7 +182,9 @@ async def test_deliver_failure_retries_until_max_attempts(db_session, monkeypatc
     row_id = row.id
 
     async def _always_fails(session, organization_id, event, data, *, event_id=None):
-        raise RuntimeError("simulated endpoint down")
+        from app.services.webhook_service import DeliveryResult
+
+        return DeliveryResult(attempted=1, failed=1)
 
     monkeypatch.setattr("app.services.webhook_service.deliver_event", _always_fails)
 
@@ -190,7 +194,7 @@ async def test_deliver_failure_retries_until_max_attempts(db_session, monkeypatc
             fresh = await db_session.get(type(row), row_id)
             await db_session.refresh(fresh)
             assert fresh.attempts == attempt
-            assert fresh.last_error and "simulated endpoint down" in fresh.last_error
+            assert fresh.last_error and "endpoint(s) failed" in fresh.last_error
             if attempt < webhook_outbox._MAX_ATTEMPTS:
                 assert fresh.status == OutboxStatus.PENDING, f"expected retryable PENDING at attempt {attempt}"
             else:
@@ -219,8 +223,10 @@ async def test_tick_claims_rows_so_a_second_tick_does_not_redeliver(db_session, 
     calls: list[str] = []
 
     async def _fake_deliver_event(session, organization_id, event, data, *, event_id=None):
+        from app.services.webhook_service import DeliveryResult
+
         calls.append(event)
-        return 1
+        return DeliveryResult(attempted=1, succeeded=1)
 
     monkeypatch.setattr("app.services.webhook_service.deliver_event", _fake_deliver_event)
 
@@ -268,8 +274,10 @@ async def test_stale_processing_row_is_reclaimed_after_simulated_crash(db_sessio
         calls: list[str] = []
 
         async def _fake_deliver_event(session, organization_id, event, data, *, event_id=None):
+            from app.services.webhook_service import DeliveryResult
+
             calls.append(event)
-            return 1
+            return DeliveryResult(attempted=1, succeeded=1)
 
         monkeypatch.setattr("app.services.webhook_service.deliver_event", _fake_deliver_event)
 

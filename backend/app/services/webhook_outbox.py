@@ -170,17 +170,29 @@ async def _deliver_outbox_row(outbox_id: uuid.UUID) -> None:
         row.status = OutboxStatus.PROCESSING
         await session.commit()
         try:
-            scheduled = await webhook_service.deliver_event(
+            result = await webhook_service.deliver_event(
                 session,
                 row.organization_id,
                 row.event,
                 row.payload.get("data", row.payload),
                 event_id=f"evt_outbox_{row.id}",
             )
-            row.status = OutboxStatus.COMPLETED
-            row.processed_at = _utcnow()
             row.attempts = (row.attempts or 0) + 1
-            log.info("outbox delivered id=%s event=%s scheduled=%d", row.id, row.event, scheduled)
+            if result.failed:
+                row.last_error = f"{result.failed} webhook endpoint(s) failed"
+                row.status = (
+                    OutboxStatus.FAILED if row.attempts >= _MAX_ATTEMPTS else OutboxStatus.PENDING
+                )
+                if row.status == OutboxStatus.FAILED:
+                    row.processed_at = _utcnow()
+                log.warning(
+                    "outbox delivery incomplete id=%s event=%s succeeded=%d failed=%d attempt=%d",
+                    row.id, row.event, result.succeeded, result.failed, row.attempts,
+                )
+            else:
+                row.status = OutboxStatus.COMPLETED
+                row.processed_at = _utcnow()
+                log.info("outbox delivered id=%s event=%s succeeded=%d", row.id, row.event, result.succeeded)
         except Exception as e:  # noqa: BLE001
             row.attempts = (row.attempts or 0) + 1
             row.last_error = str(e)[:500]
