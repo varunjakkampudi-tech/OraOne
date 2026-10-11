@@ -44,7 +44,7 @@ openpyxl>=3.1,<4.0              # XLSX extraction (R2 knowledge)
 python-pptx>=0.6,<1.1          # PPTX extraction (R2 knowledge)
 
 # ---- JWT / crypto for self-hosted access tokens ----
-python-jose[cryptography]>=3.3,<4.0
+PyJWT>=2.10,<3.0
 argon2-cffi>=23.1,<24.0        # password hashing (self-hosted auth)
 
 # ---- Timezones (business-hours calculations) ----

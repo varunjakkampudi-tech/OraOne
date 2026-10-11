@@ -71,9 +71,11 @@ def _caller_id(request: Request) -> str:
     auth = request.headers.get("authorization", "")
     if auth.lower().startswith("bearer "):
         try:
-            from jose import jwt as jose_jwt
+            import jwt as jose_jwt
 
-            claims = jose_jwt.get_unverified_claims(auth[7:].strip())
+            claims = jose_jwt.decode(
+                auth[7:].strip(), options={"verify_signature": False}
+            )
             sub = claims.get("sub")
             if sub:
                 return f"user:{sub}"

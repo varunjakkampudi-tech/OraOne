@@ -4,12 +4,15 @@ Every 401 from this module is logged with a precise reason at WARNING
 level under the logger `app.auth.jwt`. Tail uvicorn output to see them.
 """
 import logging
+import json
 import time
 from typing import Any, Dict
 
 from fastapi import HTTPException, Request, status
 import httpx
-from jose import JWTError, jwt as jose_jwt
+import jwt as jose_jwt
+from jwt.algorithms import RSAAlgorithm
+from jwt.exceptions import InvalidTokenError as JWTError
 
 from app.core.config import settings
 from app.core.security import decode_access_token
@@ -75,12 +78,18 @@ async def verify_cognito_access_token(
                 raise JWTError("Cognito JWKS does not contain token key")
             return await verify_cognito_access_token(token, request=request, _refreshed=True)
 
+        verification_key = (
+            RSAAlgorithm.from_jwk(json.dumps(key))
+            if key.get("n") and key.get("e")
+            else key
+        )
         claims = jose_jwt.decode(
             token,
-            key,
+            verification_key,
             algorithms=["RS256"],
             issuer=settings.cognito_token_issuer,
-            options={"verify_aud": False, "leeway": 60},
+            options={"verify_aud": False},
+            leeway=60,
         )
         if claims.get("token_use") != "access":
             raise JWTError("Cognito token_use must be access")

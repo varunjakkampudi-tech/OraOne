@@ -2,7 +2,7 @@
 
 OAuth access/refresh tokens must never be stored in plaintext. This
 module wraps Fernet (AES-128-CBC + HMAC, from the ``cryptography``
-package that already ships transitively via ``python-jose[cryptography]``)
+package used by the application's JWT and Fernet cryptography)
 behind two tiny helpers: :func:`encrypt` and :func:`decrypt`.
 
 Key resolution (first match wins):

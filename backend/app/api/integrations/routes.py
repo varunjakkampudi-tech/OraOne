@@ -28,7 +28,8 @@ from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from fastapi.responses import RedirectResponse
-from jose import JWTError, jwt as jose_jwt
+import jwt as jose_jwt
+from jwt.exceptions import InvalidTokenError as JWTError
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

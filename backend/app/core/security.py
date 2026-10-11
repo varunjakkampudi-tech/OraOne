@@ -17,7 +17,8 @@ from typing import Any, Optional
 
 from argon2 import PasswordHasher as _Argon2Hasher
 from argon2.exceptions import VerifyMismatchError, InvalidHashError
-from jose import JWTError, jwt as jose_jwt
+import jwt as jose_jwt
+from jwt.exceptions import InvalidTokenError as JWTError
 
 from app.core.config import settings
 
@@ -90,7 +91,8 @@ def decode_access_token(token: str) -> dict[str, Any]:
         settings.jwt_secret_key,
         algorithms=["HS256"],
         issuer=settings.jwt_issuer,
-        options={"verify_aud": False, "leeway": settings.jwt_leeway_seconds},
+        options={"verify_aud": False},
+        leeway=settings.jwt_leeway_seconds,
     )
     if claims.get("token_use") != TOKEN_USE_ACCESS:
         raise JWTError(f"unexpected token_use={claims.get('token_use')!r}")
