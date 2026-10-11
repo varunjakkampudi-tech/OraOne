@@ -1,0 +1,17 @@
+flowchart TB
+  Token[Validated Cognito subject] --> User[PostgreSQL user mapping]
+  User --> Platform[Platform role]
+  User --> Membership[Organization membership]
+  Platform --> Super[Platform super_admin]
+  Platform --> Admin[Platform admin]
+  Platform --> Manager[Platform manager]
+  Platform --> PlatformUser[Platform user]
+  Membership --> Owner[Organization owner]
+  Membership --> OrgAdmin[Organization admin]
+  Membership --> Member[Organization member]
+  Membership --> Viewer[Organization viewer]
+  Platform --> Policy[Platform permission]
+  Membership --> Scope[Tenant scope]
+  Policy --> Query[Scoped repository query]
+  Scope --> Query
+  Query --> Audit[Audit privileged mutation]

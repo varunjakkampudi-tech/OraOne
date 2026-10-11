@@ -1,0 +1,23 @@
+sequenceDiagram
+  participant B as Browser
+  participant C as Cognito Hosted Login
+  participant F as React frontend
+  participant A as FastAPI
+  participant J as Cognito JWKS
+  participant D as PostgreSQL
+  B->>F: Start email authentication
+  F->>F: Create state and PKCE transaction
+  F->>C: Authorization request
+  C-->>F: Authorization code callback
+  F->>F: Validate state and bind transaction
+  F->>C: Exchange code with PKCE verifier
+  C-->>F: Tokens
+  F->>A: Establish session with access token
+  A->>J: Request JWKS on cache miss
+  J-->>A: Return JWKS document
+  A->>A: Verify issuer, signature, expiry, token_use, client
+  A->>D: Resolve Cognito sub and membership
+  D-->>A: User and RBAC scope
+  A-->>F: HttpOnly session result
+  F->>A: Refresh or logout
+  A-->>F: Rotate or clear session cookies

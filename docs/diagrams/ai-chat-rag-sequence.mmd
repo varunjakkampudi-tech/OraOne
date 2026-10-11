@@ -1,0 +1,20 @@
+sequenceDiagram
+  participant V as Visitor
+  participant W as Widget
+  participant A as Chat API
+  participant C as Agent configuration
+  participant R as Scoped retrieval
+  participant K as Knowledge chunks
+  participant O as OpenRouter
+  participant D as PostgreSQL
+  V->>W: Send message
+  W->>A: Chat request
+  A->>C: Load agent and policy
+  A->>R: Retrieve within organization scope
+  R->>K: Query pgvector and knowledge records
+  K-->>R: Relevant chunks
+  R-->>A: Context
+  A->>O: Grounded prompt
+  O-->>A: Model response
+  A->>D: Persist conversation and usage
+  A-->>W: Response
