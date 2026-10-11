@@ -5,14 +5,12 @@ level under the logger `app.auth.jwt`. Tail uvicorn output to see them.
 """
 
 import logging
-import json
 import time
 from typing import Any, Dict
 
 from fastapi import HTTPException, Request, status
 import httpx
 import jwt as jose_jwt
-from jwt.algorithms import RSAAlgorithm
 from jwt.exceptions import InvalidTokenError as JWTError
 
 from app.core.config import settings
@@ -87,11 +85,14 @@ async def verify_cognito_access_token(
                 token, request=request, _refreshed=True
             )
 
-        verification_key = (
-            RSAAlgorithm.from_jwk(json.dumps(key))
-            if key.get("n") and key.get("e")
-            else key
-        )
+        if key.get("n") and key.get("e"):
+            # Use PyJWT's public JWK wrapper instead of importing an internal
+            # algorithm class. This keeps clean installs compatible across
+            # supported PyJWT releases and validates the RSA key material at
+            # the same boundary as token decoding.
+            verification_key = jose_jwt.PyJWK.from_dict(key).key
+        else:
+            verification_key = key
         claims = jose_jwt.decode(
             token,
             verification_key,
