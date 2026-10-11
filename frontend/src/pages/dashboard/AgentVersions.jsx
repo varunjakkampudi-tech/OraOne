@@ -106,7 +106,7 @@ export default function AgentVersions() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { if (agentId) load(agentId); /* eslint-disable-next-line */ }, [agentId]);
+  useEffect(() => { if (agentId) load(agentId); }, [agentId]);
 
   const publish = () => {
     setPublishing(true);

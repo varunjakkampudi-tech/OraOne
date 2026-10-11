@@ -21,7 +21,6 @@ console.warn = (...args) => {
 // with no try/catch) would otherwise fail completely silently for the user.
 // Surface it in the console so it's at least visible/debuggable in prod.
 window.addEventListener("unhandledrejection", (event) => {
-  // eslint-disable-next-line no-console
   console.error("[unhandled promise rejection]", event.reason);
 });
 

@@ -1,0 +1,49 @@
+name: Frontend lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Apply safe ESLint fixes
+        run: npm run lint:fix
+
+      - name: Require auto-fixes to be committed
+        run: |
+          if ! git diff --quiet -- frontend/src; then
+            echo "ESLint produced safe fixes. Run 'npm run lint:fix' in frontend and commit the result."
+            git diff -- frontend/src
+            exit 1
+          fi
+
+      - name: Run ESLint
+        run: npm run lint

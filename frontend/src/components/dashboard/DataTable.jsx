@@ -130,7 +130,7 @@ export default function DataTable({
       });
     }
     return out;
-  }, [rows, q, activeFilters, sort, columns, filters, searchKeys]); // eslint-disable-line
+  }, [rows, q, activeFilters, sort, columns, filters, searchKeys]);
 
   // reset to page 1 when the result set changes
   useEffect(() => {

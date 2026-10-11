@@ -121,7 +121,6 @@ export default function Conversations() {
 
   useEffect(() => {
     loadConversations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Distinct statuses present in the data, for the status filter menu.
