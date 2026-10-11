@@ -25,8 +25,8 @@ flowchart TB
     Worker --> DB
     Worker --> Redis
   end
-  Cognito[External Cognito service] --> Backend
-  OpenRouter[External OpenRouter service] --> Backend
+  Backend -. outbound token/API requests .-> Cognito[External Cognito service]
+  Backend -. outbound model requests .-> OpenRouter[External OpenRouter service]
   Volumes[Persistent Docker volumes] -. persist .-> DB
   Volumes -. persist .-> Redis
   Volumes -. persist .-> Minio
@@ -48,7 +48,8 @@ flowchart LR
   API --> DB[(PostgreSQL and pgvector)]
   API --> Redis[(Redis)]
   API --> Minio[(MinIO or S3-compatible storage)]
-  API --> Worker[Background worker]
+  API -. enqueues durable work .-> Outbox[(Transactional outbox)]
+  Worker[Independent worker process] --> Outbox
   Worker --> DB
   Worker --> Redis
   Worker --> Minio

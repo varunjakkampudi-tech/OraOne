@@ -13,7 +13,8 @@ sequenceDiagram
   F->>C: Exchange code with PKCE verifier
   C-->>F: Tokens
   F->>A: Establish session with access token
-  A->>J: Fetch and cache JWKS
+  A->>J: Request JWKS on cache miss
+  J-->>A: Return JWKS document
   A->>A: Verify issuer, signature, expiry, token_use, client
   A->>D: Resolve Cognito sub and membership
   D-->>A: User and RBAC scope

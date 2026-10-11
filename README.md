@@ -90,7 +90,8 @@ flowchart LR
   API --> DB[(PostgreSQL and pgvector)]
   API --> Redis[(Redis)]
   API --> Minio[(MinIO or S3-compatible storage)]
-  API --> Worker[Background worker]
+  API -. enqueues durable work .-> Outbox[(Transactional outbox)]
+  Worker[Independent worker process] --> Outbox
   Worker --> DB
   Worker --> Redis
   Worker --> Minio
@@ -116,7 +117,7 @@ docs/                             Architecture, operations, security, and eviden
 
 ## Local quickstart
 
-Prerequisites: Docker Engine with Compose v2, Python 3.11+, Node.js 20+, and Yarn 1.22.22. The supported path is documented in the [quickstart](docs/guides/QUICKSTART.md); the short version is:
+Prerequisites: Docker Engine with Compose v2, Python 3.11+, Node.js 20+, and Yarn 1.22.22. The [quickstart](docs/guides/QUICKSTART.md) is authoritative. The guarded bootstrap below establishes the development services, required secret, and both PostgreSQL URLs before Alembic runs:
 
 ```powershell
 docker compose -f docker-compose.dev.yml up -d
@@ -126,6 +127,28 @@ python -m venv .venv
 .\\.venv\\Scripts\\Activate.ps1
 python -m pip install -r requirements.txt
 Copy-Item .env.example .env
+$jwt = python -c "import secrets; print(secrets.token_urlsafe(48))"
+@"
+ENVIRONMENT=development
+AUTH_PROVIDER=self_hosted
+JWT_SECRET_KEY=$jwt
+DB_HOST=localhost
+DB_PORT=5433
+DB_USER=oraone_admin
+DB_PASSWORD=oraone_dev_password
+DB_NAME=oraone
+DATABASE_URL=postgresql+asyncpg://oraone_admin:oraone_dev_password@localhost:5433/oraone
+ALEMBIC_DATABASE_URL=postgresql+psycopg2://oraone_admin:oraone_dev_password@localhost:5433/oraone
+REDIS_URL=redis://localhost:6379/0
+ENTITLEMENTS_CACHE_BACKEND=redis
+S3_BUCKET=oraone-dev
+S3_ENDPOINT_URL=http://localhost:9000
+S3_ACCESS_KEY_ID=oraone_minio
+S3_SECRET_ACCESS_KEY=oraone_minio_password
+RUN_BACKGROUND_WORKERS=false
+EMBEDDING_PROVIDER=hash
+AI_ALLOW_MOCK=false
+"@ | Set-Content .env
 alembic upgrade head
 python -m uvicorn server:app --reload --port 8000
 ```

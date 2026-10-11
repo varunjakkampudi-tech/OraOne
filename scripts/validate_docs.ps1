@@ -3,19 +3,10 @@ $ErrorActionPreference = "Stop"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $failures = [System.Collections.Generic.List[string]]::new()
 $fence = [char]96 + [char]96 + [char]96
+. (Join-Path $PSScriptRoot "docs_validation_helpers.ps1")
 
 function Add-Failure([string]$message) {
   [void]$failures.Add($message)
-}
-
-function Get-GitHubAnchor([string]$heading) {
-  $value = $heading.ToLowerInvariant()
-  $value = [regex]::Replace($value, "<[^>]+>", "")
-  $value = $value.Replace(([char]96).ToString(), "")
-  $value = $value -replace "[^a-z0-9 -]", ""
-  $value = $value -replace "s+", "-"
-  $value = $value -replace "-+", "-"
-  return $value.Trim("-")
 }
 
 $markdown = @(Get-ChildItem -Path $root -Recurse -File -Filter *.md |
