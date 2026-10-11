@@ -1,5 +1,13 @@
 # OraOne
 
+<p align="center">
+  <img src="frontend/public/assets/brand-logo.png" alt="OraOne" width="220" />
+</p>
+
+<p align="center"><strong>One AI. Every Conversation.</strong></p>
+
+<p align="center"><a href="https://oraone.in">oraone.in</a> · <a href="docs/README.md">Documentation</a> · <a href="SECURITY.md">Security</a></p>
+
 OraOne is a multitenant AI conversation platform for website agents. The current product supports knowledge-grounded chat, lead capture, workflows, integrations, billing primitives, an embeddable widget, and tenant-scoped administration.
 
 This repository is the source of truth for the application and its local, self-hosted operational model. It is a release candidate, not a claim of live production readiness. See the [release checklist](docs/operations/RELEASE-CHECKLIST.md) for the gates that remain external to this checkout.
@@ -19,22 +27,75 @@ This repository is the source of truth for the application and its local, self-h
 
 Future product concepts are catalogued separately in [Product portfolio](docs/PRODUCT-PORTFOLIO.md) and are not represented as shipped functionality.
 
+## OraOne ecosystem
+
+The portfolio is broader than the active Product 1 repository. Planned products may share platform foundations, but their status is not implied by similarly named prototype code.
+
+<!-- diagram: docs/diagrams/system-context.mmd -->
+```mermaid
+flowchart TB
+  Viswatra[Viswatra portfolio direction]
+  Viswatra -. intended portfolio brand .-> Ecosystem[OraOne ecosystem]
+  Ecosystem --> P1[Product 1: OraOne AI Chat Platform]
+  Ecosystem --> P2[Product 2: OraOne AI Voice Platform]
+  Ecosystem --> P3[Product 3: OraOne WhatsApp Platform]
+  Ecosystem --> P4[Product 4: Omnichannel Communication Hub]
+  Ecosystem --> P5[Product 5: Workflow Automation Platform]
+  Ecosystem --> P6[Product 6: AI Studio & Agent Builder]
+  Ecosystem --> P7[Product 7: Marketplace]
+  Ecosystem --> P8[Product 8: Mobile Applications]
+  Ecosystem --> P9[Product 9: Enterprise Edition]
+  Ecosystem --> P10[Product 10: OraOne OS]
+  Shared[Shared foundations: identity, governance, AI gateway, usage, integrations]
+  P1 --> Shared
+  P2 -. planned .-> Shared
+  P3 -. planned .-> Shared
+  P4 -. planned .-> Shared
+  P5 -. planned .-> Shared
+  P6 -. planned .-> Shared
+  P7 -. planned .-> Shared
+  P8 -. planned .-> Shared
+  P9 -. planned .-> Shared
+  P10 -. long-term vision .-> Shared
+```
+
+See the [full product portfolio](docs/PRODUCT-PORTFOLIO.md) for exact names and status.
+
+| Product | Status |
+| --- | --- |
+| OraOne AI Chat Platform | In active development |
+| OraOne AI Voice Platform | Planned |
+| OraOne WhatsApp Platform | Planned |
+| Omnichannel Communication Hub | Planned |
+| Workflow Automation Platform | Planned |
+| AI Studio & Agent Builder | Planned |
+| Marketplace | Planned |
+| Mobile Applications | Planned |
+| Enterprise Edition | Planned |
+| OraOne OS | Long-term vision |
+
 ## Architecture at a glance
 
+<!-- diagram: docs/diagrams/product1-system-architecture.mmd -->
 ```mermaid
 flowchart LR
-    Browser[Browser or embedded widget] --> Edge[Caddy edge]
-    Edge --> UI[React frontend]
-    Edge --> API[FastAPI backend]
-    API --> DB[(PostgreSQL + pgvector)]
-    API --> Cache[(Redis)]
-    API --> Objects[(MinIO or S3-compatible storage)]
-    API --> Identity[Cognito or self-hosted auth]
-    API --> Model[OpenAI-compatible model provider]
-    API --> Worker[Worker process]
-    Worker --> DB
-    Worker --> Cache
-    Worker --> Objects
+  Visitor[Website visitor] --> Widget[Embeddable widget]
+  Operator[Business operator] --> Browser[React dashboard]
+  Widget --> Edge[Caddy edge]
+  Browser --> Edge
+  Edge --> Frontend[React frontend]
+  Edge --> API[FastAPI backend]
+  API --> Cognito[Cognito email identity]
+  API --> Router[OpenAI-compatible provider]
+  API --> DB[(PostgreSQL and pgvector)]
+  API --> Redis[(Redis)]
+  API --> Minio[(MinIO or S3-compatible storage)]
+  API --> Worker[Background worker]
+  Worker --> DB
+  Worker --> Redis
+  Worker --> Minio
+  API --> Integrations[Configured integrations and webhooks]
+  External[External provider services] --> Integrations
 ```
 
 The production-like Compose stack exposes only Caddy on ports 80 and 443. Local development Compose publishes PostgreSQL on `127.0.0.1:5433`, Redis on `127.0.0.1:6379`, and MinIO on `127.0.0.1:9000`/`9001`.
@@ -126,6 +187,17 @@ PostgreSQL is the system of record. Redis is a cache/rate-limit and distributed-
 `docker-compose.prod.yml` is a production-like deployment artifact, not proof of a completed hosting deployment. It requires operator-supplied Cognito, database, storage, domain, and provider settings. Hostinger provisioning, DNS/TLS, production backups, live inbox authentication, paid provider lifecycles, and rollback drills remain external release gates.
 
 Use the [deployment guide](docs/operations/DEPLOYMENT.md), [backup and restore guide](docs/operations/BACKUP-RESTORE.md), and [release checklist](docs/operations/RELEASE-CHECKLIST.md). Do not run a production migration against a guessed database URL.
+
+## Documentation navigation
+
+| Topic | Guide |
+| --- | --- |
+| Product portfolio and roadmap | [Product portfolio](docs/PRODUCT-PORTFOLIO.md) · [Roadmap](docs/ROADMAP.md) |
+| Architecture and diagrams | [Architecture index](docs/architecture/README.md) |
+| Local setup and environments | [Quickstart](docs/guides/QUICKSTART.md) · [Environment](docs/guides/ENVIRONMENT.md) |
+| Testing and troubleshooting | [Testing](docs/guides/TESTING.md) · [Troubleshooting](docs/guides/TROUBLESHOOTING.md) |
+| Deployment and recovery | [Deployment](docs/operations/DEPLOYMENT.md) · [Backup and restore](docs/operations/BACKUP-RESTORE.md) |
+| Security and licensing | [Security model](docs/security/SECURITY-MODEL.md) · [Licensing audit](docs/LICENSING-AUDIT.md)
 
 ## Security and support
 

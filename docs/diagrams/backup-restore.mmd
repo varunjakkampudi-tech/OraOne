@@ -1,6 +1,0 @@
-flowchart TD
-  Source[(Deployment database)] --> Dump[Encrypted pg_dump]
-  Dump --> Retain[External retention]
-  Dump --> Restore[Disposable restore]
-  Restore --> Verify[Revision, rows, vectors, mappings]
-  Verify --> Drill[Recovery evidence]

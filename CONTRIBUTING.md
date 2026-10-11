@@ -1,7 +1,7 @@
 # Contributing
 
-Read the relevant architecture and security documentation first. Keep tenant boundaries and PostgreSQL authority intact. Do not add secrets, credentials, tokens, generated output, or local databases.
+Read the relevant architecture and security documentation first. Use a short-lived `codex/` or feature branch, keep tenant boundaries and PostgreSQL authority intact, and use Conventional Commit-style messages such as `docs: clarify local setup`. Do not add secrets, credentials, tokens, generated output, or local databases.
 
-Run backend compile/tests, frontend lint/build/E2E checks relevant to the change, and scripts/validate_docs.ps1 for Markdown or metadata changes.
+Run backend compile/tests, frontend lint/build/E2E checks relevant to the change, and scripts/validate_docs.ps1 for Markdown or metadata changes. Document exact commands and counts in the pull request.
 
 Reviewers expect a threat model for auth, RBAC, webhooks, storage, provider calls, and migrations. Production claims require external evidence. Do not change either license without owner/legal approval.

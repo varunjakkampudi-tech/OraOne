@@ -7,3 +7,51 @@ PostgreSQL with pgvector is the system of record. Redis provides cache, rate lim
 The development Compose file publishes local stateful ports. The production-like file keeps backend, worker, PostgreSQL, Redis, and MinIO private and publishes only Caddy.
 
 Provider failures must remain visible and must not become a production claim through a local fallback. Outbox work is persisted before delivery; external delivery and recovery drills remain release gates.
+
+## Deployment topology
+
+<!-- diagram: docs/diagrams/deployment.mmd -->
+```mermaid
+flowchart TB
+  DNS[oraone.in DNS] --> HTTPS[Public HTTPS traffic]
+  HTTPS --> Caddy[Caddy on Hostinger VPS]
+  subgraph PrivateNetwork[Private Compose network]
+    Caddy --> Frontend[Frontend container]
+    Caddy --> Backend[Backend container]
+    Backend --> Worker[Worker container]
+    Backend --> DB[(PostgreSQL volume)]
+    Backend --> Redis[(Redis volume)]
+    Backend --> Minio[(MinIO volume)]
+    Worker --> DB
+    Worker --> Redis
+  end
+  Cognito[External Cognito service] --> Backend
+  OpenRouter[External OpenRouter service] --> Backend
+  Volumes[Persistent Docker volumes] -. persist .-> DB
+  Volumes -. persist .-> Redis
+  Volumes -. persist .-> Minio
+```
+
+## Product 1 system architecture
+
+<!-- diagram: docs/diagrams/product1-system-architecture.mmd -->
+```mermaid
+flowchart LR
+  Visitor[Website visitor] --> Widget[Embeddable widget]
+  Operator[Business operator] --> Browser[React dashboard]
+  Widget --> Edge[Caddy edge]
+  Browser --> Edge
+  Edge --> Frontend[React frontend]
+  Edge --> API[FastAPI backend]
+  API --> Cognito[Cognito email identity]
+  API --> Router[OpenAI-compatible provider]
+  API --> DB[(PostgreSQL and pgvector)]
+  API --> Redis[(Redis)]
+  API --> Minio[(MinIO or S3-compatible storage)]
+  API --> Worker[Background worker]
+  Worker --> DB
+  Worker --> Redis
+  Worker --> Minio
+  API --> Integrations[Configured integrations and webhooks]
+  External[External provider services] --> Integrations
+```

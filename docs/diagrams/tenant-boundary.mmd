@@ -1,7 +1,0 @@
-flowchart LR
-  Request[Request] --> Identity[Validated identity]
-  Identity --> Membership[Organization membership]
-  Membership --> Org[Allowed organization]
-  Org --> Repos[Scoped repositories]
-  Repos --> Records[(Tenant records)]
-  Other[Other tenant records] -. rejected .-> Repos

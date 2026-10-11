@@ -15,3 +15,27 @@ This describes the production-like Compose artifact. It does not claim Hostinger
 Caddy terminates TLS and routes /api/* to FastAPI. Other services remain private.
 
 Keep previous image tags and Git SHA. Roll back by redeploying the previous image while preserving a compatible schema. Reverse migrations only with a reviewed down migration and verified backup.
+
+## Hostinger deployment
+
+<!-- diagram: docs/diagrams/deployment.mmd -->
+```mermaid
+flowchart TB
+  DNS[oraone.in DNS] --> HTTPS[Public HTTPS traffic]
+  HTTPS --> Caddy[Caddy on Hostinger VPS]
+  subgraph PrivateNetwork[Private Compose network]
+    Caddy --> Frontend[Frontend container]
+    Caddy --> Backend[Backend container]
+    Backend --> Worker[Worker container]
+    Backend --> DB[(PostgreSQL volume)]
+    Backend --> Redis[(Redis volume)]
+    Backend --> Minio[(MinIO volume)]
+    Worker --> DB
+    Worker --> Redis
+  end
+  Cognito[External Cognito service] --> Backend
+  OpenRouter[External OpenRouter service] --> Backend
+  Volumes[Persistent Docker volumes] -. persist .-> DB
+  Volumes -. persist .-> Redis
+  Volumes -. persist .-> Minio
+```

@@ -1,9 +1,24 @@
-flowchart LR
-  User[User] --> Web[React app or widget]
-  Web --> Edge[Caddy]
-  Edge --> Api[FastAPI]
-  Api --> Data[(PostgreSQL)]
-  Api --> Cache[(Redis)]
-  Api --> Files[(MinIO or S3-compatible)]
-  Api --> Auth[Cognito or self-hosted auth]
-  Api --> AI[Model provider]
+flowchart TB
+  Viswatra[Viswatra portfolio direction]
+  Viswatra -. intended portfolio brand .-> Ecosystem[OraOne ecosystem]
+  Ecosystem --> P1[Product 1: OraOne AI Chat Platform]
+  Ecosystem --> P2[Product 2: OraOne AI Voice Platform]
+  Ecosystem --> P3[Product 3: OraOne WhatsApp Platform]
+  Ecosystem --> P4[Product 4: Omnichannel Communication Hub]
+  Ecosystem --> P5[Product 5: Workflow Automation Platform]
+  Ecosystem --> P6[Product 6: AI Studio & Agent Builder]
+  Ecosystem --> P7[Product 7: Marketplace]
+  Ecosystem --> P8[Product 8: Mobile Applications]
+  Ecosystem --> P9[Product 9: Enterprise Edition]
+  Ecosystem --> P10[Product 10: OraOne OS]
+  Shared[Shared foundations: identity, governance, AI gateway, usage, integrations]
+  P1 --> Shared
+  P2 -. planned .-> Shared
+  P3 -. planned .-> Shared
+  P4 -. planned .-> Shared
+  P5 -. planned .-> Shared
+  P6 -. planned .-> Shared
+  P7 -. planned .-> Shared
+  P8 -. planned .-> Shared
+  P9 -. planned .-> Shared
+  P10 -. long-term vision .-> Shared

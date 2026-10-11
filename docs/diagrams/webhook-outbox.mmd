@@ -1,10 +1,15 @@
 sequenceDiagram
-  participant Tx as API transaction
-  participant O as Outbox
+  participant B as Business operation
+  participant T as Database transaction
+  participant O as Outbox row
   participant W as Worker
-  participant H as Endpoint
-  Tx->>O: Persist business event
+  participant E as Endpoint
+  participant D as Delivery state
+  B->>T: Commit business change
+  T->>O: Persist event atomically
   W->>O: Claim pending event
-  W->>H: Deliver with idempotency key
-  H-->>W: Success or failure
-  W->>O: Record endpoint result and retry state
+  W->>E: Deliver with stable idempotency key
+  E-->>W: Success, HTTP failure, timeout, or connection error
+  W->>D: Persist per-endpoint result and attempts
+  D-->>W: Retry while bounded
+  D-->>W: Dead-letter or terminal failure after exhaustion
