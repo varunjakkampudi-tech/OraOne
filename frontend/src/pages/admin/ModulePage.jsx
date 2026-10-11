@@ -1,11 +1,10 @@
-import React from "react";
 import { useLocation } from "react-router-dom";
 import {
   LifeBuoy, Database, ListOrdered, BellRing, Brain, Save, ShieldAlert,
   Settings, Code2, Sparkles, CheckCircle2,
 } from "lucide-react";
 import {
-  PageHeader, Glass, Badge, SectionTitle, Table, LoadingState, ErrorState, EmptyState, useAdminTheme,
+  PageHeader, Glass, Badge, Table, LoadingState, ErrorState, EmptyState, useAdminTheme,
 } from "@/components/admin/adminKit";
 import { useAdminData } from "@/components/admin/useAdminData";
 import { superAdminApi } from "@/lib/superAdmin";
@@ -107,7 +106,6 @@ function InfraModule({ desc }) {
 }
 
 function AlertsModule({ desc }) {
-  const { t } = useAdminTheme();
   const { data, loading, error, reload } = useAdminData(() => superAdminApi.security(), []);
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} onRetry={reload} />;

@@ -1,7 +1,6 @@
-import React from "react";
 import { Lightbulb, TrendingUp, Users, DollarSign, AlertTriangle, Sparkles } from "lucide-react";
 import {
-  PageHeader, Glass, GradientText, Badge, LoadingState, ErrorState, useAdminTheme,
+  PageHeader, Glass, GradientText, LoadingState, ErrorState, useAdminTheme,
 } from "@/components/admin/adminKit";
 import { useAdminData } from "@/components/admin/useAdminData";
 import { superAdminApi } from "@/lib/superAdmin";
@@ -25,7 +24,6 @@ function Insight({ icon: Icon, tone, title, body }) {
 }
 
 export default function AdminInsights() {
-  const { t } = useAdminTheme();
   const { data, loading, error, reload } = useAdminData(() => superAdminApi.overview(), []);
 
   if (loading) return <div><PageHeader icon={Lightbulb} title="Founder Insights" /><LoadingState /></div>;

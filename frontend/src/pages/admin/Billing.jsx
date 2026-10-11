@@ -1,7 +1,6 @@
-import React from "react";
 import { CreditCard, Repeat, DollarSign, TrendingUp, Repeat as RepeatIcon, Percent } from "lucide-react";
 import {
-  PageHeader, StatCard, Glass, SectionTitle, Badge, LoadingState, ErrorState, useAdminTheme,
+  PageHeader, StatCard, Glass, SectionTitle, LoadingState, ErrorState, useAdminTheme,
 } from "@/components/admin/adminKit";
 import { useAdminData } from "@/components/admin/useAdminData";
 import { superAdminApi } from "@/lib/superAdmin";

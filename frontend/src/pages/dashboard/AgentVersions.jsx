@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   History, Loader2, GitBranch, RotateCcw, Plus, AlertTriangle,
   Check, ArrowRight,
@@ -6,7 +6,7 @@ import {
 import { toast } from "sonner";
 import {
   PageHeader, Card, Badge, SectionTitle, PrimaryButton, GhostButton,
-  EmptyState, INK, SUB, LINE, BRAND,
+  EmptyState, INK, SUB, LINE,
 } from "@/components/dashboard/kit";
 import { api, formatApiError } from "@/lib/api";
 import { agentVersionsApi } from "@/lib/agentVersions";

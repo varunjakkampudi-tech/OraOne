@@ -1,8 +1,6 @@
-import React from "react";
 import { Phone, MessageCircle, MessageSquare, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import { OraMark } from "@/components/marketing/Logo";
-import SimpleIcon from "@/components/ui/SimpleIcon";
 
 /**
  * Hero Orb — large OraOne brand mark surrounded by 6 channel icons on

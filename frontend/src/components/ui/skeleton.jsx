@@ -1,4 +1,3 @@
-import React from "react";
 
 /**
  * Skeleton — small composable shimmer block.

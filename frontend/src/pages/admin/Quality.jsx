@@ -1,4 +1,3 @@
-import React from "react";
 import { Award, AlertTriangle } from "lucide-react";
 import {
   PageHeader, StatCard, Glass, SectionTitle, Badge, Table, LoadingState, ErrorState, EmptyState, useAdminTheme,
@@ -26,7 +25,6 @@ function Metric({ label, value, suffix = "/100" }) {
 }
 
 export default function AdminQuality() {
-  const { t } = useAdminTheme();
   const { data, loading, error, reload } = useAdminData(() => superAdminApi.quality(), []);
 
   if (loading) return <div><PageHeader icon={Award} title="AI Quality Monitoring" /><LoadingState /></div>;

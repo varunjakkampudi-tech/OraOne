@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { TrendingUp, Loader2, RefreshCw, AlertTriangle, DollarSign, Target, Users } from "lucide-react";
 import {
   PageHeader,
   Card,
-  Badge,
   SectionTitle,
   StatCard,
   Segmented,

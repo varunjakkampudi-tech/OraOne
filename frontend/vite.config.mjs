@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
 
 const clientEnvKeys = [
@@ -24,7 +25,7 @@ export default defineConfig(({ mode }) => {
   const backendTarget = env.REACT_APP_API_URL || env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
 
   return {
-    plugins: [react({ include: /\.[jt]sx?$/ })],
+    plugins: [tailwindcss(), react({ include: /\.[jt]sx?$/ })],
     resolve: {
       alias: {
         "@": path.resolve(process.cwd(), "src"),
@@ -56,6 +57,16 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "build",
       emptyOutDir: true,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes("node_modules")) return undefined;
+            if (id.includes("recharts")) return "charts";
+            if (id.includes("framer-motion")) return "motion";
+            return undefined;
+          },
+        },
+      },
     },
   };
 });

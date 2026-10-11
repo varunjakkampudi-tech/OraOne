@@ -1,4 +1,3 @@
-import React from "react";
 import { OraMark } from "@/components/marketing/Logo";
 
 /**

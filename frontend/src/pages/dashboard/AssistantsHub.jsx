@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Sparkles, Loader2, Wand2, ArrowRight } from "lucide-react";
 import {
   PageHeader,

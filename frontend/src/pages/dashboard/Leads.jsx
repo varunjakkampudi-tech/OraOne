@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Users,
   UserPlus,
@@ -125,7 +125,6 @@ export default function Leads() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   // View + filtering.
   const [view, setView] = useState("table"); // table | pipeline
@@ -154,7 +153,6 @@ export default function Leads() {
 
   const loadLeads = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
       const params = { limit: 500 };
       if (q.trim()) params.q = q.trim();
@@ -164,7 +162,7 @@ export default function Leads() {
       setLeads(Array.isArray(data) ? data.map(formatRow) : []);
       setPage(1);
     } catch (err) {
-      setError(formatApiError(err));
+      toast.error(formatApiError(err));
       setLeads([]);
     } finally {
       setLoading(false);

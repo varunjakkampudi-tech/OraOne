@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useCallback, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useCallback, useEffect, useMemo, useState } from "react";
 import { api, getActiveProjectId, setActiveProjectId } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 

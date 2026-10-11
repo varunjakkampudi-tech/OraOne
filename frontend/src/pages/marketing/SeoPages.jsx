@@ -3,7 +3,6 @@
 // /ai-chat-agent           /ai-lead-generation
 // /ai-appointment-booking  /ai-customer-support
 
-import React from "react";
 import SEOLanding from "@/components/marketing/SEOLanding";
 import {
   MessageSquare, MessageCircle, Users, Calendar, Headphones,

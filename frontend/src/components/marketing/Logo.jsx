@@ -1,4 +1,3 @@
-﻿import React from "react";
 
 /* =========================================================================
    OraOne brand logo — "Orbit": one central AI core with a conversation node

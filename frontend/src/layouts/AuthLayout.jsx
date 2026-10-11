@@ -1,4 +1,3 @@
-import React from "react";
 import { Outlet, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Logo } from "@/components/marketing/Logo";

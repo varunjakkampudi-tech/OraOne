@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { motion } from "framer-motion";
 import { MessageSquare, Sparkles, CheckCircle2, UserPlus, Building2 } from "lucide-react";
 

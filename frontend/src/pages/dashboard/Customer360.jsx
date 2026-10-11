@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { UserSearch, Loader2, Search, AlertTriangle, Mail, Phone, Building2, MessagesSquare, Clock } from "lucide-react";
 import {
   PageHeader,

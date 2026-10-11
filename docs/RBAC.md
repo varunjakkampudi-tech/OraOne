@@ -53,7 +53,7 @@ Local verification on 11 October 2026:
 - Frontend Cognito E2E suite: `4 passed`.
 - Frontend production build: passed.
 - ESLint 9: 0 errors; 184 warnings remain, consisting of 179 existing
-  `no-unused-vars` warnings and 5 stale-disable warnings. No active hook or
+  `no-unused-vars` warnings or stale-disable warnings. No active hook or
   security-rule warnings were reported.
 
 Production is **not verified** from this checkout. No independently verified

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Cookie, Settings as SettingsIcon, X, Shield } from "lucide-react";
-import { setConsent, getConsent } from "@/lib/analytics";
+import { setConsent } from "@/lib/analytics";
 
 const STORAGE_KEY = "oraone_cookie_choice_v1";
 

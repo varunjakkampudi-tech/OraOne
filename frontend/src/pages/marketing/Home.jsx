@@ -1,9 +1,8 @@
-import React, { lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
-  Mail,
   MessageSquare,
   Clock,
   Sparkles,
@@ -16,21 +15,16 @@ import {
   ShoppingBag,
   CheckCircle2,
   ChevronDown,
-  Lock,
   Layers,
   BookOpen,
   UserPlus,
   BarChart3,
   Users,
-  Bot,
-  Plug,
   Rocket,
   TrendingUp,
   Headphones,
   Activity,
-  Quote,
   Building2,
-  ArrowUpRight,
   Zap,
   Network,
   Workflow,

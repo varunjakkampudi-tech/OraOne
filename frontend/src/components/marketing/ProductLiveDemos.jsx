@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import * as React from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   MessageSquare,
@@ -35,7 +36,7 @@ export function ChatAgentDemo() {
       await navigator.clipboard.writeText(snippet);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch (e) { /* clipboard unavailable */ }
+    } catch { /* clipboard unavailable */ }
   };
 
   return (

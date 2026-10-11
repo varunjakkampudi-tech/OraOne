@@ -1,4 +1,3 @@
-import React from "react";
 import { TrendingUp, ArrowUpRight, ArrowDownRight, Minus, Trophy } from "lucide-react";
 import {
   PageHeader, Glass, SectionTitle, Badge, Table, LoadingState, ErrorState, EmptyState, useAdminTheme,

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Palette,
@@ -142,7 +142,7 @@ function LogoUploader({ value, uploading, disabled, wide, onPick, onClear, testi
 
 export default function Branding() {
   const { can } = usePermissions();
-  const { branding: ctxBranding, refresh: refreshCtx } = useBranding();
+  const { refresh: refreshCtx } = useBranding();
   const [server, setServer] = useState(null);
   const [form, setForm] = useState(EMPTY);
   const [loading, setLoading] = useState(true);

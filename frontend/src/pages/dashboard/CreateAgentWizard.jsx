@@ -7,7 +7,6 @@ import {
   LifeBuoy,
   BookOpen,
   TrendingUp,
-  MessageCircle,
   Code2,
   Upload,
   FileText,

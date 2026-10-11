@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Star, Loader2, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PrimaryButton, GhostButton, INK, SUB, LINE } from "@/components/dashboard/kit";

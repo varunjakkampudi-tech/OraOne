@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   MessageSquare,
   Users,
@@ -475,13 +475,6 @@ function OverviewTab({ days }) {
       count: v,
       color: CHANNEL_META[k]?.color || "#94A3B8",
     }));
-  }, [data]);
-
-  const statusData = useMemo(() => {
-    const st = data?.breakdowns?.conversations_by_status || {};
-    return Object.entries(st)
-      .filter(([, v]) => v > 0)
-      .map(([k, v]) => ({ name: k, value: v, color: STATUS_COLORS[k] || "#94A3B8" }));
   }, [data]);
 
   const runStatusData = useMemo(() => {

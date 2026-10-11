@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MessageSquare, ArrowRight, ArrowLeft, Globe } from "lucide-react";
 import { motion } from "framer-motion";

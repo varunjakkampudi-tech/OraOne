@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Users2,
@@ -8,7 +8,6 @@ import {
   X,
   UserPlus,
   Crown,
-  Pencil,
   ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";

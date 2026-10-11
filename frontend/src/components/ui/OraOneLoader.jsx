@@ -112,34 +112,6 @@ export function AuraOrb({ size = 120, dark = false, animated = true }) {
    ConversationBars — chat EQ bars that dance on each side
    of the orb. Visually communicates "every conversation".
    ────────────────────────────────────────────────────────────────── */
-function ConversationBars({ count = 5, dark = false, side = "left" }) {
-  const heights = [16, 28, 40, 26, 18]; // base px
-  const colors = dark
-    ? ["#60A5FA", "#22D3EE", "#38BDF8", "#22D3EE", "#60A5FA"]
-    : [C.blue, C.cyan, "#0EA5E9", C.cyan, C.blue];
-  return (
-    <div
-      aria-hidden="true"
-      className="flex items-end gap-1.5"
-      style={{ direction: side === "left" ? "rtl" : "ltr" }}
-    >
-      {Array.from({ length: count }).map((_, i) => (
-        <span
-          key={i}
-          className="block rounded-full wave-bar"
-          style={{
-            width: 4,
-            height: heights[i % heights.length],
-            background: `linear-gradient(180deg, ${colors[i % colors.length]} 0%, ${colors[(i + 1) % colors.length]} 100%)`,
-            animationDelay: `${i * 0.12 + (side === "left" ? 0 : 0.06)}s`,
-            opacity: dark ? 0.9 : 0.85,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
 /* ──────────────────────────────────────────────────────────────────
    OraOneLoader — Full Page (default Suspense fallback)
    Matches the brand loading screen: spinning gradient ring around the

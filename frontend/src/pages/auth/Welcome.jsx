@@ -1,4 +1,3 @@
-import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PartyPopper, CheckCircle2, Users, Rocket, ArrowRight } from "lucide-react";
 import { useSEO } from "@/lib/seo";

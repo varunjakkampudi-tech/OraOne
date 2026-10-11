@@ -1,4 +1,3 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 import { ShieldCheck, X } from "lucide-react";
 import { useAdminTheme, GradientText } from "@/components/admin/adminKit";

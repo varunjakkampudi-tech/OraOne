@@ -1,3 +1,5 @@
+import React from "react";
+
 // SEOLanding.jsx — Marketing-heavy SEO landing template.
 // Used by /ai-chat-agent, /ai-lead-generation,
 // /ai-appointment-booking, /ai-customer-support.
@@ -6,7 +8,6 @@
 // industries, FAQs, social proof) and this template renders a high-
 // conversion long-form page with strong CTAs.
 
-import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {

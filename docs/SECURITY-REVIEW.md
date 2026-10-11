@@ -26,7 +26,7 @@ This is a repository review, not a penetration test or certification.
 - Frontend E2E: `4 passed` covering Cognito entry points, PKCE/state binding,
   recovery navigation, protected API access and logout.
 - Frontend production build: passed.
-- Frontend ESLint: `0 errors, 183 warnings`; the remaining warnings are legacy
+- Frontend ESLint: `0 errors, 0 warnings` under the strict `lint:check` gate.
   unused imports/variables and unused suppression directives, not suppressed
   security or hook errors.
 - Cognito identity provisioning now requires an explicit positive

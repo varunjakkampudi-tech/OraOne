@@ -1,4 +1,3 @@
-import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { PRIMARY_NAV, SECONDARY_NAV, resolveSection } from "@/constants/navigation";

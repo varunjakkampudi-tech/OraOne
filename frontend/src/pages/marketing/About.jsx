@@ -1,9 +1,8 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Heart, Code2, DollarSign, ShieldCheck, ArrowRight, Sparkles,
-  Users, MessageSquare, Globe2, Target, Lightbulb, Rocket,
+  Users, MessageSquare, Globe2,
 } from "lucide-react";
 import { useSEO } from "@/lib/seo";
 import { BrandMark } from "@/components/marketing/Logo";

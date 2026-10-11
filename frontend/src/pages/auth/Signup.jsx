@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { User, Mail, Building2, Lock, ArrowRight } from "lucide-react";
 import { useSEO } from "@/lib/seo";

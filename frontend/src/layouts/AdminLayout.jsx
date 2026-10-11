@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Menu, Search, Sun, Moon, ShieldAlert, Loader2, LogOut, Command } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";

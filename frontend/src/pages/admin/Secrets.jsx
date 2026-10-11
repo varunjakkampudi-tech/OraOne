@@ -1,4 +1,3 @@
-import React from "react";
 import { Lock, CheckCircle2, XCircle, ShieldAlert } from "lucide-react";
 import {
   PageHeader, Glass, Badge, LoadingState, ErrorState, useAdminTheme,

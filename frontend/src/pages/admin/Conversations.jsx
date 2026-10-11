@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { MessagesSquare, Search } from "lucide-react";
 import {
   PageHeader, Badge, Table, SearchInput, LoadingState, ErrorState, EmptyState, useAdminTheme,

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   BookOpen,
@@ -15,7 +15,6 @@ import {
   Search,
   Copy,
   Check,
-  ExternalLink,
   Mail,
   LifeBuoy,
   Ticket,

@@ -228,7 +228,7 @@ function PreviewModal({ template, onClose }) {
       await navigator.clipboard.writeText(template.prompt);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch (e) { /* clipboard unavailable */ }
+    } catch { /* clipboard unavailable */ }
   };
 
   return (

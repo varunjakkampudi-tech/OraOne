@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { MessageSquare, X, Send, BookOpen, Calendar, Mail, Check, Loader2 } from "lucide-react";

@@ -1,4 +1,3 @@
-import React from "react";
 import { PageHeader } from "./kit";
 import DataTable from "./DataTable";
 import { TableSkeleton, ErrorState, EmptyState } from "./states";

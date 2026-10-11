@@ -1,4 +1,3 @@
-import React from "react";
 import { ShieldAlert, ShieldCheck, Ban } from "lucide-react";
 import {
   PageHeader, StatCard, Glass, Badge, LoadingState, ErrorState, EmptyState, useAdminTheme,

@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { TrendingUp } from "lucide-react";
 import { COLOR, RADIUS, SHADOW } from "@/constants/tokens";

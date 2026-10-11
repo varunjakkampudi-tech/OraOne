@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Bot, User, Sparkles, MessageSquare, Loader2 } from "lucide-react";
 import { API_BASE } from "@/lib/api";

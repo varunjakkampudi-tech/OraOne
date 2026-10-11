@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Wand2, Sparkles, ArrowRight, Send, Lightbulb } from "lucide-react";
 import {
   PageHeader, Glass, Badge, Btn, SectionTitle, LoadingState, useAdminTheme,

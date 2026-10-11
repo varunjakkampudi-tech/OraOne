@@ -1,7 +1,6 @@
 // Standardised error pages: NetworkError + Maintenance.
 // NotFound (404) and ServerError (500) already exist in /pages.
 
-import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { WifiOff, RefreshCw, Wrench, Mail, Home } from "lucide-react";

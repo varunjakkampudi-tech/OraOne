@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Gauge, Loader2, RefreshCw, AlertTriangle, CheckCircle2, ArrowRight } from "lucide-react";
 import {
   PageHeader,

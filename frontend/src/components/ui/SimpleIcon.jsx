@@ -1,4 +1,3 @@
-import React from "react";
 import SmartImg from "@/components/ui/SmartImg";
 import { formatSimpleIconTitle, getSimpleIconUrl } from "@/lib/simpleIcons";
 
