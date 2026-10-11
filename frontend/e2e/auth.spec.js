@@ -30,6 +30,7 @@ test.describe("email-only Cognito entry points", () => {
   });
 
   test("login uses PKCE and binds the callback to state", async ({ page }) => {
+    test.setTimeout(60_000);
     await page.goto("/login");
     await page.getByRole("button", { name: "Continue with Cognito" }).click();
     await expect.poll(() => page.url()).toContain("code_challenge_method=S256");

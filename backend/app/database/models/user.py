@@ -22,9 +22,10 @@ if TYPE_CHECKING:
 
 
 class UserRole(str, enum.Enum):
-    owner = "owner"
+    super_admin = "super_admin"
     admin = "admin"
-    member = "member"
+    manager = "manager"
+    user = "user"
 
 
 class UserStatus(str, enum.Enum):
@@ -56,7 +57,8 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole, name="user_role"),
         nullable=False,
-        default=UserRole.owner,
+        default=UserRole.user,
+        server_default=UserRole.user.value,
     )
     status: Mapped[UserStatus] = mapped_column(
         Enum(UserStatus, name="user_status"),

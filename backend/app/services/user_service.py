@@ -24,6 +24,7 @@ async def get_user_profile(session: AsyncSession, user_id: str) -> Optional[User
         email=user.email,
         name=user.full_name or "",
         role=user.role.value,
+        platform_role=user.role.value,
         plan="free",
         status=user.status.value,
         createdAt=user.created_at,

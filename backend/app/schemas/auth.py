@@ -74,6 +74,7 @@ class UserProfile(BaseModel):
     email: EmailStr
     name: str
     role: str = "user"
+    platform_role: str = "user"
     plan: str = "free"
     status: str = "active"
     createdAt: Optional[datetime] = None
@@ -95,6 +96,7 @@ class IdentityUser(BaseModel):
     full_name: Optional[str] = None
     avatar_url: Optional[str] = None
     role: str
+    platform_role: str
     status: str
     created_at: datetime
     last_login_at: Optional[datetime] = None

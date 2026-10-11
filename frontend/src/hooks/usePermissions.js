@@ -10,6 +10,7 @@ import { api } from "@/lib/api";
  */
 export function usePermissions() {
   const [role, setRole] = useState(null);
+  const [platformRole, setPlatformRole] = useState(null);
   const [permissions, setPermissions] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,6 +21,7 @@ export function usePermissions() {
         const { data } = await api.get("/rbac/me");
         if (!active) return;
         setRole(data.role);
+        setPlatformRole(data.platform_role || null);
         setPermissions(data.permissions || []);
       } catch {
         if (active) setPermissions([]);
@@ -37,5 +39,5 @@ export function usePermissions() {
     [permissions]
   );
 
-  return { role, permissions, can, loading };
+  return { role, platformRole, permissions, can, loading };
 }

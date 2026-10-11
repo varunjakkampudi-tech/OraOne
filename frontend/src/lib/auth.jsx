@@ -15,7 +15,8 @@ function normalizeUser(profile) {
     email: profile.email || "",
     name: profile.name || profile.full_name || "",
     full_name: profile.full_name || profile.name || "",
-    role: profile.role || "owner",
+    role: profile.role || profile.platform_role || "user",
+    platformRole: profile.platform_role || profile.role || "user",
   };
 }
 

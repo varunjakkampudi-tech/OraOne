@@ -57,6 +57,7 @@ class OrgContext:
     cognito_sub: str
     organization_id: uuid.UUID
     membership_role: str
+    platform_role: str = "user"
 
 
 async def apply_rls_on_session(
@@ -168,6 +169,7 @@ async def get_current_organization(
         cognito_sub=cognito_sub,
         organization_id=org.id,
         membership_role=member.role.value,
+        platform_role=user.role.value,
     )
 
     # Attach to the request for easy logging downstream (e.g. access logs).
