@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { AUTH } from "@/constants/testIds";
 import { useSEO } from "@/lib/seo";
+import { beginCognitoLogin, cognitoEnabled } from "@/lib/cognito";
 import {
   Field,
   IconInput,
@@ -23,6 +24,24 @@ import {
 } from "@/components/auth/AuthShell";
 
 const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+function CognitoManagedAuthNotice({ title, message }) {
+  return (
+    <AuthShell cardTestId="cognito-managed-auth">
+      <IconBadge icon={Mail} />
+      <h1 className="mt-5 text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">{title}</h1>
+      <p className="mt-2 text-center text-sm leading-relaxed text-[#64748B]">{message}</p>
+      <div className="mt-8">
+        <GradientButton type="button" trailingIcon={ArrowRight} onClick={() => beginCognitoLogin()}>
+          Continue to secure account access
+        </GradientButton>
+      </div>
+      <p className="mt-6 text-center text-sm text-[#64748B]">
+        <Link to="/login" className="font-semibold text-[#2563EB] hover:underline">Back to sign in</Link>
+      </p>
+    </AuthShell>
+  );
+}
 
 /* ─────────────────────────────────────────────────────────── */
 /* Verify Email — confirm signup with 6-digit Cognito code      */
@@ -49,6 +68,10 @@ export function VerifyEmail() {
     const t = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
     return () => clearInterval(t);
   }, [seconds]);
+
+  if (cognitoEnabled) {
+    return <CognitoManagedAuthNotice title="Verify Your Email" message="Email verification is completed securely in the Cognito account flow." />;
+  }
 
   const submit = async (e) => {
     e.preventDefault();
@@ -181,7 +204,7 @@ export function ForgotPassword() {
     if (authProvider === "cognito") window.location.assign(`${window.location.origin}/login`);
   }, [authProvider]);
   if (authProvider === "cognito") {
-    return null;
+    return <CognitoManagedAuthNotice title="Recover Your Account" message="Password recovery is completed securely in the Cognito account flow." />;
   }
 
   const submit = async (e) => {
@@ -250,6 +273,10 @@ export function ResetPassword() {
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [resending, setResending] = useState(false);
+
+  if (cognitoEnabled) {
+    return <CognitoManagedAuthNotice title="Reset Your Password" message="Password reset is completed securely in the Cognito account flow." />;
+  }
 
   const submit = async (e) => {
     e.preventDefault();

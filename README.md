@@ -47,7 +47,7 @@ Run `alembic upgrade head` only after reviewing migration SQL and confirming the
 
 ## Cognito
 
-Configure a user pool, app client, email sign-in, and Google identity provider with callback/logout URLs for the deployed domain. The API verifier fetches rotating JWKS keys and validates RS256 signature, issuer, expiry, `token_use=access`, and `client_id`, then resolves the subject through the existing organization/RBAC model. Existing users must be mapped and tested before local auth is disabled. Live login, refresh, logout, expiry, and OAuth tests remain release gates.
+Configure the existing user pool and app client for email sign-in with callback/logout URLs for the deployed domain. The API verifier fetches rotating JWKS keys and validates RS256 signature, issuer, expiry, `token_use=access`, and `client_id`, then resolves the subject through the existing organization/RBAC model. Google and SMS are intentionally not authentication providers. Existing users must be mapped and tested before local auth is disabled. Live login, refresh, logout, expiry, and email-delivery tests remain release gates.
 
 ## OpenRouter and RAG
 

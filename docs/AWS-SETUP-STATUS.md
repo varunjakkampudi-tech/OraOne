@@ -10,9 +10,9 @@ Updated 2026-10-11. This document records only verified configuration and does n
 | Region | VERIFIED COMPLETE | OraOne resources use `ap-southeast-2` (Sydney) | Mumbai is unavailable on the current plan |
 | Cognito user pool | VERIFIED COMPLETE | AWS created the current pool and app client in Sydney; the console currently names the pool `User pool - fsc2sp` | Essentials plan; monitor MAU/message usage |
 | Email sign-in | VERIFIED COMPLETE | User pool sign-in identifier is Email | Delivery is not yet live-tested |
-| Hosted login client | VERIFIED COMPLETE | Authorization code grant, HTTPS callback `https://oraone.in/auth/callback`, sign-out URL `https://oraone.in/`, and OIDC scopes `email openid phone profile` | Google provider is not yet attached |
+| Hosted login client | VERIFIED COMPLETE | Authorization code grant, HTTPS callback `https://oraone.in/auth/callback`, sign-out URL `https://oraone.in/`, and OIDC scopes `email openid profile` | Email-only authentication; Google and phone scopes are not attached |
 | Passwordless email OTP | CONFIGURED — UNTESTED | Essentials exposes the feature, but it remains inactive | Keep disabled until delivery and cost are approved/verified |
-| Google sign-in | BLOCKED — ACCESS | Cognito form requires Google client ID and client secret | Requires an authorized Google Cloud OAuth app |
+| Google sign-in | DISABLED BY DESIGN | No Google identity provider is attached and no Google login UI is active | Not part of the email-only authentication scope |
 | Mobile OTP | CONFIGURED — UNTESTED | No phone sign-in or SMS factor was enabled | Keep disabled; India SMS may incur charges and regulatory setup |
 | Custom sender | BLOCKED — ACCESS | `noreply@oraone.in` is the intended sender | Requires DNS/SES access and a live delivery test |
 | AWS budget | VERIFIED COMPLETE | `OraOne-Account-Safety-Budget`, recurring `$1/month`, actual 50/80/100%, forecast 100% | Budget email recipient must verify the address |

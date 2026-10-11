@@ -12,6 +12,7 @@ import {
   Checkbox,
 } from "@/components/auth/AuthBits";
 import { AuthShell, GradientButton } from "@/components/auth/AuthShell";
+import { beginCognitoLogin, cognitoEnabled } from "@/lib/cognito";
 
 export default function Signup() {
   useSEO({ title: "Sign up", description: "Create your OraOne account in minutes." });
@@ -25,6 +26,23 @@ export default function Signup() {
   const [agree, setAgree] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
+  if (cognitoEnabled) {
+    return (
+      <AuthShell cardTestId="signup-form">
+        <h1 className="text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">Create Your Account</h1>
+        <p className="mt-2 text-center text-sm text-[#64748B]">Sign up with your email through OraOne&apos;s secure Cognito sign-in.</p>
+        <div className="mt-8">
+          <GradientButton type="button" trailingIcon={ArrowRight} onClick={() => beginCognitoLogin()}>
+            Continue to secure sign-up
+          </GradientButton>
+        </div>
+        <p className="mt-6 text-center text-sm text-[#64748B]">
+          Already have an account? <Link to="/login" className="font-semibold text-[#2563EB] hover:underline">Sign in</Link>
+        </p>
+      </AuthShell>
+    );
+  }
 
   const canSubmit =
     name.trim() && email.trim() && passwordValid(password) && password === confirm && agree && !busy;
