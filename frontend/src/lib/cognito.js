@@ -31,7 +31,7 @@ export async function beginCognitoLogin() {
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     response_type: "code",
-    scope: "openid email profile",
+    scope: "openid email phone profile",
     redirect_uri: REDIRECT_URI,
     code_challenge_method: "S256",
     code_challenge: challenge,

@@ -171,11 +171,18 @@ export function VerifyEmail() {
 /* Forgot Password — request a reset code                       */
 /* ─────────────────────────────────────────────────────────── */
 export function ForgotPassword() {
+  const authProvider = (process.env.REACT_APP_AUTH_PROVIDER || "self_hosted").toLowerCase();
   useSEO({ title: "Forgot Password", description: "Reset your OraOne password." });
   const { forgotPassword } = useAuth();
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (authProvider === "cognito") window.location.assign(`${window.location.origin}/login`);
+  }, [authProvider]);
+  if (authProvider === "cognito") {
+    return null;
+  }
 
   const submit = async (e) => {
     e.preventDefault();

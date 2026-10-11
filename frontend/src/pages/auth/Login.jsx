@@ -23,7 +23,7 @@ export default function Login() {
     return (
       <AuthShell cardTestId="login-form">
         <h1 className="text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">Welcome Back</h1>
-        <p className="mt-2 text-center text-sm text-[#64748B]">Sign in securely with your OraOne account.</p>
+        <p className="mt-2 text-center text-sm text-[#64748B]">Sign in securely with your OraOne account. Password recovery is handled by Cognito.</p>
         <div className="mt-8">
           <GradientButton type="button" trailingIcon={ArrowRight} onClick={() => beginCognitoLogin()}>
             Continue with Cognito

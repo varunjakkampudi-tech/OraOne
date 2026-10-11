@@ -423,5 +423,9 @@ async def refresh_cognito(request: Request, response: Response, payload: Cognito
     if not access_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cognito did not return an access token.")
     await verify_cognito_access_token(access_token)
-    set_auth_cookies(response, access_token=access_token, refresh_token=refresh_token)
+    # Cognito token rotation may return a replacement refresh token. Persist it
+    # in the narrow httpOnly cookie immediately; otherwise the next refresh
+    # would replay a rotated token and force a needless sign-in.
+    next_refresh_token = tokens.get("refresh_token") or refresh_token
+    set_auth_cookies(response, access_token=access_token, refresh_token=next_refresh_token)
     return MessageResponse(message="Session refreshed.")

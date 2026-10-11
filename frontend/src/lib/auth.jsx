@@ -288,7 +288,10 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     try {
-      if (getToken()) {
+      // Cognito browser sessions intentionally keep tokens out of JS storage;
+      // the httpOnly refresh cookie is the session indicator. Always call the
+      // provider logout endpoint in Cognito mode so that cookie is revoked.
+      if (cognitoEnabled || getToken()) {
         const refreshToken = getRefreshToken();
         await api.post(
           cognitoEnabled ? "/auth/cognito/logout" : "/auth/logout",
