@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ScopeOption(BaseModel):
@@ -14,6 +14,8 @@ class ScopeOption(BaseModel):
 
 
 class ApiKeyOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID
     name: str
     prefix: str
@@ -21,9 +23,6 @@ class ApiKeyOut(BaseModel):
     last_used_at: Optional[datetime] = None
     expires_at: Optional[datetime] = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class ApiKeyCreateRequest(BaseModel):
