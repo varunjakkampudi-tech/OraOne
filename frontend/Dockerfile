@@ -6,7 +6,10 @@ FROM node:20-alpine AS build
 WORKDIR /build
 
 COPY package.json package-lock.json ./
-RUN npm ci --ignore-scripts
+# react-day-picker 8.x has a stale React peer range and is compatible with
+# this project's React 19 runtime. Keep the lockfile authoritative while
+# allowing the clean production image to resolve that known peer mismatch.
+RUN npm ci --ignore-scripts --legacy-peer-deps
 
 COPY . .
 
