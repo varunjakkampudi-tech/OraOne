@@ -1,8 +1,9 @@
 """Migrate users to explicit platform roles.
 
 Organization membership roles remain unchanged and continue to represent
-workspace permissions. Existing ``users.role`` values are mapped conservatively:
-legacy owners/admins remain platform admins; legacy members become users.
+workspace permissions. Legacy ``users.role`` values are not evidence of global
+platform authority, so all legacy values are mapped to the least-privileged
+platform ``user`` role.
 """
 from __future__ import annotations
 
@@ -27,8 +28,7 @@ def upgrade() -> None:
     )
     op.execute(
         "ALTER TABLE users ALTER COLUMN role TYPE user_role_new USING "
-        "CASE role::text WHEN 'owner' THEN 'admin' WHEN 'admin' THEN 'admin' "
-        "WHEN 'member' THEN 'user' ELSE 'user' END::user_role_new"
+        "'user'::user_role_new"
     )
     op.execute("DROP TYPE user_role")
     op.execute("ALTER TYPE user_role_new RENAME TO user_role")
