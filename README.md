@@ -39,7 +39,7 @@ For a reproducible local gate after services are running, execute `powershell -E
 
 ## Docker production-like stack
 
-Prepare a real `backend/.env` and operator environment. Run `docker compose -f docker-compose.prod.yml config` as a mandatory preflight, then `docker compose -f docker-compose.prod.yml up -d --build` and `docker compose -f docker-compose.prod.yml ps`. The preflight must fail when required secrets or Cognito values are missing. Do not use development defaults in production.
+Prepare the private root `.env.production` file from the supplied template and fill every blank secret/provider value with real production values. Run `docker compose --env-file .env.production -f docker-compose.prod.yml config` as a mandatory preflight, then `docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build` and `docker compose --env-file .env.production -f docker-compose.prod.yml ps`. The preflight must fail when required secrets or Cognito values are missing. Do not use development defaults in production.
 
 ## Database, backups, and recovery
 

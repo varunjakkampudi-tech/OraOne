@@ -4,7 +4,7 @@
 # provider; all secrets are mandatory and supplied by the operator environment.
 #
 # Usage:
-#   REACT_APP_API_URL=https://oraone.in docker compose -f docker-compose.prod.yml up -d --build
+#   docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
 services:
   postgres:
     image: pgvector/pgvector:pg16
