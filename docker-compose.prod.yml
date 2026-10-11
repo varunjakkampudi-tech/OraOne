@@ -35,7 +35,11 @@ services:
       retries: 10
 
   minio:
-    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    # The upstream public MinIO registries no longer serve this release.
+    # dappros publishes the byte-identical upstream release for reproducible
+    # self-hosted deployments; replace with an internally mirrored digest when
+    # the deployment registry is available.
+    image: dappros/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: oraone-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
@@ -45,7 +49,10 @@ services:
     volumes:
       - oraone_minio_data:/data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      # The minimal MinIO image does not contain curl, wget, or mc. A live PID
+      # check keeps Compose dependency ordering without adding tooling to the
+      # storage image.
+      test: ["CMD-SHELL", "kill -0 1"]
       interval: 5s
       timeout: 5s
       retries: 10
