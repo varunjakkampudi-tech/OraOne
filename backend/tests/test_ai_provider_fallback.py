@@ -33,3 +33,30 @@ async def test_generate_reply_surfaces_provider_error_when_chain_exhausted(monke
 
     with pytest.raises(AIProviderError, match="simulated provider outage"):
         await runtime.generate_reply(agent=None, messages=[ChatMessage(role="user", content="hi")])
+
+
+def test_mock_provider_is_forbidden_in_production(monkeypatch):
+    from app.providers import get_provider
+
+    monkeypatch.setenv("ENVIRONMENT", "production")
+    monkeypatch.setenv("AI_ALLOW_MOCK", "true")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    get_provider.cache_clear()
+
+    with pytest.raises(RuntimeError, match="forbidden in production-like"):
+        get_provider()
+
+    get_provider.cache_clear()
+
+
+def test_mock_provider_remains_available_for_local_tests(monkeypatch):
+    from app.providers import get_provider
+
+    monkeypatch.setenv("ENVIRONMENT", "development")
+    monkeypatch.setenv("AI_ALLOW_MOCK", "true")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    get_provider.cache_clear()
+
+    provider = get_provider()
+    assert provider.name == "mock"
+    get_provider.cache_clear()

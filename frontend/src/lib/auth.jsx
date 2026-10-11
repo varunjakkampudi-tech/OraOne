@@ -154,6 +154,21 @@ export function AuthProvider({ children }) {
   const _err = (e) =>
     formatApiError(e?.response?.data?.detail) || e?.message || "Something went wrong.";
 
+  const clearEstablishedSession = useCallback(async () => {
+    // Cognito session establishment sets an httpOnly cookie that JavaScript
+    // cannot remove. Revoke/clear it server-side before exposing a failed
+    // identity result to the caller.
+    try {
+      await api.post(cognitoEnabled ? "/auth/cognito/logout" : "/auth/logout");
+    } catch {
+      // Local state is still cleared below; the server endpoint is best effort
+      // when the identity failure was caused by a transient backend outage.
+    }
+    clearTokens();
+    clearIdentity();
+    setUser(false);
+  }, [clearIdentity]);
+
   const login = useCallback(async ({ email, password } = {}) => {
     const normalizedEmail = String(email || "").trim().toLowerCase();
     const normalizedPassword = String(password || "");
@@ -179,16 +194,14 @@ export function AuthProvider({ children }) {
       await fetchMe();
       const identityResult = await fetchIdentity();
       if (!identityResult.ok) {
-        clearTokens();
-        clearIdentity();
-        setUser(false);
+        await clearEstablishedSession();
         return { ok: false, error: identityResult.error || "Could not load account identity." };
       }
       return { ok: true, identity: identityResult.identity };
     } catch (e) {
       return { ok: false, error: _err(e) };
     }
-  }, [fetchMe, fetchIdentity, clearIdentity]);
+  }, [fetchMe, fetchIdentity, clearEstablishedSession]);
 
   const completeCognitoSession = useCallback(async (code, state) => {
     if (!cognitoEnabled) return { ok: false, error: "Cognito authentication is not enabled." };
@@ -201,16 +214,14 @@ export function AuthProvider({ children }) {
       await fetchMe();
       const identityResult = await fetchIdentity();
       if (!identityResult.ok) {
-        clearTokens();
-        clearIdentity();
-        setUser(false);
+        await clearEstablishedSession();
         return { ok: false, error: identityResult.error || "Could not load account identity." };
       }
       return { ok: true, identity: identityResult.identity };
     } catch (e) {
       return { ok: false, error: _err(e) };
     }
-  }, [fetchMe, fetchIdentity, clearIdentity]);
+  }, [fetchMe, fetchIdentity, clearEstablishedSession]);
 
   const verifyLoginOtp = useCallback(async ({ email, code } = {}) => {
     try {
@@ -221,16 +232,14 @@ export function AuthProvider({ children }) {
       // user + organization context are ready (Phase 4 requirement #6).
       const identityResult = await fetchIdentity();
       if (!identityResult.ok) {
-        clearTokens();
-        clearIdentity();
-        setUser(false);
+        await clearEstablishedSession();
         return { ok: false, error: identityResult.error || "Could not load account identity." };
       }
       return { ok: true, identity: identityResult.identity };
     } catch (e) {
       return { ok: false, error: _err(e) };
     }
-  }, [fetchMe, fetchIdentity, clearIdentity]);
+  }, [fetchMe, fetchIdentity, clearEstablishedSession]);
 
   const signup = useCallback(async ({ email, password, name } = {}) => {
     const normalizedEmail = String(email || "").trim().toLowerCase();

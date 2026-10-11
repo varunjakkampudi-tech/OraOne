@@ -301,8 +301,14 @@ async def deliver_event(
     data: dict[str, Any],
     *,
     event_id: str | None = None,
+    isolated_delivery: bool = False,
 ) -> DeliveryResult:
-    """Deliver an event and report endpoint-level success/failure."""
+    """Deliver an event and report endpoint-level success/failure.
+
+    ``isolated_delivery`` is used by the outbox worker: it commits the endpoint
+    query before network I/O and commits each delivery record independently,
+    so one slow or failing destination does not hold a business transaction.
+    """
     result = await session.execute(
         select(WebhookEndpoint).where(
             WebhookEndpoint.organization_id == organization_id,
@@ -310,6 +316,8 @@ async def deliver_event(
             WebhookEndpoint.deleted_at.is_(None),
         )
     )
+    if isolated_delivery:
+        await session.commit()
     payload = _envelope(event, organization_id, data, event_id=event_id)
     attempted = 0
     succeeded = 0
@@ -333,6 +341,8 @@ async def deliver_event(
                 succeeded += 1
             else:
                 failed += 1
+            if isolated_delivery:
+                await session.commit()
     return DeliveryResult(attempted=attempted, succeeded=succeeded, failed=failed)
 
 

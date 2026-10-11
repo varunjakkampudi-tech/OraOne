@@ -149,7 +149,7 @@ async def test_deliver_success_marks_completed(db_session, monkeypatch):
     await db_session.commit()
     row_id = row.id
 
-    async def _fake_deliver_event(session, organization_id, event, data, *, event_id=None):
+    async def _fake_deliver_event(session, organization_id, event, data, *, event_id=None, isolated_delivery=False):
         from app.services.webhook_service import DeliveryResult
 
         return DeliveryResult(attempted=1, succeeded=1)
@@ -181,7 +181,7 @@ async def test_deliver_failure_retries_until_max_attempts(db_session, monkeypatc
     await db_session.commit()
     row_id = row.id
 
-    async def _always_fails(session, organization_id, event, data, *, event_id=None):
+    async def _always_fails(session, organization_id, event, data, *, event_id=None, isolated_delivery=False):
         from app.services.webhook_service import DeliveryResult
 
         return DeliveryResult(attempted=1, failed=1)
@@ -222,7 +222,7 @@ async def test_tick_claims_rows_so_a_second_tick_does_not_redeliver(db_session, 
 
     calls: list[str] = []
 
-    async def _fake_deliver_event(session, organization_id, event, data, *, event_id=None):
+    async def _fake_deliver_event(session, organization_id, event, data, *, event_id=None, isolated_delivery=False):
         from app.services.webhook_service import DeliveryResult
 
         calls.append(event)
@@ -273,7 +273,7 @@ async def test_stale_processing_row_is_reclaimed_after_simulated_crash(db_sessio
 
         calls: list[str] = []
 
-        async def _fake_deliver_event(session, organization_id, event, data, *, event_id=None):
+        async def _fake_deliver_event(session, organization_id, event, data, *, event_id=None, isolated_delivery=False):
             from app.services.webhook_service import DeliveryResult
 
             calls.append(event)

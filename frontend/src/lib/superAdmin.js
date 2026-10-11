@@ -1,7 +1,7 @@
 import { api } from "@/lib/api";
 
 // Super Admin Control Center API client. All routes are platform-scoped and
-// gated server-side by the PLATFORM_ADMIN_EMAILS allow-list.
+// gated server-side by the database-backed platform role.
 const get = (path, params) => api.get(`/super-admin${path}`, { params }).then((r) => r.data);
 
 export const superAdminApi = {

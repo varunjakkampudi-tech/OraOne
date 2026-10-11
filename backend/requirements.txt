@@ -57,6 +57,7 @@ tzdata>=2024.1
 # provider when OPENAI_API_KEY is unset, so this is only required for
 # live model responses.
 openai>=1.40,<2.0
+stripe>=10.0,<15.0              # signed Checkout, Portal and webhook processing
 
 # ---- Redis (distributed cache / rate limiting) ----
 # Optional at runtime: app/services/cache.py and the rate limiter fall back

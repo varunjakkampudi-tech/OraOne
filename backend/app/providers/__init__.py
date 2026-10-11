@@ -37,6 +37,11 @@ def get_provider() -> AIProvider:
     ``get_provider.cache_clear()``.
     """
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    environment = os.environ.get("ENVIRONMENT", "development").strip().lower()
+    if environment in {"production", "prod", "staging"} and os.environ.get(
+        "AI_ALLOW_MOCK", "false"
+    ).strip().lower() == "true":
+        raise RuntimeError("AI_ALLOW_MOCK is forbidden in production-like environments.")
     if api_key:
         try:
             from app.providers.openai_provider import OpenAIProvider

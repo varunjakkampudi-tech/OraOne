@@ -176,6 +176,7 @@ async def _deliver_outbox_row(outbox_id: uuid.UUID) -> None:
                 row.event,
                 row.payload.get("data", row.payload),
                 event_id=f"evt_outbox_{row.id}",
+                isolated_delivery=True,
             )
             row.attempts = (row.attempts or 0) + 1
             if result.failed:

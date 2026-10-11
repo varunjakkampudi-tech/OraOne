@@ -12,14 +12,13 @@ documents, websites, search, workflows, widgets, integrations and analytics —
 so external developers can build on every OraOne capability programmatically.
 
 Cross-cutting concerns:
-* **Idempotency** — mutating ``POST`` endpoints honour an ``Idempotency-Key``
-  header (best-effort, in-process replay within a short TTL).
+* **Idempotency** — centralized middleware uses the shared Redis-backed cache
+  (with an explicit single-node fallback when Redis is not configured).
 * **Request logging** — handled centrally by the access-log middleware which
   reads ``request.state.api_ctx`` set here.
 """
 from __future__ import annotations
 
-import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
@@ -96,30 +95,6 @@ def require_api_scope(scope: str):
         return key
 
     return _dep
-
-
-# ── idempotency (best-effort, in-process) ────────────────────────────────────
-_IDEMPOTENCY: dict[str, tuple[float, dict]] = {}
-_IDEMPOTENCY_TTL = 600.0  # 10 minutes
-
-
-def _idem_lookup(request: Request, organization_id: uuid.UUID) -> tuple[Optional[str], Optional[dict]]:
-    key = request.headers.get("idempotency-key")
-    if not key:
-        return None, None
-    composite = f"{organization_id}:{request.url.path}:{key}"
-    now = time.time()
-    for k in [k for k, (ts, _) in _IDEMPOTENCY.items() if now - ts > _IDEMPOTENCY_TTL]:
-        _IDEMPOTENCY.pop(k, None)
-    hit = _IDEMPOTENCY.get(composite)
-    if hit and now - hit[0] <= _IDEMPOTENCY_TTL:
-        return composite, hit[1]
-    return composite, None
-
-
-def _idem_store(composite: Optional[str], payload: dict) -> None:
-    if composite:
-        _IDEMPOTENCY[composite] = (time.time(), payload)
 
 
 def _now() -> datetime:
@@ -220,14 +195,9 @@ def _estimate_tokens(*texts: str) -> int:
 @router.post("/chat")
 async def chat_v1(
     payload: ChatRequest,
-    request: Request,
     key: ApiKey = Depends(require_api_scope("chat:write")),
     session: AsyncSession = Depends(get_db),
 ) -> dict:
-    composite, cached = _idem_lookup(request, key.organization_id)
-    if cached is not None:
-        return cached
-
     result = await answer_query(
         session,
         payload.message,
@@ -355,7 +325,6 @@ async def chat_v1(
             "latency_ms": int(result.get("latency_ms") or 0),
         },
     }
-    _idem_store(composite, response)
     return response
 
 
@@ -562,15 +531,10 @@ async def list_workflows_v1(
 async def run_workflow_v1(
     workflow_id: uuid.UUID,
     payload: WorkflowRunRequest,
-    request: Request,
     background: BackgroundTasks,
     key: ApiKey = Depends(require_api_scope("workflows:execute")),
     session: AsyncSession = Depends(get_db),
 ) -> dict:
-    composite, cached = _idem_lookup(request, key.organization_id)
-    if cached is not None:
-        return cached
-
     workflow = await session.get(Workflow, workflow_id)
     if workflow is None or workflow.organization_id != key.organization_id or workflow.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found.")
@@ -611,7 +575,6 @@ async def run_workflow_v1(
     background.add_task(execute_run, run.id)
 
     response = {"object": "workflow.run", "run_id": str(run.id), "status": "queued"}
-    _idem_store(composite, response)
     return response
 
 

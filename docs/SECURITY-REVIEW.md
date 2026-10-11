@@ -11,7 +11,12 @@ This is a repository review, not a penetration test or certification.
 | HS256-only authentication | High | Fixed in code / live cutover unverified | Cognito JWKS validation and email-only session flow are implemented; production live cutover remains untested |
 | Documented local admin default | High | Fixed in template | Empty values now required; no DB mutation performed |
 | Unsafe AI fallback in production | High | Open | Disable/isolate and verify provider failure behavior before hosting |
-| Billing, SSRF/crawler, uploads, prompt injection | High | Open | Independent review and targeted tests remain required |
+| Billing, crawler, uploads, prompt injection | High | Open | Independent review and targeted tests remain required |
+| Customer webhook SSRF | High | Fixed in code / infrastructure follow-up | Public-host validation, delivery-time revalidation and redirect blocking are tested; deployment egress policy remains required |
+| API-key idempotency | High | Fixed in code | Public API no longer keeps a process-local replay map; centralized middleware uses the shared idempotency cache and fails closed when unavailable |
+| Production mock inference | High | Fixed in code | Production-like environments reject `AI_ALLOW_MOCK=true` unconditionally |
+| Payment runtime dependency | High | Configured / unverified | Stripe is now declared in runtime requirements; live sandbox Checkout/webhook lifecycle remains untested |
+| Tenant AI spend ceiling | High | Open | Daily AI-message quota exists; monetary/token budget reservation and reconciliation are not yet implemented |
 | Webhook delivery durability | High | Fixed in code / locally tested | Durable outbox worker performs delivery and records results; external endpoint delivery remains untested |
 | Secrets in repository history | High | Open | Scan history before any public-release decision |
 
