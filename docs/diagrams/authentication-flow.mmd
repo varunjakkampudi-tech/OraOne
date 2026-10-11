@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant U as User
+  participant F as Frontend
+  participant C as Cognito
+  participant A as API
+  participant D as PostgreSQL
+  U->>F: Start email login
+  F->>C: Authorization code with PKCE
+  C-->>F: Code callback
+  F->>A: Access token
+  A->>C: JWKS and issuer validation
+  A->>D: Map Cognito sub
+  D-->>A: User and role
+  A-->>F: Protected response

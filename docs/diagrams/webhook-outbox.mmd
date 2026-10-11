@@ -1,0 +1,10 @@
+sequenceDiagram
+  participant Tx as API transaction
+  participant O as Outbox
+  participant W as Worker
+  participant H as Endpoint
+  Tx->>O: Persist business event
+  W->>O: Claim pending event
+  W->>H: Deliver with idempotency key
+  H-->>W: Success or failure
+  W->>O: Record endpoint result and retry state

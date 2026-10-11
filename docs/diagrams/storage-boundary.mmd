@@ -1,0 +1,6 @@
+flowchart LR
+  App[Backend services] --> Select{S3_BUCKET set?}
+  Select -->|No| Local[UPLOAD_DIR]
+  Select -->|Yes| S3[S3-compatible API]
+  S3 --> Minio[MinIO/R2/B2 or approved S3]
+  App --> Metadata[(PostgreSQL metadata)]

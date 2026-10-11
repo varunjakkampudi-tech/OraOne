@@ -1,0 +1,9 @@
+flowchart LR
+  User[User] --> Web[React app or widget]
+  Web --> Edge[Caddy]
+  Edge --> Api[FastAPI]
+  Api --> Data[(PostgreSQL)]
+  Api --> Cache[(Redis)]
+  Api --> Files[(MinIO or S3-compatible)]
+  Api --> Auth[Cognito or self-hosted auth]
+  Api --> AI[Model provider]

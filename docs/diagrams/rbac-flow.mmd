@@ -1,0 +1,10 @@
+flowchart TD
+  Token[Validated Cognito access token] --> Subject[Cognito sub]
+  Subject --> User[PostgreSQL user]
+  User --> Platform[Platform role]
+  User --> Membership[Tenant membership]
+  Platform --> Policy[Endpoint policy]
+  Membership --> Scope[Tenant scope]
+  Policy --> Query[Scoped query]
+  Scope --> Query
+  Query --> Audit[Audit privileged mutation]

@@ -1,0 +1,10 @@
+flowchart LR
+  Upload[Document upload] --> Store[Storage abstraction]
+  Store --> Parse[Parse and chunk]
+  Parse --> Embed[Embedding provider]
+  Embed --> Vector[(pgvector)]
+  Query[Conversation query] --> Retrieve[Scoped retrieval]
+  Vector --> Retrieve
+  Retrieve --> Prompt[Grounded prompt]
+  Prompt --> Model[OpenAI-compatible provider]
+  Model --> Answer[Answer and usage record]
