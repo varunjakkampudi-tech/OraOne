@@ -212,7 +212,6 @@ def require_role(*allowed: str):
         return ctx
 
     return _checker
-
 def require_permission(*needed: str):
     """Dependency factory: 403 unless the caller's role grants every
     permission in ``needed`` (Phase 12 RBAC).

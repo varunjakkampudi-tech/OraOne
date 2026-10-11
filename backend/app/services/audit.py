@@ -131,4 +131,3 @@ async def flush_pending(session) -> int:
             _PENDING.appendleft(rec)
         log.exception("Failed to flush %d audit records", len(batch))
         return 0
-
