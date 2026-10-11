@@ -91,11 +91,8 @@ def rate_limited(key: str, *, limit: int, window_seconds: int = 60) -> bool:
     bucket = int(time.time() // window_seconds)
     cache = get_shared_cache("widget-ratelimit")
     cache_key = f"{key}:{bucket}"
-    count = int(cache.get(cache_key) or 0)
-    if count >= max(1, limit):
-        return True
-    cache.set(cache_key, count + 1, ttl_seconds=window_seconds * 2)
-    return False
+    count = cache.increment(cache_key, ttl_seconds=window_seconds * 2)
+    return count > max(1, limit)
 
 
 async def get_widget_by_key(session: AsyncSession, public_key: str) -> Optional[Widget]:

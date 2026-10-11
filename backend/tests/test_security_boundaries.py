@@ -60,6 +60,10 @@ class _Cache:
     def set(self, key, value, ttl_seconds=None):
         self.values[key] = value
 
+    def increment(self, key, ttl_seconds=None):
+        self.values[key] = int(self.values.get(key) or 0) + 1
+        return self.values[key]
+
 
 def test_widget_rate_limit_uses_shared_cache(monkeypatch):
     cache = _Cache()

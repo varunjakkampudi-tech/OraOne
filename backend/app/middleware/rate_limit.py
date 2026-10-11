@@ -147,8 +147,8 @@ async def rate_limit_middleware(request: Request, call_next):
         cache = _cache()
         window_bucket = int(time.time() // tier.window_seconds)
         key = f"{tier.name}:{_caller_id(request)}:{window_bucket}"
-        count = int(cache.get(key) or 0)
-        if count >= tier.limit:
+        count = cache.increment(key, ttl_seconds=tier.window_seconds * 1.5)
+        if count > tier.limit:
             return JSONResponse(
                 status_code=429,
                 content={
@@ -161,7 +161,6 @@ async def rate_limit_middleware(request: Request, call_next):
                 },
                 headers={"Retry-After": str(tier.window_seconds)},
             )
-        cache.set(key, count + 1, ttl_seconds=tier.window_seconds * 1.5)
     except Exception:  # noqa: BLE001 — never block a request on a cache hiccup
         log.warning("rate_limit_check_failed", exc_info=True)
 

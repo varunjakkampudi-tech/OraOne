@@ -69,6 +69,12 @@ class CacheBackend(ABC):
         self.set(key, value, ttl_seconds=ttl_seconds)
         return True
 
+    def increment(self, key: str, ttl_seconds: Optional[float] = None) -> int:
+        """Increment a counter, using an atomic implementation when available."""
+        value = int(self.get(key) or 0) + 1
+        self.set(key, value, ttl_seconds=ttl_seconds)
+        return value
+
 
 class InProcessCacheBackend(CacheBackend):
     """A plain in-memory dict. Single-node only — no cross-process visibility.
@@ -89,6 +95,11 @@ class InProcessCacheBackend(CacheBackend):
 
     def set(self, key: str, value: Any, ttl_seconds: Optional[float] = None) -> None:
         self._store[key] = value
+
+    def increment(self, key: str, ttl_seconds: Optional[float] = None) -> int:
+        value = int(self._store.get(key) or 0) + 1
+        self._store[key] = value
+        return value
 
     def delete(self, key: str) -> None:
         self._store.pop(key, None)
@@ -149,6 +160,12 @@ class RedisCacheBackend(CacheBackend):
         return bool(
             self._redis.set(self._k(key), payload, nx=True, ex=int(ttl_seconds) if ttl_seconds else None)
         )
+
+    def increment(self, key: str, ttl_seconds: Optional[float] = None) -> int:  # pragma: no cover
+        value = int(self._redis.incr(self._k(key)))
+        if value == 1 and ttl_seconds:
+            self._redis.expire(self._k(key), int(ttl_seconds))
+        return value
 
     def publish_invalidation(self, key: str) -> None:  # pragma: no cover — needs redis
         """Broadcast an invalidation so peer nodes drop their local copy."""
