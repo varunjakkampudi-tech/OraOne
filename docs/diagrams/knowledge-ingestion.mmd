@@ -1,0 +1,11 @@
+flowchart LR
+  Submit[Document upload or website URL] --> Validate[Validate tenant and input]
+  Validate --> Store[Store object or crawl content]
+  Store --> Parse[Parse and normalize text]
+  Parse --> Chunks[Create chunks]
+  Chunks --> Embed[Embedding path]
+  Embed --> Index[(PostgreSQL and pgvector)]
+  Index --> Ready[Retrieval ready]
+  Worker[Background worker] -. processes queued work .-> Parse
+  Fallback[Local hash embedding fallback] -. local development only .-> Embed
+  Provider[Configured semantic embedding provider] -. optional provider .-> Embed

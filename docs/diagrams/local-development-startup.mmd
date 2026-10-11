@@ -1,0 +1,13 @@
+flowchart TD
+  Prereq[Git, Python 3.11+, Node 20+, Yarn, Docker Compose] --> Docker[Start dev Compose]
+  Docker --> DB[(PostgreSQL pgvector on 5433)]
+  Docker --> Redis[(Redis on 6379)]
+  Docker --> Minio[(MinIO API 9000 and console 9001)]
+  Prereq --> BackendDeps[Create backend virtualenv and install requirements]
+  BackendDeps --> Env[Copy backend .env and set local values]
+  Env --> Alembic[Run alembic upgrade head]
+  Alembic --> API[Start FastAPI on 8000]
+  Prereq --> FrontendDeps[Install frontend dependencies]
+  FrontendDeps --> UI[Start React on 3000 or 3001]
+  API --> Validate[Run tests, lint, build, and docs validation]
+  UI --> Validate

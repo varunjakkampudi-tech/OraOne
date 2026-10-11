@@ -25,8 +25,8 @@ remain because they are product or operational dependencies.
 
 ## Remaining release gates
 
-1. Configure/test Cognito login, Google OAuth, logout, refresh, expiry, and
-   migration of existing users.
+1. Configure/test email-only Cognito login, verification, logout, refresh,
+   expiry, and migration of existing users.
 2. Run credentialed OpenRouter inference and verify quotas, accounting,
    timeout/retry behavior, and provider failure behavior.
 3. Run migrations, backups, restore, and restart recovery against disposable

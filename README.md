@@ -1,70 +1,231 @@
 # OraOne
 
-OraOne is a multitenant AI chat platform for website agents, knowledge-grounded answers, lead capture, workflows, integrations, billing, and an embeddable widget.
+<p align="center">
+  <img src="frontend/public/assets/brand-logo.png" alt="OraOne" width="220" />
+</p>
 
-This is the authoritative setup and operations guide. Local validation is not production approval; see `docs/CLEANUP-MANIFEST.md` and `docs/SECURITY-REVIEW.md`.
+<p align="center"><strong>One AI. Every Conversation.</strong></p>
 
-## Architecture
+<p align="center"><a href="https://oraone.in">oraone.in</a> · <a href="docs/README.md">Documentation</a> · <a href="SECURITY.md">Security</a></p>
 
-Browser/widget -> Caddy :443 (oraone.in) -> React static app and FastAPI :8000. FastAPI uses PostgreSQL + pgvector, Redis, and MinIO/S3-compatible storage. FastAPI uses AWS Cognito JWKS for production identity and OpenRouter for server-side AI inference.
+OraOne is a multitenant AI conversation platform for website agents. The current product supports knowledge-grounded chat, lead capture, workflows, integrations, billing primitives, an embeddable widget, and tenant-scoped administration.
 
-Docker Compose on a Hostinger VPS is the intended deployment. Caddy is the only public application entry point; stateful and app service ports are private. AWS EC2 and GitHub Pages are not deployment targets.
+This repository is the source of truth for the application and its local, self-hosted operational model. It is a release candidate, not a claim of live production readiness. See the [release checklist](docs/operations/RELEASE-CHECKLIST.md) for the gates that remain external to this checkout.
 
-## Stack and structure
+## Product scope
 
-- `frontend/`: React/CRACO application and production widget assets.
-- `backend/`: FastAPI, SQLAlchemy, Alembic, providers, services, and tests.
-- `docker-compose.dev.yml`: local PostgreSQL/pgvector, Redis, and MinIO.
-- `docker-compose.prod.yml`: private service network and Caddy edge.
-- `Caddyfile`: TLS termination and `/api/*` reverse proxy routing.
-- `docs/`: architecture and evidence records; this README is authoritative.
+| Area | Current repository evidence |
+| --- | --- |
+| Website agents | Agent CRUD, deployment configuration, channels, branding, and public widget routes |
+| AI conversations | Authenticated conversations, streaming, folders, sharing, suggestions, and public API access |
+| Knowledge | Uploads, parsing, embeddings, pgvector retrieval, and RAG answer services |
+| Operations | Redis-backed cache/rate limits, background workers, outbox delivery, audit logs, and health endpoints |
+| Identity | Email-only Cognito mode or self-hosted local mode; backend validates Cognito access tokens |
+| Authorization | PostgreSQL-backed platform roles plus tenant-scoped organization memberships |
+| Storage | MinIO/S3-compatible object storage with a local-disk development fallback |
+| Widget | `@oraone/widget` package and the `frontend/public/widget.js` loader |
 
-## Prerequisites
+Future product concepts are catalogued separately in [Product portfolio](docs/PRODUCT-PORTFOLIO.md) and are not represented as shipped functionality.
 
-Docker Engine 24+ with Compose v2, Python 3.11+, Node 20+ with Yarn classic, and PostgreSQL with pgvector when Docker is not used.
+## OraOne ecosystem
 
-## Environment variables
+The portfolio is broader than the active Product 1 repository. Planned products may share platform foundations, but their status is not implied by similarly named prototype code.
 
-Copy `backend/.env.example` to `backend/.env`; never commit it. Local development uses `AUTH_PROVIDER=self_hosted` and a random 32+ character `JWT_SECRET_KEY`. Production must use `AUTH_PROVIDER=cognito` with `COGNITO_USER_POOL_ID`, `COGNITO_REGION`, and `COGNITO_CLIENT_ID`.
+<!-- diagram: docs/diagrams/system-context.mmd -->
+```mermaid
+flowchart TB
+  Viswatra[Viswatra portfolio direction]
+  Viswatra -. intended portfolio brand .-> Ecosystem[OraOne ecosystem]
+  Ecosystem --> P1[Product 1: OraOne AI Chat Platform]
+  Ecosystem --> P2[Product 2: OraOne AI Voice Platform]
+  Ecosystem --> P3[Product 3: OraOne WhatsApp Platform]
+  Ecosystem --> P4[Product 4: Omnichannel Communication Hub]
+  Ecosystem --> P5[Product 5: Workflow Automation Platform]
+  Ecosystem --> P6[Product 6: AI Studio & Agent Builder]
+  Ecosystem --> P7[Product 7: Marketplace]
+  Ecosystem --> P8[Product 8: Mobile Applications]
+  Ecosystem --> P9[Product 9: Enterprise Edition]
+  Ecosystem --> P10[Product 10: OraOne OS]
+  Shared[Shared foundations: identity, governance, AI gateway, usage, integrations]
+  P1 --> Shared
+  P2 -. planned .-> Shared
+  P3 -. planned .-> Shared
+  P4 -. planned .-> Shared
+  P5 -. planned .-> Shared
+  P6 -. planned .-> Shared
+  P7 -. planned .-> Shared
+  P8 -. planned .-> Shared
+  P9 -. planned .-> Shared
+  P10 -. long-term vision .-> Shared
+```
 
-Production also requires operator-managed `DB_PASSWORD`, `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `S3_BUCKET`, `CADDY_DOMAIN`, and values listed in `backend/.env.example`. `OPENAI_API_KEY` is the server-side OpenRouter credential. Never put Cognito or OpenRouter secrets in the frontend.
+See the [full product portfolio](docs/PRODUCT-PORTFOLIO.md) for exact names and status.
 
-## Local installation
+| Product | Status |
+| --- | --- |
+| OraOne AI Chat Platform | In active development |
+| OraOne AI Voice Platform | Planned |
+| OraOne WhatsApp Platform | Planned |
+| Omnichannel Communication Hub | Planned |
+| Workflow Automation Platform | Planned |
+| AI Studio & Agent Builder | Planned |
+| Marketplace | Planned |
+| Mobile Applications | Planned |
+| Enterprise Edition | Planned |
+| OraOne OS | Long-term vision |
 
-Run `docker compose -f docker-compose.dev.yml up -d`, create a Python 3.11+ virtual environment in `backend`, install `backend/requirements.txt`, copy `backend/.env.example` to `backend/.env`, set a random JWT secret and local database URLs, run `alembic upgrade head`, and start `uvicorn server:app --reload --port 8000`. In `frontend`, run `yarn install --frozen-lockfile` and `yarn start` (use `PORT=3001` if port 3000 is already occupied). The local frontend is `http://localhost:3000` or `http://localhost:3001`; the API is `http://localhost:8000`.
+## Architecture at a glance
 
-Production Compose requires explicit `AUTH_PROVIDER=cognito`, Cognito settings, a non-localhost `REACT_APP_API_URL`, database/object-storage secrets and Stripe credentials before it will start. HTTP containers do not run schedulers; the dedicated `workers` service runs scheduled workflows and the webhook outbox.
+<!-- diagram: docs/diagrams/product1-system-architecture.mmd -->
+```mermaid
+flowchart LR
+  Visitor[Website visitor] --> Widget[Embeddable widget]
+  Operator[Business operator] --> Browser[React dashboard]
+  Widget --> Edge[Caddy edge]
+  Browser --> Edge
+  Edge --> Frontend[React frontend]
+  Edge --> API[FastAPI backend]
+  API --> Cognito[Cognito email identity]
+  API --> Router[OpenAI-compatible provider]
+  API --> DB[(PostgreSQL and pgvector)]
+  API --> Redis[(Redis)]
+  API --> Minio[(MinIO or S3-compatible storage)]
+  API -. enqueues durable work .-> Outbox[(Transactional outbox)]
+  Worker[Independent worker process] --> Outbox
+  Worker --> DB
+  Worker --> Redis
+  Worker --> Minio
+  API --> Integrations[Configured integrations and webhooks]
+  External[External provider services] --> Integrations
+```
 
-For a reproducible local gate after services are running, execute `powershell -ExecutionPolicy Bypass -File backend/scripts/validate_local.ps1`.
+The production-like Compose stack exposes only Caddy on ports 80 and 443. Local development Compose publishes PostgreSQL on `127.0.0.1:5433`, Redis on `127.0.0.1:6379`, and MinIO on `127.0.0.1:9000`/`9001`.
 
-## Docker production-like stack
+Detailed diagrams and boundaries are in [architecture](docs/architecture/README.md).
 
-Prepare the private root `.env.production` file from the supplied template and fill every blank secret/provider value with real production values. Run `docker compose --env-file .env.production -f docker-compose.prod.yml config` as a mandatory preflight, then `docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build` and `docker compose --env-file .env.production -f docker-compose.prod.yml ps`. The preflight must fail when required secrets or Cognito values are missing. Do not use development defaults in production.
+## Repository layout
 
-## Database, backups, and recovery
+```text
+backend/                         FastAPI app, database, services, migrations, tests
+frontend/                        React app, E2E tests, public widget loader
+frontend/packages/oraone-widget  Framework-neutral widget SDK source
+docker-compose.dev.yml           Local PostgreSQL/pgvector, Redis, and MinIO
+docker-compose.prod.yml          Production-like private stack plus Caddy
+Caddyfile                        Edge routing and security headers
+docs/                             Architecture, operations, security, and evidence
+```
 
-Run `alembic upgrade head` only after reviewing migration SQL and confirming the target database. Use `backend/scripts/backup_restore_drill.py` against a disposable environment. Keep encrypted backups outside the VPS and record retention, restore timing, and recovery evidence.
+## Local quickstart
 
-## Cognito
+Prerequisites: Docker Engine with Compose v2, Python 3.11+, Node.js 20+, and Yarn 1.22.22. The [quickstart](docs/guides/QUICKSTART.md) is authoritative. The guarded bootstrap below establishes the development services, required secret, and both PostgreSQL URLs before Alembic runs:
 
-Configure the existing user pool and app client for email sign-in with callback/logout URLs for the deployed domain. The API verifier fetches rotating JWKS keys and validates RS256 signature, issuer, expiry, `token_use=access`, and `client_id`, then resolves the subject through the existing organization/RBAC model. Google and SMS are intentionally not authentication providers. Existing users must be mapped and tested before local auth is disabled. Live login, refresh, logout, expiry, and email-delivery tests remain release gates.
+```powershell
+docker compose -f docker-compose.dev.yml up -d
 
-## OpenRouter and RAG
+cd backend
+python -m venv .venv
+.\\.venv\\Scripts\\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
+$jwt = python -c "import secrets; print(secrets.token_urlsafe(48))"
+@"
+ENVIRONMENT=development
+AUTH_PROVIDER=self_hosted
+JWT_SECRET_KEY=$jwt
+DB_HOST=localhost
+DB_PORT=5433
+DB_USER=oraone_admin
+DB_PASSWORD=oraone_dev_password
+DB_NAME=oraone
+DATABASE_URL=postgresql+asyncpg://oraone_admin:oraone_dev_password@localhost:5433/oraone
+ALEMBIC_DATABASE_URL=postgresql+psycopg2://oraone_admin:oraone_dev_password@localhost:5433/oraone
+REDIS_URL=redis://localhost:6379/0
+ENTITLEMENTS_CACHE_BACKEND=redis
+S3_BUCKET=oraone-dev
+S3_ENDPOINT_URL=http://localhost:9000
+S3_ACCESS_KEY_ID=oraone_minio
+S3_SECRET_ACCESS_KEY=oraone_minio_password
+RUN_BACKGROUND_WORKERS=false
+EMBEDDING_PROVIDER=hash
+AI_ALLOW_MOCK=false
+"@ | Set-Content .env
+alembic upgrade head
+python -m uvicorn server:app --reload --port 8000
+```
 
-The backend uses the OpenAI-compatible provider interface pointed at `https://openrouter.ai/api/v1`; credentials remain server-side. Configure model selection, embeddings, quotas, usage accounting, timeouts, and retry policy in the backend. Credentialed inference and cost-limit evidence are required before production approval.
+In a second terminal:
 
-## Testing and formatting
+```powershell
+cd frontend
+yarn install --frozen-lockfile
+$env:PORT = "3001"
+yarn start
+```
 
-Run `python -m pytest -q` and `python -m compileall -q app server.py` in `backend`, then set `CI=true` and run `yarn build` in `frontend`. Database-dependent tests may require Compose services. Report skipped tests as skipped, never as passing integration evidence. Keep formatting-only changes separate from behavior changes.
+The API is available at `http://localhost:8000`, and the frontend at `http://localhost:3001` when port 3000 is occupied. Keep local credentials in ignored `.env` files; never copy production secrets into the repository.
 
-## Hostinger deployment
+Environment ownership and safe defaults are documented in [Environment configuration](docs/guides/ENVIRONMENT.md).
 
-Provision a supported VPS, Docker, a firewall allowing only SSH and 80/443, DNS for `oraone.in`, and operator-managed secrets. Clone the private repository, create `backend/.env`, run the Compose config preflight, apply migrations, and start the stack. Verify `/api/health/ready`, TLS, frontend routing, Cognito login, tenant isolation, a real AI request, logs, backup, and restart recovery. Hostinger access, DNS, OAuth, payment accounts, and production credentials are external blockers in this checkout.
+## Development checks
 
-## Manual release and rollback
+Backend checks run from `backend`:
 
-Review the diff and run complete local validation; build tagged images and record Git SHA and image digests; back up and verify the database; apply migrations and start the new revision; run health, auth, tenant-isolation, billing/webhook, widget, and AI smoke tests. On failure, restore prior image tags and use the approved reversible migration procedure. Never reset or destructively rewrite production data.
+```powershell
+python -m compileall -q app server.py
+python -m pytest -q
+```
 
-## Production status
+Frontend checks run from `frontend`:
 
-This repository is a release candidate, not a production GO. Open high-risk gates include live Cognito cutover, credentialed OpenRouter usage/cost control, independent SSRF/upload/webhook/prompt-injection review, billing verification, secret-history scanning, and Hostinger backup/rollback validation.
+```powershell
+yarn build
+npx eslint "src/**/*.{js,jsx}"
+npx playwright test
+```
+
+The repository validation script also checks Compose, migrations, tests, and the production build:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File backend/scripts/validate_local.ps1
+```
+
+For documentation and metadata checks, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/validate_docs.ps1
+```
+
+See [Testing](docs/guides/TESTING.md) for prerequisites and evidence rules.
+
+## Identity, authorization, and data
+
+Production identity is intended to use the existing email-only Cognito pool. The backend validates issuer, signature, expiry, token use, client binding, and the Cognito subject before resolving the PostgreSQL user record. Self-hosted authentication remains useful for local development. Google, phone, and SMS authentication are intentionally outside the current identity contract.
+
+Platform roles (`super_admin`, `admin`, `manager`, `user`) are separate from organization membership roles. PostgreSQL is authoritative; frontend checks are only presentation. Read [RBAC](docs/RBAC.md) and [authentication and authorization](docs/architecture/AUTHENTICATION-RBAC.md) before changing privileged behavior.
+
+PostgreSQL is the system of record. Redis is a cache/rate-limit and distributed-idempotency dependency. MinIO is the local S3-compatible object store. If `S3_BUCKET` is unset, uploads use the configured local `UPLOAD_DIR`; the abstraction is intentionally retained so local development does not need an AWS bucket.
+
+## Deployment posture
+
+`docker-compose.prod.yml` is a production-like deployment artifact, not proof of a completed hosting deployment. It requires operator-supplied Cognito, database, storage, domain, and provider settings. Hostinger provisioning, DNS/TLS, production backups, live inbox authentication, paid provider lifecycles, and rollback drills remain external release gates.
+
+Use the [deployment guide](docs/operations/DEPLOYMENT.md), [backup and restore guide](docs/operations/BACKUP-RESTORE.md), and [release checklist](docs/operations/RELEASE-CHECKLIST.md). Do not run a production migration against a guessed database URL.
+
+## Documentation navigation
+
+| Topic | Guide |
+| --- | --- |
+| Product portfolio and roadmap | [Product portfolio](docs/PRODUCT-PORTFOLIO.md) · [Roadmap](docs/ROADMAP.md) |
+| Architecture and diagrams | [Architecture index](docs/architecture/README.md) |
+| Local setup and environments | [Quickstart](docs/guides/QUICKSTART.md) · [Environment](docs/guides/ENVIRONMENT.md) |
+| Testing and troubleshooting | [Testing](docs/guides/TESTING.md) · [Troubleshooting](docs/guides/TROUBLESHOOTING.md) |
+| Deployment and recovery | [Deployment](docs/operations/DEPLOYMENT.md) · [Backup and restore](docs/operations/BACKUP-RESTORE.md) |
+| Security and licensing | [Security model](docs/security/SECURITY-MODEL.md) · [Licensing audit](docs/LICENSING-AUDIT.md)
+
+## Security and support
+
+Report vulnerabilities privately using the process in [SECURITY.md](SECURITY.md). Contribution expectations are in [CONTRIBUTING.md](CONTRIBUTING.md); support and issue triage guidance is in [SUPPORT.md](SUPPORT.md). Licensing is documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [LICENSING-AUDIT.md](docs/LICENSING-AUDIT.md). No ownership or relicensing decision is implied by this documentation pass.
+
+## Project status
+
+The current branch contains repository and documentation improvements only; hosting is intentionally deferred. Local tests and builds are evidence of checkout health, not independent proof of production operation. See [CHANGELOG.md](CHANGELOG.md) for this branch's documentation changes and [ROADMAP.md](docs/ROADMAP.md) for clearly separated planned work.
