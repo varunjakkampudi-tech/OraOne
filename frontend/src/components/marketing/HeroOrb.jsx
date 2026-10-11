@@ -13,7 +13,12 @@ export default function HeroOrb() {
   return (
     <div className="relative w-full aspect-square max-w-[560px] mx-auto select-none">
       {/* Concentric rings */}
-      <svg className="absolute inset-0" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+      <svg
+        className="absolute inset-0"
+        viewBox="0 0 400 400"
+        fill="none"
+        aria-hidden="true"
+      >
         <defs>
           <radialGradient id="orbRingFill" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#EEF2FF" stopOpacity="0.8" />
@@ -22,9 +27,32 @@ export default function HeroOrb() {
           </radialGradient>
         </defs>
         <circle cx="200" cy="200" r="172" fill="url(#orbRingFill)" />
-        <circle cx="200" cy="200" r="172" stroke="#C7D2FE" strokeWidth="1" strokeDasharray="3 5" opacity="0.55" />
-        <circle cx="200" cy="200" r="130" stroke="#C7D2FE" strokeWidth="1" opacity="0.55" />
-        <circle cx="200" cy="200" r="88" stroke="#C7D2FE" strokeWidth="1" strokeDasharray="2 4" opacity="0.55" />
+        <circle
+          cx="200"
+          cy="200"
+          r="172"
+          stroke="#C7D2FE"
+          strokeWidth="1"
+          strokeDasharray="3 5"
+          opacity="0.55"
+        />
+        <circle
+          cx="200"
+          cy="200"
+          r="130"
+          stroke="#C7D2FE"
+          strokeWidth="1"
+          opacity="0.55"
+        />
+        <circle
+          cx="200"
+          cy="200"
+          r="88"
+          stroke="#C7D2FE"
+          strokeWidth="1"
+          strokeDasharray="2 4"
+          opacity="0.55"
+        />
       </svg>
 
       {/* Audio waveform behind the brand mark */}
@@ -43,7 +71,13 @@ export default function HeroOrb() {
                   background: "linear-gradient(180deg, #3B82F6, #06B6D4)",
                   opacity: 0.55 + envelope * 0.35,
                 }}
-                animate={{ height: [`${baseHeight * 0.6}px`, `${baseHeight}px`, `${baseHeight * 0.6}px`] }}
+                animate={{
+                  height: [
+                    `${baseHeight * 0.6}px`,
+                    `${baseHeight}px`,
+                    `${baseHeight * 0.6}px`,
+                  ],
+                }}
                 transition={{
                   duration: 1.1 + (i % 5) * 0.12,
                   repeat: Infinity,

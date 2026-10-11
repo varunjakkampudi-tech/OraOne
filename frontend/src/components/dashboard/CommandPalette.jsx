@@ -19,13 +19,49 @@ import { useEntitlements } from "@/lib/entitlements";
 
 // Static destinations so the palette doubles as fast navigation.
 const PAGES = [
-  { label: "Dashboard", to: "/app/dashboard", icon: LayoutDashboard, keywords: "home overview dashboard" },
-  { label: "AI Agents", to: "/app/agents", icon: Bot, keywords: "bots assistants" },
-  { label: "Conversations", to: "/app/conversations", icon: MessagesSquare, keywords: "chats inbox" },
-  { label: "Knowledge", to: "/app/knowledge-base", icon: BookOpen, keywords: "docs documents" },
-  { label: "Websites", to: "/app/knowledge-base/websites", icon: Globe, keywords: "crawl knowledge" },
-  { label: "Integrations", to: "/app/integrations", icon: Plug, keywords: "apps connect" },
-  { label: "Leads", to: "/app/leads", icon: Users, keywords: "contacts crm", feature: "crm" },
+  {
+    label: "Dashboard",
+    to: "/app/dashboard",
+    icon: LayoutDashboard,
+    keywords: "home overview dashboard",
+  },
+  {
+    label: "AI Agents",
+    to: "/app/agents",
+    icon: Bot,
+    keywords: "bots assistants",
+  },
+  {
+    label: "Conversations",
+    to: "/app/conversations",
+    icon: MessagesSquare,
+    keywords: "chats inbox",
+  },
+  {
+    label: "Knowledge",
+    to: "/app/knowledge-base",
+    icon: BookOpen,
+    keywords: "docs documents",
+  },
+  {
+    label: "Websites",
+    to: "/app/knowledge-base/websites",
+    icon: Globe,
+    keywords: "crawl knowledge",
+  },
+  {
+    label: "Integrations",
+    to: "/app/integrations",
+    icon: Plug,
+    keywords: "apps connect",
+  },
+  {
+    label: "Leads",
+    to: "/app/leads",
+    icon: Users,
+    keywords: "contacts crm",
+    feature: "crm",
+  },
 ];
 
 const GROUP_META = {
@@ -53,7 +89,12 @@ export default function CommandPalette({ open, onClose }) {
   const [q, setQ] = useState("");
   const [active, setActive] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState({ agents: [], knowledge: [], conversations: [], websites: [] });
+  const [data, setData] = useState({
+    agents: [],
+    knowledge: [],
+    conversations: [],
+    websites: [],
+  });
 
   // Load searchable resources once the palette opens.
   useEffect(() => {
@@ -67,13 +108,17 @@ export default function CommandPalette({ open, onClose }) {
         api.get("/conversations", { params: { limit: 50, sort: "recent" } }),
         api.get("/websites", { params: { limit: 100 } }),
       ];
-      const [agents, knowledge, conversations, websites] = await Promise.allSettled(calls);
+      const [agents, knowledge, conversations, websites] =
+        await Promise.allSettled(calls);
       if (!on) return;
       const val = (r) => (r.status === "fulfilled" ? r.value.data : null);
       setData({
         agents: normalize(val(agents), ["items", "agents"]),
         knowledge: normalize(val(knowledge), ["items", "knowledge_bases"]),
-        conversations: normalize(val(conversations), ["items", "conversations"]),
+        conversations: normalize(val(conversations), [
+          "items",
+          "conversations",
+        ]),
         websites: normalize(val(websites), ["items", "websites"]),
       });
       setLoading(false);
@@ -94,18 +139,22 @@ export default function CommandPalette({ open, onClose }) {
   // Build grouped, filtered results.
   const groups = useMemo(() => {
     const term = q.trim().toLowerCase();
-    const match = (s) => !term || String(s || "").toLowerCase().includes(term);
+    const match = (s) =>
+      !term ||
+      String(s || "")
+        .toLowerCase()
+        .includes(term);
 
-    const pages = PAGES
-      .filter((p) => !p.product || isProductEnabled(p.product))
+    const pages = PAGES.filter((p) => !p.product || isProductEnabled(p.product))
       .filter((p) => !p.feature || isFeatureEnabled(p.feature))
-      .filter((p) => match(`${p.label} ${p.keywords}`)).map((p) => ({
-      group: "pages",
-      id: p.to,
-      label: p.label,
-      icon: p.icon,
-      to: p.to,
-    }));
+      .filter((p) => match(`${p.label} ${p.keywords}`))
+      .map((p) => ({
+        group: "pages",
+        id: p.to,
+        label: p.label,
+        icon: p.icon,
+        to: p.to,
+      }));
 
     const proj = projects
       .filter((p) => match(p.name))
@@ -121,12 +170,23 @@ export default function CommandPalette({ open, onClose }) {
     const agents = data.agents
       .filter((a) => match(a.name))
       .slice(0, 6)
-      .map((a) => ({ group: "agents", id: a.id, label: a.name || "Untitled agent", sub: a.type, to: `/app/agents/${a.id}` }));
+      .map((a) => ({
+        group: "agents",
+        id: a.id,
+        label: a.name || "Untitled agent",
+        sub: a.type,
+        to: `/app/agents/${a.id}`,
+      }));
 
     const knowledge = data.knowledge
       .filter((k) => match(k.name))
       .slice(0, 6)
-      .map((k) => ({ group: "knowledge", id: k.id, label: k.name || "Knowledge base", to: `/app/knowledge-base/${k.id}` }));
+      .map((k) => ({
+        group: "knowledge",
+        id: k.id,
+        label: k.name || "Knowledge base",
+        to: `/app/knowledge-base/${k.id}`,
+      }));
 
     const conversations = data.conversations
       .filter((c) => match(c.title) || match(c.contact_name))
@@ -142,7 +202,13 @@ export default function CommandPalette({ open, onClose }) {
     const websites = data.websites
       .filter((w) => match(w.name) || match(w.base_url))
       .slice(0, 6)
-      .map((w) => ({ group: "websites", id: w.id, label: w.name || w.base_url, sub: w.base_url, to: "/app/websites" }));
+      .map((w) => ({
+        group: "websites",
+        id: w.id,
+        label: w.name || w.base_url,
+        sub: w.base_url,
+        to: "/app/websites",
+      }));
 
     const ordered = [
       ["pages", pages],
@@ -168,7 +234,7 @@ export default function CommandPalette({ open, onClose }) {
       onClose();
       nav(item.to);
     },
-    [nav, onClose]
+    [nav, onClose],
   );
 
   const onKeyDown = (e) => {
@@ -194,8 +260,14 @@ export default function CommandPalette({ open, onClose }) {
   let runningIndex = -1;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center p-4 pt-[12vh]" data-testid="command-palette">
-      <div className="absolute inset-0 bg-[#0F172A]/40 backdrop-blur-sm" onClick={onClose} />
+    <div
+      className="fixed inset-0 z-[60] flex items-start justify-center p-4 pt-[12vh]"
+      data-testid="command-palette"
+    >
+      <div
+        className="absolute inset-0 bg-[#0F172A]/40 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
         <div className="flex items-center gap-3 border-b border-[#F1F5F9] px-4">
           <Search size={18} className="text-[#94A3B8]" />
@@ -208,13 +280,18 @@ export default function CommandPalette({ open, onClose }) {
             className="flex-1 bg-transparent py-4 text-[15px] outline-none placeholder:text-[#94A3B8]"
             data-testid="command-palette-input"
           />
-          {loading && <Loader2 size={16} className="animate-spin text-[#94A3B8]" />}
+          {loading && (
+            <Loader2 size={16} className="animate-spin text-[#94A3B8]" />
+          )}
           <kbd className="hidden sm:block rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-1.5 py-0.5 text-[11px] text-[#94A3B8]">
             Esc
           </kbd>
         </div>
 
-        <div ref={listRef} className="max-h-[55vh] overflow-y-auto p-2 scrollbar-thin">
+        <div
+          ref={listRef}
+          className="max-h-[55vh] overflow-y-auto p-2 scrollbar-thin"
+        >
           {flat.length === 0 ? (
             <div className="px-4 py-10 text-center text-sm text-[#94A3B8]">
               {loading ? "Searching…" : "No results found."}
@@ -246,10 +323,21 @@ export default function CommandPalette({ open, onClose }) {
                           <Icon size={15} />
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[13.5px] font-medium text-[#0F172A]">{item.label}</span>
-                          {item.sub && <span className="block truncate text-[11px] text-[#94A3B8]">{item.sub}</span>}
+                          <span className="block truncate text-[13.5px] font-medium text-[#0F172A]">
+                            {item.label}
+                          </span>
+                          {item.sub && (
+                            <span className="block truncate text-[11px] text-[#94A3B8]">
+                              {item.sub}
+                            </span>
+                          )}
                         </span>
-                        {isActive && <CornerDownLeft size={14} className="shrink-0 text-[#2563EB]" />}
+                        {isActive && (
+                          <CornerDownLeft
+                            size={14}
+                            className="shrink-0 text-[#2563EB]"
+                          />
+                        )}
                       </button>
                     );
                   })}

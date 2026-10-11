@@ -45,18 +45,32 @@ export default function EntityListPage({
 
   return (
     <div className="space-y-6" data-testid="entity-list-page">
-      <PageHeader eyebrow={eyebrow} title={title} subtitle={subtitle} icon={icon} actions={actions} />
+      <PageHeader
+        eyebrow={eyebrow}
+        title={title}
+        subtitle={subtitle}
+        icon={icon}
+        actions={actions}
+      />
 
       {stats}
 
       {loading ? (
         <TableSkeleton rows={6} cols={skeletonCols} />
       ) : error ? (
-        <ErrorState message={typeof error === "string" ? error : undefined} onRetry={onRetry} />
+        <ErrorState
+          message={typeof error === "string" ? error : undefined}
+          onRetry={onRetry}
+        />
       ) : rows.length === 0 ? (
         emptyNode
       ) : (
-        <DataTable rows={rows} columns={columns} emptyState={emptyNode} {...tableProps} />
+        <DataTable
+          rows={rows}
+          columns={columns}
+          emptyState={emptyNode}
+          {...tableProps}
+        />
       )}
 
       {children}

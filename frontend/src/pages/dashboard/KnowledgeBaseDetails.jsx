@@ -108,7 +108,7 @@ export default function KnowledgeBaseDetails() {
   // Poll while any document is still being processed.
   useEffect(() => {
     const inFlight = docs.some(
-      (d) => d.status === "pending" || d.status === "processing"
+      (d) => d.status === "pending" || d.status === "processing",
     );
     if (!inFlight) return undefined;
     const t = setInterval(load, 1500);
@@ -123,7 +123,7 @@ export default function KnowledgeBaseDetails() {
 
   const unfiledCount = useMemo(
     () => docs.filter((d) => !d.folder_id).length,
-    [docs]
+    [docs],
   );
 
   /* ----------------------------- uploads ----------------------------- */
@@ -143,7 +143,9 @@ export default function KnowledgeBaseDetails() {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }
-      toast.success(`Uploaded ${list.length} file${list.length > 1 ? "s" : ""}`);
+      toast.success(
+        `Uploaded ${list.length} file${list.length > 1 ? "s" : ""}`,
+      );
       load();
     } catch (err) {
       toast.error(formatApiError(err.response?.data?.detail));
@@ -165,14 +167,19 @@ export default function KnowledgeBaseDetails() {
 
   /* --------------------- multi-source ingestion (Phase R) --------------------- */
   const addWebsite = async () => {
-    const url = window.prompt("Enter a public web page URL to import (https://…)");
+    const url = window.prompt(
+      "Enter a public web page URL to import (https://…)",
+    );
     if (!url || !url.trim()) return;
     setUploading(true);
     try {
       await api.post("/knowledge/sources/website", {
         knowledge_base_id: id,
         url: url.trim(),
-        folder_id: selectedFolder && selectedFolder !== "unfiled" ? selectedFolder : undefined,
+        folder_id:
+          selectedFolder && selectedFolder !== "unfiled"
+            ? selectedFolder
+            : undefined,
       });
       toast.success("Web page imported — indexing now");
       load();
@@ -194,7 +201,10 @@ export default function KnowledgeBaseDetails() {
         knowledge_base_id: id,
         title: textTitle.trim(),
         content: textBody,
-        folder_id: selectedFolder && selectedFolder !== "unfiled" ? selectedFolder : undefined,
+        folder_id:
+          selectedFolder && selectedFolder !== "unfiled"
+            ? selectedFolder
+            : undefined,
       });
       toast.success("Text added — indexing now");
       setTextOpen(false);
@@ -237,7 +247,11 @@ export default function KnowledgeBaseDetails() {
   };
 
   const deleteFolder = async (folder) => {
-    if (!window.confirm(`Delete folder "${folder.name}"? Documents inside move to Unfiled.`))
+    if (
+      !window.confirm(
+        `Delete folder "${folder.name}"? Documents inside move to Unfiled.`,
+      )
+    )
       return;
     try {
       await api.delete(`/knowledge-folders/${folder.id}`);
@@ -310,9 +324,15 @@ export default function KnowledgeBaseDetails() {
 
   const bulkMove = (folderId) => {
     if (folderId === "unfiled") {
-      bulk({ action: "move", clear_folder: true }, (n) => `Moved ${n} to Unfiled`);
+      bulk(
+        { action: "move", clear_folder: true },
+        (n) => `Moved ${n} to Unfiled`,
+      );
     } else {
-      bulk({ action: "move", folder_id: folderId }, (n) => `Moved ${n} document(s)`);
+      bulk(
+        { action: "move", folder_id: folderId },
+        (n) => `Moved ${n} document(s)`,
+      );
     }
   };
 
@@ -344,7 +364,12 @@ export default function KnowledgeBaseDetails() {
   };
 
   if (loading || !kb) {
-    return <div className="h-48 rounded-2xl skeleton" data-testid="kb-details-loading" />;
+    return (
+      <div
+        className="h-48 rounded-2xl skeleton"
+        data-testid="kb-details-loading"
+      />
+    );
   }
 
   const folderName = (fid) => folders.find((f) => f.id === fid)?.name;
@@ -377,7 +402,9 @@ export default function KnowledgeBaseDetails() {
             </span>
           </div>
           {kb.description && (
-            <p className="text-sm text-[#64748B] mt-1 max-w-2xl">{kb.description}</p>
+            <p className="text-sm text-[#64748B] mt-1 max-w-2xl">
+              {kb.description}
+            </p>
           )}
         </div>
         <div className="flex items-center gap-3 text-sm">
@@ -396,8 +423,15 @@ export default function KnowledgeBaseDetails() {
       </div>
 
       {/* Knowledge search */}
-      <form onSubmit={runSearch} className="relative" data-testid="kb-search-form">
-        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+      <form
+        onSubmit={runSearch}
+        className="relative"
+        data-testid="kb-search-form"
+      >
+        <Search
+          size={16}
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+        />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -454,10 +488,14 @@ export default function KnowledgeBaseDetails() {
                       {h.document}
                     </span>
                     {h.page != null && (
-                      <span className="text-[10px] text-[#94A3B8]">· page {h.page}</span>
+                      <span className="text-[10px] text-[#94A3B8]">
+                        · page {h.page}
+                      </span>
                     )}
                     {h.section && (
-                      <span className="text-[10px] text-[#94A3B8] truncate">· {h.section}</span>
+                      <span className="text-[10px] text-[#94A3B8] truncate">
+                        · {h.section}
+                      </span>
                     )}
                     {h.score != null && (
                       <span className="ml-auto text-[10px] text-[#94A3B8]">
@@ -465,7 +503,9 @@ export default function KnowledgeBaseDetails() {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-[#334155] line-clamp-3">{h.content}</p>
+                  <p className="text-sm text-[#334155] line-clamp-3">
+                    {h.content}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -501,7 +541,10 @@ export default function KnowledgeBaseDetails() {
         <p className="text-sm text-[#64748B] mt-1">
           PDF, DOCX, TXT, MD, CSV, XLSX, PPTX, JSON, HTML — up to 25 MB each
           {selectedFolder && selectedFolder !== "unfiled" && (
-            <> · uploading to <strong>{folderName(selectedFolder)}</strong></>
+            <>
+              {" "}
+              · uploading to <strong>{folderName(selectedFolder)}</strong>
+            </>
           )}
         </p>
         <button
@@ -545,7 +588,10 @@ export default function KnowledgeBaseDetails() {
       {/* Folders + documents */}
       <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-5">
         {/* Folders sidebar */}
-        <aside className="rounded-2xl border border-[#E2E8F0] bg-white p-2 h-max" data-testid="kb-folders">
+        <aside
+          className="rounded-2xl border border-[#E2E8F0] bg-white p-2 h-max"
+          data-testid="kb-folders"
+        >
           <div className="flex items-center justify-between px-2 py-1.5">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-[#94A3B8]">
               Folders
@@ -607,17 +653,23 @@ export default function KnowledgeBaseDetails() {
                 aria-label="Select all"
                 data-testid="kb-select-all"
               >
-                {allVisibleSelected ? <CheckSquare size={16} /> : <Square size={16} />}
+                {allVisibleSelected ? (
+                  <CheckSquare size={16} />
+                ) : (
+                  <Square size={16} />
+                )}
               </button>
               <h3 className="text-sm font-semibold text-[#0F172A]">
                 {selectedFolder === null
                   ? "All documents"
                   : selectedFolder === "unfiled"
-                  ? "Unfiled"
-                  : folderName(selectedFolder)}
+                    ? "Unfiled"
+                    : folderName(selectedFolder)}
               </h3>
             </div>
-            <span className="text-xs text-[#64748B]">{visibleDocs.length} shown</span>
+            <span className="text-xs text-[#64748B]">
+              {visibleDocs.length} shown
+            </span>
           </div>
 
           {/* Bulk action bar */}
@@ -634,11 +686,15 @@ export default function KnowledgeBaseDetails() {
                   onClick={() => setMoveOpen((v) => !v)}
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-[#BFDBFE] text-xs font-medium text-[#1D4ED8] hover:bg-[#F8FAFC]"
                 >
-                  <FolderInput size={13} /> Move <ChevronRight size={12} className="rotate-90" />
+                  <FolderInput size={13} /> Move{" "}
+                  <ChevronRight size={12} className="rotate-90" />
                 </button>
                 {moveOpen && (
                   <>
-                    <div className="fixed inset-0 z-10" onClick={() => setMoveOpen(false)} />
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setMoveOpen(false)}
+                    />
                     <div className="absolute left-0 top-9 z-20 w-48 rounded-xl bg-white border border-[#E2E8F0] shadow-xl py-1 text-[13px] max-h-64 overflow-y-auto">
                       <button
                         onClick={() => bulkMove("unfiled")}
@@ -652,11 +708,14 @@ export default function KnowledgeBaseDetails() {
                           onClick={() => bulkMove(f.id)}
                           className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-[#334155] hover:bg-[#F8FAFC]"
                         >
-                          <Folder size={13} /> <span className="truncate">{f.name}</span>
+                          <Folder size={13} />{" "}
+                          <span className="truncate">{f.name}</span>
                         </button>
                       ))}
                       {folders.length === 0 && (
-                        <p className="px-3 py-2 text-[11px] text-[#94A3B8]">No folders</p>
+                        <p className="px-3 py-2 text-[11px] text-[#94A3B8]">
+                          No folders
+                        </p>
                       )}
                     </div>
                   </>
@@ -745,9 +804,11 @@ export default function KnowledgeBaseDetails() {
                         </>
                       )}
                       {d.version > 1 && <> · v{d.version}</>}
-                      {d.folder_id && folderName(d.folder_id) && selectedFolder === null && (
-                        <> · {folderName(d.folder_id)}</>
-                      )}
+                      {d.folder_id &&
+                        folderName(d.folder_id) &&
+                        selectedFolder === null && (
+                          <> · {folderName(d.folder_id)}</>
+                        )}
                       {" · "}
                       {d.processing_completed_at
                         ? `Synced ${new Date(d.processing_completed_at).toLocaleDateString()}`
@@ -791,7 +852,9 @@ export default function KnowledgeBaseDetails() {
                           toast.success("Reprocessing started");
                           load();
                         } catch (err) {
-                          toast.error(formatApiError(err.response?.data?.detail));
+                          toast.error(
+                            formatApiError(err.response?.data?.detail),
+                          );
                         }
                       }}
                       className="px-3 py-1.5 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] text-xs font-medium text-[#0F172A]"
@@ -824,7 +887,11 @@ export default function KnowledgeBaseDetails() {
       )}
 
       {textOpen && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" role="dialog" aria-modal="true">
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+        >
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-[#0F172A] flex items-center gap-2">
@@ -839,7 +906,8 @@ export default function KnowledgeBaseDetails() {
               </button>
             </div>
             <p className="mt-1 text-sm text-[#64748B]">
-              Paste raw content or Q&amp;A. It will be chunked, embedded and searchable like any document.
+              Paste raw content or Q&amp;A. It will be chunked, embedded and
+              searchable like any document.
             </p>
             <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
               Title
@@ -899,7 +967,16 @@ function Stat({ label, value, icon: Icon }) {
   );
 }
 
-function FolderItem({ active, icon: Icon, label, count, color, onClick, onRename, onDelete }) {
+function FolderItem({
+  active,
+  icon: Icon,
+  label,
+  count,
+  color,
+  onClick,
+  onRename,
+  onDelete,
+}) {
   return (
     <div
       className={`group flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer transition-colors ${
@@ -1021,7 +1098,9 @@ function PreviewDrawer({ doc, onClose, onChanged }) {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <FileText size={16} className="text-[#475569] shrink-0" />
-              <h3 className="text-sm font-semibold text-[#0F172A] truncate">{doc.filename}</h3>
+              <h3 className="text-sm font-semibold text-[#0F172A] truncate">
+                {doc.filename}
+              </h3>
             </div>
             <p className="text-[11px] text-[#94A3B8] mt-0.5">
               {doc.file_type} · {humanSize(doc.file_size)}
@@ -1081,15 +1160,23 @@ function PreviewDrawer({ doc, onClose, onChanged }) {
             {/* metadata stats */}
             {Object.keys(meta).length > 0 && (
               <div className="grid grid-cols-2 gap-2">
-                {meta.pages != null && <MiniStat label="Pages" value={meta.pages} />}
+                {meta.pages != null && (
+                  <MiniStat label="Pages" value={meta.pages} />
+                )}
                 {meta.word_count != null && (
-                  <MiniStat label="Words" value={meta.word_count.toLocaleString()} />
+                  <MiniStat
+                    label="Words"
+                    value={meta.word_count.toLocaleString()}
+                  />
                 )}
                 {meta.chunk_count != null && (
                   <MiniStat label="Chunks" value={meta.chunk_count} />
                 )}
                 {meta.char_count != null && (
-                  <MiniStat label="Characters" value={meta.char_count.toLocaleString()} />
+                  <MiniStat
+                    label="Characters"
+                    value={meta.char_count.toLocaleString()}
+                  />
                 )}
               </div>
             )}
@@ -1097,7 +1184,9 @@ function PreviewDrawer({ doc, onClose, onChanged }) {
             {/* summary */}
             {data?.summary && (
               <Section icon={Sparkles} title="Summary">
-                <p className="text-sm text-[#334155] leading-relaxed">{data.summary}</p>
+                <p className="text-sm text-[#334155] leading-relaxed">
+                  {data.summary}
+                </p>
               </Section>
             )}
 
@@ -1168,15 +1257,22 @@ function PreviewDrawer({ doc, onClose, onChanged }) {
 
             {/* versions */}
             {versions.length > 0 && (
-              <Section icon={History} title={`Version history (${versions.length})`}>
+              <Section
+                icon={History}
+                title={`Version history (${versions.length})`}
+              >
                 <ul className="space-y-1.5">
                   {versions.map((v) => (
                     <li
                       key={v.id}
                       className="flex items-center justify-between text-xs px-3 py-2 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]"
                     >
-                      <span className="font-medium text-[#334155]">v{v.version}</span>
-                      <span className="text-[#94A3B8]">{humanSize(v.file_size)}</span>
+                      <span className="font-medium text-[#334155]">
+                        v{v.version}
+                      </span>
+                      <span className="text-[#94A3B8]">
+                        {humanSize(v.file_size)}
+                      </span>
                       <span className="text-[#94A3B8]">
                         {new Date(v.created_at).toLocaleDateString()}
                       </span>
@@ -1209,7 +1305,9 @@ function Section({ icon: Icon, title, children }) {
 function MiniStat({ label, value }) {
   return (
     <div className="px-3 py-2 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-      <p className="text-[10px] uppercase tracking-wide text-[#94A3B8]">{label}</p>
+      <p className="text-[10px] uppercase tracking-wide text-[#94A3B8]">
+        {label}
+      </p>
       <p className="text-sm font-semibold text-[#0F172A]">{value}</p>
     </div>
   );

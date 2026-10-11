@@ -1,5 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import { PartyPopper, CheckCircle2, Users, Rocket, ArrowRight } from "lucide-react";
+import {
+  PartyPopper,
+  CheckCircle2,
+  Users,
+  Rocket,
+  ArrowRight,
+} from "lucide-react";
 import { useSEO } from "@/lib/seo";
 import { AuthShell, GradientButton } from "@/components/auth/AuthShell";
 
@@ -48,7 +54,9 @@ export default function Welcome() {
             </span>
             <div>
               <p className="text-sm font-bold text-[#0F172A]">{s.title}</p>
-              <p className="mt-0.5 text-xs leading-snug text-[#64748B]">{s.desc}</p>
+              <p className="mt-0.5 text-xs leading-snug text-[#64748B]">
+                {s.desc}
+              </p>
             </div>
           </div>
         ))}
@@ -67,7 +75,10 @@ export default function Welcome() {
 
       <p className="mt-5 text-center text-sm text-[#64748B]">
         Need help getting started?{" "}
-        <Link to="/docs" className="font-semibold text-[#2563EB] hover:underline">
+        <Link
+          to="/docs"
+          className="font-semibold text-[#2563EB] hover:underline"
+        >
           View Getting Started Guide
         </Link>
       </p>

@@ -20,7 +20,10 @@ export const conversationsService = {
   },
 
   sendMessage: async (id, payload) => {
-    const { data } = await api.post(`/v2/conversations/${id}/messages`, payload);
+    const { data } = await api.post(
+      `/v2/conversations/${id}/messages`,
+      payload,
+    );
     return data;
   },
 

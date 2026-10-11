@@ -1,6 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
-import { PRIMARY_NAV, SECONDARY_NAV, resolveSection } from "@/constants/navigation";
+import {
+  PRIMARY_NAV,
+  SECONDARY_NAV,
+  resolveSection,
+} from "@/constants/navigation";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Breadcrumbs — derived entirely from the navigation config so every page
@@ -11,7 +15,9 @@ import { PRIMARY_NAV, SECONDARY_NAV, resolveSection } from "@/constants/navigati
 const FLAT = [...PRIMARY_NAV, ...SECONDARY_NAV];
 
 function labelForFlat(pathname) {
-  const hit = FLAT.find((n) => pathname === n.to || pathname.startsWith(n.to + "/"));
+  const hit = FLAT.find(
+    (n) => pathname === n.to || pathname.startsWith(n.to + "/"),
+  );
   return hit?.label || null;
 }
 
@@ -28,7 +34,9 @@ export default function Breadcrumbs() {
     crumbs.push({ label: section.label, to: section.root });
     // Which tab are we on?
     const tab = section.tabs.find((t) =>
-      t.end ? pathname === t.to : pathname === t.to || pathname.startsWith(t.to + "/")
+      t.end
+        ? pathname === t.to
+        : pathname === t.to || pathname.startsWith(t.to + "/"),
     );
     // Sort by longest match so nested tab wins over the overview tab.
     const best = [...section.tabs]
@@ -37,7 +45,11 @@ export default function Breadcrumbs() {
     const active = best || tab;
     if (active && active.to !== section.root) {
       crumbs.push({ label: active.label });
-    } else if (active && active.to === section.root && pathname !== section.root) {
+    } else if (
+      active &&
+      active.to === section.root &&
+      pathname !== section.root
+    ) {
       // deeper detail route under the section root, e.g. /app/agents/:id
       crumbs.push({ label: "Details" });
     }
@@ -56,15 +68,29 @@ export default function Breadcrumbs() {
           return (
             <li key={i} className="flex items-center gap-1">
               {c.to && !last ? (
-                <Link to={c.to} className="rounded font-medium text-sub transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40">
+                <Link
+                  to={c.to}
+                  className="rounded font-medium text-sub transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+                >
                   {c.label}
                 </Link>
               ) : (
-                <span aria-current={last ? "page" : undefined} className={last ? "font-semibold text-ink" : "font-medium text-sub"}>
+                <span
+                  aria-current={last ? "page" : undefined}
+                  className={
+                    last ? "font-semibold text-ink" : "font-medium text-sub"
+                  }
+                >
                   {c.label}
                 </span>
               )}
-              {!last && <ChevronRight size={13} className="text-[#CBD5E1]" aria-hidden="true" />}
+              {!last && (
+                <ChevronRight
+                  size={13}
+                  className="text-[#CBD5E1]"
+                  aria-hidden="true"
+                />
+              )}
             </li>
           );
         })}

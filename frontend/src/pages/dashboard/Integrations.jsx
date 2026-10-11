@@ -54,7 +54,14 @@ const CATEGORY_LABELS = {
   crm: "CRM & Business",
 };
 
-const CATEGORY_ORDER = ["all", "communication", "documents", "documentation", "development", "crm"];
+const CATEGORY_ORDER = [
+  "all",
+  "communication",
+  "documents",
+  "documentation",
+  "development",
+  "crm",
+];
 
 function iconFor(name) {
   return ICONS[name] || Plug;
@@ -108,7 +115,8 @@ export default function Integrations() {
     } else if (error) {
       const labels = {
         invalid_state: "Authorization expired — please try connecting again.",
-        token_exchange_failed: "Google rejected the authorization. Please retry.",
+        token_exchange_failed:
+          "Google rejected the authorization. Please retry.",
         missing_code: "Authorization was cancelled.",
         access_denied: "Authorization was cancelled.",
       };
@@ -133,7 +141,9 @@ export default function Integrations() {
       toast.success("Connected");
       await load();
     } catch (err) {
-      toast.error(formatApiError(err.response?.data?.detail) || "Connection failed");
+      toast.error(
+        formatApiError(err.response?.data?.detail) || "Connection failed",
+      );
     } finally {
       setProviderBusy(provider, false);
     }
@@ -144,7 +154,9 @@ export default function Integrations() {
     setProviderBusy(provider, true);
     try {
       await api.post(`/integrations/${integration.id}/sync`);
-      toast.success("Sync started — documents will appear in your Knowledge Base shortly.");
+      toast.success(
+        "Sync started — documents will appear in your Knowledge Base shortly.",
+      );
       // Give the background task a moment, then refresh status.
       setTimeout(load, 2500);
     } catch (err) {
@@ -156,15 +168,24 @@ export default function Integrations() {
 
   const disconnect = async (integration, provider, name) => {
     if (!integration) return;
-    if (!window.confirm(`Disconnect ${name}? Synced documents will be removed from your Knowledge Base.`)) return;
+    if (
+      !window.confirm(
+        `Disconnect ${name}? Synced documents will be removed from your Knowledge Base.`,
+      )
+    )
+      return;
     setProviderBusy(provider, true);
     try {
       const { data } = await api.delete(`/integrations/${integration.id}`);
-      toast.success(`Disconnected · ${data.documents_removed ?? 0} document(s) removed`);
+      toast.success(
+        `Disconnected · ${data.documents_removed ?? 0} document(s) removed`,
+      );
       setSelected(null);
       await load();
     } catch (err) {
-      toast.error(formatApiError(err.response?.data?.detail) || "Disconnect failed");
+      toast.error(
+        formatApiError(err.response?.data?.detail) || "Disconnect failed",
+      );
     } finally {
       setProviderBusy(provider, false);
     }
@@ -190,11 +211,15 @@ export default function Integrations() {
   }, [entries, q, cat]);
 
   const connected = useMemo(
-    () => entries.filter((e) => e.integration && e.integration.status !== "disconnected"),
-    [entries]
+    () =>
+      entries.filter(
+        (e) => e.integration && e.integration.status !== "disconnected",
+      ),
+    [entries],
   );
 
-  const selectedEntry = entries.find((e) => e.catalog.provider === selected) || null;
+  const selectedEntry =
+    entries.find((e) => e.catalog.provider === selected) || null;
 
   return (
     <div className="space-y-8" data-testid="integrations-dashboard">
@@ -213,8 +238,15 @@ export default function Integrations() {
 
       {/* Connected health grid */}
       {connected.length > 0 && (
-        <Section title="Connected" subtitle={`${connected.length} active integration(s)`} icon={Activity}>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4" data-testid="health-grid">
+        <Section
+          title="Connected"
+          subtitle={`${connected.length} active integration(s)`}
+          icon={Activity}
+        >
+          <div
+            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4"
+            data-testid="health-grid"
+          >
             {connected.map((e) => {
               return (
                 <div
@@ -229,9 +261,14 @@ export default function Integrations() {
                     </span>
                     <StatusPill status={e.integration.status} />
                   </div>
-                  <p className="mt-3 text-[14px] font-semibold text-[#0F172A]">{e.catalog.name}</p>
+                  <p className="mt-3 text-[14px] font-semibold text-[#0F172A]">
+                    {e.catalog.name}
+                  </p>
                   <p className="text-[11.5px] text-[#64748B] mt-0.5 flex items-center gap-1">
-                    <Clock size={10} /> {e.integration.last_synced_at ? `Synced ${timeAgo(e.integration.last_synced_at)}` : "Not synced yet"}
+                    <Clock size={10} />{" "}
+                    {e.integration.last_synced_at
+                      ? `Synced ${timeAgo(e.integration.last_synced_at)}`
+                      : "Not synced yet"}
                   </p>
                 </div>
               );
@@ -249,7 +286,10 @@ export default function Integrations() {
         <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 sm:p-5">
           <div className="flex flex-wrap items-center gap-3 mb-5">
             <div className="relative flex-1 min-w-[220px]">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+              <Search
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+              />
               <input
                 type="text"
                 value={q}
@@ -282,9 +322,13 @@ export default function Integrations() {
               <Loader2 size={22} className="animate-spin" />
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="int-grid">
+            <div
+              className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              data-testid="int-grid"
+            >
               {list.map((e) => {
-                const isConnected = e.integration && e.integration.status !== "disconnected";
+                const isConnected =
+                  e.integration && e.integration.status !== "disconnected";
                 return (
                   <motion.button
                     key={e.catalog.provider}
@@ -303,18 +347,30 @@ export default function Integrations() {
                       <span className="size-11 rounded-xl grid place-items-center bg-[#F5F7FB] ring-1 ring-[#EEF0F5]">
                         <ProviderGlyph entry={e} size={22} />
                       </span>
-                      <StatusPill status={isConnected ? e.integration.status : "disconnected"} />
+                      <StatusPill
+                        status={
+                          isConnected ? e.integration.status : "disconnected"
+                        }
+                      />
                     </div>
-                    <p className="mt-3 text-[14.5px] font-semibold text-[#0F172A]">{e.catalog.name}</p>
-                    <p className="text-[10.5px] text-[#94A3B8] uppercase tracking-wider font-bold">
-                      {CATEGORY_LABELS[e.catalog.category] || e.catalog.category}
+                    <p className="mt-3 text-[14.5px] font-semibold text-[#0F172A]">
+                      {e.catalog.name}
                     </p>
-                    <p className="mt-2 text-[12.5px] text-[#64748B] leading-snug">{e.catalog.description}</p>
+                    <p className="text-[10.5px] text-[#94A3B8] uppercase tracking-wider font-bold">
+                      {CATEGORY_LABELS[e.catalog.category] ||
+                        e.catalog.category}
+                    </p>
+                    <p className="mt-2 text-[12.5px] text-[#64748B] leading-snug">
+                      {e.catalog.description}
+                    </p>
                   </motion.button>
                 );
               })}
               {list.length === 0 && (
-                <div className="col-span-full py-10 flex flex-col items-center justify-center text-center" data-testid="int-empty-state">
+                <div
+                  className="col-span-full py-10 flex flex-col items-center justify-center text-center"
+                  data-testid="int-empty-state"
+                >
                   <div className="size-14 rounded-full grid place-items-center bg-[#EFF6FF]">
                     <Plug size={26} className="text-[#2563EB]" />
                   </div>
@@ -358,9 +414,15 @@ export default function Integrations() {
             busy={!!busy[selectedEntry.catalog.provider]}
             onClose={() => setSelected(null)}
             onConnect={() => connect(selectedEntry.catalog.provider)}
-            onSync={() => sync(selectedEntry.integration, selectedEntry.catalog.provider)}
+            onSync={() =>
+              sync(selectedEntry.integration, selectedEntry.catalog.provider)
+            }
             onDisconnect={() =>
-              disconnect(selectedEntry.integration, selectedEntry.catalog.provider, selectedEntry.catalog.name)
+              disconnect(
+                selectedEntry.integration,
+                selectedEntry.catalog.provider,
+                selectedEntry.catalog.name,
+              )
             }
           />
         )}
@@ -370,7 +432,14 @@ export default function Integrations() {
 }
 
 /* ──────────────────────────────────────────────────────────────────── */
-function DetailDrawer({ entry, busy, onClose, onConnect, onSync, onDisconnect }) {
+function DetailDrawer({
+  entry,
+  busy,
+  onClose,
+  onConnect,
+  onSync,
+  onDisconnect,
+}) {
   const { catalog, integration } = entry;
   const isConnected = integration && integration.status !== "disconnected";
   const [logs, setLogs] = useState([]);
@@ -418,17 +487,29 @@ function DetailDrawer({ entry, busy, onClose, onConnect, onSync, onDisconnect })
 
   const removeSelected = async () => {
     if (!integration || removalSel.size === 0) return;
-    if (!window.confirm(`Remove ${removalSel.size} item(s) from your Knowledge Base?`)) return;
+    if (
+      !window.confirm(
+        `Remove ${removalSel.size} item(s) from your Knowledge Base?`,
+      )
+    )
+      return;
     setRemoving(true);
     try {
-      const { data } = await api.post(`/integrations/${integration.id}/items/remove`, {
-        external_ids: Array.from(removalSel),
-      });
-      toast.success(`Removed · ${data.documents_removed ?? 0} document(s) purged`);
+      const { data } = await api.post(
+        `/integrations/${integration.id}/items/remove`,
+        {
+          external_ids: Array.from(removalSel),
+        },
+      );
+      toast.success(
+        `Removed · ${data.documents_removed ?? 0} document(s) purged`,
+      );
       setRemovalSel(new Set());
       await loadItems();
     } catch (err) {
-      toast.error(formatApiError(err.response?.data?.detail) || "Remove failed");
+      toast.error(
+        formatApiError(err.response?.data?.detail) || "Remove failed",
+      );
     } finally {
       setRemoving(false);
     }
@@ -458,35 +539,59 @@ function DetailDrawer({ entry, busy, onClose, onConnect, onSync, onDisconnect })
                 <ProviderGlyph entry={entry} size={24} />
               </span>
               <div>
-                <h3 className="text-lg font-bold text-[#0F172A]">{catalog.name}</h3>
+                <h3 className="text-lg font-bold text-[#0F172A]">
+                  {catalog.name}
+                </h3>
                 <p className="text-[11px] text-[#94A3B8] uppercase tracking-wider font-bold">
                   {CATEGORY_LABELS[catalog.category] || catalog.category}
                 </p>
               </div>
             </div>
-            <button onClick={onClose} aria-label="Close panel" className="text-[#94A3B8] hover:text-[#0F172A]" data-testid="int-detail-close">
+            <button
+              onClick={onClose}
+              aria-label="Close panel"
+              className="text-[#94A3B8] hover:text-[#0F172A]"
+              data-testid="int-detail-close"
+            >
               <X size={18} />
             </button>
           </div>
-          <StatusPill status={isConnected ? integration.status : "disconnected"} large />
+          <StatusPill
+            status={isConnected ? integration.status : "disconnected"}
+            large
+          />
         </div>
 
         <div className="p-6 space-y-6">
           <div>
-            <p className="text-[11px] font-bold tracking-[0.2em] text-[#2563EB] mb-2">OVERVIEW</p>
-            <p className="text-[13.5px] text-[#475569] leading-relaxed">{catalog.description}</p>
+            <p className="text-[11px] font-bold tracking-[0.2em] text-[#2563EB] mb-2">
+              OVERVIEW
+            </p>
+            <p className="text-[13.5px] text-[#475569] leading-relaxed">
+              {catalog.description}
+            </p>
             {!catalog.available && (
               <p className="mt-3 text-[12px] text-[#92400E] bg-[#FEF3C7] rounded-lg px-3 py-2">
-                Runs in demo mode — connecting imports a small sample document set so you can test
-                end-to-end retrieval. Real OAuth ships next.
+                Runs in demo mode — connecting imports a small sample document
+                set so you can test end-to-end retrieval. Real OAuth ships next.
               </p>
             )}
           </div>
 
           {isConnected && (
             <div className="grid grid-cols-2 gap-3">
-              <Stat label="Account" value={integration.external_account || "—"} />
-              <Stat label="Last sync" value={integration.last_synced_at ? timeAgo(integration.last_synced_at) : "Never"} />
+              <Stat
+                label="Account"
+                value={integration.external_account || "—"}
+              />
+              <Stat
+                label="Last sync"
+                value={
+                  integration.last_synced_at
+                    ? timeAgo(integration.last_synced_at)
+                    : "Never"
+                }
+              />
               <Stat label="Schedule" value={integration.sync_schedule} />
               <Stat label="Mode" value={integration.connection_type} />
             </div>
@@ -506,7 +611,11 @@ function DetailDrawer({ entry, busy, onClose, onConnect, onSync, onDisconnect })
               data-testid="int-connect-cta"
               className="w-full px-4 py-3 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-60 text-white text-sm font-semibold inline-flex items-center justify-center gap-1.5"
             >
-              {busy ? <Loader2 size={14} className="animate-spin" /> : <Plug size={14} />}
+              {busy ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Plug size={14} />
+              )}
               Connect {catalog.name}
             </button>
           ) : (
@@ -525,7 +634,12 @@ function DetailDrawer({ entry, busy, onClose, onConnect, onSync, onDisconnect })
                 data-testid="int-sync"
                 className="px-3 py-2.5 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#0F172A] text-[13px] font-semibold inline-flex items-center justify-center gap-1.5"
               >
-                {busy ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />} Sync Now
+                {busy ? (
+                  <Loader2 size={13} className="animate-spin" />
+                ) : (
+                  <Sparkles size={13} />
+                )}{" "}
+                Sync Now
               </button>
               <button
                 onClick={removeSelected}
@@ -533,7 +647,11 @@ function DetailDrawer({ entry, busy, onClose, onConnect, onSync, onDisconnect })
                 data-testid="int-remove-selected"
                 className="px-3 py-2.5 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] disabled:opacity-50 text-[#0F172A] text-[13px] font-semibold inline-flex items-center justify-center gap-1.5"
               >
-                {removing ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                {removing ? (
+                  <Loader2 size={13} className="animate-spin" />
+                ) : (
+                  <Trash2 size={13} />
+                )}
                 Remove{removalSel.size > 0 ? ` (${removalSel.size})` : ""}
               </button>
               <button
@@ -565,8 +683,8 @@ function DetailDrawer({ entry, busy, onClose, onConnect, onSync, onDisconnect })
               ) : items.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-[#E2E8F0] px-4 py-6 text-center">
                   <p className="text-[12.5px] text-[#64748B]">
-                    Nothing selected yet. Click <b>Browse Files</b> to choose folders or
-                    files to sync.
+                    Nothing selected yet. Click <b>Browse Files</b> to choose
+                    folders or files to sync.
                   </p>
                 </div>
               ) : (
@@ -584,13 +702,26 @@ function DetailDrawer({ entry, busy, onClose, onConnect, onSync, onDisconnect })
                           className="flex-shrink-0 text-[#2563EB]"
                           data-testid={`synced-check-${it.external_id}`}
                         >
-                          {checked ? <CheckSquare size={16} /> : <Square size={16} className="text-[#CBD5E1]" />}
+                          {checked ? (
+                            <CheckSquare size={16} />
+                          ) : (
+                            <Square size={16} className="text-[#CBD5E1]" />
+                          )}
                         </button>
-                        <ItIcon size={15} className={it.is_folder ? "text-[#2563EB]" : "text-[#64748B]"} />
+                        <ItIcon
+                          size={15}
+                          className={
+                            it.is_folder ? "text-[#2563EB]" : "text-[#64748B]"
+                          }
+                        />
                         <div className="min-w-0 flex-1">
-                          <p className="text-[12.5px] font-medium text-[#0F172A] truncate">{it.name}</p>
+                          <p className="text-[12.5px] font-medium text-[#0F172A] truncate">
+                            {it.name}
+                          </p>
                           {it.path && (
-                            <p className="text-[10.5px] text-[#94A3B8] truncate">{it.path}</p>
+                            <p className="text-[10.5px] text-[#94A3B8] truncate">
+                              {it.path}
+                            </p>
                           )}
                         </div>
                         <SyncedStatusPill status={it.status} />
@@ -605,15 +736,28 @@ function DetailDrawer({ entry, busy, onClose, onConnect, onSync, onDisconnect })
           {/* Sync logs */}
           {isConnected && logs.length > 0 && (
             <div>
-              <p className="text-[11px] font-bold tracking-[0.2em] text-[#2563EB] mb-3">RECENT ACTIVITY</p>
+              <p className="text-[11px] font-bold tracking-[0.2em] text-[#2563EB] mb-3">
+                RECENT ACTIVITY
+              </p>
               <div className="space-y-1.5">
                 {logs.map((l) => (
-                  <div key={l.id} className="flex items-start gap-2 text-[12.5px]">
-                    <span className={`mt-1 size-1.5 rounded-full flex-shrink-0 ${l.level === "error" ? "bg-[#DC2626]" : l.level === "warning" ? "bg-[#F59E0B]" : "bg-[#16A34A]"}`} />
+                  <div
+                    key={l.id}
+                    className="flex items-start gap-2 text-[12.5px]"
+                  >
+                    <span
+                      className={`mt-1 size-1.5 rounded-full flex-shrink-0 ${l.level === "error" ? "bg-[#DC2626]" : l.level === "warning" ? "bg-[#F59E0B]" : "bg-[#16A34A]"}`}
+                    />
                     <div className="min-w-0">
-                      <span className="font-semibold text-[#0F172A]">{l.event}</span>
-                      {l.message && <span className="text-[#64748B]"> — {l.message}</span>}
-                      <span className="block text-[10.5px] text-[#94A3B8]">{timeAgo(l.created_at)}</span>
+                      <span className="font-semibold text-[#0F172A]">
+                        {l.event}
+                      </span>
+                      {l.message && (
+                        <span className="text-[#64748B]"> — {l.message}</span>
+                      )}
+                      <span className="block text-[10.5px] text-[#94A3B8]">
+                        {timeAgo(l.created_at)}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -705,18 +849,27 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
     async ({ parent, q, recent }) => {
       setLoading(true);
       try {
-        const { data: res } = await api.get(`/integrations/${integrationId}/browse`, {
-          params: { parent: parent ?? undefined, q: q || undefined, recent: recent || undefined },
-        });
+        const { data: res } = await api.get(
+          `/integrations/${integrationId}/browse`,
+          {
+            params: {
+              parent: parent ?? undefined,
+              q: q || undefined,
+              recent: recent || undefined,
+            },
+          },
+        );
         setData(res.items || []);
       } catch (err) {
-        toast.error(formatApiError(err.response?.data?.detail) || "Browse failed");
+        toast.error(
+          formatApiError(err.response?.data?.detail) || "Browse failed",
+        );
         setData([]);
       } finally {
         setLoading(false);
       }
     },
-    [integrationId]
+    [integrationId],
   );
 
   useEffect(() => {
@@ -792,7 +945,10 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
       toast.success("Selection saved");
       onSaved({ triggerSync });
     } catch (err) {
-      toast.error(formatApiError(err.response?.data?.detail) || "Failed to save selection");
+      toast.error(
+        formatApiError(err.response?.data?.detail) ||
+          "Failed to save selection",
+      );
     } finally {
       setSaving(false);
     }
@@ -818,11 +974,16 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
         <div className="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
           <div>
             <h3 className="text-[15px] font-bold text-[#0F172A]">
-              {step === "select" ? "Select content to sync" : "Confirm selection"}
+              {step === "select"
+                ? "Select content to sync"
+                : "Confirm selection"}
             </h3>
             <p className="text-[12px] text-[#64748B]">{providerName}</p>
           </div>
-          <button onClick={onClose} className="text-[#94A3B8] hover:text-[#0F172A]">
+          <button
+            onClick={onClose}
+            className="text-[#94A3B8] hover:text-[#0F172A]"
+          >
             <X size={18} />
           </button>
         </div>
@@ -843,8 +1004,12 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                         : "border-[#E2E8F0] hover:border-[#2563EB]/40"
                     }`}
                   >
-                    <p className="text-[12.5px] font-semibold text-[#0F172A]">{m.label}</p>
-                    <p className="text-[10.5px] text-[#64748B] leading-tight mt-0.5">{m.hint}</p>
+                    <p className="text-[12.5px] font-semibold text-[#0F172A]">
+                      {m.label}
+                    </p>
+                    <p className="text-[10.5px] text-[#64748B] leading-tight mt-0.5">
+                      {m.hint}
+                    </p>
                   </button>
                 ))}
               </div>
@@ -853,9 +1018,9 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
             {mode === "full" ? (
               <div className="px-5 py-8 flex-1">
                 <div className="rounded-xl border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 text-[12.5px] text-[#92400E]">
-                  Full Drive sync imports <b>all</b> supported files. This may include
-                  sensitive documents and increases storage/embedding costs. Filters below
-                  still apply.
+                  Full Drive sync imports <b>all</b> supported files. This may
+                  include sensitive documents and increases storage/embedding
+                  costs. Filters below still apply.
                 </div>
                 <FiltersPanel
                   options={options}
@@ -878,7 +1043,9 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                         }}
                         data-testid={`browse-tab-${t}`}
                         className={`px-3 py-1.5 rounded-md text-[12px] font-semibold capitalize ${
-                          tab === t ? "bg-white text-[#2563EB] shadow-sm" : "text-[#64748B]"
+                          tab === t
+                            ? "bg-white text-[#2563EB] shadow-sm"
+                            : "text-[#64748B]"
                         }`}
                       >
                         {t}
@@ -887,7 +1054,10 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                   </div>
                   {tab === "browse" && (
                     <div className="relative flex-1">
-                      <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+                      <Search
+                        size={13}
+                        className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+                      />
                       <input
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -901,7 +1071,9 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                     onClick={() => setShowFilters((v) => !v)}
                     data-testid="browse-filters-toggle"
                     className={`px-2.5 py-1.5 rounded-lg border text-[12px] font-semibold inline-flex items-center gap-1 ${
-                      showFilters ? "border-[#2563EB] text-[#2563EB] bg-[#EFF6FF]" : "border-[#E2E8F0] text-[#475569]"
+                      showFilters
+                        ? "border-[#2563EB] text-[#2563EB] bg-[#EFF6FF]"
+                        : "border-[#E2E8F0] text-[#475569]"
                     }`}
                   >
                     <SlidersHorizontal size={12} /> Filters
@@ -921,10 +1093,16 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                     )}
                     {stack.map((s, i) => (
                       <span key={i} className="inline-flex items-center gap-1">
-                        {i > 0 && <ChevronRight size={11} className="text-[#CBD5E1]" />}
+                        {i > 0 && (
+                          <ChevronRight size={11} className="text-[#CBD5E1]" />
+                        )}
                         <button
                           onClick={() => goTo(i)}
-                          className={i === stack.length - 1 ? "font-semibold text-[#0F172A]" : "hover:text-[#2563EB]"}
+                          className={
+                            i === stack.length - 1
+                              ? "font-semibold text-[#0F172A]"
+                              : "hover:text-[#2563EB]"
+                          }
                         >
                           {s.name}
                         </button>
@@ -935,7 +1113,11 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
 
                 {showFilters && (
                   <div className="px-5 pt-2">
-                    <FiltersPanel options={options} setOptions={setOptions} toggleFileType={toggleFileType} />
+                    <FiltersPanel
+                      options={options}
+                      setOptions={setOptions}
+                      toggleFileType={toggleFileType}
+                    />
                   </div>
                 )}
 
@@ -963,22 +1145,39 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                           >
                             <button
                               onClick={() =>
-                                item.is_folder ? toggleFolder(item) : toggleFile(item)
+                                item.is_folder
+                                  ? toggleFolder(item)
+                                  : toggleFile(item)
                               }
                               data-testid={`browse-check-${item.external_id}`}
                               className="text-[#2563EB] flex-shrink-0"
                             >
-                              {selectedF ? <CheckSquare size={16} /> : <Square size={16} className="text-[#CBD5E1]" />}
+                              {selectedF ? (
+                                <CheckSquare size={16} />
+                              ) : (
+                                <Square size={16} className="text-[#CBD5E1]" />
+                              )}
                             </button>
-                            <ItIcon size={16} className={item.is_folder ? "text-[#2563EB]" : "text-[#64748B]"} />
+                            <ItIcon
+                              size={16}
+                              className={
+                                item.is_folder
+                                  ? "text-[#2563EB]"
+                                  : "text-[#64748B]"
+                              }
+                            />
                             <button
                               onClick={() => item.is_folder && openFolder(item)}
                               className="min-w-0 flex-1 text-left"
                               disabled={!item.is_folder}
                             >
-                              <p className="text-[12.5px] font-medium text-[#0F172A] truncate">{item.name}</p>
+                              <p className="text-[12.5px] font-medium text-[#0F172A] truncate">
+                                {item.name}
+                              </p>
                               {item.size != null && (
-                                <p className="text-[10px] text-[#94A3B8]">{formatBytes(item.size)}</p>
+                                <p className="text-[10px] text-[#94A3B8]">
+                                  {formatBytes(item.size)}
+                                </p>
                               )}
                             </button>
                             {item.is_folder && (
@@ -1017,10 +1216,16 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
           /* Confirm step */
           <div className="flex-1 overflow-y-auto px-5 py-5">
             <div className="rounded-xl border border-[#E2E8F0] divide-y divide-[#F1F5F9]">
-              <ConfirmRow label="Sync strategy" value={SYNC_MODES.find((m) => m.key === mode)?.label} />
+              <ConfirmRow
+                label="Sync strategy"
+                value={SYNC_MODES.find((m) => m.key === mode)?.label}
+              />
               {mode !== "full" && (
                 <>
-                  <ConfirmRow label="Folders selected" value={`${folders.size}`} />
+                  <ConfirmRow
+                    label="Folders selected"
+                    value={`${folders.size}`}
+                  />
                   <ConfirmRow label="Files selected" value={`${files.size}`} />
                 </>
               )}
@@ -1029,35 +1234,52 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                 value={
                   options.file_types && options.file_types.length
                     ? options.file_types
-                        .map((k) => FILE_TYPE_OPTIONS.find((o) => o.key === k)?.label || k)
+                        .map(
+                          (k) =>
+                            FILE_TYPE_OPTIONS.find((o) => o.key === k)?.label ||
+                            k,
+                        )
                         .join(", ")
                     : "All supported"
                 }
               />
-              <ConfirmRow label="Max size" value={`${options.max_size_mb} MB`} />
+              <ConfirmRow
+                label="Max size"
+                value={`${options.max_size_mb} MB`}
+              />
               <ConfirmRow
                 label="Excludes"
-                value={[
-                  options.ignore_images && "images",
-                  options.ignore_videos && "videos",
-                  options.ignore_trash && "trash",
-                  options.ignore_shared && "shared",
-                ]
-                  .filter(Boolean)
-                  .join(", ") || "none"}
+                value={
+                  [
+                    options.ignore_images && "images",
+                    options.ignore_videos && "videos",
+                    options.ignore_trash && "trash",
+                    options.ignore_shared && "shared",
+                  ]
+                    .filter(Boolean)
+                    .join(", ") || "none"
+                }
               />
             </div>
             {mode !== "full" && totalSelected > 0 && (
               <div className="mt-4">
-                <p className="text-[11px] font-bold tracking-[0.15em] text-[#2563EB] mb-2">SELECTED</p>
+                <p className="text-[11px] font-bold tracking-[0.15em] text-[#2563EB] mb-2">
+                  SELECTED
+                </p>
                 <div className="flex flex-wrap gap-1.5">
                   {Array.from(folders.values()).map((f) => (
-                    <span key={f.external_id} className="inline-flex items-center gap-1 text-[11.5px] bg-[#EFF6FF] text-[#1D4ED8] px-2 py-1 rounded-lg">
+                    <span
+                      key={f.external_id}
+                      className="inline-flex items-center gap-1 text-[11.5px] bg-[#EFF6FF] text-[#1D4ED8] px-2 py-1 rounded-lg"
+                    >
                       <Folder size={11} /> {f.name}
                     </span>
                   ))}
                   {Array.from(files.values()).map((f) => (
-                    <span key={f.external_id} className="inline-flex items-center gap-1 text-[11.5px] bg-[#F1F5F9] text-[#475569] px-2 py-1 rounded-lg">
+                    <span
+                      key={f.external_id}
+                      className="inline-flex items-center gap-1 text-[11.5px] bg-[#F1F5F9] text-[#475569] px-2 py-1 rounded-lg"
+                    >
                       <FileText size={11} /> {f.name}
                     </span>
                   ))}
@@ -1085,7 +1307,11 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                   data-testid="browse-start-sync"
                   className="px-4 py-2 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-60 text-white text-[13px] font-semibold inline-flex items-center gap-1.5"
                 >
-                  {saving ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                  {saving ? (
+                    <Loader2 size={13} className="animate-spin" />
+                  ) : (
+                    <Sparkles size={13} />
+                  )}
                   Save & Sync
                 </button>
               </div>
@@ -1099,8 +1325,12 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
 
 function FiltersPanel({ options, setOptions, toggleFileType, alwaysOpen }) {
   return (
-    <div className={`rounded-xl border border-[#E2E8F0] p-3 ${alwaysOpen ? "mt-4" : ""} bg-[#FAFBFC]`}>
-      <p className="text-[11px] font-bold tracking-[0.15em] text-[#475569] mb-2">FILE TYPES</p>
+    <div
+      className={`rounded-xl border border-[#E2E8F0] p-3 ${alwaysOpen ? "mt-4" : ""} bg-[#FAFBFC]`}
+    >
+      <p className="text-[11px] font-bold tracking-[0.15em] text-[#475569] mb-2">
+        FILE TYPES
+      </p>
       <div className="flex flex-wrap gap-1.5 mb-3">
         {FILE_TYPE_OPTIONS.map((o) => {
           const active = options.file_types?.includes(o.key);
@@ -1109,7 +1339,9 @@ function FiltersPanel({ options, setOptions, toggleFileType, alwaysOpen }) {
               key={o.key}
               onClick={() => toggleFileType(o.key)}
               className={`px-2.5 py-1 rounded-full text-[11.5px] font-semibold border ${
-                active ? "border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]" : "border-[#E2E8F0] text-[#64748B]"
+                active
+                  ? "border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]"
+                  : "border-[#E2E8F0] text-[#64748B]"
               }`}
             >
               {o.label}
@@ -1148,13 +1380,18 @@ function FiltersPanel({ options, setOptions, toggleFileType, alwaysOpen }) {
         />
       </div>
       <div className="mt-3 flex items-center gap-2">
-        <span className="text-[11.5px] text-[#475569] font-medium">Max file size</span>
+        <span className="text-[11.5px] text-[#475569] font-medium">
+          Max file size
+        </span>
         <input
           type="number"
           min={1}
           value={options.max_size_mb ?? ""}
           onChange={(e) =>
-            setOptions((o) => ({ ...o, max_size_mb: Number(e.target.value) || null }))
+            setOptions((o) => ({
+              ...o,
+              max_size_mb: Number(e.target.value) || null,
+            }))
           }
           className="w-16 px-2 py-1 rounded-lg border border-[#E2E8F0] text-[12px] focus:border-[#2563EB] focus:outline-none"
         />
@@ -1202,18 +1439,37 @@ function formatBytes(n) {
 function Stat({ label, value }) {
   return (
     <div className="px-3 py-2.5 rounded-xl border border-[#E2E8F0]">
-      <p className="text-[10.5px] text-[#94A3B8] uppercase tracking-wider font-bold">{label}</p>
-      <p className="text-[13px] font-semibold text-[#0F172A] truncate capitalize">{value}</p>
+      <p className="text-[10.5px] text-[#94A3B8] uppercase tracking-wider font-bold">
+        {label}
+      </p>
+      <p className="text-[13px] font-semibold text-[#0F172A] truncate capitalize">
+        {value}
+      </p>
     </div>
   );
 }
 
 function StatusPill({ status, large }) {
   const map = {
-    connected: { bg: "#DCFCE7", dot: "#16A34A", text: "#15803D", label: "Connected" },
-    syncing: { bg: "#DBEAFE", dot: "#2563EB", text: "#1D4ED8", label: "Syncing" },
+    connected: {
+      bg: "#DCFCE7",
+      dot: "#16A34A",
+      text: "#15803D",
+      label: "Connected",
+    },
+    syncing: {
+      bg: "#DBEAFE",
+      dot: "#2563EB",
+      text: "#1D4ED8",
+      label: "Syncing",
+    },
     error: { bg: "#FEE2E2", dot: "#DC2626", text: "#B91C1C", label: "Error" },
-    disconnected: { bg: "#F1F5F9", dot: "#94A3B8", text: "#64748B", label: "Not Connected" },
+    disconnected: {
+      bg: "#F1F5F9",
+      dot: "#94A3B8",
+      text: "#64748B",
+      label: "Not Connected",
+    },
   };
   const s = map[status] || map.disconnected;
   return (

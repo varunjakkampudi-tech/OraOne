@@ -63,7 +63,9 @@ export default function Footer() {
       toast.success("You're in! Welcome to OraOne updates.");
       setEmail("");
     } catch (err) {
-      toast.error(formatApiError(err.response?.data?.detail) || "Subscription failed");
+      toast.error(
+        formatApiError(err.response?.data?.detail) || "Subscription failed",
+      );
     } finally {
       setBusy(false);
     }
@@ -76,7 +78,8 @@ export default function Footer() {
           <div className="lg:col-span-4">
             <Logo light className="h-10" />
             <p className="mt-5 text-sm text-white/70 leading-relaxed max-w-sm">
-              AI chat agents for your website. Automate conversations, capture leads, book appointments — grow your business 24/7.
+              AI chat agents for your website. Automate conversations, capture
+              leads, book appointments — grow your business 24/7.
             </p>
             <form onSubmit={subscribe} className="mt-6 flex gap-2 max-w-sm">
               <input
@@ -105,7 +108,12 @@ export default function Footer() {
                   aria-label={social.label}
                   className="size-9 grid place-items-center rounded-full bg-white/5 hover:bg-white/10 transition-colors"
                 >
-                  <SimpleIcon slug={social.slug} size={16} color="#FFFFFF" title={social.label} />
+                  <SimpleIcon
+                    slug={social.slug}
+                    size={16}
+                    color="#FFFFFF"
+                    title={social.label}
+                  />
                 </a>
               ))}
             </div>
@@ -114,11 +122,16 @@ export default function Footer() {
           <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-8">
             {columns.map((col) => (
               <div key={col.title}>
-                <h3 className="text-sm font-semibold text-white mb-4">{col.title}</h3>
+                <h3 className="text-sm font-semibold text-white mb-4">
+                  {col.title}
+                </h3>
                 <ul className="space-y-3">
                   {col.links.map((l, i) => (
                     <li key={i}>
-                      <Link to={l.to} className="text-sm text-white/65 hover:text-white transition-colors">
+                      <Link
+                        to={l.to}
+                        className="text-sm text-white/65 hover:text-white transition-colors"
+                      >
                         {l.label}
                       </Link>
                     </li>
@@ -130,13 +143,40 @@ export default function Footer() {
         </div>
 
         <div className="mt-16 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-white/55">© 2026 OraOne Technologies Pvt. Ltd. All rights reserved.</p>
+          <p className="text-xs text-white/55">
+            © 2026 OraOne Technologies Pvt. Ltd. All rights reserved.
+          </p>
           <div className="flex items-center gap-5">
-            <Link to="/privacy" className="text-xs text-white/55 hover:text-white">Privacy Policy</Link>
-            <Link to="/terms" className="text-xs text-white/55 hover:text-white">Terms of Service</Link>
-            <Link to="/security" className="text-xs text-white/55 hover:text-white">Security</Link>
-            <Link to="/cookie-policy" className="text-xs text-white/55 hover:text-white">Cookie Policy</Link>
-            <Link to="/data-deletion" className="text-xs text-white/55 hover:text-white">Data Deletion</Link>
+            <Link
+              to="/privacy"
+              className="text-xs text-white/55 hover:text-white"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              to="/terms"
+              className="text-xs text-white/55 hover:text-white"
+            >
+              Terms of Service
+            </Link>
+            <Link
+              to="/security"
+              className="text-xs text-white/55 hover:text-white"
+            >
+              Security
+            </Link>
+            <Link
+              to="/cookie-policy"
+              className="text-xs text-white/55 hover:text-white"
+            >
+              Cookie Policy
+            </Link>
+            <Link
+              to="/data-deletion"
+              className="text-xs text-white/55 hover:text-white"
+            >
+              Data Deletion
+            </Link>
           </div>
         </div>
       </div>

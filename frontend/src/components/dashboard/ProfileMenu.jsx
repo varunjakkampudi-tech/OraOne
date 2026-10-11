@@ -26,9 +26,15 @@ export default function ProfileMenu() {
     let alive = true;
     superAdminApi
       .me()
-      .then(() => { if (alive) setIsPlatformAdmin(true); })
-      .catch(() => { if (alive) setIsPlatformAdmin(false); });
-    return () => { alive = false; };
+      .then(() => {
+        if (alive) setIsPlatformAdmin(true);
+      })
+      .catch(() => {
+        if (alive) setIsPlatformAdmin(false);
+      });
+    return () => {
+      alive = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -89,8 +95,12 @@ export default function ProfileMenu() {
               {initial}
             </span>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-[#0F172A]">{user?.full_name || "User"}</p>
-              <p className="truncate text-xs capitalize text-[#64748B]">{membershipRole || user?.role || "owner"}</p>
+              <p className="truncate text-sm font-semibold text-[#0F172A]">
+                {user?.full_name || "User"}
+              </p>
+              <p className="truncate text-xs capitalize text-[#64748B]">
+                {membershipRole || user?.role || "owner"}
+              </p>
             </div>
           </div>
 
@@ -99,8 +109,12 @@ export default function ProfileMenu() {
             <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-2">
               <Building2 size={15} className="text-[#94A3B8]" />
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">Workspace</p>
-                <p className="truncate text-[13px] font-medium text-[#0F172A]">{organizationName || "Workspace"}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+                  Workspace
+                </p>
+                <p className="truncate text-[13px] font-medium text-[#0F172A]">
+                  {organizationName || "Workspace"}
+                </p>
               </div>
             </div>
             <button
@@ -110,10 +124,16 @@ export default function ProfileMenu() {
             >
               <FolderKanban size={15} className="text-[#94A3B8]" />
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">Project</p>
-                <p className="truncate text-[13px] font-medium text-[#0F172A]">{activeProject?.name || "First Project"}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+                  Project
+                </p>
+                <p className="truncate text-[13px] font-medium text-[#0F172A]">
+                  {activeProject?.name || "First Project"}
+                </p>
               </div>
-              <span className="text-[11px] font-semibold text-[#2563EB]">Switch</span>
+              <span className="text-[11px] font-semibold text-[#2563EB]">
+                Switch
+              </span>
             </button>
             <button
               onClick={() => go("/app/team")}
@@ -123,8 +143,12 @@ export default function ProfileMenu() {
             >
               <Users size={15} className="text-[#94A3B8]" />
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">Workspace</p>
-                <p className="truncate text-[13px] font-medium text-[#0F172A]">Members &amp; roles</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+                  Workspace
+                </p>
+                <p className="truncate text-[13px] font-medium text-[#0F172A]">
+                  Members &amp; roles
+                </p>
               </div>
             </button>
           </div>

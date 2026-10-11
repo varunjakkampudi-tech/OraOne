@@ -44,7 +44,9 @@ const STATUS_STYLES = {
 function StatusBadge({ status }) {
   const cls = STATUS_STYLES[status] || "bg-[#F1F5F9] text-[#475569]";
   return (
-    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize ${cls}`}>
+    <span
+      className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize ${cls}`}
+    >
       {status}
     </span>
   );
@@ -70,12 +72,18 @@ function EventPicker({ events, selected, toggle }) {
             onClick={() => toggle(e.event)}
             data-testid={`event-${e.event}`}
             className={`flex items-start justify-between gap-2 rounded-xl border px-3 py-2 text-left text-sm transition ${
-              on ? "border-[#4F46E5] bg-[#EEF2FF]" : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC]"
+              on
+                ? "border-[#4F46E5] bg-[#EEF2FF]"
+                : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC]"
             }`}
           >
             <span className="min-w-0">
-              <span className="block font-mono text-[12px] font-medium text-[#0F172A]">{e.event}</span>
-              <span className="mt-0.5 block text-[11px] text-[#94A3B8]">{e.description}</span>
+              <span className="block font-mono text-[12px] font-medium text-[#0F172A]">
+                {e.event}
+              </span>
+              <span className="mt-0.5 block text-[11px] text-[#94A3B8]">
+                {e.description}
+              </span>
             </span>
             {on && <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#4F46E5]" />}
           </button>
@@ -92,7 +100,9 @@ function CreateWebhookModal({ events, onClose, onCreated }) {
   const [submitting, setSubmitting] = useState(false);
 
   const toggle = (e) =>
-    setSelected((prev) => (prev.includes(e) ? prev.filter((s) => s !== e) : [...prev, e]));
+    setSelected((prev) =>
+      prev.includes(e) ? prev.filter((s) => s !== e) : [...prev, e],
+    );
 
   const submit = async () => {
     const u = url.trim();
@@ -128,17 +138,26 @@ function CreateWebhookModal({ events, onClose, onCreated }) {
       >
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-lg font-bold text-[#0F172A]">Add webhook endpoint</h2>
-            <p className="text-sm text-[#64748B]">We'll POST signed events to your URL.</p>
+            <h2 className="text-lg font-bold text-[#0F172A]">
+              Add webhook endpoint
+            </h2>
+            <p className="text-sm text-[#64748B]">
+              We'll POST signed events to your URL.
+            </p>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]">
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="mt-5 space-y-5">
           <div>
-            <label className="text-sm font-medium text-[#334155]">Endpoint URL</label>
+            <label className="text-sm font-medium text-[#334155]">
+              Endpoint URL
+            </label>
             <input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
@@ -148,7 +167,9 @@ function CreateWebhookModal({ events, onClose, onCreated }) {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[#334155]">Description (optional)</label>
+            <label className="text-sm font-medium text-[#334155]">
+              Description (optional)
+            </label>
             <input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -158,17 +179,28 @@ function CreateWebhookModal({ events, onClose, onCreated }) {
           </div>
           <div>
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-[#334155]">Events</label>
-              <span className="text-[11px] text-[#94A3B8]">{selected.length} selected</span>
+              <label className="text-sm font-medium text-[#334155]">
+                Events
+              </label>
+              <span className="text-[11px] text-[#94A3B8]">
+                {selected.length} selected
+              </span>
             </div>
             <div className="mt-2">
-              <EventPicker events={events} selected={selected} toggle={toggle} />
+              <EventPicker
+                events={events}
+                selected={selected}
+                toggle={toggle}
+              />
             </div>
           </div>
         </div>
 
         <div className="mt-6 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-xl border border-[#E2E8F0] px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#F8FAFC]">
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-[#E2E8F0] px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#F8FAFC]"
+          >
             Cancel
           </button>
           <button
@@ -211,27 +243,43 @@ function RevealSecretModal({ secret, onClose }) {
           </div>
           <div>
             <h2 className="text-lg font-bold text-[#0F172A]">Signing secret</h2>
-            <p className="text-sm text-[#64748B]">Store it now — it won't be shown again.</p>
+            <p className="text-sm text-[#64748B]">
+              Store it now — it won't be shown again.
+            </p>
           </div>
         </div>
         <div className="mt-5 flex items-stretch gap-2">
-          <code data-testid="webhook-secret" className="flex-1 break-all rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-3 font-mono text-xs text-[#0F172A]">
+          <code
+            data-testid="webhook-secret"
+            className="flex-1 break-all rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-3 font-mono text-xs text-[#0F172A]"
+          >
             {secret}
           </code>
-          <button onClick={copy} className="shrink-0 rounded-xl bg-[#4F46E5] px-3 text-white hover:bg-[#4338CA]">
-            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          <button
+            onClick={copy}
+            className="shrink-0 rounded-xl bg-[#4F46E5] px-3 text-white hover:bg-[#4338CA]"
+          >
+            {copied ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
           </button>
         </div>
         <div className="mt-4 rounded-xl border border-[#E2E8F0] bg-[#0F172A] p-4 text-xs text-[#CBD5E1]">
           <p className="mb-2 text-[#94A3B8]">Verify the signature header</p>
           <pre className="overflow-x-auto whitespace-pre-wrap font-mono">
-{`X-OraOne-Signature: t=<ts>,v1=<hmac_sha256>
+            {`X-OraOne-Signature: t=<ts>,v1=<hmac_sha256>
 // signed_payload = "{t}.{raw_body}"
 // expected = HMAC_SHA256(secret, signed_payload)`}
           </pre>
         </div>
         <div className="mt-6 flex justify-end">
-          <button onClick={onClose} data-testid="webhook-secret-done" className="rounded-xl bg-[#4F46E5] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4338CA]">
+          <button
+            onClick={onClose}
+            data-testid="webhook-secret-done"
+            className="rounded-xl bg-[#4F46E5] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4338CA]"
+          >
             Done
           </button>
         </div>
@@ -265,7 +313,11 @@ function DeliveriesRow({ endpointId }) {
     );
   }
   if (!deliveries.length) {
-    return <p className="py-6 text-center text-sm text-[#94A3B8]">No deliveries yet. Send a test to try it out.</p>;
+    return (
+      <p className="py-6 text-center text-sm text-[#94A3B8]">
+        No deliveries yet. Send a test to try it out.
+      </p>
+    );
   }
   return (
     <div className="overflow-x-auto">
@@ -282,7 +334,9 @@ function DeliveriesRow({ endpointId }) {
         <tbody>
           {deliveries.map((d) => (
             <tr key={d.id} className="border-b border-[#F1F5F9] last:border-0">
-              <td className="py-2.5 pr-4 font-mono text-[12px] text-[#475569]">{d.event}</td>
+              <td className="py-2.5 pr-4 font-mono text-[12px] text-[#475569]">
+                {d.event}
+              </td>
               <td className="py-2.5 pr-4">
                 {d.success ? (
                   <span className="inline-flex items-center gap-1 text-[#16A34A]">
@@ -294,9 +348,15 @@ function DeliveriesRow({ endpointId }) {
                   </span>
                 )}
               </td>
-              <td className="py-2.5 pr-4 tabular-nums text-[#475569]">{d.status_code ?? "—"}</td>
-              <td className="py-2.5 pr-4 tabular-nums text-[#475569]">{d.attempts}</td>
-              <td className="py-2.5 pr-4 text-[#64748B]">{fmtRelative(d.created_at)}</td>
+              <td className="py-2.5 pr-4 tabular-nums text-[#475569]">
+                {d.status_code ?? "—"}
+              </td>
+              <td className="py-2.5 pr-4 tabular-nums text-[#475569]">
+                {d.attempts}
+              </td>
+              <td className="py-2.5 pr-4 text-[#64748B]">
+                {fmtRelative(d.created_at)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -345,7 +405,10 @@ export default function Webhooks() {
     try {
       const { data } = await api.post(`/webhooks/${ep.id}/test`);
       if (data.success) toast.success("Test delivered successfully");
-      else toast.error(`Test failed${data.status_code ? ` (HTTP ${data.status_code})` : ""}`);
+      else
+        toast.error(
+          `Test failed${data.status_code ? ` (HTTP ${data.status_code})` : ""}`,
+        );
       setExpanded(ep.id);
       load();
     } catch (e) {
@@ -370,7 +433,12 @@ export default function Webhooks() {
   };
 
   const rotate = async (ep) => {
-    if (!window.confirm("Rotate the signing secret? Existing signatures will stop validating.")) return;
+    if (
+      !window.confirm(
+        "Rotate the signing secret? Existing signatures will stop validating.",
+      )
+    )
+      return;
     setBusyId(ep.id);
     try {
       const { data } = await api.post(`/webhooks/${ep.id}/rotate`);
@@ -384,7 +452,8 @@ export default function Webhooks() {
   };
 
   const remove = async (ep) => {
-    if (!window.confirm(`Delete this webhook endpoint? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete this webhook endpoint? This cannot be undone.`))
+      return;
     setBusyId(ep.id);
     try {
       await api.delete(`/webhooks/${ep.id}`);
@@ -408,7 +477,11 @@ export default function Webhooks() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-5xl space-y-8 p-6">
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mx-auto max-w-5xl space-y-8 p-6"
+    >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#EEF2FF] text-[#4F46E5]">
@@ -444,9 +517,12 @@ export default function Webhooks() {
       {!hasEndpoints ? (
         <div className="grid place-items-center rounded-2xl border border-dashed border-[#CBD5E1] bg-white py-16 text-center">
           <WebhookIcon className="mb-3 h-10 w-10 text-[#CBD5E1]" />
-          <p className="text-sm font-semibold text-[#0F172A]">No webhook endpoints yet</p>
+          <p className="text-sm font-semibold text-[#0F172A]">
+            No webhook endpoints yet
+          </p>
           <p className="mt-1 max-w-sm text-sm text-[#64748B]">
-            Add an endpoint to get notified about conversations, documents, workflows and more.
+            Add an endpoint to get notified about conversations, documents,
+            workflows and more.
           </p>
           {canManage && (
             <button
@@ -463,23 +539,40 @@ export default function Webhooks() {
             const busy = busyId === ep.id;
             const open = expanded === ep.id;
             return (
-              <div key={ep.id} className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white">
+              <div
+                key={ep.id}
+                className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white"
+              >
                 <div className="flex flex-wrap items-start justify-between gap-4 p-5">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <code className="truncate font-mono text-sm font-medium text-[#0F172A]">{ep.url}</code>
+                      <code className="truncate font-mono text-sm font-medium text-[#0F172A]">
+                        {ep.url}
+                      </code>
                       <StatusBadge status={ep.status} />
                     </div>
-                    {ep.description && <p className="mt-1 text-[13px] text-[#64748B]">{ep.description}</p>}
+                    {ep.description && (
+                      <p className="mt-1 text-[13px] text-[#64748B]">
+                        {ep.description}
+                      </p>
+                    )}
                     <div className="mt-3 flex flex-wrap gap-1">
                       {(ep.events || []).map((e) => (
                         <EventChip key={e}>{e}</EventChip>
                       ))}
                     </div>
                     <div className="mt-3 flex flex-wrap items-center gap-4 text-[12px] text-[#94A3B8]">
-                      <span>Last delivery: {fmtRelative(ep.last_delivery_at)}</span>
-                      {ep.last_status && <span>Last status: {ep.last_status}</span>}
-                      {ep.failure_count > 0 && <span className="text-[#DC2626]">{ep.failure_count} recent failures</span>}
+                      <span>
+                        Last delivery: {fmtRelative(ep.last_delivery_at)}
+                      </span>
+                      {ep.last_status && (
+                        <span>Last status: {ep.last_status}</span>
+                      )}
+                      {ep.failure_count > 0 && (
+                        <span className="text-[#DC2626]">
+                          {ep.failure_count} recent failures
+                        </span>
+                      )}
                     </div>
                   </div>
                   {canManage && (
@@ -491,7 +584,12 @@ export default function Webhooks() {
                         data-testid={`webhook-test-${ep.id}`}
                         className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-[12px] font-medium text-[#475569] hover:bg-[#F8FAFC] disabled:opacity-60"
                       >
-                        {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />} Test
+                        {busy ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Send className="h-3.5 w-3.5" />
+                        )}{" "}
+                        Test
                       </button>
                       <button
                         onClick={() => toggleStatus(ep)}
@@ -499,7 +597,11 @@ export default function Webhooks() {
                         title={ep.status === "active" ? "Pause" : "Resume"}
                         className="rounded-lg border border-[#E2E8F0] p-1.5 text-[#475569] hover:bg-[#F8FAFC] disabled:opacity-60"
                       >
-                        {ep.status === "active" ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                        {ep.status === "active" ? (
+                          <Pause className="h-4 w-4" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
                       </button>
                       <button
                         onClick={() => rotate(ep)}
@@ -525,7 +627,9 @@ export default function Webhooks() {
                   className="flex w-full items-center justify-between border-t border-[#F1F5F9] bg-[#F8FAFC] px-5 py-2.5 text-[12px] font-medium text-[#475569] hover:bg-[#F1F5F9]"
                 >
                   <span>Recent deliveries</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
+                  />
                 </button>
                 {open && (
                   <div className="border-t border-[#F1F5F9] p-5">
@@ -539,9 +643,15 @@ export default function Webhooks() {
       )}
 
       {showCreate && (
-        <CreateWebhookModal events={events} onClose={() => setShowCreate(false)} onCreated={onCreated} />
+        <CreateWebhookModal
+          events={events}
+          onClose={() => setShowCreate(false)}
+          onCreated={onCreated}
+        />
       )}
-      {secret && <RevealSecretModal secret={secret} onClose={() => setSecret(null)} />}
+      {secret && (
+        <RevealSecretModal secret={secret} onClose={() => setSecret(null)} />
+      )}
     </motion.div>
   );
 }

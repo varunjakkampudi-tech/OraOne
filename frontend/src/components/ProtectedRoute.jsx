@@ -2,7 +2,14 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 
 export function ProtectedRoute({ children }) {
-  const { user, loading, identity, identityLoading, identityError, fetchIdentity } = useAuth();
+  const {
+    user,
+    loading,
+    identity,
+    identityLoading,
+    identityError,
+    fetchIdentity,
+  } = useAuth();
 
   // Initial auth probe in progress.
   if (loading) {
@@ -45,8 +52,12 @@ export function ProtectedRoute({ children }) {
         data-testid="protected-route-identity-error"
       >
         <div className="max-w-md w-full bg-white rounded-2xl border border-[#E2E8F0] shadow-sm p-7 text-center space-y-4">
-          <h1 className="text-lg font-semibold text-[#0F172A]">Couldn&apos;t load your workspace</h1>
-          <p className="text-sm text-[#64748B] leading-relaxed">{identityError}</p>
+          <h1 className="text-lg font-semibold text-[#0F172A]">
+            Couldn&apos;t load your workspace
+          </h1>
+          <p className="text-sm text-[#64748B] leading-relaxed">
+            {identityError}
+          </p>
           <button
             onClick={fetchIdentity}
             className="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-semibold transition-colors"

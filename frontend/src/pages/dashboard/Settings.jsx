@@ -30,18 +30,49 @@ import {
   Rocket,
   Lightbulb,
   LifeBuoy,
-} from "lucide-react";import { useAuth } from "@/lib/auth";
+} from "lucide-react";
+import { useAuth } from "@/lib/auth";
 import { api, formatApiError } from "@/lib/api";
 import { toast } from "sonner";
 
 // Account settings open inline as tabs in the right-hand panel.
 const ACCOUNT_TABS = [
-  { id: "profile",       icon: User,     label: "Profile",       desc: "Update your personal information" },
-  { id: "password",      icon: Lock,     label: "Password",      desc: "Change your password" },
-  { id: "notifications", icon: Bell,     label: "Notifications", desc: "Manage your notifications" },
-  { id: "appearance",    icon: Palette,  label: "Appearance",    desc: "Theme & display" },
-  { id: "sessions",      icon: Monitor,  label: "Sessions",      desc: "Devices & security" },
-  { id: "activity",      icon: Activity, label: "Activity",      desc: "Sign-in & account history" },
+  {
+    id: "profile",
+    icon: User,
+    label: "Profile",
+    desc: "Update your personal information",
+  },
+  {
+    id: "password",
+    icon: Lock,
+    label: "Password",
+    desc: "Change your password",
+  },
+  {
+    id: "notifications",
+    icon: Bell,
+    label: "Notifications",
+    desc: "Manage your notifications",
+  },
+  {
+    id: "appearance",
+    icon: Palette,
+    label: "Appearance",
+    desc: "Theme & display",
+  },
+  {
+    id: "sessions",
+    icon: Monitor,
+    label: "Sessions",
+    desc: "Devices & security",
+  },
+  {
+    id: "activity",
+    icon: Activity,
+    label: "Activity",
+    desc: "Sign-in & account history",
+  },
 ];
 
 // Workspace settings are full pages of their own — Settings is now the single
@@ -50,36 +81,111 @@ const WORKSPACE_GROUPS = [
   {
     title: "Workspace",
     links: [
-      { to: "/app/team",     icon: Users,   label: "Members",  desc: "Invite & manage people" },
-      { to: "/app/teams",    icon: UserCog, label: "Teams",    desc: "Organize members into teams" },
-      { to: "/app/branding", icon: Palette, label: "Branding", desc: "Logo, colors & widget look" },
-      { to: "/app/ai-models",icon: Cpu,     label: "AI Models",desc: "Choose your default models" },
+      {
+        to: "/app/team",
+        icon: Users,
+        label: "Members",
+        desc: "Invite & manage people",
+      },
+      {
+        to: "/app/teams",
+        icon: UserCog,
+        label: "Teams",
+        desc: "Organize members into teams",
+      },
+      {
+        to: "/app/branding",
+        icon: Palette,
+        label: "Branding",
+        desc: "Logo, colors & widget look",
+      },
+      {
+        to: "/app/ai-models",
+        icon: Cpu,
+        label: "AI Models",
+        desc: "Choose your default models",
+      },
     ],
   },
   {
     title: "Developers",
     links: [
-      { to: "/app/api-keys",   icon: KeyRound, label: "API Keys",           desc: "Programmatic access" },
-      { to: "/app/webhooks",   icon: Webhook,  label: "Webhooks",           desc: "Event notifications" },
-      { to: "/app/developers", icon: Code2,    label: "Developer Platform", desc: "SDKs & integration docs" },
+      {
+        to: "/app/api-keys",
+        icon: KeyRound,
+        label: "API Keys",
+        desc: "Programmatic access",
+      },
+      {
+        to: "/app/webhooks",
+        icon: Webhook,
+        label: "Webhooks",
+        desc: "Event notifications",
+      },
+      {
+        to: "/app/developers",
+        icon: Code2,
+        label: "Developer Platform",
+        desc: "SDKs & integration docs",
+      },
     ],
   },
   {
     title: "Billing",
     links: [
-      { to: "/app/usage",      icon: Gauge,      label: "Usage & Limits", desc: "Track your consumption" },
-      { to: "/app/billing",    icon: CreditCard, label: "Billing",        desc: "Plan & payment method" },
-      { to: "/app/audit-logs", icon: ScrollText, label: "Audit Logs",     desc: "Security & activity history" },
+      {
+        to: "/app/usage",
+        icon: Gauge,
+        label: "Usage & Limits",
+        desc: "Track your consumption",
+      },
+      {
+        to: "/app/billing",
+        icon: CreditCard,
+        label: "Billing",
+        desc: "Plan & payment method",
+      },
+      {
+        to: "/app/audit-logs",
+        icon: ScrollText,
+        label: "Audit Logs",
+        desc: "Security & activity history",
+      },
     ],
   },
   {
     title: "Resources",
     links: [
-      { to: "/app/portal",           icon: LifeBuoy,  label: "Customer Portal",  desc: "Support, docs, status & account" },
-      { to: "/app/getting-started",  icon: Rocket,    label: "Getting Started",  desc: "Guided setup checklist" },
-      { to: "/app/tickets", icon: Lightbulb, label: "Support Tickets", desc: "Report bugs, get help or request features" },
-      { to: "/app/changelog",        icon: Rocket,    label: "Changelog",        desc: "What's new in OraOne" },
-      { to: "/app/status",           icon: Activity,  label: "Product Status",   desc: "Live service health" },
+      {
+        to: "/app/portal",
+        icon: LifeBuoy,
+        label: "Customer Portal",
+        desc: "Support, docs, status & account",
+      },
+      {
+        to: "/app/getting-started",
+        icon: Rocket,
+        label: "Getting Started",
+        desc: "Guided setup checklist",
+      },
+      {
+        to: "/app/tickets",
+        icon: Lightbulb,
+        label: "Support Tickets",
+        desc: "Report bugs, get help or request features",
+      },
+      {
+        to: "/app/changelog",
+        icon: Rocket,
+        label: "Changelog",
+        desc: "What's new in OraOne",
+      },
+      {
+        to: "/app/status",
+        icon: Activity,
+        label: "Product Status",
+        desc: "Live service health",
+      },
     ],
   },
 ];
@@ -88,7 +194,12 @@ const WORKSPACE_GROUPS = [
 const ADMIN_GROUP = {
   title: "Admin",
   links: [
-    { to: "/app/operations", icon: ShieldCheck, label: "Operations & Security", desc: "Internal controls" },
+    {
+      to: "/app/operations",
+      icon: ShieldCheck,
+      label: "Operations & Security",
+      desc: "Internal controls",
+    },
   ],
 };
 
@@ -99,14 +210,21 @@ export default function Settings() {
   const role = (membershipRole || user?.role || "").toLowerCase();
   const isAdmin = role === "owner" || role === "admin";
 
-  const groups = isAdmin ? [...WORKSPACE_GROUPS, ADMIN_GROUP] : WORKSPACE_GROUPS;
+  const groups = isAdmin
+    ? [...WORKSPACE_GROUPS, ADMIN_GROUP]
+    : WORKSPACE_GROUPS;
 
   return (
     <div className="space-y-6">
       <div className="rounded-2xl bg-white border border-[#E2E8F0] grid grid-cols-1 lg:grid-cols-[300px_1fr] overflow-hidden">
         {/* Tabs (left) */}
-        <nav className="border-b lg:border-b-0 lg:border-r border-[#F1F5F9] p-3 space-y-1" aria-label="Settings sections">
-          <p className="px-3 pt-2 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#94A3B8]">Account</p>
+        <nav
+          className="border-b lg:border-b-0 lg:border-r border-[#F1F5F9] p-3 space-y-1"
+          aria-label="Settings sections"
+        >
+          <p className="px-3 pt-2 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+            Account
+          </p>
           {ACCOUNT_TABS.map((t) => {
             const sel = active === t.id;
             return (
@@ -119,10 +237,21 @@ export default function Settings() {
                 }`}
                 aria-current={sel ? "true" : undefined}
               >
-                <t.icon size={16} className={sel ? "text-[#2563EB] mt-0.5" : "text-[#64748B] mt-0.5"} />
+                <t.icon
+                  size={16}
+                  className={
+                    sel ? "text-[#2563EB] mt-0.5" : "text-[#64748B] mt-0.5"
+                  }
+                />
                 <div className="min-w-0">
-                  <p className={`text-[13.5px] font-semibold ${sel ? "text-[#2563EB]" : "text-[#0F172A]"}`}>{t.label}</p>
-                  <p className="text-[11.5px] text-[#94A3B8] mt-0.5 leading-snug">{t.desc}</p>
+                  <p
+                    className={`text-[13.5px] font-semibold ${sel ? "text-[#2563EB]" : "text-[#0F172A]"}`}
+                  >
+                    {t.label}
+                  </p>
+                  <p className="text-[11.5px] text-[#94A3B8] mt-0.5 leading-snug">
+                    {t.desc}
+                  </p>
                 </div>
               </button>
             );
@@ -130,7 +259,9 @@ export default function Settings() {
 
           {groups.map((g) => (
             <div key={g.title} className="pt-2">
-              <p className="px-3 pt-2 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#94A3B8]">{g.title}</p>
+              <p className="px-3 pt-2 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+                {g.title}
+              </p>
               {g.links.map((l) => (
                 <button
                   key={l.to}
@@ -140,10 +271,17 @@ export default function Settings() {
                 >
                   <l.icon size={16} className="text-[#64748B] shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[13.5px] font-semibold text-[#0F172A]">{l.label}</p>
-                    <p className="text-[11.5px] text-[#94A3B8] mt-0.5 leading-snug">{l.desc}</p>
+                    <p className="text-[13.5px] font-semibold text-[#0F172A]">
+                      {l.label}
+                    </p>
+                    <p className="text-[11.5px] text-[#94A3B8] mt-0.5 leading-snug">
+                      {l.desc}
+                    </p>
                   </div>
-                  <ChevronRight size={15} className="text-[#CBD5E1] group-hover:text-[#94A3B8] shrink-0" />
+                  <ChevronRight
+                    size={15}
+                    className="text-[#CBD5E1] group-hover:text-[#94A3B8] shrink-0"
+                  />
                 </button>
               ))}
             </div>
@@ -152,12 +290,12 @@ export default function Settings() {
 
         {/* Panel (right) */}
         <div className="p-6 sm:p-8">
-          {active === "profile"       && <ProfileSection />}
-          {active === "password"      && <PasswordSection />}
+          {active === "profile" && <ProfileSection />}
+          {active === "password" && <PasswordSection />}
           {active === "notifications" && <NotificationsSection />}
-          {active === "appearance"    && <AppearanceSection />}
-          {active === "sessions"      && <SessionsSection />}
-          {active === "activity"      && <ActivitySection />}
+          {active === "appearance" && <AppearanceSection />}
+          {active === "sessions" && <SessionsSection />}
+          {active === "activity" && <ActivitySection />}
         </div>
       </div>
     </div>
@@ -171,17 +309,27 @@ export default function Settings() {
 function SaveStatus({ state }) {
   if (state === "saving")
     return (
-      <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#64748B]" data-testid="save-status-saving">
+      <span
+        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#64748B]"
+        data-testid="save-status-saving"
+      >
         <Loader2 size={13} className="animate-spin" /> Saving…
       </span>
     );
   if (state === "saved")
     return (
-      <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#16A34A]" data-testid="save-status-saved">
+      <span
+        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#16A34A]"
+        data-testid="save-status-saved"
+      >
         <Check size={13} /> Saved
       </span>
     );
-  return <span className="text-[12px] font-medium text-transparent select-none">·</span>;
+  return (
+    <span className="text-[12px] font-medium text-transparent select-none">
+      ·
+    </span>
+  );
 }
 
 /* =========================== Sections =========================== */
@@ -198,7 +346,9 @@ function SectionHeader({ title, desc }) {
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="block text-[13px] font-semibold text-[#0F172A] mb-2">{label}</span>
+      <span className="block text-[13px] font-semibold text-[#0F172A] mb-2">
+        {label}
+      </span>
       {children}
     </label>
   );
@@ -260,7 +410,10 @@ function ProfileSection() {
   return (
     <>
       <div className="mb-6 flex items-start justify-between gap-4">
-        <SectionHeader title="Profile Information" desc="Update your personal information." />
+        <SectionHeader
+          title="Profile Information"
+          desc="Update your personal information."
+        />
         <SaveStatus state={status} />
       </div>
 
@@ -280,18 +433,38 @@ function ProfileSection() {
 
       <div className="space-y-5 max-w-2xl">
         <Field label="Full Name">
-          <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} data-testid="settings-name" />
+          <input
+            className={inputCls}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            data-testid="settings-name"
+          />
         </Field>
         <Field label="Email Address">
           <div className="relative">
-            <input className={`${inputCls} pr-10 bg-[#F8FAFC] text-[#64748B]`} value={user?.email || ""} readOnly data-testid="settings-email" />
-            <Lock size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+            <input
+              className={`${inputCls} pr-10 bg-[#F8FAFC] text-[#64748B]`}
+              value={user?.email || ""}
+              readOnly
+              data-testid="settings-email"
+            />
+            <Lock
+              size={14}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+            />
           </div>
         </Field>
         <Field label="Role">
           <div className="relative">
-            <input className={`${inputCls} pr-10 bg-[#F8FAFC] text-[#64748B] capitalize`} value={user?.role || "Owner"} readOnly />
-            <Lock size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+            <input
+              className={`${inputCls} pr-10 bg-[#F8FAFC] text-[#64748B] capitalize`}
+              value={user?.role || "Owner"}
+              readOnly
+            />
+            <Lock
+              size={14}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+            />
           </div>
         </Field>
       </div>
@@ -317,7 +490,10 @@ function PasswordSection() {
       return;
     }
     setSaving(true);
-    const res = await changePassword({ current_password: current, new_password: next });
+    const res = await changePassword({
+      current_password: current,
+      new_password: next,
+    });
     setSaving(false);
     if (res.ok) {
       toast.success("Password updated.");
@@ -331,12 +507,30 @@ function PasswordSection() {
 
   return (
     <>
-      <SectionHeader title="Change Password" desc="Use a strong password you don't reuse anywhere else." />
+      <SectionHeader
+        title="Change Password"
+        desc="Use a strong password you don't reuse anywhere else."
+      />
       <div className="space-y-5 max-w-xl">
         {[
-          { label: "Current Password", value: current, set: setCurrent, testid: "settings-current-password" },
-          { label: "New Password", value: next, set: setNext, testid: "settings-new-password" },
-          { label: "Confirm New Password", value: confirm, set: setConfirm, testid: "settings-confirm-password" },
+          {
+            label: "Current Password",
+            value: current,
+            set: setCurrent,
+            testid: "settings-current-password",
+          },
+          {
+            label: "New Password",
+            value: next,
+            set: setNext,
+            testid: "settings-new-password",
+          },
+          {
+            label: "Confirm New Password",
+            value: confirm,
+            set: setConfirm,
+            testid: "settings-confirm-password",
+          },
         ].map((f) => (
           <Field key={f.label} label={f.label}>
             <div className="relative">
@@ -348,7 +542,12 @@ function PasswordSection() {
                 onChange={(e) => f.set(e.target.value)}
                 data-testid={f.testid}
               />
-              <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#475569]" aria-label="Toggle visibility">
+              <button
+                type="button"
+                onClick={() => setShow((s) => !s)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#475569]"
+                aria-label="Toggle visibility"
+              >
                 {show ? <Eye size={16} /> : <EyeOff size={16} />}
               </button>
             </div>
@@ -356,7 +555,10 @@ function PasswordSection() {
         ))}
       </div>
       <div className="mt-7">
-        <SaveBtn label={saving ? "Updating…" : "Update Password"} onClick={onSubmit} />
+        <SaveBtn
+          label={saving ? "Updating…" : "Update Password"}
+          onClick={onSubmit}
+        />
       </div>
     </>
   );
@@ -364,9 +566,21 @@ function PasswordSection() {
 
 function NotificationsSection() {
   const opts = [
-    { id: "leads",  label: "New leads",     desc: "Email me when a new lead is captured." },
-    { id: "weekly", label: "Weekly digest", desc: "Receive a weekly performance summary." },
-    { id: "team",   label: "Team activity", desc: "When a teammate joins, leaves, or changes role." },
+    {
+      id: "leads",
+      label: "New leads",
+      desc: "Email me when a new lead is captured.",
+    },
+    {
+      id: "weekly",
+      label: "Weekly digest",
+      desc: "Receive a weekly performance summary.",
+    },
+    {
+      id: "team",
+      label: "Team activity",
+      desc: "When a teammate joins, leaves, or changes role.",
+    },
   ];
   const STORAGE_KEY = "oraone_notification_prefs";
   const [state, setState] = useState(() => {
@@ -402,14 +616,22 @@ function NotificationsSection() {
   return (
     <>
       <div className="mb-6 flex items-start justify-between gap-4">
-        <SectionHeader title="Notifications" desc="Choose what you want to be notified about." />
+        <SectionHeader
+          title="Notifications"
+          desc="Choose what you want to be notified about."
+        />
         <SaveStatus state={status} />
       </div>
       <div className="space-y-3 max-w-xl">
         {opts.map((o) => (
-          <label key={o.id} className="flex items-start gap-4 p-4 rounded-xl border border-[#E2E8F0] hover:border-[#CBD5E1] cursor-pointer">
+          <label
+            key={o.id}
+            className="flex items-start gap-4 p-4 rounded-xl border border-[#E2E8F0] hover:border-[#CBD5E1] cursor-pointer"
+          >
             <div className="flex-1 min-w-0">
-              <p className="text-[14px] font-semibold text-[#0F172A]">{o.label}</p>
+              <p className="text-[14px] font-semibold text-[#0F172A]">
+                {o.label}
+              </p>
               <p className="text-[12px] text-[#64748B] mt-0.5">{o.desc}</p>
             </div>
             <Toggle on={state[o.id]} onChange={() => toggle(o.id)} />
@@ -422,8 +644,15 @@ function NotificationsSection() {
 
 function Toggle({ on, onChange }) {
   return (
-    <button type="button" onClick={onChange} aria-pressed={on} className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${on ? "bg-[#2563EB]" : "bg-[#CBD5E1]"}`}>
-      <span className={`absolute top-0.5 size-5 rounded-full bg-white shadow transition-transform ${on ? "translate-x-[22px]" : "translate-x-0.5"}`} />
+    <button
+      type="button"
+      onClick={onChange}
+      aria-pressed={on}
+      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${on ? "bg-[#2563EB]" : "bg-[#CBD5E1]"}`}
+    >
+      <span
+        className={`absolute top-0.5 size-5 rounded-full bg-white shadow transition-transform ${on ? "translate-x-[22px]" : "translate-x-0.5"}`}
+      />
     </button>
   );
 }
@@ -436,28 +665,41 @@ function AppearanceSection() {
   ];
   return (
     <>
-      <SectionHeader title="Appearance" desc="Personalize how OraOne looks for you." />
+      <SectionHeader
+        title="Appearance"
+        desc="Personalize how OraOne looks for you."
+      />
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl">
         {themes.map((t) => (
           <div
             key={t.id}
             className={`rounded-xl border p-4 ${
-              t.id === "light" ? "border-[#2563EB] ring-2 ring-[#2563EB]/15" : "border-[#E2E8F0] opacity-60"
+              t.id === "light"
+                ? "border-[#2563EB] ring-2 ring-[#2563EB]/15"
+                : "border-[#E2E8F0] opacity-60"
             }`}
           >
             <div className="flex items-center justify-between">
-              <p className="text-[13.5px] font-semibold text-[#0F172A]">{t.label}</p>
+              <p className="text-[13.5px] font-semibold text-[#0F172A]">
+                {t.label}
+              </p>
               {t.id === "light" ? (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium">Active</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium">
+                  Active
+                </span>
               ) : (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#94A3B8] font-medium">Soon</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#94A3B8] font-medium">
+                  Soon
+                </span>
               )}
             </div>
             <p className="text-[12px] text-[#64748B] mt-1">{t.desc}</p>
           </div>
         ))}
       </div>
-      <p className="text-[12px] text-[#94A3B8] mt-5">More appearance options are coming soon.</p>
+      <p className="text-[12px] text-[#94A3B8] mt-5">
+        More appearance options are coming soon.
+      </p>
     </>
   );
 }
@@ -471,23 +713,23 @@ function SessionsSection() {
   const browser = /Edg/.test(ua)
     ? "Microsoft Edge"
     : /Chrome/.test(ua)
-    ? "Google Chrome"
-    : /Firefox/.test(ua)
-    ? "Firefox"
-    : /Safari/.test(ua)
-    ? "Safari"
-    : "Browser";
+      ? "Google Chrome"
+      : /Firefox/.test(ua)
+        ? "Firefox"
+        : /Safari/.test(ua)
+          ? "Safari"
+          : "Browser";
   const os = /Windows/.test(ua)
     ? "Windows"
     : /Mac OS X|Macintosh/.test(ua)
-    ? "macOS"
-    : /Android/.test(ua)
-    ? "Android"
-    : /iPhone|iPad|iOS/.test(ua)
-    ? "iOS"
-    : /Linux/.test(ua)
-    ? "Linux"
-    : "";
+      ? "macOS"
+      : /Android/.test(ua)
+        ? "Android"
+        : /iPhone|iPad|iOS/.test(ua)
+          ? "iOS"
+          : /Linux/.test(ua)
+            ? "Linux"
+            : "";
   const lastLogin = u.last_login_at || user?.lastLogin || null;
 
   // Self-hosted JWT refresh tokens are tracked server-side (Redis), so
@@ -497,7 +739,7 @@ function SessionsSection() {
   const signOutEverywhere = async () => {
     if (signingOut) return;
     const ok = window.confirm(
-      "Sign out of all devices? This ends every active session, including this one. You'll need to sign in again."
+      "Sign out of all devices? This ends every active session, including this one. You'll need to sign in again.",
     );
     if (!ok) return;
     setSigningOut(true);
@@ -512,7 +754,10 @@ function SessionsSection() {
 
   return (
     <>
-      <SectionHeader title="Sessions & Security" desc="Manage where you're signed in and your account security." />
+      <SectionHeader
+        title="Sessions & Security"
+        desc="Manage where you're signed in and your account security."
+      />
 
       <div className="max-w-2xl space-y-3">
         <div className="rounded-xl border border-[#E2E8F0] p-4 flex items-center gap-4">
@@ -521,30 +766,44 @@ function SessionsSection() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[14px] font-semibold text-[#0F172A] inline-flex items-center gap-2">
-              {browser}{os ? ` · ${os}` : ""}
+              {browser}
+              {os ? ` · ${os}` : ""}
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 font-medium">
                 This device
               </span>
             </p>
             <p className="text-[12px] text-[#64748B] mt-0.5">
-              Active now{lastLogin ? ` · signed in ${relTime(lastLogin)}` : " · current session"}
+              Active now
+              {lastLogin
+                ? ` · signed in ${relTime(lastLogin)}`
+                : " · current session"}
             </p>
           </div>
         </div>
         <p className="text-[11.5px] text-[#94A3B8] px-1">
-          Sessions use short-lived tokens that refresh automatically. To end access on a lost or shared
-          device, sign out of all devices below.
+          Sessions use short-lived tokens that refresh automatically. To end
+          access on a lost or shared device, sign out of all devices below.
         </p>
       </div>
 
       <div className="max-w-2xl mt-6 rounded-xl border border-[#E2E8F0] p-5 flex items-center justify-between gap-4">
         <div className="min-w-0">
           <p className="text-[14px] font-semibold text-[#0F172A] inline-flex items-center gap-2">
-            <ShieldCheck size={15} className="text-[#2563EB]" /> Two-factor authentication
+            <ShieldCheck size={15} className="text-[#2563EB]" /> Two-factor
+            authentication
           </p>
-          <p className="text-[12px] text-[#64748B] mt-0.5">Require a 6-digit code on sign-in. Use Google Authenticator, 1Password, Authy, etc.</p>
+          <p className="text-[12px] text-[#64748B] mt-0.5">
+            Require a 6-digit code on sign-in. Use Google Authenticator,
+            1Password, Authy, etc.
+          </p>
         </div>
-        <Toggle on={enabled} onChange={() => { setEnabled((v) => !v); toast.success(`2FA ${!enabled ? "enabled" : "disabled"}`); }} />
+        <Toggle
+          on={enabled}
+          onChange={() => {
+            setEnabled((v) => !v);
+            toast.success(`2FA ${!enabled ? "enabled" : "disabled"}`);
+          }}
+        />
       </div>
 
       <div className="mt-6">
@@ -554,7 +813,11 @@ function SessionsSection() {
           data-testid="sessions-signout-all"
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[13px] font-semibold text-[#475569] disabled:opacity-60"
         >
-          {signingOut ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />}
+          {signingOut ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <LogOut size={14} />
+          )}
           Sign out of all devices
         </button>
       </div>
@@ -612,7 +875,11 @@ function relTime(iso) {
   if (h < 24) return `${h}h ago`;
   const d = Math.floor(h / 24);
   if (d < 30) return `${d}d ago`;
-  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return new Date(iso).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function fmtDate(iso) {
@@ -648,8 +915,14 @@ function ActivitySection() {
           .filter((l) => !uid || l.user_id === uid)
           .slice(0, 15)
           .map((l) => {
-            const verb = ACTIVITY_VERBS[l.action] || (l.action ? l.action[0].toUpperCase() + l.action.slice(1) : "Did");
-            const noun = ACTIVITY_NOUNS[l.resource] || (l.resource ? l.resource.replace(/_/g, " ") : "an item");
+            const verb =
+              ACTIVITY_VERBS[l.action] ||
+              (l.action
+                ? l.action[0].toUpperCase() + l.action.slice(1)
+                : "Did");
+            const noun =
+              ACTIVITY_NOUNS[l.resource] ||
+              (l.resource ? l.resource.replace(/_/g, " ") : "an item");
             return {
               id: l.id,
               text: `${verb} ${noun}`,
@@ -671,24 +944,39 @@ function ActivitySection() {
   const facts = [
     { icon: Clock, label: "Last sign-in", value: fmtDate(lastLogin) },
     { icon: CalendarDays, label: "Member since", value: fmtDate(createdAt) },
-    { icon: ShieldCheck, label: "Role", value: (u.role || user?.role || "owner").replace(/^\w/, (c) => c.toUpperCase()) },
+    {
+      icon: ShieldCheck,
+      label: "Role",
+      value: (u.role || user?.role || "owner").replace(/^\w/, (c) =>
+        c.toUpperCase(),
+      ),
+    },
   ];
 
   return (
     <>
-      <SectionHeader title="Account Activity" desc="Your recent sign-in details and account history." />
+      <SectionHeader
+        title="Account Activity"
+        desc="Your recent sign-in details and account history."
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mb-7">
         {facts.map((f) => (
           <div key={f.label} className="rounded-xl border border-[#E2E8F0] p-4">
             <f.icon size={16} className="text-[#2563EB]" />
-            <p className="text-[11.5px] text-[#94A3B8] mt-2.5 font-medium">{f.label}</p>
-            <p className="text-[13.5px] font-semibold text-[#0F172A] mt-0.5">{f.value}</p>
+            <p className="text-[11.5px] text-[#94A3B8] mt-2.5 font-medium">
+              {f.label}
+            </p>
+            <p className="text-[13.5px] font-semibold text-[#0F172A] mt-0.5">
+              {f.value}
+            </p>
           </div>
         ))}
       </div>
 
-      <h4 className="text-[13.5px] font-semibold text-[#0F172A] mb-3">Recent activity</h4>
+      <h4 className="text-[13.5px] font-semibold text-[#0F172A] mb-3">
+        Recent activity
+      </h4>
 
       {error && (
         <div className="max-w-2xl flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12.5px] text-amber-800">
@@ -699,25 +987,35 @@ function ActivitySection() {
       {!error && logs === null && (
         <div className="max-w-2xl space-y-2.5" data-testid="activity-loading">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-12 rounded-xl bg-[#F1F5F9] animate-pulse" />
+            <div
+              key={i}
+              className="h-12 rounded-xl bg-[#F1F5F9] animate-pulse"
+            />
           ))}
         </div>
       )}
 
       {!error && Array.isArray(logs) && logs.length === 0 && (
-        <p className="max-w-2xl text-[13px] text-[#64748B]">No recent activity yet.</p>
+        <p className="max-w-2xl text-[13px] text-[#64748B]">
+          No recent activity yet.
+        </p>
       )}
 
       {!error && Array.isArray(logs) && logs.length > 0 && (
         <ul className="max-w-2xl space-y-1" data-testid="activity-list">
           {logs.map((l, i) => (
-            <li key={l.id || i} className="flex items-start gap-3 py-2.5 border-b border-[#F1F5F9] last:border-0">
+            <li
+              key={l.id || i}
+              className="flex items-start gap-3 py-2.5 border-b border-[#F1F5F9] last:border-0"
+            >
               <span className="mt-1.5 size-2 rounded-full bg-[#2563EB]/60 shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] text-[#0F172A]">
                   <span className="font-semibold">{l.actor}</span> {l.text}
                 </p>
-                <p className="text-[11.5px] text-[#94A3B8] mt-0.5">{relTime(l.at)}</p>
+                <p className="text-[11.5px] text-[#94A3B8] mt-0.5">
+                  {relTime(l.at)}
+                </p>
               </div>
             </li>
           ))}

@@ -5,7 +5,8 @@ import { cognitoEnabled } from "./cognito";
 // an explicit HTTPS API origin is supplied, so a missing build argument can
 // never silently point a customer's browser at localhost.
 function resolveBackendUrl() {
-  const explicit = process.env.REACT_APP_API_URL || process.env.REACT_APP_BACKEND_URL;
+  const explicit =
+    process.env.REACT_APP_API_URL || process.env.REACT_APP_BACKEND_URL;
   if (explicit) return explicit;
 
   if (typeof window !== "undefined" && window.location) {
@@ -48,14 +49,19 @@ const safeRemove = (storage, key) => {
 };
 
 export const getToken = () => {
-  return safeGet(sessionStorage, ACCESS_KEY) || safeGet(localStorage, ACCESS_KEY);
+  return (
+    safeGet(sessionStorage, ACCESS_KEY) || safeGet(localStorage, ACCESS_KEY)
+  );
 };
 
 export const getRefreshToken = () => {
-  return safeGet(sessionStorage, REFRESH_KEY) || safeGet(localStorage, REFRESH_KEY);
+  return (
+    safeGet(sessionStorage, REFRESH_KEY) || safeGet(localStorage, REFRESH_KEY)
+  );
 };
 
-export const isPersistentSession = () => safeGet(localStorage, PERSIST_KEY) === "1";
+export const isPersistentSession = () =>
+  safeGet(localStorage, PERSIST_KEY) === "1";
 
 export const setTokens = (access, refresh, { persistent = true } = {}) => {
   const target = persistent ? localStorage : sessionStorage;
@@ -79,7 +85,8 @@ export const clearTokens = () => {
 // Active project — the workspace > project layer. Persisted so the chosen
 // project survives reloads; attached as X-Project-Id on every API request so
 // the backend scopes resources to it.
-export const getActiveProjectId = () => safeGet(localStorage, ACTIVE_PROJECT_KEY);
+export const getActiveProjectId = () =>
+  safeGet(localStorage, ACTIVE_PROJECT_KEY);
 
 export const setActiveProjectId = (id) => {
   if (id) safeSet(localStorage, ACTIVE_PROJECT_KEY, id);
@@ -176,11 +183,16 @@ api.interceptors.response.use(
           .post(
             `${API_BASE}${cognitoEnabled ? "/auth/cognito/refresh" : "/auth/refresh"}`,
             cognitoEnabled ? {} : { refresh_token: refreshToken },
-            { headers: { "Content-Type": "application/json" }, withCredentials: true }
+            {
+              headers: { "Content-Type": "application/json" },
+              withCredentials: true,
+            },
           )
           .then(({ data }) => {
             if (cognitoEnabled) return "cookie-session";
-            setTokens(data.access_token, data.refresh_token || refreshToken, { persistent: isPersistentSession() });
+            setTokens(data.access_token, data.refresh_token || refreshToken, {
+              persistent: isPersistentSession(),
+            });
             return data.access_token;
           })
           .finally(() => {
@@ -190,7 +202,8 @@ api.interceptors.response.use(
 
       const newAccessToken = await refreshInFlight;
       original.headers = original.headers || {};
-      if (newAccessToken !== "cookie-session") original.headers.Authorization = `Bearer ${newAccessToken}`;
+      if (newAccessToken !== "cookie-session")
+        original.headers.Authorization = `Bearer ${newAccessToken}`;
       return api(original);
     } catch (refreshErr) {
       // Only sign out if the refresh was definitively rejected (the token is
@@ -198,14 +211,19 @@ api.interceptors.response.use(
       // must NOT nuke the session — keep the tokens so the request can be
       // retried once the backend is back.
       const refreshStatus = refreshErr?.response?.status;
-      if (refreshStatus && refreshStatus !== 502 && refreshStatus !== 503 && refreshStatus !== 504) {
+      if (
+        refreshStatus &&
+        refreshStatus !== 502 &&
+        refreshStatus !== 503 &&
+        refreshStatus !== 504
+      ) {
         clearTokens();
       } else {
         signalApiUnavailable();
       }
       return Promise.reject(error);
     }
-  }
+  },
 );
 
 export function formatApiError(detail) {

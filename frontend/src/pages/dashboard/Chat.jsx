@@ -53,21 +53,32 @@ function renderInline(text, keyPrefix = "i") {
     const tok = m[0];
     if (tok.startsWith("`")) {
       nodes.push(
-        <code key={`${keyPrefix}-c-${k}`} className="px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[#0F172A] text-[12.5px] font-mono">
+        <code
+          key={`${keyPrefix}-c-${k}`}
+          className="px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[#0F172A] text-[12.5px] font-mono"
+        >
           {tok.slice(1, -1)}
-        </code>
+        </code>,
       );
     } else if (tok.startsWith("**")) {
-      nodes.push(<strong key={`${keyPrefix}-b-${k}`}>{tok.slice(2, -2)}</strong>);
+      nodes.push(
+        <strong key={`${keyPrefix}-b-${k}`}>{tok.slice(2, -2)}</strong>,
+      );
     } else if (tok.startsWith("*")) {
       nodes.push(<em key={`${keyPrefix}-i-${k}`}>{tok.slice(1, -1)}</em>);
     } else if (tok.startsWith("[")) {
       const mm = /\[([^\]]+)\]\(([^)]+)\)/.exec(tok);
       if (mm) {
         nodes.push(
-          <a key={`${keyPrefix}-a-${k}`} href={mm[2]} target="_blank" rel="noopener noreferrer" className="text-[#2563EB] underline break-all">
+          <a
+            key={`${keyPrefix}-a-${k}`}
+            href={mm[2]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#2563EB] underline break-all"
+          >
             {mm[1]}
-          </a>
+          </a>,
         );
       }
     }
@@ -96,9 +107,12 @@ function renderMarkdown(src) {
       }
       i++; // skip closing fence
       blocks.push(
-        <pre key={`blk-${bi++}`} className="my-1.5 p-3 rounded-lg bg-[#0F172A] text-[#E2E8F0] text-[12.5px] font-mono overflow-x-auto">
+        <pre
+          key={`blk-${bi++}`}
+          className="my-1.5 p-3 rounded-lg bg-[#0F172A] text-[#E2E8F0] text-[12.5px] font-mono overflow-x-auto"
+        >
           <code>{code.join("\n")}</code>
-        </pre>
+        </pre>,
       );
       continue;
     }
@@ -106,8 +120,20 @@ function renderMarkdown(src) {
     const h = /^(#{1,4})\s+(.*)$/.exec(line);
     if (h) {
       const lvl = h[1].length;
-      const cls = lvl <= 1 ? "text-base font-bold" : lvl === 2 ? "text-[15px] font-bold" : "text-sm font-semibold";
-      blocks.push(<div key={`blk-${bi++}`} className={`${cls} mt-1.5 mb-0.5 text-[#0F172A]`}>{renderInline(h[2], `h${bi}`)}</div>);
+      const cls =
+        lvl <= 1
+          ? "text-base font-bold"
+          : lvl === 2
+            ? "text-[15px] font-bold"
+            : "text-sm font-semibold";
+      blocks.push(
+        <div
+          key={`blk-${bi++}`}
+          className={`${cls} mt-1.5 mb-0.5 text-[#0F172A]`}
+        >
+          {renderInline(h[2], `h${bi}`)}
+        </div>,
+      );
       i++;
       continue;
     }
@@ -117,15 +143,26 @@ function renderMarkdown(src) {
       const ordered = /^\s*\d+\.\s+/.test(line);
       while (i < lines.length && /^\s*([-*+]|\d+\.)\s+/.test(lines[i])) {
         const txt = lines[i].replace(/^\s*([-*+]|\d+\.)\s+/, "");
-        items.push(<li key={`li-${bi}-${items.length}`} className="ml-1">{renderInline(txt, `l${bi}-${items.length}`)}</li>);
+        items.push(
+          <li key={`li-${bi}-${items.length}`} className="ml-1">
+            {renderInline(txt, `l${bi}-${items.length}`)}
+          </li>,
+        );
         i++;
       }
       blocks.push(
         ordered ? (
-          <ol key={`blk-${bi++}`} className="my-1 ml-4 list-decimal space-y-0.5">{items}</ol>
+          <ol
+            key={`blk-${bi++}`}
+            className="my-1 ml-4 list-decimal space-y-0.5"
+          >
+            {items}
+          </ol>
         ) : (
-          <ul key={`blk-${bi++}`} className="my-1 ml-4 list-disc space-y-0.5">{items}</ul>
-        )
+          <ul key={`blk-${bi++}`} className="my-1 ml-4 list-disc space-y-0.5">
+            {items}
+          </ul>
+        ),
       );
       continue;
     }
@@ -137,11 +174,21 @@ function renderMarkdown(src) {
     // paragraph — gather until blank/structural line
     const para = [line];
     i++;
-    while (i < lines.length && lines[i].trim() !== "" && !/^\s*([-*+]|\d+\.)\s+/.test(lines[i]) && !/^#{1,4}\s/.test(lines[i]) && !lines[i].trim().startsWith("```")) {
+    while (
+      i < lines.length &&
+      lines[i].trim() !== "" &&
+      !/^\s*([-*+]|\d+\.)\s+/.test(lines[i]) &&
+      !/^#{1,4}\s/.test(lines[i]) &&
+      !lines[i].trim().startsWith("```")
+    ) {
       para.push(lines[i]);
       i++;
     }
-    blocks.push(<p key={`blk-${bi++}`} className="my-0.5 leading-relaxed">{renderInline(para.join(" "), `p${bi}`)}</p>);
+    blocks.push(
+      <p key={`blk-${bi++}`} className="my-0.5 leading-relaxed">
+        {renderInline(para.join(" "), `p${bi}`)}
+      </p>,
+    );
   }
   return blocks;
 }
@@ -280,7 +327,7 @@ export default function Chat() {
         setLoadingThread(false);
       }
     },
-    [nav]
+    [nav],
   );
 
   useEffect(() => {
@@ -315,14 +362,16 @@ export default function Chat() {
     async (agent) => {
       setShowPicker(false);
       try {
-        const { data } = await api.post("/conversations", { agent_id: agent.id });
+        const { data } = await api.post("/conversations", {
+          agent_id: agent.id,
+        });
         setConversations((prev) => [data, ...prev]);
         nav(`/app/chat/${data.id}`);
       } catch {
         toast.error("Could not start a conversation.");
       }
     },
-    [nav]
+    [nav],
   );
 
   const onNewChat = () => {
@@ -360,114 +409,132 @@ export default function Chat() {
       });
       setStreamingText("");
     },
-    [conversationId]
+    [conversationId],
   );
 
-  const sendMessage = useCallback(async (override) => {
-    const content = (typeof override === "string" ? override : input).trim();
-    if (!content || sending || !conversationId) return;
+  const sendMessage = useCallback(
+    async (override) => {
+      const content = (typeof override === "string" ? override : input).trim();
+      if (!content || sending || !conversationId) return;
 
-    setInput("");
-    setSending(true);
-    setStreamingText("");
-    setSuggested([]);
+      setInput("");
+      setSending(true);
+      setStreamingText("");
+      setSuggested([]);
 
-    const optimisticUser = {
-      id: tmpId(),
-      conversation_id: conversationId,
-      role: "user",
-      content,
-      created_at: new Date().toISOString(),
-      _optimistic: true,
-    };
-    setMessages((prev) => [...prev, optimisticUser]);
+      const optimisticUser = {
+        id: tmpId(),
+        conversation_id: conversationId,
+        role: "user",
+        content,
+        created_at: new Date().toISOString(),
+        _optimistic: true,
+      };
+      setMessages((prev) => [...prev, optimisticUser]);
 
-    const controller = new AbortController();
-    abortRef.current = controller;
+      const controller = new AbortController();
+      abortRef.current = controller;
 
-    let acc = "";
-    let streamedAny = false;
-    let doneReceived = false;
+      let acc = "";
+      let streamedAny = false;
+      let doneReceived = false;
 
-    try {
-      const res = await fetch(`${API_BASE}/conversations/${conversationId}/stream`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken() || ""}`,
-        },
-        body: JSON.stringify({ content, use_knowledge: useKnowledge }),
-        signal: controller.signal,
-      });
+      try {
+        const res = await fetch(
+          `${API_BASE}/conversations/${conversationId}/stream`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${getToken() || ""}`,
+            },
+            body: JSON.stringify({ content, use_knowledge: useKnowledge }),
+            signal: controller.signal,
+          },
+        );
 
-      if (!res.ok || !res.body) {
-        let detail = `Request failed (${res.status}).`;
-        try {
-          const j = await res.json();
-          detail = j?.detail?.message || j?.detail || detail;
-        } catch {
-          /* ignore parse failure */
+        if (!res.ok || !res.body) {
+          let detail = `Request failed (${res.status}).`;
+          try {
+            const j = await res.json();
+            detail = j?.detail?.message || j?.detail || detail;
+          } catch {
+            /* ignore parse failure */
+          }
+          throw new Error(detail);
         }
-        throw new Error(detail);
-      }
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = "";
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = "";
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        const [frames, rest] = parseSSE(buf);
-        buf = rest;
-        for (const { event, data } of frames) {
-          if (event === "token") {
-            streamedAny = true;
-            acc += data.delta || "";
-            setStreamingText(acc);
-          } else if (event === "done") {
-            doneReceived = true;
-            const finalText = data.content || acc;
-            finalizeAssistant(finalText, data);
-            if (data.title) {
-              setActiveConv((c) => (c ? { ...c, title: data.title } : c));
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const [frames, rest] = parseSSE(buf);
+          buf = rest;
+          for (const { event, data } of frames) {
+            if (event === "token") {
+              streamedAny = true;
+              acc += data.delta || "";
+              setStreamingText(acc);
+            } else if (event === "done") {
+              doneReceived = true;
+              const finalText = data.content || acc;
+              finalizeAssistant(finalText, data);
+              if (data.title) {
+                setActiveConv((c) => (c ? { ...c, title: data.title } : c));
+              }
+            } else if (event === "error") {
+              throw new Error(
+                data.message || "The assistant failed to respond.",
+              );
             }
-          } else if (event === "error") {
-            throw new Error(data.message || "The assistant failed to respond.");
           }
         }
-      }
 
-      // safety: stream closed without an explicit "done" frame
-      if (!doneReceived && acc) {
-        finalizeAssistant(acc, {});
-      }
-    } catch (err) {
-      if (err.name === "AbortError") {
-        // thread switched mid-stream — drop the partial assistant bubble
-        setMessages((prev) => prev.filter((m) => !m._streaming));
-      } else {
-        toast.error(err.message || "Failed to send message.");
-        // drop optimistic user + any partial assistant; restore input
-        setMessages((prev) => prev.filter((m) => m.id !== optimisticUser.id && !m._streaming));
-        setInput(content);
-      }
-      setStreamingText("");
-    } finally {
-      abortRef.current = null;
-      setSending(false);
-      // refresh thread + list to reconcile persisted state / ordering / title
-      if (!controller.signal.aborted) {
-        loadConversations();
-        if (!streamedAny) {
-          // nothing streamed (e.g., error before tokens) — re-pull to be safe
-          loadThread(conversationId);
+        // safety: stream closed without an explicit "done" frame
+        if (!doneReceived && acc) {
+          finalizeAssistant(acc, {});
         }
+      } catch (err) {
+        if (err.name === "AbortError") {
+          // thread switched mid-stream — drop the partial assistant bubble
+          setMessages((prev) => prev.filter((m) => !m._streaming));
+        } else {
+          toast.error(err.message || "Failed to send message.");
+          // drop optimistic user + any partial assistant; restore input
+          setMessages((prev) =>
+            prev.filter((m) => m.id !== optimisticUser.id && !m._streaming),
+          );
+          setInput(content);
+        }
+        setStreamingText("");
+      } finally {
+        abortRef.current = null;
+        setSending(false);
+        // refresh thread + list to reconcile persisted state / ordering / title
+        if (!controller.signal.aborted) {
+          loadConversations();
+          if (!streamedAny) {
+            // nothing streamed (e.g., error before tokens) — re-pull to be safe
+            loadThread(conversationId);
+          }
+        }
+        inputRef.current?.focus();
       }
-      inputRef.current?.focus();
-    }
-  }, [input, sending, conversationId, useKnowledge, finalizeAssistant, loadConversations, loadThread]);
+    },
+    [
+      input,
+      sending,
+      conversationId,
+      useKnowledge,
+      finalizeAssistant,
+      loadConversations,
+      loadThread,
+    ],
+  );
 
   const onKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -490,9 +557,13 @@ export default function Chat() {
       return;
     }
     try {
-      const { data } = await api.put(`/conversations/${activeConv.id}`, { title });
+      const { data } = await api.put(`/conversations/${activeConv.id}`, {
+        title,
+      });
       setActiveConv(data);
-      setConversations((prev) => prev.map((c) => (c.id === data.id ? { ...c, title: data.title } : c)));
+      setConversations((prev) =>
+        prev.map((c) => (c.id === data.id ? { ...c, title: data.title } : c)),
+      );
       toast.success("Renamed");
     } catch {
       toast.error("Rename failed.");
@@ -504,7 +575,8 @@ export default function Chat() {
   const deleteConversation = async (conv, e) => {
     e?.stopPropagation();
     e?.preventDefault();
-    if (!window.confirm(`Delete "${conv.title || "this conversation"}"?`)) return;
+    if (!window.confirm(`Delete "${conv.title || "this conversation"}"?`))
+      return;
     try {
       await api.delete(`/conversations/${conv.id}`);
       setConversations((prev) => prev.filter((c) => c.id !== conv.id));
@@ -517,36 +589,44 @@ export default function Chat() {
 
   /* ---------- R1: organization actions ---------- */
 
-  const patchConversation = useCallback(
-    async (id, body, { silent } = {}) => {
-      try {
-        const { data } = await api.patch(`/conversations/${id}`, body);
-        setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, ...data } : c)));
-        setActiveConv((c) => (c && c.id === id ? { ...c, ...data } : c));
-        return data;
-      } catch {
-        if (!silent) toast.error("Update failed.");
-        return null;
-      }
-    },
-    []
-  );
+  const patchConversation = useCallback(async (id, body, { silent } = {}) => {
+    try {
+      const { data } = await api.patch(`/conversations/${id}`, body);
+      setConversations((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, ...data } : c)),
+      );
+      setActiveConv((c) => (c && c.id === id ? { ...c, ...data } : c));
+      return data;
+    } catch {
+      if (!silent) toast.error("Update failed.");
+      return null;
+    }
+  }, []);
 
   const togglePin = async (conv, e) => {
     e?.stopPropagation();
-    const data = await patchConversation(conv.id, { is_pinned: !conv.is_pinned });
+    const data = await patchConversation(conv.id, {
+      is_pinned: !conv.is_pinned,
+    });
     if (data) toast.success(data.is_pinned ? "Pinned" : "Unpinned");
   };
 
   const toggleFavorite = async (conv, e) => {
     e?.stopPropagation();
-    const data = await patchConversation(conv.id, { is_favorite: !conv.is_favorite });
-    if (data) toast.success(data.is_favorite ? "Added to favorites" : "Removed from favorites");
+    const data = await patchConversation(conv.id, {
+      is_favorite: !conv.is_favorite,
+    });
+    if (data)
+      toast.success(
+        data.is_favorite ? "Added to favorites" : "Removed from favorites",
+      );
   };
 
   const toggleArchive = async (conv, e) => {
     e?.stopPropagation();
-    const data = await patchConversation(conv.id, { is_archived: !conv.is_archived });
+    const data = await patchConversation(conv.id, {
+      is_archived: !conv.is_archived,
+    });
     if (data) {
       toast.success(data.is_archived ? "Archived" : "Unarchived");
       setConversations((prev) => prev.filter((c) => c.id !== conv.id));
@@ -565,8 +645,14 @@ export default function Chat() {
         return;
       }
       const { data } = await api.post(`/conversations/${conv.id}/share`);
-      setConversations((prev) => prev.map((c) => (c.id === conv.id ? { ...c, share_token: data.share_token } : c)));
-      setActiveConv((c) => (c && c.id === conv.id ? { ...c, share_token: data.share_token } : c));
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === conv.id ? { ...c, share_token: data.share_token } : c,
+        ),
+      );
+      setActiveConv((c) =>
+        c && c.id === conv.id ? { ...c, share_token: data.share_token } : c,
+      );
       const url = `${window.location.origin}/share/${data.share_token}`;
       await navigator.clipboard?.writeText(url).catch(() => {});
       toast.success("Public link created & copied");
@@ -579,9 +665,12 @@ export default function Chat() {
     e?.stopPropagation();
     setMenuFor(null);
     try {
-      const res = await fetch(`${API_BASE}/conversations/${conv.id}/export?format=${format}`, {
-        headers: { Authorization: `Bearer ${getToken() || ""}` },
-      });
+      const res = await fetch(
+        `${API_BASE}/conversations/${conv.id}/export?format=${format}`,
+        {
+          headers: { Authorization: `Bearer ${getToken() || ""}` },
+        },
+      );
       if (!res.ok) throw new Error();
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -602,9 +691,13 @@ export default function Chat() {
     if (!conversationId || regenerating || sending) return;
     setRegenerating(true);
     try {
-      const { data } = await api.post(`/conversations/${conversationId}/regenerate`, null, {
-        params: { use_knowledge: useKnowledge },
-      });
+      const { data } = await api.post(
+        `/conversations/${conversationId}/regenerate`,
+        null,
+        {
+          params: { use_knowledge: useKnowledge },
+        },
+      );
       setMessages((prev) => {
         // drop the last assistant message, append the fresh one
         const trimmed = [...prev];
@@ -627,7 +720,8 @@ export default function Chat() {
       setSuggested([]);
       toast.success("Regenerated");
     } catch (err) {
-      const msg = err?.response?.data?.detail?.message || err?.response?.data?.detail;
+      const msg =
+        err?.response?.data?.detail?.message || err?.response?.data?.detail;
       toast.error(typeof msg === "string" ? msg : "Regenerate failed.");
     } finally {
       setRegenerating(false);
@@ -637,7 +731,9 @@ export default function Chat() {
   const loadSuggested = useCallback(async () => {
     if (!conversationId) return;
     try {
-      const { data } = await api.get(`/conversations/${conversationId}/suggested-questions`);
+      const { data } = await api.get(
+        `/conversations/${conversationId}/suggested-questions`,
+      );
       setSuggested(Array.isArray(data?.questions) ? data.questions : []);
     } catch {
       setSuggested([]);
@@ -677,7 +773,10 @@ export default function Chat() {
               <Plus size={16} /> New Chat
             </button>
             <div className="relative">
-              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+              <Search
+                size={14}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+              />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -706,7 +805,9 @@ export default function Chat() {
                   onClick={() => setFilter(t.k)}
                   data-testid={`chat-filter-${t.k}`}
                   className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
-                    filter === t.k ? "bg-[#EFF6FF] text-[#2563EB]" : "text-[#64748B] hover:bg-[#F8FAFC]"
+                    filter === t.k
+                      ? "bg-[#EFF6FF] text-[#2563EB]"
+                      : "text-[#64748B] hover:bg-[#F8FAFC]"
                   }`}
                 >
                   {t.label}
@@ -717,14 +818,29 @@ export default function Chat() {
 
           <div className="flex-1 overflow-y-auto scrollbar-thin p-2 space-y-1">
             {loadingConvs ? (
-              [1, 2, 3, 4].map((i) => <div key={i} className="h-14 rounded-xl skeleton" />)
+              [1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-14 rounded-xl skeleton" />
+              ))
             ) : conversations.length === 0 ? (
               <div className="px-3 py-10 text-center">
-                <MessageSquarePlus size={28} className="mx-auto text-[#94A3B8]" />
+                <MessageSquarePlus
+                  size={28}
+                  className="mx-auto text-[#94A3B8]"
+                />
                 <p className="mt-2 text-sm text-[#64748B]">
-                  {search ? "No matches found." : filter === "archived" ? "No archived chats." : filter === "favorites" ? "No favorites yet." : "No conversations yet."}
+                  {search
+                    ? "No matches found."
+                    : filter === "archived"
+                      ? "No archived chats."
+                      : filter === "favorites"
+                        ? "No favorites yet."
+                        : "No conversations yet."}
                 </p>
-                {!search && filter === "active" && <p className="text-xs text-[#94A3B8]">Start a new chat to begin.</p>}
+                {!search && filter === "active" && (
+                  <p className="text-xs text-[#94A3B8]">
+                    Start a new chat to begin.
+                  </p>
+                )}
               </div>
             ) : (
               (() => {
@@ -824,7 +940,9 @@ export default function Chat() {
                         </button>
                       </div>
                     )}
-                    <p className="text-xs text-[#64748B] truncate">{agentName}</p>
+                    <p className="text-xs text-[#64748B] truncate">
+                      {agentName}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
@@ -836,7 +954,9 @@ export default function Chat() {
                   <button
                     onClick={(e) => activeConv && togglePin(activeConv, e)}
                     className={`p-2 rounded-lg transition-colors ${
-                      activeConv?.is_pinned ? "text-[#2563EB] bg-[#EFF6FF]" : "text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#EFF6FF]"
+                      activeConv?.is_pinned
+                        ? "text-[#2563EB] bg-[#EFF6FF]"
+                        : "text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#EFF6FF]"
                     }`}
                     aria-label="Pin conversation"
                     title={activeConv?.is_pinned ? "Unpin" : "Pin"}
@@ -846,15 +966,24 @@ export default function Chat() {
                   <button
                     onClick={(e) => activeConv && toggleFavorite(activeConv, e)}
                     className={`p-2 rounded-lg transition-colors ${
-                      activeConv?.is_favorite ? "text-amber-500 bg-amber-50" : "text-[#94A3B8] hover:text-amber-500 hover:bg-amber-50"
+                      activeConv?.is_favorite
+                        ? "text-amber-500 bg-amber-50"
+                        : "text-[#94A3B8] hover:text-amber-500 hover:bg-amber-50"
                     }`}
                     aria-label="Favorite conversation"
                     title={activeConv?.is_favorite ? "Unfavorite" : "Favorite"}
                   >
-                    <Star size={16} className={activeConv?.is_favorite ? "fill-amber-400" : ""} />
+                    <Star
+                      size={16}
+                      className={
+                        activeConv?.is_favorite ? "fill-amber-400" : ""
+                      }
+                    />
                   </button>
                   <button
-                    onClick={(e) => activeConv && shareConversation(activeConv, e)}
+                    onClick={(e) =>
+                      activeConv && shareConversation(activeConv, e)
+                    }
                     className="p-2 rounded-lg text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#EFF6FF] transition-colors"
                     aria-label="Share conversation"
                     title="Share"
@@ -862,7 +991,10 @@ export default function Chat() {
                     <Share2 size={16} />
                   </button>
                   <button
-                    onClick={(e) => activeConv && exportConversation(activeConv, "markdown", e)}
+                    onClick={(e) =>
+                      activeConv &&
+                      exportConversation(activeConv, "markdown", e)
+                    }
                     className="p-2 rounded-lg text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#EFF6FF] transition-colors"
                     aria-label="Export conversation"
                     title="Export as Markdown"
@@ -870,7 +1002,9 @@ export default function Chat() {
                     <Download size={16} />
                   </button>
                   <button
-                    onClick={(e) => activeConv && deleteConversation(activeConv, e)}
+                    onClick={(e) =>
+                      activeConv && deleteConversation(activeConv, e)
+                    }
                     className="p-2 rounded-lg text-[#94A3B8] hover:text-red-500 hover:bg-red-50"
                     aria-label="Delete conversation"
                     title="Delete"
@@ -900,7 +1034,8 @@ export default function Chat() {
                         Say hello to start the conversation
                       </p>
                       <p className="text-xs text-[#94A3B8]">
-                        Your agent will answer using its instructions and knowledge base.
+                        Your agent will answer using its instructions and
+                        knowledge base.
                       </p>
                     </div>
                   </div>
@@ -909,10 +1044,19 @@ export default function Chat() {
                     {messages
                       .filter((m) => !m._streaming)
                       .map((m) => (
-                        <Bubble key={m.id} role={m.role} content={m.content} meta={m.metadata} />
+                        <Bubble
+                          key={m.id}
+                          role={m.role}
+                          content={m.content}
+                          meta={m.metadata}
+                        />
                       ))}
                     {(streamingText || sending) && (
-                      <Bubble role="assistant" content={streamingText} streaming />
+                      <Bubble
+                        role="assistant"
+                        content={streamingText}
+                        streaming
+                      />
                     )}
                   </>
                 )}
@@ -941,7 +1085,11 @@ export default function Chat() {
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-[#E2E8F0] text-[12px] text-[#64748B] hover:text-[#2563EB] hover:border-[#2563EB] transition-colors disabled:opacity-50"
                       title="Regenerate the last response"
                     >
-                      <RefreshCw size={12} className={regenerating ? "animate-spin" : ""} /> Regenerate
+                      <RefreshCw
+                        size={12}
+                        className={regenerating ? "animate-spin" : ""}
+                      />{" "}
+                      Regenerate
                     </button>
                   </div>
                 )}
@@ -964,7 +1112,8 @@ export default function Chat() {
                       data-testid={CHAT.typingIndicator}
                       className="inline-flex items-center gap-1.5 text-[12px] text-[#64748B]"
                     >
-                      <Loader2 size={13} className="animate-spin" /> Agent is typing…
+                      <Loader2 size={13} className="animate-spin" /> Agent is
+                      typing…
                     </span>
                   )}
                 </div>
@@ -986,7 +1135,11 @@ export default function Chat() {
                     className="size-12 shrink-0 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-40 disabled:cursor-not-allowed text-white grid place-items-center shadow-[0_8px_24px_-8px_rgba(37,99,235,0.5)] transition-colors"
                     aria-label="Send message"
                   >
-                    {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                    {sending ? (
+                      <Loader2 size={18} className="animate-spin" />
+                    ) : (
+                      <Send size={18} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -997,7 +1150,11 @@ export default function Chat() {
 
       {/* agent picker modal */}
       {showPicker && (
-        <AgentPicker agents={agents} onPick={startConversation} onClose={() => setShowPicker(false)} />
+        <AgentPicker
+          agents={agents}
+          onPick={startConversation}
+          onClose={() => setShowPicker(false)}
+        />
       )}
     </div>
   );
@@ -1040,17 +1197,31 @@ function ConversationRow({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1">
-            {c.is_pinned && <Pin size={11} className="text-[#2563EB] shrink-0" />}
-            {c.is_favorite && <Star size={11} className="text-amber-500 fill-amber-400 shrink-0" />}
-            <p className={`text-sm font-medium truncate ${sel ? "text-[#2563EB]" : "text-[#0F172A]"}`}>
+            {c.is_pinned && (
+              <Pin size={11} className="text-[#2563EB] shrink-0" />
+            )}
+            {c.is_favorite && (
+              <Star
+                size={11}
+                className="text-amber-500 fill-amber-400 shrink-0"
+              />
+            )}
+            <p
+              className={`text-sm font-medium truncate ${sel ? "text-[#2563EB]" : "text-[#0F172A]"}`}
+            >
               {c.title || "New Conversation"}
             </p>
           </div>
-          <p className="text-[11px] text-[#94A3B8]">{relativeTime(c.last_message_at || c.created_at)}</p>
+          <p className="text-[11px] text-[#94A3B8]">
+            {relativeTime(c.last_message_at || c.created_at)}
+          </p>
           {Array.isArray(c.tags) && c.tags.length > 0 && (
             <div className="mt-1 flex flex-wrap gap-1">
               {c.tags.slice(0, 3).map((t) => (
-                <span key={t} className="px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[9.5px] text-[#64748B]">
+                <span
+                  key={t}
+                  className="px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[9.5px] text-[#64748B]"
+                >
                   {t}
                 </span>
               ))}
@@ -1061,7 +1232,9 @@ function ConversationRow({
           <button
             onClick={(e) => togglePin(c, e)}
             className={`opacity-0 group-hover:opacity-100 p-1.5 rounded-lg transition-all ${
-              c.is_pinned ? "text-[#2563EB] opacity-100" : "text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#EFF6FF]"
+              c.is_pinned
+                ? "text-[#2563EB] opacity-100"
+                : "text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#EFF6FF]"
             }`}
             aria-label={c.is_pinned ? "Unpin" : "Pin"}
           >
@@ -1083,19 +1256,56 @@ function ConversationRow({
       </div>
       {open && (
         <>
-          <div className="fixed inset-0 z-10" onClick={(e) => { e.stopPropagation(); setMenuFor(null); }} />
+          <div
+            className="fixed inset-0 z-10"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuFor(null);
+            }}
+          />
           <div
             className="absolute right-2 top-11 z-20 w-44 rounded-xl bg-white border border-[#E2E8F0] shadow-xl py-1 text-[13px]"
             role="menu"
             onClick={(e) => e.stopPropagation()}
           >
-            <MenuItem icon={Star} label={c.is_favorite ? "Unfavorite" : "Favorite"} onClick={(e) => { toggleFavorite(c, e); setMenuFor(null); }} />
-            <MenuItem icon={Archive} label={c.is_archived ? "Unarchive" : "Archive"} onClick={(e) => toggleArchive(c, e)} />
-            <MenuItem icon={Share2} label={c.share_token ? "Copy share link" : "Share"} onClick={(e) => shareConversation(c, e)} />
-            <MenuItem icon={Download} label="Export Markdown" onClick={(e) => exportConversation(c, "markdown", e)} />
-            <MenuItem icon={FileText} label="Export JSON" onClick={(e) => exportConversation(c, "json", e)} />
+            <MenuItem
+              icon={Star}
+              label={c.is_favorite ? "Unfavorite" : "Favorite"}
+              onClick={(e) => {
+                toggleFavorite(c, e);
+                setMenuFor(null);
+              }}
+            />
+            <MenuItem
+              icon={Archive}
+              label={c.is_archived ? "Unarchive" : "Archive"}
+              onClick={(e) => toggleArchive(c, e)}
+            />
+            <MenuItem
+              icon={Share2}
+              label={c.share_token ? "Copy share link" : "Share"}
+              onClick={(e) => shareConversation(c, e)}
+            />
+            <MenuItem
+              icon={Download}
+              label="Export Markdown"
+              onClick={(e) => exportConversation(c, "markdown", e)}
+            />
+            <MenuItem
+              icon={FileText}
+              label="Export JSON"
+              onClick={(e) => exportConversation(c, "json", e)}
+            />
             <div className="my-1 border-t border-[#F1F5F9]" />
-            <MenuItem icon={Trash2} label="Delete" danger onClick={(e) => { deleteConversation(c, e); setMenuFor(null); }} />
+            <MenuItem
+              icon={Trash2}
+              label="Delete"
+              danger
+              onClick={(e) => {
+                deleteConversation(c, e);
+                setMenuFor(null);
+              }}
+            />
           </div>
         </>
       )}
@@ -1109,7 +1319,9 @@ function MenuItem({ icon: Icon, label, onClick, danger }) {
       onClick={onClick}
       role="menuitem"
       className={`w-full flex items-center gap-2 px-3 py-1.5 text-left transition-colors ${
-        danger ? "text-red-600 hover:bg-red-50" : "text-[#334155] hover:bg-[#F8FAFC]"
+        danger
+          ? "text-red-600 hover:bg-red-50"
+          : "text-[#334155] hover:bg-[#F8FAFC]"
       }`}
     >
       <Icon size={14} className="shrink-0" /> {label}
@@ -1123,22 +1335,33 @@ function Bubble({ role, content, streaming = false, meta }) {
   if (isSystem) {
     return (
       <div className="flex justify-center">
-        <span className="px-3 py-1 rounded-full bg-[#F1F5F9] text-[11px] text-[#64748B]">{content}</span>
+        <span className="px-3 py-1 rounded-full bg-[#F1F5F9] text-[11px] text-[#64748B]">
+          {content}
+        </span>
       </div>
     );
   }
   const sources = Array.isArray(meta?.sources) ? meta.sources : [];
-  const usedCount = meta?.context_used ?? meta?.context_chunks ?? sources.length ?? 0;
+  const usedCount =
+    meta?.context_used ?? meta?.context_chunks ?? sources.length ?? 0;
   return (
-    <div className={`flex gap-3 ${isUser ? "flex-row-reverse" : ""}`} data-testid={CHAT.message} data-role={role}>
+    <div
+      className={`flex gap-3 ${isUser ? "flex-row-reverse" : ""}`}
+      data-testid={CHAT.message}
+      data-role={role}
+    >
       <div
         className={`size-8 rounded-lg grid place-items-center shrink-0 ${
-          isUser ? "bg-[#2563EB] text-white" : "bg-white border border-[#E2E8F0] text-[#2563EB]"
+          isUser
+            ? "bg-[#2563EB] text-white"
+            : "bg-white border border-[#E2E8F0] text-[#2563EB]"
         }`}
       >
         {isUser ? <User size={15} /> : <Bot size={15} />}
       </div>
-      <div className={`max-w-[78%] ${isUser ? "items-end" : "items-start"} flex flex-col`}>
+      <div
+        className={`max-w-[78%] ${isUser ? "items-end" : "items-start"} flex flex-col`}
+      >
         <div
           className={`px-4 py-2.5 rounded-2xl text-sm break-words ${
             isUser
@@ -1151,7 +1374,9 @@ function Bubble({ role, content, streaming = false, meta }) {
           ) : (
             <div className="space-y-0.5">{renderMarkdown(content)}</div>
           )}
-          {streaming && <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-[#2563EB] animate-pulse" />}
+          {streaming && (
+            <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-[#2563EB] animate-pulse" />
+          )}
         </div>
         {!isUser && sources.length > 0 ? (
           <SourcesPanel sources={sources} />
@@ -1159,7 +1384,8 @@ function Bubble({ role, content, streaming = false, meta }) {
           !isUser &&
           usedCount > 0 && (
             <span className="mt-1 inline-flex items-center gap-1 text-[10.5px] text-[#94A3B8]">
-              <BookOpen size={11} /> {usedCount} knowledge source{usedCount > 1 ? "s" : ""} used
+              <BookOpen size={11} /> {usedCount} knowledge source
+              {usedCount > 1 ? "s" : ""} used
             </span>
           )
         )}
@@ -1180,7 +1406,10 @@ function SourcesPanel({ sources }) {
       >
         <BookOpen size={11} />
         {sources.length} source{sources.length > 1 ? "s" : ""}
-        <ChevronDown size={11} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={11}
+          className={`transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {open && (
         <ul className="mt-1.5 space-y-1">
@@ -1195,12 +1424,16 @@ function SourcesPanel({ sources }) {
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 text-[11.5px] font-medium text-[#0F172A] truncate">
                   <FileText size={11} className="text-[#94A3B8] shrink-0" />
-                  <span className="truncate">{s.document || s.document_name || "Document"}</span>
+                  <span className="truncate">
+                    {s.document || s.document_name || "Document"}
+                  </span>
                 </div>
                 <div className="text-[10px] text-[#94A3B8]">
                   {s.page != null ? `Page ${s.page}` : "—"}
                   {s.section ? ` · ${s.section}` : ""}
-                  {typeof s.score === "number" ? ` · ${Math.round(s.score * 100)}% match` : ""}
+                  {typeof s.score === "number"
+                    ? ` · ${Math.round(s.score * 100)}% match`
+                    : ""}
                 </div>
               </div>
             </li>
@@ -1218,9 +1451,12 @@ function EmptyChat({ onNewChat }) {
         <div className="size-14 mx-auto rounded-2xl bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] grid place-items-center text-white">
           <Sparkles size={24} />
         </div>
-        <h2 className="mt-4 text-xl font-bold text-[#0F172A]">Chat with your AI agents</h2>
+        <h2 className="mt-4 text-xl font-bold text-[#0F172A]">
+          Chat with your AI agents
+        </h2>
         <p className="mt-1.5 text-sm text-[#64748B]">
-          Start a conversation to test your agent live. Responses use the agent's instructions and your knowledge base.
+          Start a conversation to test your agent live. Responses use the
+          agent's instructions and your knowledge base.
         </p>
         <button
           onClick={onNewChat}
@@ -1236,7 +1472,10 @@ function EmptyChat({ onNewChat }) {
 function AgentPicker({ agents, onPick, onClose }) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-4">
-      <div className="absolute inset-0 bg-[#0F172A]/50 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-[#0F172A]/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div
         className="relative w-full max-w-md rounded-2xl bg-white border border-[#E2E8F0] shadow-2xl overflow-hidden"
         data-testid={CHAT.agentPicker}
@@ -1244,8 +1483,14 @@ function AgentPicker({ agents, onPick, onClose }) {
         aria-modal="true"
       >
         <div className="h-14 px-5 flex items-center justify-between border-b border-[#E2E8F0]">
-          <h3 className="text-base font-semibold text-[#0F172A]">Choose an agent</h3>
-          <button onClick={onClose} className="p-2 rounded-lg text-[#64748B] hover:bg-[#F1F5F9]" aria-label="Close">
+          <h3 className="text-base font-semibold text-[#0F172A]">
+            Choose an agent
+          </h3>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg text-[#64748B] hover:bg-[#F1F5F9]"
+            aria-label="Close"
+          >
             <X size={18} />
           </button>
         </div>
@@ -1263,8 +1508,12 @@ function AgentPicker({ agents, onPick, onClose }) {
                   <Icon size={18} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#0F172A] truncate">{a.name}</p>
-                  <p className="text-xs text-[#64748B] capitalize">{a.type || "chat"} agent</p>
+                  <p className="text-sm font-semibold text-[#0F172A] truncate">
+                    {a.name}
+                  </p>
+                  <p className="text-xs text-[#64748B] capitalize">
+                    {a.type || "chat"} agent
+                  </p>
                 </div>
                 {a.status === "active" ? (
                   <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-green-50 text-green-700">

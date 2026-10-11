@@ -15,7 +15,12 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { PageHeader, Card, Badge, PrimaryButton } from "@/components/dashboard/kit";
+import {
+  PageHeader,
+  Card,
+  Badge,
+  PrimaryButton,
+} from "@/components/dashboard/kit";
 
 const RESOURCE_METRICS = ["agents", "knowledge_bases", "users", "workflows"];
 
@@ -102,7 +107,10 @@ function MetricBar({ m }) {
       <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[#EEF2F7]">
         <div
           className="h-full rounded-full transition-all"
-          style={{ width: `${m.unlimited ? 6 : pct}%`, background: m.unlimited ? "#CBD5E1" : tone }}
+          style={{
+            width: `${m.unlimited ? 6 : pct}%`,
+            background: m.unlimited ? "#CBD5E1" : tone,
+          }}
         />
       </div>
     </div>
@@ -112,7 +120,12 @@ function MetricBar({ m }) {
 export default function Portal() {
   const { user } = useAuth();
   const [usage, setUsage] = useState(null);
-  const firstName = (user?.name || user?.full_name || user?.email || "there").split(/[\s@]/)[0];
+  const firstName = (
+    user?.name ||
+    user?.full_name ||
+    user?.email ||
+    "there"
+  ).split(/[\s@]/)[0];
 
   useEffect(() => {
     let active = true;
@@ -125,9 +138,12 @@ export default function Portal() {
     };
   }, []);
 
-  const metrics = (usage?.metrics || []).filter((m) => RESOURCE_METRICS.includes(m.metric));
+  const metrics = (usage?.metrics || []).filter((m) =>
+    RESOURCE_METRICS.includes(m.metric),
+  );
 
-  const openSupport = () => window.dispatchEvent(new CustomEvent("oraone:open-support"));
+  const openSupport = () =>
+    window.dispatchEvent(new CustomEvent("oraone:open-support"));
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
@@ -153,7 +169,9 @@ export default function Portal() {
             </span>
             <div>
               <p className="text-sm font-bold text-[#0F172A]">Your plan</p>
-              <p className="text-xs text-[#64748B]">Resource usage this period</p>
+              <p className="text-xs text-[#64748B]">
+                Resource usage this period
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -187,34 +205,53 @@ export default function Portal() {
                 <Icon size={20} />
               </span>
               <div className="mt-3 flex items-center gap-1.5">
-                <p className="text-[15px] font-bold text-[#0F172A]">{a.title}</p>
+                <p className="text-[15px] font-bold text-[#0F172A]">
+                  {a.title}
+                </p>
                 {a.external ? (
                   <ArrowUpRight size={15} className="text-[#94A3B8]" />
                 ) : (
                   <ArrowRight size={15} className="text-[#94A3B8]" />
                 )}
               </div>
-              <p className="mt-1 text-[13px] leading-snug text-[#64748B]">{a.desc}</p>
+              <p className="mt-1 text-[13px] leading-snug text-[#64748B]">
+                {a.desc}
+              </p>
             </>
           );
           const cls =
             "group flex flex-col rounded-2xl border border-[#E7EAF1] bg-white p-5 text-left transition hover:border-[#C7D2FE] hover:shadow-sm";
           if (a.action === "support") {
             return (
-              <button key={a.key} onClick={openSupport} className={cls} data-testid={`portal-action-${a.key}`}>
+              <button
+                key={a.key}
+                onClick={openSupport}
+                className={cls}
+                data-testid={`portal-action-${a.key}`}
+              >
                 {inner}
               </button>
             );
           }
           if (a.external) {
             return (
-              <a key={a.key} href={a.to} className={cls} data-testid={`portal-action-${a.key}`}>
+              <a
+                key={a.key}
+                href={a.to}
+                className={cls}
+                data-testid={`portal-action-${a.key}`}
+              >
                 {inner}
               </a>
             );
           }
           return (
-            <Link key={a.key} to={a.to} className={cls} data-testid={`portal-action-${a.key}`}>
+            <Link
+              key={a.key}
+              to={a.to}
+              className={cls}
+              data-testid={`portal-action-${a.key}`}
+            >
               {inner}
             </Link>
           );

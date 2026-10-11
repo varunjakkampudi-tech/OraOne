@@ -47,11 +47,27 @@ const PROJECT_SCOPED = new Set([
 // "Create Agent". Navigates to the create surface (pages may also open their
 // own modal via location state / the oraone:create event).
 const CONTEXT_ACTIONS = {
-  "/app/dashboard": { label: "New Project", to: "/app/projects", state: { openCreate: true } },
-  "/app/projects": { label: "New Project", to: "/app/projects", state: { openCreate: true } },
+  "/app/dashboard": {
+    label: "New Project",
+    to: "/app/projects",
+    state: { openCreate: true },
+  },
+  "/app/projects": {
+    label: "New Project",
+    to: "/app/projects",
+    state: { openCreate: true },
+  },
   "/app/agents": { label: "Create Agent", to: "/app/agents/new" },
-  "/app/knowledge-base": { label: "New Knowledge Base", to: "/app/knowledge-base", state: { create: true } },
-  "/app/integrations": { label: "Connect App", to: "/app/integrations", state: { create: true } },
+  "/app/knowledge-base": {
+    label: "New Knowledge Base",
+    to: "/app/knowledge-base",
+    state: { create: true },
+  },
+  "/app/integrations": {
+    label: "Connect App",
+    to: "/app/integrations",
+    state: { create: true },
+  },
 };
 const DEFAULT_ACTION = { label: "Create Agent", to: "/app/create-agent" };
 
@@ -67,12 +83,17 @@ export default function TopBar({ onMenuClick = () => {} }) {
     ? filterByEntitlements(section.tabs, { isProductEnabled, isFeatureEnabled })
     : [];
 
-  const titleKey = Object.keys(TITLES).find((k) => pathname === k || pathname.startsWith(k + "/"));
+  const titleKey = Object.keys(TITLES).find(
+    (k) => pathname === k || pathname.startsWith(k + "/"),
+  );
   const title = section?.label || TITLES[titleKey] || "Dashboard";
 
   const scopeKey = section?.root || titleKey;
   const isProjectScoped = scopeKey ? PROJECT_SCOPED.has(scopeKey) : false;
-  const action = CONTEXT_ACTIONS[section?.root] || CONTEXT_ACTIONS[titleKey] || DEFAULT_ACTION;
+  const action =
+    CONTEXT_ACTIONS[section?.root] ||
+    CONTEXT_ACTIONS[titleKey] ||
+    DEFAULT_ACTION;
 
   // Cmd/Ctrl+K opens the global command palette.
   useEffect(() => {
@@ -87,78 +108,89 @@ export default function TopBar({ onMenuClick = () => {} }) {
   }, []);
 
   const runAction = () => {
-    window.dispatchEvent(new CustomEvent("oraone:create", { detail: { key: section?.root || titleKey } }));
+    window.dispatchEvent(
+      new CustomEvent("oraone:create", {
+        detail: { key: section?.root || titleKey },
+      }),
+    );
     nav(action.to, action.state ? { state: action.state } : undefined);
   };
 
   return (
     <div className="bg-white border-b border-[#E2E8F0]">
       <header className="h-16 flex items-center px-4 sm:px-6 gap-3">
-      {/* Left: title */}
-      <div className="flex items-center gap-3 min-w-0 shrink-0">
-        <button
-          onClick={onMenuClick}
-          className="lg:hidden p-2 -ml-1 rounded-xl text-[#475569] hover:bg-[#F1F5F9]"
-          aria-label="Open navigation menu"
-          data-testid="dashboard-menu-btn"
-        >
-          <Menu size={20} />
-        </button>
-        {isProjectScoped && activeProject ? (
+        {/* Left: title */}
+        <div className="flex items-center gap-3 min-w-0 shrink-0">
           <button
-            onClick={() => nav("/app/projects")}
-            className="text-lg sm:text-xl font-bold text-[#0F172A] tracking-tight truncate hover:text-[#2563EB] transition-colors"
-            title={title}
-            data-testid="topbar-workspace-name"
+            onClick={onMenuClick}
+            className="lg:hidden p-2 -ml-1 rounded-xl text-[#475569] hover:bg-[#F1F5F9]"
+            aria-label="Open navigation menu"
+            data-testid="dashboard-menu-btn"
           >
-            {title}
+            <Menu size={20} />
           </button>
-        ) : (
-          <h1 className="text-lg sm:text-xl font-bold text-[#0F172A] tracking-tight truncate">{title}</h1>
-        )}
-      </div>
-
-      {/* Center: search */}
-      <div className="flex flex-1 justify-center px-2">
-        <button
-          onClick={() => setPaletteOpen(true)}
-          className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#F8FAFC] border border-[#E2E8F0] w-full max-w-lg text-left hover:bg-[#F1F5F9] transition-colors"
-          data-testid="dashboard-search-input"
-        >
-          <Search size={16} className="text-[#64748B]" />
-          <span className="text-sm flex-1 text-[#94A3B8] truncate">Search agents, conversations…</span>
-          <kbd className="rounded-md border border-[#E2E8F0] bg-white px-1.5 py-0.5 text-[11px] text-[#94A3B8]">⌘K</kbd>
-        </button>
-      </div>
-
-      {/* Right: actions */}
-      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-        <button
-          onClick={() => setPaletteOpen(true)}
-          className="md:hidden p-2.5 rounded-full text-[#64748B] hover:bg-[#F1F5F9]"
-          aria-label="Search"
-          data-testid="dashboard-search-btn"
-        >
-          <Search size={18} />
-        </button>
-
-        <HelpMenu />
-
-        <NotificationsMenu />
-
-        <button
-          onClick={runAction}
-          className="inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-semibold transition-colors shrink-0 shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]"
-          aria-label={action.label}
-          data-testid={DASH.createAgentBtn}
-        >
-          <Plus size={16} /> <span className="hidden sm:inline">{action.label}</span>
-        </button>
-
-        <div className="pl-1 ml-0.5 border-l border-[#E2E8F0]">
-          <ProfileMenu />
+          {isProjectScoped && activeProject ? (
+            <button
+              onClick={() => nav("/app/projects")}
+              className="text-lg sm:text-xl font-bold text-[#0F172A] tracking-tight truncate hover:text-[#2563EB] transition-colors"
+              title={title}
+              data-testid="topbar-workspace-name"
+            >
+              {title}
+            </button>
+          ) : (
+            <h1 className="text-lg sm:text-xl font-bold text-[#0F172A] tracking-tight truncate">
+              {title}
+            </h1>
+          )}
         </div>
-      </div>
+
+        {/* Center: search */}
+        <div className="flex flex-1 justify-center px-2">
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#F8FAFC] border border-[#E2E8F0] w-full max-w-lg text-left hover:bg-[#F1F5F9] transition-colors"
+            data-testid="dashboard-search-input"
+          >
+            <Search size={16} className="text-[#64748B]" />
+            <span className="text-sm flex-1 text-[#94A3B8] truncate">
+              Search agents, conversations…
+            </span>
+            <kbd className="rounded-md border border-[#E2E8F0] bg-white px-1.5 py-0.5 text-[11px] text-[#94A3B8]">
+              ⌘K
+            </kbd>
+          </button>
+        </div>
+
+        {/* Right: actions */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="md:hidden p-2.5 rounded-full text-[#64748B] hover:bg-[#F1F5F9]"
+            aria-label="Search"
+            data-testid="dashboard-search-btn"
+          >
+            <Search size={18} />
+          </button>
+
+          <HelpMenu />
+
+          <NotificationsMenu />
+
+          <button
+            onClick={runAction}
+            className="inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-semibold transition-colors shrink-0 shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]"
+            aria-label={action.label}
+            data-testid={DASH.createAgentBtn}
+          >
+            <Plus size={16} />{" "}
+            <span className="hidden sm:inline">{action.label}</span>
+          </button>
+
+          <div className="pl-1 ml-0.5 border-l border-[#E2E8F0]">
+            <ProfileMenu />
+          </div>
+        </div>
       </header>
 
       {/* Section tab bar — turns a group of related pages into focused tabs. */}
@@ -187,7 +219,10 @@ export default function TopBar({ onMenuClick = () => {} }) {
         </nav>
       )}
 
-      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+      />
     </div>
   );
 }

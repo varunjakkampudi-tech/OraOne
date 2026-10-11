@@ -15,7 +15,10 @@ import { AuthShell, GradientButton } from "@/components/auth/AuthShell";
 import { beginCognitoLogin, cognitoEnabled } from "@/lib/cognito";
 
 export default function Signup() {
-  useSEO({ title: "Sign up", description: "Create your OraOne account in minutes." });
+  useSEO({
+    title: "Sign up",
+    description: "Create your OraOne account in minutes.",
+  });
   const { signup } = useAuth();
   const nav = useNavigate();
   const [name, setName] = useState("");
@@ -30,22 +33,41 @@ export default function Signup() {
   if (cognitoEnabled) {
     return (
       <AuthShell cardTestId="signup-form">
-        <h1 className="text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">Create Your Account</h1>
-        <p className="mt-2 text-center text-sm text-[#64748B]">Sign up with your email through OraOne&apos;s secure Cognito sign-in.</p>
+        <h1 className="text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">
+          Create Your Account
+        </h1>
+        <p className="mt-2 text-center text-sm text-[#64748B]">
+          Sign up with your email through OraOne&apos;s secure Cognito sign-in.
+        </p>
         <div className="mt-8">
-          <GradientButton type="button" trailingIcon={ArrowRight} onClick={() => beginCognitoLogin({ endpoint: "signup" })}>
+          <GradientButton
+            type="button"
+            trailingIcon={ArrowRight}
+            onClick={() => beginCognitoLogin({ endpoint: "signup" })}
+          >
             Continue to secure sign-up
           </GradientButton>
         </div>
         <p className="mt-6 text-center text-sm text-[#64748B]">
-          Already have an account? <Link to="/login" className="font-semibold text-[#2563EB] hover:underline">Sign in</Link>
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="font-semibold text-[#2563EB] hover:underline"
+          >
+            Sign in
+          </Link>
         </p>
       </AuthShell>
     );
   }
 
   const canSubmit =
-    name.trim() && email.trim() && passwordValid(password) && password === confirm && agree && !busy;
+    name.trim() &&
+    email.trim() &&
+    passwordValid(password) &&
+    password === confirm &&
+    agree &&
+    !busy;
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -73,10 +95,18 @@ export default function Signup() {
 
     if (company) {
       try {
-        const biz = JSON.parse(sessionStorage.getItem("onboard_business") || "{}");
-        sessionStorage.setItem("onboard_business", JSON.stringify({ ...biz, company_name: company }));
+        const biz = JSON.parse(
+          sessionStorage.getItem("onboard_business") || "{}",
+        );
+        sessionStorage.setItem(
+          "onboard_business",
+          JSON.stringify({ ...biz, company_name: company }),
+        );
       } catch {
-        sessionStorage.setItem("onboard_business", JSON.stringify({ company_name: company }));
+        sessionStorage.setItem(
+          "onboard_business",
+          JSON.stringify({ company_name: company }),
+        );
       }
     }
 
@@ -146,7 +176,14 @@ export default function Signup() {
           />
         </Field>
 
-        <Field label={<>Company Name <span className="font-normal text-[#64748B]">(Optional)</span></>}>
+        <Field
+          label={
+            <>
+              Company Name{" "}
+              <span className="font-normal text-[#64748B]">(Optional)</span>
+            </>
+          }
+        >
           <IconInput
             icon={Building2}
             type="text"
@@ -165,9 +202,19 @@ export default function Signup() {
           data-testid="signup-terms"
         >
           I agree to the{" "}
-          <Link to="/terms" className="font-semibold text-[#2563EB] hover:underline">Terms of Service</Link>{" "}
+          <Link
+            to="/terms"
+            className="font-semibold text-[#2563EB] hover:underline"
+          >
+            Terms of Service
+          </Link>{" "}
           and{" "}
-          <Link to="/privacy" className="font-semibold text-[#2563EB] hover:underline">Privacy Policy</Link>
+          <Link
+            to="/privacy"
+            className="font-semibold text-[#2563EB] hover:underline"
+          >
+            Privacy Policy
+          </Link>
         </Checkbox>
 
         {error && <p className="text-sm text-[#DC2626]">{error}</p>}
@@ -186,7 +233,12 @@ export default function Signup() {
 
       <p className="mt-6 text-center text-sm text-[#64748B]">
         Already have an account?{" "}
-        <Link to="/login" className="font-semibold text-[#2563EB] hover:underline">Sign in</Link>
+        <Link
+          to="/login"
+          className="font-semibold text-[#2563EB] hover:underline"
+        >
+          Sign in
+        </Link>
       </p>
     </AuthShell>
   );

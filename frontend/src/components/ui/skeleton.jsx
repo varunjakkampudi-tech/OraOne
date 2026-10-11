@@ -1,4 +1,3 @@
-
 /**
  * Skeleton — small composable shimmer block.
  * Usage: <Skeleton className="h-4 w-32" />

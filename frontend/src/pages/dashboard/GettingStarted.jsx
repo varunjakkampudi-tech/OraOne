@@ -17,7 +17,13 @@ import {
 import { api } from "@/lib/api";
 import { useProjects } from "@/lib/projects";
 import { useTour } from "@/lib/tour";
-import { PageHeader, Card, Badge, PrimaryButton, GhostButton } from "@/components/dashboard/kit";
+import {
+  PageHeader,
+  Card,
+  Badge,
+  PrimaryButton,
+  GhostButton,
+} from "@/components/dashboard/kit";
 
 /* Pull a count out of either a {items,total} envelope or a bare array. */
 const countOf = (data) => {
@@ -54,7 +60,10 @@ function useSetupState() {
       ];
       const r = await Promise.allSettled(calls);
       if (!active) return;
-      const d = (i) => (r[i] && r[i].status === "fulfilled" && r[i].value ? r[i].value.data : null);
+      const d = (i) =>
+        r[i] && r[i].status === "fulfilled" && r[i].value
+          ? r[i].value.data
+          : null;
       setState({
         loading: false,
         agents: countOf(d(0)),
@@ -135,7 +144,7 @@ export default function GettingStarted() {
         cta: "Invite teammates",
       },
     ],
-    [s]
+    [s],
   );
 
   const required = steps.filter((x) => !x.optional);
@@ -147,8 +156,8 @@ export default function GettingStarted() {
   const cta = allDone
     ? { to: "/app/dashboard", label: "Explore dashboard" }
     : nextStep
-    ? { to: nextStep.to, label: `Continue: ${nextStep.cta}` }
-    : null;
+      ? { to: nextStep.to, label: `Continue: ${nextStep.cta}` }
+      : null;
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
@@ -163,12 +172,20 @@ export default function GettingStarted() {
               <Sparkles size={15} />
               Take the tour
             </GhostButton>
-            <GhostButton as={Link} to="/app/guide" data-testid="getting-started-guide">
+            <GhostButton
+              as={Link}
+              to="/app/guide"
+              data-testid="getting-started-guide"
+            >
               <BookOpen size={15} />
               Step-by-step guide
             </GhostButton>
             {cta ? (
-              <PrimaryButton as={Link} to={cta.to} data-testid="getting-started-next">
+              <PrimaryButton
+                as={Link}
+                to={cta.to}
+                data-testid="getting-started-next"
+              >
                 {cta.label}
                 <ArrowRight size={16} />
               </PrimaryButton>
@@ -234,14 +251,20 @@ export default function GettingStarted() {
                   {step.optional && <Badge tone="slate">Optional</Badge>}
                   {step.done && <Badge tone="green">Done</Badge>}
                 </div>
-                <p className="mt-0.5 text-xs leading-snug text-[#64748B]">{step.desc}</p>
+                <p className="mt-0.5 text-xs leading-snug text-[#64748B]">
+                  {step.desc}
+                </p>
               </div>
 
               <div className="shrink-0">
                 {step.done ? (
                   <CheckCircle2 size={22} className="text-[#16A34A]" />
                 ) : (
-                  <GhostButton as={Link} to={step.to} data-testid={`getting-started-cta-${step.key}`}>
+                  <GhostButton
+                    as={Link}
+                    to={step.to}
+                    data-testid={`getting-started-cta-${step.key}`}
+                  >
                     {step.cta}
                     <ArrowRight size={15} />
                   </GhostButton>

@@ -8,13 +8,26 @@ import { cx, PrimaryButton, GhostButton } from "./kit";
 
 /* Skeleton primitive. */
 export function Skeleton({ className = "" }) {
-  return <div aria-hidden="true" className={cx("animate-pulse rounded-lg bg-line motion-reduce:animate-none", className)} />;
+  return (
+    <div
+      aria-hidden="true"
+      className={cx(
+        "animate-pulse rounded-lg bg-line motion-reduce:animate-none",
+        className,
+      )}
+    />
+  );
 }
 
 /* Table loading skeleton — mimics rows so layout doesn't jump. */
 export function TableSkeleton({ rows = 6, cols = 4 }) {
   return (
-    <div role="status" aria-busy="true" aria-label="Loading" className="overflow-hidden rounded-2xl border border-line bg-white">
+    <div
+      role="status"
+      aria-busy="true"
+      aria-label="Loading"
+      className="overflow-hidden rounded-2xl border border-line bg-white"
+    >
       <span className="sr-only">Loading…</span>
       <div className="flex items-center gap-4 border-b border-hairline px-4 py-3">
         {Array.from({ length: cols }).map((_, i) => (
@@ -22,9 +35,15 @@ export function TableSkeleton({ rows = 6, cols = 4 }) {
         ))}
       </div>
       {Array.from({ length: rows }).map((_, r) => (
-        <div key={r} className="flex items-center gap-4 border-b border-canvas px-4 py-4 last:border-0">
+        <div
+          key={r}
+          className="flex items-center gap-4 border-b border-canvas px-4 py-4 last:border-0"
+        >
           {Array.from({ length: cols }).map((_, c) => (
-            <Skeleton key={c} className={cx("h-4", c === 0 ? "w-40" : "flex-1")} />
+            <Skeleton
+              key={c}
+              className={cx("h-4", c === 0 ? "w-40" : "flex-1")}
+            />
           ))}
         </div>
       ))}
@@ -35,7 +54,12 @@ export function TableSkeleton({ rows = 6, cols = 4 }) {
 /* Card grid loading skeleton. */
 export function CardsSkeleton({ count = 6 }) {
   return (
-    <div role="status" aria-busy="true" aria-label="Loading" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div
+      role="status"
+      aria-busy="true"
+      aria-label="Loading"
+      className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+    >
       <span className="sr-only">Loading…</span>
       {Array.from({ length: count }).map((_, i) => (
         <Skeleton key={i} className="h-40 rounded-2xl" />
@@ -45,9 +69,16 @@ export function CardsSkeleton({ count = 6 }) {
 }
 
 /* Error state with retry. */
-export function ErrorState({ title = "Something went wrong", message, onRetry }) {
+export function ErrorState({
+  title = "Something went wrong",
+  message,
+  onRetry,
+}) {
   return (
-    <div role="alert" className="rounded-2xl border border-danger-border bg-[#FFFBFA] p-10 text-center">
+    <div
+      role="alert"
+      className="rounded-2xl border border-danger-border bg-[#FFFBFA] p-10 text-center"
+    >
       <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-danger-soft text-danger">
         <AlertTriangle size={22} aria-hidden="true" />
       </span>
@@ -65,7 +96,13 @@ export function ErrorState({ title = "Something went wrong", message, onRetry })
 }
 
 /* Empty state — one template: icon, title, explanation, primary + optional secondary CTA. */
-export function EmptyState({ icon: Icon, title, hint, action, secondaryAction }) {
+export function EmptyState({
+  icon: Icon,
+  title,
+  hint,
+  action,
+  secondaryAction,
+}) {
   return (
     <div className="rounded-2xl border border-dashed border-stroke bg-white p-9 text-center">
       {Icon && (
@@ -74,7 +111,11 @@ export function EmptyState({ icon: Icon, title, hint, action, secondaryAction })
         </span>
       )}
       {title && <p className="mt-4 text-[16px] font-bold text-ink">{title}</p>}
-      {hint && <p className="mx-auto mt-1.5 max-w-md text-[13.5px] text-body">{hint}</p>}
+      {hint && (
+        <p className="mx-auto mt-1.5 max-w-md text-[13.5px] text-body">
+          {hint}
+        </p>
+      )}
       {(action || secondaryAction) && (
         <div className="mt-5 flex items-center justify-center gap-2">
           {action}

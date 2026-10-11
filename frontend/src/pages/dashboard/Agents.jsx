@@ -20,7 +20,12 @@ import {
 } from "lucide-react";
 import { formatApiError } from "@/lib/api";
 import { toast } from "sonner";
-import { StatCard, PrimaryButton, GhostButton, cx } from "@/components/dashboard/kit";
+import {
+  StatCard,
+  PrimaryButton,
+  GhostButton,
+  cx,
+} from "@/components/dashboard/kit";
 import EntityListPage from "@/components/dashboard/EntityListPage";
 import { MenuItem } from "@/components/dashboard/DataTable";
 import Drawer from "@/components/dashboard/Drawer";
@@ -34,16 +39,42 @@ import {
 } from "@/features/agents/hooks/useAgents";
 
 const TYPE_META = {
-  chat:     { icon: MessageSquare, color: "#0891B2", label: "Chat Agent",     desc: "Chats on your website and engages visitors." },
-  whatsapp: { icon: MessageCircle, color: "#22C55E", label: "WhatsApp Agent", desc: "AI that replies on WhatsApp." },
+  chat: {
+    icon: MessageSquare,
+    color: "#0891B2",
+    label: "Chat Agent",
+    desc: "Chats on your website and engages visitors.",
+  },
+  whatsapp: {
+    icon: MessageCircle,
+    color: "#22C55E",
+    label: "WhatsApp Agent",
+    desc: "AI that replies on WhatsApp.",
+  },
 };
 
 // Agents behave like cloud services: Draft → Active ⇄ Paused → Archived.
 const STATUS_META = {
-  draft:    { label: "Draft",    dot: "#94A3B8", badge: "bg-[#F1F5F9] text-[#475569]" },
-  active:   { label: "Active",   dot: "#22C55E", badge: "bg-green-50 text-green-700" },
-  paused:   { label: "Paused",   dot: "#F59E0B", badge: "bg-amber-50 text-amber-700" },
-  archived: { label: "Archived", dot: "#64748B", badge: "bg-[#E2E8F0] text-[#475569]" },
+  draft: {
+    label: "Draft",
+    dot: "#94A3B8",
+    badge: "bg-[#F1F5F9] text-[#475569]",
+  },
+  active: {
+    label: "Active",
+    dot: "#22C55E",
+    badge: "bg-green-50 text-green-700",
+  },
+  paused: {
+    label: "Paused",
+    dot: "#F59E0B",
+    badge: "bg-amber-50 text-amber-700",
+  },
+  archived: {
+    label: "Archived",
+    dot: "#64748B",
+    badge: "bg-[#E2E8F0] text-[#475569]",
+  },
 };
 
 const fmtRelative = (iso) => {
@@ -80,8 +111,13 @@ export default function Agents() {
 
   const setStatus = async (a, newStatus) => {
     try {
-      await updateAgent.mutateAsync({ id: a.id, payload: { status: newStatus } });
-      toast.success(newStatus === "active" ? "Agent activated" : `Agent ${newStatus}`);
+      await updateAgent.mutateAsync({
+        id: a.id,
+        payload: { status: newStatus },
+      });
+      toast.success(
+        newStatus === "active" ? "Agent activated" : `Agent ${newStatus}`,
+      );
     } catch (err) {
       toast.error(formatApiError(err.response?.data?.detail));
     }
@@ -92,7 +128,9 @@ export default function Agents() {
   const toggleStatus = (a) => {
     if (a.status === "active") return setStatus(a, "paused");
     if (a.is_ready === false) {
-      toast.error("Agent is incomplete — add a system prompt before activating.");
+      toast.error(
+        "Agent is incomplete — add a system prompt before activating.",
+      );
       return;
     }
     return setStatus(a, "active");
@@ -121,15 +159,23 @@ export default function Agents() {
   // Bulk operations over the current selection.
   const bulkStatus = async (sel, clear, status) => {
     try {
-      await bulkUpdateStatus.mutateAsync({ ids: sel.filter((a) => a.status !== status).map((a) => a.id), status });
+      await bulkUpdateStatus.mutateAsync({
+        ids: sel.filter((a) => a.status !== status).map((a) => a.id),
+        status,
+      });
       clear();
-      toast.success(status === "active" ? "Agents activated" : `Agents ${status}`);
+      toast.success(
+        status === "active" ? "Agents activated" : `Agents ${status}`,
+      );
     } catch (err) {
       toast.error(formatApiError(err.response?.data?.detail));
     }
   };
   const bulkDelete = async (sel, clear) => {
-    if (!window.confirm(`Delete ${sel.length} agent${sel.length > 1 ? "s" : ""}?`)) return;
+    if (
+      !window.confirm(`Delete ${sel.length} agent${sel.length > 1 ? "s" : ""}?`)
+    )
+      return;
     try {
       await bulkDeleteAgents.mutateAsync(sel.map((a) => a.id));
       clear();
@@ -143,15 +189,53 @@ export default function Agents() {
     const total = agents.length;
     const activeCount = agents.filter((a) => a.status === "active").length;
     const paused = agents.filter((a) => a.status === "paused").length;
-    const conversations = agents.reduce((sum, a) => sum + (a.conversations || 0), 0);
+    const conversations = agents.reduce(
+      (sum, a) => sum + (a.conversations || 0),
+      0,
+    );
     const leads = agents.reduce((sum, a) => sum + (a.leads_generated || 0), 0);
     const pct = (n) => (total ? Math.round((n / total) * 100) : 0);
     return [
-      { key: "total",         icon: Bot,         color: "#2563EB", label: "Total Agents",          value: total,         sub: `${activeCount} active` },
-      { key: "active",        icon: Power,       color: "#22C55E", label: "Active Agents",         value: activeCount,   sub: `${pct(activeCount)}% of total` },
-      { key: "paused",        icon: PauseCircle, color: "#F59E0B", label: "Paused Agents",         value: paused,        sub: `${pct(paused)}% of total` },
-      { key: "conversations", icon: Sparkles,    color: "#F59E0B", label: "Total Conversations",   value: conversations, sub: "this month" },
-      { key: "leads",         icon: Users,       color: "#0EA5E9", label: "Total Leads Generated", value: leads,         sub: "this month" },
+      {
+        key: "total",
+        icon: Bot,
+        color: "#2563EB",
+        label: "Total Agents",
+        value: total,
+        sub: `${activeCount} active`,
+      },
+      {
+        key: "active",
+        icon: Power,
+        color: "#22C55E",
+        label: "Active Agents",
+        value: activeCount,
+        sub: `${pct(activeCount)}% of total`,
+      },
+      {
+        key: "paused",
+        icon: PauseCircle,
+        color: "#F59E0B",
+        label: "Paused Agents",
+        value: paused,
+        sub: `${pct(paused)}% of total`,
+      },
+      {
+        key: "conversations",
+        icon: Sparkles,
+        color: "#F59E0B",
+        label: "Total Conversations",
+        value: conversations,
+        sub: "this month",
+      },
+      {
+        key: "leads",
+        icon: Users,
+        color: "#0EA5E9",
+        label: "Total Leads Generated",
+        value: leads,
+        sub: "this month",
+      },
     ];
   }, [agents]);
 
@@ -167,18 +251,28 @@ export default function Agents() {
           const Icon = meta.icon;
           return (
             <div className="flex items-center gap-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-xl" style={{ background: `${meta.color}1A` }}>
+              <span
+                className="grid size-9 shrink-0 place-items-center rounded-xl"
+                style={{ background: `${meta.color}1A` }}
+              >
                 <Icon size={16} style={{ color: meta.color }} />
               </span>
               <div className="min-w-0">
-                <p className="truncate font-semibold text-[#0F172A]">{a.name}</p>
+                <p className="truncate font-semibold text-[#0F172A]">
+                  {a.name}
+                </p>
                 <p className="text-[12px] text-[#64748B]">{meta.label}</p>
               </div>
             </div>
           );
         },
       },
-      { key: "status", header: "Status", sortable: true, render: (a) => <StatusBadge status={a.status} /> },
+      {
+        key: "status",
+        header: "Status",
+        sortable: true,
+        render: (a) => <StatusBadge status={a.status} />,
+      },
       {
         key: "model",
         header: "Model",
@@ -189,8 +283,20 @@ export default function Agents() {
           </span>
         ),
       },
-      { key: "conversations", header: "Conversations", sortable: true, accessor: (a) => a.conversations || 0, render: (a) => (a.conversations || 0).toLocaleString() },
-      { key: "success_rate", header: "Success", sortable: true, accessor: (a) => a.success_rate || 0, render: (a) => `${a.success_rate || 0}%` },
+      {
+        key: "conversations",
+        header: "Conversations",
+        sortable: true,
+        accessor: (a) => a.conversations || 0,
+        render: (a) => (a.conversations || 0).toLocaleString(),
+      },
+      {
+        key: "success_rate",
+        header: "Success",
+        sortable: true,
+        accessor: (a) => a.success_rate || 0,
+        render: (a) => `${a.success_rate || 0}%`,
+      },
       {
         key: "updated_at",
         header: "Updated",
@@ -203,7 +309,7 @@ export default function Agents() {
         ),
       },
     ],
-    []
+    [],
   );
 
   const statStrip =
@@ -240,30 +346,45 @@ export default function Agents() {
         searchKeys={["name", "model"]}
         searchPlaceholder="Search agents…"
         filters={[
-          { key: "type", label: "Type", options: [
-            { value: "chat", label: "Chat" },
-          ] },
-          { key: "status", label: "Status", options: [
-            { value: "draft", label: "Draft" },
-            { value: "active", label: "Active" },
-            { value: "paused", label: "Paused" },
-            { value: "archived", label: "Archived" },
-          ] },
+          {
+            key: "type",
+            label: "Type",
+            options: [{ value: "chat", label: "Chat" }],
+          },
+          {
+            key: "status",
+            label: "Status",
+            options: [
+              { value: "draft", label: "Draft" },
+              { value: "active", label: "Active" },
+              { value: "paused", label: "Paused" },
+              { value: "archived", label: "Archived" },
+            ],
+          },
         ]}
         onRowClick={(a) => setActive(a)}
         rowActions={(a) => (
           <>
-            <MenuItem icon={ExternalLink} onClick={() => nav(`/app/agents/${a.id}`)}>
+            <MenuItem
+              icon={ExternalLink}
+              onClick={() => nav(`/app/agents/${a.id}`)}
+            >
               Open
             </MenuItem>
-            <MenuItem icon={Code2} onClick={() => nav(`/app/agents/${a.id}/deploy`)}>
+            <MenuItem
+              icon={Code2}
+              onClick={() => nav(`/app/agents/${a.id}/deploy`)}
+            >
               Channels &amp; Deploy
             </MenuItem>
             <MenuItem icon={Copy} onClick={() => duplicate(a)}>
               Duplicate
             </MenuItem>
             {a.status !== "archived" && (
-              <MenuItem icon={a.status === "active" ? PauseCircle : Rocket} onClick={() => toggleStatus(a)}>
+              <MenuItem
+                icon={a.status === "active" ? PauseCircle : Rocket}
+                onClick={() => toggleStatus(a)}
+              >
                 {a.status === "active" ? "Pause" : "Activate"}
               </MenuItem>
             )}
@@ -274,9 +395,15 @@ export default function Agents() {
         )}
         bulkActions={(sel, clear) => (
           <>
-            <GhostButton onClick={() => bulkStatus(sel, clear, "active")}>Activate</GhostButton>
-            <GhostButton onClick={() => bulkStatus(sel, clear, "paused")}>Pause</GhostButton>
-            <GhostButton onClick={() => bulkDelete(sel, clear)}>Delete</GhostButton>
+            <GhostButton onClick={() => bulkStatus(sel, clear, "active")}>
+              Activate
+            </GhostButton>
+            <GhostButton onClick={() => bulkStatus(sel, clear, "paused")}>
+              Pause
+            </GhostButton>
+            <GhostButton onClick={() => bulkDelete(sel, clear)}>
+              Delete
+            </GhostButton>
           </>
         )}
         empty={{
@@ -284,7 +411,11 @@ export default function Agents() {
           title: "No agents yet",
           hint: "Create your first AI agent to start automating website chat conversations.",
           action: (
-            <PrimaryButton as={Link} to="/app/agents/new" data-testid="agents-empty-create-btn">
+            <PrimaryButton
+              as={Link}
+              to="/app/agents/new"
+              data-testid="agents-empty-create-btn"
+            >
               <Plus size={16} /> Create Agent
             </PrimaryButton>
           ),
@@ -319,16 +450,30 @@ function StatusBadge({ status }) {
   const meta = STATUS_META[status] || STATUS_META.draft;
   return (
     <span
-      className={cx("inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold", meta.badge)}
+      className={cx(
+        "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold",
+        meta.badge,
+      )}
       data-testid={`agent-status-${status}`}
     >
-      <span className="size-1.5 rounded-full" style={{ background: meta.dot }} />
+      <span
+        className="size-1.5 rounded-full"
+        style={{ background: meta.dot }}
+      />
       {meta.label}
     </span>
   );
 }
 
-function AgentDrawer({ agent, onClose, onOpenFull, onGotoDeploy, onToggle, onDuplicate, onDelete }) {
+function AgentDrawer({
+  agent,
+  onClose,
+  onOpenFull,
+  onGotoDeploy,
+  onToggle,
+  onDuplicate,
+  onDelete,
+}) {
   const meta = agent ? TYPE_META[agent.type] || TYPE_META.chat : TYPE_META.chat;
   const isActive = agent?.status === "active";
   return (
@@ -386,16 +531,22 @@ function AgentDrawer({ agent, onClose, onOpenFull, onGotoDeploy, onToggle, onDup
             </div>
           )}
 
-          <p className="text-[13.5px] text-[#475569]">{agent.description || meta.desc}</p>
+          <p className="text-[13.5px] text-[#475569]">
+            {agent.description || meta.desc}
+          </p>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-[#EAF0F6] bg-[#FBFCFE] p-4">
               <p className="text-[12px] text-[#64748B]">Conversations</p>
-              <p className="mt-1 text-[20px] font-bold text-[#0F172A]">{(agent.conversations || 0).toLocaleString()}</p>
+              <p className="mt-1 text-[20px] font-bold text-[#0F172A]">
+                {(agent.conversations || 0).toLocaleString()}
+              </p>
             </div>
             <div className="rounded-xl border border-[#EAF0F6] bg-[#FBFCFE] p-4">
               <p className="text-[12px] text-[#64748B]">Success rate</p>
-              <p className="mt-1 text-[20px] font-bold text-[#0F172A]">{agent.success_rate || 0}%</p>
+              <p className="mt-1 text-[20px] font-bold text-[#0F172A]">
+                {agent.success_rate || 0}%
+              </p>
             </div>
           </div>
 

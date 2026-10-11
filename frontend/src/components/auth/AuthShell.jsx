@@ -33,7 +33,17 @@ export function AuthBrand() {
 
 export function Hexagon({ size = 16 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M12 2 20.5 7v10L12 22 3.5 17V7z" />
       <path d="m9 12 2 2 4-4" />
     </svg>
@@ -42,11 +52,36 @@ export function Hexagon({ size = 16 }) {
 
 /* ── Left-panel data ───────────────────────────────────────── */
 const FEATURES = [
-  { icon: Headset, tone: "blue", title: "AI Chat Agents", desc: "Human-like conversations that convert." },
-  { icon: MessagesSquare, tone: "green", title: "Website Widget", desc: "Drop it on any site in one line." },
-  { icon: BookOpen, tone: "cyan", title: "Knowledge Base AI", desc: "Instant answers from your data." },
-  { icon: Users, tone: "blue", title: "Lead Intelligence", desc: "Capture, qualify & convert leads." },
-  { icon: ShieldCheck, tone: "cyan", title: "Enterprise Security", desc: "Your data is safe with us." },
+  {
+    icon: Headset,
+    tone: "blue",
+    title: "AI Chat Agents",
+    desc: "Human-like conversations that convert.",
+  },
+  {
+    icon: MessagesSquare,
+    tone: "green",
+    title: "Website Widget",
+    desc: "Drop it on any site in one line.",
+  },
+  {
+    icon: BookOpen,
+    tone: "cyan",
+    title: "Knowledge Base AI",
+    desc: "Instant answers from your data.",
+  },
+  {
+    icon: Users,
+    tone: "blue",
+    title: "Lead Intelligence",
+    desc: "Capture, qualify & convert leads.",
+  },
+  {
+    icon: ShieldCheck,
+    tone: "cyan",
+    title: "Enterprise Security",
+    desc: "Your data is safe with us.",
+  },
 ];
 
 const TONES = {
@@ -75,9 +110,23 @@ const TRUST = [
 function ChatFlow() {
   return (
     <div className="relative h-[300px] w-[300px]" aria-hidden="true">
-      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 300 300" fill="none">
-        <path d="M250 40 C250 90 120 90 120 130" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="4 5" />
-        <path d="M210 150 C260 160 260 210 220 220" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="4 5" />
+      <svg
+        className="absolute inset-0 h-full w-full"
+        viewBox="0 0 300 300"
+        fill="none"
+      >
+        <path
+          d="M250 40 C250 90 120 90 120 130"
+          stroke="#CBD5E1"
+          strokeWidth="2"
+          strokeDasharray="4 5"
+        />
+        <path
+          d="M210 150 C260 160 260 210 220 220"
+          stroke="#CBD5E1"
+          strokeWidth="2"
+          strokeDasharray="4 5"
+        />
       </svg>
 
       <div className="absolute right-6 top-0 grid size-10 place-items-center rounded-xl bg-white text-[#2563EB] shadow-[0_10px_30px_-12px_rgba(15,23,42,0.35)]">
@@ -91,7 +140,9 @@ function ChatFlow() {
           </span>
           <div>
             <p className="text-xs font-bold text-[#0F172A]">AI Agent</p>
-            <p className="mt-0.5 text-[11px] leading-snug text-[#64748B]">Hello! How can I help you today?</p>
+            <p className="mt-0.5 text-[11px] leading-snug text-[#64748B]">
+              Hello! How can I help you today?
+            </p>
           </div>
         </div>
       </div>
@@ -107,8 +158,12 @@ function ChatFlow() {
 
       <div className="absolute left-8 top-[210px] flex items-center gap-2.5 rounded-2xl border border-[#EEF0F6] bg-white p-3 shadow-[0_16px_40px_-20px_rgba(15,23,42,0.35)]">
         <div>
-          <p className="text-[11px] font-semibold leading-snug text-[#0F172A]">Demo scheduled</p>
-          <p className="text-[11px] leading-snug text-[#64748B]">for tomorrow at 11:00 AM</p>
+          <p className="text-[11px] font-semibold leading-snug text-[#0F172A]">
+            Demo scheduled
+          </p>
+          <p className="text-[11px] leading-snug text-[#64748B]">
+            for tomorrow at 11:00 AM
+          </p>
         </div>
         <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[#16A34A] text-white">
           <Check size={13} strokeWidth={3} />
@@ -144,8 +199,8 @@ function MarketingPanel() {
               </span>
             </h1>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-[#475569]">
-              OraOne helps businesses automate conversations, capture leads, and scale operations with
-              advanced AI agents.
+              OraOne helps businesses automate conversations, capture leads, and
+              scale operations with advanced AI agents.
             </p>
           </div>
 
@@ -156,33 +211,46 @@ function MarketingPanel() {
 
         <div className="space-y-3.5">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="rounded-2xl border border-[#EEF0F6] bg-white p-4 shadow-[0_10px_30px_-22px_rgba(15,23,42,0.4)]">
-              <span className={`grid size-10 place-items-center rounded-xl ${TONES[f.tone]}`}>
-                <f.icon size={20} />
-              </span>
-              <p className="mt-3 text-[13px] font-bold leading-tight text-[#0F172A]">{f.title}</p>
-              <p className="mt-1 text-[11px] leading-snug text-[#475569]">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between gap-2 rounded-2xl border border-[#EEF0F6] bg-white px-5 py-4">
-          {STATS.map((s, i) => (
-            <React.Fragment key={s.label}>
-              {i > 0 && <span className="h-9 w-px bg-[#EEF0F6]" />}
-              <div className="flex items-center gap-2.5">
-                <span className={`grid size-9 place-items-center rounded-xl ${TONES[s.tone]}`}>
-                  <s.icon size={18} />
+            {FEATURES.map((f) => (
+              <div
+                key={f.title}
+                className="rounded-2xl border border-[#EEF0F6] bg-white p-4 shadow-[0_10px_30px_-22px_rgba(15,23,42,0.4)]"
+              >
+                <span
+                  className={`grid size-10 place-items-center rounded-xl ${TONES[f.tone]}`}
+                >
+                  <f.icon size={20} />
                 </span>
-                <div>
-                  <p className="text-[15px] font-extrabold leading-none text-[#0F172A]">{s.value}</p>
-                  <p className="mt-1 text-[11px] text-[#475569]">{s.label}</p>
-                </div>
+                <p className="mt-3 text-[13px] font-bold leading-tight text-[#0F172A]">
+                  {f.title}
+                </p>
+                <p className="mt-1 text-[11px] leading-snug text-[#475569]">
+                  {f.desc}
+                </p>
               </div>
-            </React.Fragment>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between gap-2 rounded-2xl border border-[#EEF0F6] bg-white px-5 py-4">
+            {STATS.map((s, i) => (
+              <React.Fragment key={s.label}>
+                {i > 0 && <span className="h-9 w-px bg-[#EEF0F6]" />}
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className={`grid size-9 place-items-center rounded-xl ${TONES[s.tone]}`}
+                  >
+                    <s.icon size={18} />
+                  </span>
+                  <div>
+                    <p className="text-[15px] font-extrabold leading-none text-[#0F172A]">
+                      {s.value}
+                    </p>
+                    <p className="mt-1 text-[11px] text-[#475569]">{s.label}</p>
+                  </div>
+                </div>
+              </React.Fragment>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -194,7 +262,10 @@ export function TrustBadges() {
   return (
     <div className="mt-5 grid grid-cols-3 gap-2 border-t border-[#F1F5F9] pt-4">
       {TRUST.map((t) => (
-        <div key={t.lines[1]} className="flex flex-col items-center gap-1.5 text-center">
+        <div
+          key={t.lines[1]}
+          className="flex flex-col items-center gap-1.5 text-center"
+        >
           <span className="grid size-6 place-items-center rounded-lg bg-[#F5F7FA] text-[#64748B]">
             <t.icon size={13} />
           </span>
@@ -223,7 +294,13 @@ export function IconBadge({ icon: Icon, check = false }) {
   );
 }
 
-export function GradientButton({ children, trailingIcon: TrailingIcon, busy = false, busyLabel, ...props }) {
+export function GradientButton({
+  children,
+  trailingIcon: TrailingIcon,
+  busy = false,
+  busyLabel,
+  ...props
+}) {
   return (
     <button
       {...props}
@@ -232,7 +309,10 @@ export function GradientButton({ children, trailingIcon: TrailingIcon, busy = fa
     >
       {busy ? busyLabel || "Please wait..." : children}
       {!busy && TrailingIcon && (
-        <TrailingIcon size={17} className="transition-transform group-hover:translate-x-0.5" />
+        <TrailingIcon
+          size={17}
+          className="transition-transform group-hover:translate-x-0.5"
+        />
       )}
     </button>
   );
@@ -248,7 +328,12 @@ export function OrLine() {
   );
 }
 
-export function OutlineButton({ children, leadingIcon: LeadingIcon = ArrowRight, to, ...props }) {
+export function OutlineButton({
+  children,
+  leadingIcon: LeadingIcon = ArrowRight,
+  to,
+  ...props
+}) {
   const cls =
     "inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white py-3.5 text-sm font-semibold text-[#2563EB] transition-all hover:border-[#CBD5E1] hover:bg-[#F8FAFC]";
   if (to) {
@@ -272,7 +357,9 @@ export function TipBox({ icon: Icon = ShieldCheck, title, children }) {
         <Icon size={16} />
       </span>
       <p className="text-xs leading-relaxed text-[#64748B]">
-        {title && <span className="font-semibold text-[#0F172A]">{title} </span>}
+        {title && (
+          <span className="font-semibold text-[#0F172A]">{title} </span>
+        )}
         {children}
       </p>
     </div>

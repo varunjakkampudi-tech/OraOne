@@ -42,7 +42,8 @@ export function useEntitlements() {
   const getProduct = (key) => catalogByKey[key] || null;
   const isProductEnabled = (key) => products[key] !== false;
   const isProductInMaintenance = (key) => maintenance[key] === true;
-  const getProductStatus = (key) => statuses[key] || getProduct(key)?.status || null;
+  const getProductStatus = (key) =>
+    statuses[key] || getProduct(key)?.status || null;
   const isComingSoon = (key) => getProductStatus(key) === "coming_soon";
   const isBeta = (key) => getProductStatus(key) === "beta";
   const isPreview = (key) => getProductStatus(key) === "preview";

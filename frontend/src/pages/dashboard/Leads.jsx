@@ -39,7 +39,13 @@ import { PageHeader, GhostButton } from "@/components/dashboard/kit";
 
 // Pipeline stages, in flow order. Values match the API's title-case labels.
 const PIPELINE = ["New", "Contacted", "Qualified", "Won", "Lost"];
-const STATUS_TO_API = { New: "new", Contacted: "contacted", Qualified: "qualified", Won: "won", Lost: "lost" };
+const STATUS_TO_API = {
+  New: "new",
+  Contacted: "contacted",
+  Qualified: "qualified",
+  Won: "won",
+  Lost: "lost",
+};
 const TEMPERATURES = ["hot", "warm", "cold"];
 const TEMP_CLS = {
   hot: "bg-red-50 text-red-700 border-red-200",
@@ -48,11 +54,11 @@ const TEMP_CLS = {
 };
 
 const STATUS_CLS = {
-  New:       "bg-blue-50 text-blue-700 border-blue-200",
+  New: "bg-blue-50 text-blue-700 border-blue-200",
   Contacted: "bg-orange-50 text-orange-700 border-orange-200",
   Qualified: "bg-green-50 text-green-700 border-green-200",
-  Won:       "bg-cyan-50 text-cyan-700 border-cyan-200",
-  Lost:      "bg-red-50 text-red-700 border-red-200",
+  Won: "bg-cyan-50 text-cyan-700 border-cyan-200",
+  Lost: "bg-red-50 text-red-700 border-red-200",
 };
 
 const AVATAR_PALETTE = [
@@ -65,25 +71,50 @@ const AVATAR_PALETTE = [
 ];
 
 const KPI_CARDS = [
-  { key: "total",      label: "Total Leads",         icon: Users,      tone: "#2563EB" },
-  { key: "new",        label: "New Leads",           icon: UserPlus,   tone: "#22C55E" },
-  { key: "qualified",  label: "Qualified Leads",     icon: UserCheck,  tone: "#0891B2" },
-  { key: "conversion", label: "Conversion Rate",     icon: TrendingUp, tone: "#F59E0B" },
-  { key: "booked",     label: "Appointments Booked", icon: Calendar,   tone: "#EC4899" },
+  { key: "total", label: "Total Leads", icon: Users, tone: "#2563EB" },
+  { key: "new", label: "New Leads", icon: UserPlus, tone: "#22C55E" },
+  {
+    key: "qualified",
+    label: "Qualified Leads",
+    icon: UserCheck,
+    tone: "#0891B2",
+  },
+  {
+    key: "conversion",
+    label: "Conversion Rate",
+    icon: TrendingUp,
+    tone: "#F59E0B",
+  },
+  {
+    key: "booked",
+    label: "Appointments Booked",
+    icon: Calendar,
+    tone: "#EC4899",
+  },
 ];
 
 const EMPTY_STATS = {
-  total: 0, new: 0, qualified: 0, conversion_rate: 0, appointments: 0,
+  total: 0,
+  new: 0,
+  qualified: 0,
+  conversion_rate: 0,
+  appointments: 0,
 };
 
 const kpiValue = (key, stats) => {
   switch (key) {
-    case "total":      return stats.total ?? 0;
-    case "new":        return stats.new ?? 0;
-    case "qualified":  return stats.qualified ?? 0;
-    case "conversion": return `${stats.conversion_rate ?? 0}%`;
-    case "booked":     return stats.appointments ?? 0;
-    default:           return 0;
+    case "total":
+      return stats.total ?? 0;
+    case "new":
+      return stats.new ?? 0;
+    case "qualified":
+      return stats.qualified ?? 0;
+    case "conversion":
+      return `${stats.conversion_rate ?? 0}%`;
+    case "booked":
+      return stats.appointments ?? 0;
+    default:
+      return 0;
   }
 };
 
@@ -103,15 +134,25 @@ const colorFor = (key = "") => {
 };
 
 // A chatting visitor may share no contact details — still show them clearly.
-const displayName = (l) => l?.name || l?.email || l?.phone || "Anonymous visitor";
+const displayName = (l) =>
+  l?.name || l?.email || l?.phone || "Anonymous visitor";
 
 function toCSV(rows) {
   if (!rows.length) return "";
-  const headers = ["Name", "Email", "Phone", "Source", "Intent", "Status", "Score", "Date"];
+  const headers = [
+    "Name",
+    "Email",
+    "Phone",
+    "Source",
+    "Intent",
+    "Status",
+    "Score",
+    "Date",
+  ];
   const body = rows.map((r) =>
     [r.name, r.email, r.phone, r.source, r.intent, r.status, r.score, r.date]
       .map((v) => `"${(v ?? "").toString().replace(/"/g, '""')}"`)
-      .join(",")
+      .join(","),
   );
   return [headers.join(","), ...body].join("\n");
 }
@@ -139,7 +180,9 @@ export default function Leads() {
     ...l,
     intent: l.intent || "—",
     tags: Array.isArray(l.tags) ? l.tags : [],
-    date: l.created_at ? new Date(l.created_at).toLocaleDateString() : new Date().toLocaleDateString(),
+    date: l.created_at
+      ? new Date(l.created_at).toLocaleDateString()
+      : new Date().toLocaleDateString(),
   });
 
   const loadStats = useCallback(async () => {
@@ -156,7 +199,9 @@ export default function Leads() {
     try {
       const params = { limit: 500 };
       if (q.trim()) params.q = q.trim();
-      if (statusFilter) params.status = STATUS_TO_API[statusFilter] || statusFilter.toLowerCase();
+      if (statusFilter)
+        params.status =
+          STATUS_TO_API[statusFilter] || statusFilter.toLowerCase();
       if (tempFilter) params.temperature = tempFilter;
       const { data } = await api.get("/leads", { params });
       setLeads(Array.isArray(data) ? data.map(formatRow) : []);
@@ -179,37 +224,51 @@ export default function Leads() {
     return () => clearTimeout(t);
   }, [loadLeads]);
 
-  const activeFilters = (statusFilter ? 1 : 0) + (tempFilter ? 1 : 0) + (q.trim() ? 1 : 0);
+  const activeFilters =
+    (statusFilter ? 1 : 0) + (tempFilter ? 1 : 0) + (q.trim() ? 1 : 0);
 
   // Optimistic status move (used by both the drawer and the pipeline board).
-  const changeStatus = useCallback(async (lead, nextLabel) => {
-    if (!lead?.id || lead.status === nextLabel) return;
-    const prev = leads;
-    setLeads((rows) => rows.map((r) => (r.id === lead.id ? { ...r, status: nextLabel } : r)));
-    setSelected((s) => (s && s.id === lead.id ? { ...s, status: nextLabel } : s));
-    try {
-      await api.patch(`/leads/${lead.id}`, { status: STATUS_TO_API[nextLabel] });
-      loadStats();
-      toast.success(`Moved to ${nextLabel}`);
-    } catch (err) {
-      setLeads(prev);
-      toast.error(formatApiError(err));
-    }
-  }, [leads, loadStats]);
+  const changeStatus = useCallback(
+    async (lead, nextLabel) => {
+      if (!lead?.id || lead.status === nextLabel) return;
+      const prev = leads;
+      setLeads((rows) =>
+        rows.map((r) => (r.id === lead.id ? { ...r, status: nextLabel } : r)),
+      );
+      setSelected((s) =>
+        s && s.id === lead.id ? { ...s, status: nextLabel } : s,
+      );
+      try {
+        await api.patch(`/leads/${lead.id}`, {
+          status: STATUS_TO_API[nextLabel],
+        });
+        loadStats();
+        toast.success(`Moved to ${nextLabel}`);
+      } catch (err) {
+        setLeads(prev);
+        toast.error(formatApiError(err));
+      }
+    },
+    [leads, loadStats],
+  );
 
-  const applyLeadUpdate = useCallback((updated) => {
-    const row = formatRow(updated);
-    setLeads((rows) => rows.map((r) => (r.id === row.id ? row : r)));
-    setSelected((s) => (s && s.id === row.id ? row : s));
-    loadStats();
-  }, [loadStats]);
+  const applyLeadUpdate = useCallback(
+    (updated) => {
+      const row = formatRow(updated);
+      setLeads((rows) => rows.map((r) => (r.id === row.id ? row : r)));
+      setSelected((s) => (s && s.id === row.id ? row : s));
+      loadStats();
+    },
+    [loadStats],
+  );
 
   // Capture-everything fills the list with anonymous browsers — let the user
   // focus on the ones they can actually reach without losing the rest.
   const isContactable = (l) => !!(l.email || l.phone);
   const visibleLeads = useMemo(() => {
     if (contactFilter === "contactable") return leads.filter(isContactable);
-    if (contactFilter === "anonymous") return leads.filter((l) => !isContactable(l));
+    if (contactFilter === "anonymous")
+      return leads.filter((l) => !isContactable(l));
     return leads;
   }, [leads, contactFilter]);
   const contactCounts = useMemo(
@@ -218,13 +277,13 @@ export default function Leads() {
       contactable: leads.reduce((n, l) => n + (isContactable(l) ? 1 : 0), 0),
       anonymous: leads.reduce((n, l) => n + (isContactable(l) ? 0 : 1), 0),
     }),
-    [leads]
+    [leads],
   );
 
   const totalPages = Math.max(1, Math.ceil(visibleLeads.length / perPage));
   const slice = useMemo(
     () => visibleLeads.slice((page - 1) * perPage, page * perPage),
-    [visibleLeads, page, perPage]
+    [visibleLeads, page, perPage],
   );
 
   const handleImport = () => {
@@ -241,7 +300,8 @@ export default function Leads() {
 
   const handleDelete = async (lead) => {
     if (!lead?.id) return;
-    if (!window.confirm(`Delete lead “${lead.name}”? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete lead “${lead.name}”? This cannot be undone.`))
+      return;
     const prev = leads;
     setLeads((rows) => rows.filter((r) => r.id !== lead.id));
     setSelected((s) => (s && s.id === lead.id ? null : s));
@@ -265,11 +325,16 @@ export default function Leads() {
         subtitle="Manage and track all your leads in one place."
         actions={
           <>
-            <div className="inline-flex rounded-xl border border-[#E2E8F0] bg-white p-0.5" data-testid="leads-view-toggle">
+            <div
+              className="inline-flex rounded-xl border border-[#E2E8F0] bg-white p-0.5"
+              data-testid="leads-view-toggle"
+            >
               <button
                 onClick={() => setView("table")}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] text-[12.5px] font-semibold transition-colors ${
-                  view === "table" ? "bg-[#EFF6FF] text-[#2563EB]" : "text-[#64748B] hover:text-[#0F172A]"
+                  view === "table"
+                    ? "bg-[#EFF6FF] text-[#2563EB]"
+                    : "text-[#64748B] hover:text-[#0F172A]"
                 }`}
                 data-testid="leads-view-table"
               >
@@ -278,7 +343,9 @@ export default function Leads() {
               <button
                 onClick={() => setView("pipeline")}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] text-[12.5px] font-semibold transition-colors ${
-                  view === "pipeline" ? "bg-[#EFF6FF] text-[#2563EB]" : "text-[#64748B] hover:text-[#0F172A]"
+                  view === "pipeline"
+                    ? "bg-[#EFF6FF] text-[#2563EB]"
+                    : "text-[#64748B] hover:text-[#0F172A]"
                 }`}
                 data-testid="leads-view-pipeline"
               >
@@ -288,7 +355,11 @@ export default function Leads() {
             <GhostButton
               data-testid="leads-filter"
               onClick={() => setShowFilter((v) => !v)}
-              className={showFilter || activeFilters ? "ring-2 ring-[#2563EB]/20 text-[#2563EB]" : undefined}
+              className={
+                showFilter || activeFilters
+                  ? "ring-2 ring-[#2563EB]/20 text-[#2563EB]"
+                  : undefined
+              }
             >
               <FilterIcon size={14} /> Filter
               {activeFilters > 0 && (
@@ -310,9 +381,15 @@ export default function Leads() {
 
       {/* Filter bar */}
       {showFilter && (
-        <div className="rounded-2xl bg-white border border-[#E7EAF1] p-4 flex flex-wrap items-center gap-3" data-testid="leads-filter-bar">
+        <div
+          className="rounded-2xl bg-white border border-[#E7EAF1] p-4 flex flex-wrap items-center gap-3"
+          data-testid="leads-filter-bar"
+        >
           <div className="relative flex-1 min-w-[200px]">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+            />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -339,7 +416,11 @@ export default function Leads() {
           />
           {activeFilters > 0 && (
             <button
-              onClick={() => { setQ(""); setStatusFilter(""); setTempFilter(""); }}
+              onClick={() => {
+                setQ("");
+                setStatusFilter("");
+                setTempFilter("");
+              }}
               className="inline-flex items-center gap-1 text-[12.5px] font-medium text-[#64748B] hover:text-[#0F172A]"
               data-testid="leads-filter-clear"
             >
@@ -358,11 +439,16 @@ export default function Leads() {
             data-testid={`leads-kpi-${k.key}`}
           >
             <div className="flex items-start gap-3">
-              <div className="size-11 rounded-2xl grid place-items-center shrink-0" style={{ background: `${k.tone}1A` }}>
+              <div
+                className="size-11 rounded-2xl grid place-items-center shrink-0"
+                style={{ background: `${k.tone}1A` }}
+              >
                 <k.icon size={18} style={{ color: k.tone }} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[12px] text-[#94A3B8] leading-tight">{k.label}</p>
+                <p className="text-[12px] text-[#94A3B8] leading-tight">
+                  {k.label}
+                </p>
                 <p className="mt-1 text-[28px] font-bold tracking-tight text-[#0F172A] leading-none">
                   {(() => {
                     const v = kpiValue(k.key, stats);
@@ -373,7 +459,9 @@ export default function Leads() {
             </div>
             <div className="mt-2.5 flex items-center gap-1.5">
               <span className="size-1.5 rounded-full bg-[#22C55E]" />
-              <span className="text-[11px] text-[#94A3B8]">Live · across this project</span>
+              <span className="text-[11px] text-[#94A3B8]">
+                Live · across this project
+              </span>
             </div>
           </div>
         ))}
@@ -382,20 +470,36 @@ export default function Leads() {
       {/* Focus filter — capture-everything fills the list with anonymous
           browsers; let the user zero in on contactable leads. */}
       {!loading && leads.length > 0 && (
-        <div className="inline-flex items-center gap-1 rounded-xl border border-[#E7EAF1] bg-white p-1" data-testid="leads-contact-filter">
-          {[["all", "All"], ["contactable", "Contactable"], ["anonymous", "Anonymous"]].map(([key, label]) => (
+        <div
+          className="inline-flex items-center gap-1 rounded-xl border border-[#E7EAF1] bg-white p-1"
+          data-testid="leads-contact-filter"
+        >
+          {[
+            ["all", "All"],
+            ["contactable", "Contactable"],
+            ["anonymous", "Anonymous"],
+          ].map(([key, label]) => (
             <button
               key={key}
-              onClick={() => { setContactFilter(key); setPage(1); }}
+              onClick={() => {
+                setContactFilter(key);
+                setPage(1);
+              }}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors ${
-                contactFilter === key ? "bg-[#EFF6FF] text-[#2563EB]" : "text-[#64748B] hover:text-[#0F172A]"
+                contactFilter === key
+                  ? "bg-[#EFF6FF] text-[#2563EB]"
+                  : "text-[#64748B] hover:text-[#0F172A]"
               }`}
               data-testid={`leads-contact-${key}`}
             >
               {label}
-              <span className={`text-[10.5px] leading-none px-1.5 py-0.5 rounded-full ${
-                contactFilter === key ? "bg-[#2563EB] text-white" : "bg-[#F1F5F9] text-[#94A3B8]"
-              }`}>
+              <span
+                className={`text-[10.5px] leading-none px-1.5 py-0.5 rounded-full ${
+                  contactFilter === key
+                    ? "bg-[#2563EB] text-white"
+                    : "bg-[#F1F5F9] text-[#94A3B8]"
+                }`}
+              >
                 {contactCounts[key]}
               </span>
             </button>
@@ -405,9 +509,12 @@ export default function Leads() {
 
       {/* Table / Pipeline / empty state */}
       {loading ? (
-        <EmptyStateLoader label="Loading leads…" sub="Fetching your captured leads…" />
+        <EmptyStateLoader
+          label="Loading leads…"
+          sub="Fetching your captured leads…"
+        />
       ) : visibleLeads.length === 0 ? (
-        (activeFilters || contactFilter !== "all") ? (
+        activeFilters || contactFilter !== "all" ? (
           <EmptyState
             testId="leads-no-match"
             size="lg"
@@ -415,7 +522,12 @@ export default function Leads() {
             title="No matching leads"
             description="No leads match your current filters. Try clearing or adjusting them."
             actionLabel="Clear filters"
-            onAction={() => { setQ(""); setStatusFilter(""); setTempFilter(""); setContactFilter("all"); }}
+            onAction={() => {
+              setQ("");
+              setStatusFilter("");
+              setTempFilter("");
+              setContactFilter("all");
+            }}
           />
         ) : (
           <EmptyState
@@ -435,107 +547,152 @@ export default function Leads() {
           onOpen={setSelected}
         />
       ) : (
-      <div className="rounded-2xl bg-white border border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-[13px]">
-            <thead className="bg-white">
-              <tr className="text-[10.5px] uppercase tracking-[0.12em] text-[#94A3B8]">
-                <th className="px-6 py-4 font-semibold">Name</th>
-                <th className="px-6 py-4 font-semibold">Contact</th>
-                <th className="px-6 py-4 font-semibold">Source</th>
-                <th className="px-6 py-4 font-semibold">Interest</th>
-                <th className="px-6 py-4 font-semibold">Status</th>
-                <th className="px-6 py-4 font-semibold">Score</th>
-                <th className="px-6 py-4 font-semibold">Date Added</th>
-                <th className="px-6 py-4 font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {slice.map((l) => {
-                const c = colorFor(l.id || l.name);
-                return (
-                  <tr
-                    key={l.id || l.name}
-                    onClick={() => setSelected(l)}
-                    className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC]/60 transition-colors cursor-pointer"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="size-9 rounded-full grid place-items-center text-white text-[11.5px] font-semibold shrink-0" style={{ background: c }}>
-                          {initials(displayName(l)) || "?"}
+        <div className="rounded-2xl bg-white border border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)] overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-[13px]">
+              <thead className="bg-white">
+                <tr className="text-[10.5px] uppercase tracking-[0.12em] text-[#94A3B8]">
+                  <th className="px-6 py-4 font-semibold">Name</th>
+                  <th className="px-6 py-4 font-semibold">Contact</th>
+                  <th className="px-6 py-4 font-semibold">Source</th>
+                  <th className="px-6 py-4 font-semibold">Interest</th>
+                  <th className="px-6 py-4 font-semibold">Status</th>
+                  <th className="px-6 py-4 font-semibold">Score</th>
+                  <th className="px-6 py-4 font-semibold">Date Added</th>
+                  <th className="px-6 py-4 font-semibold text-right">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {slice.map((l) => {
+                  const c = colorFor(l.id || l.name);
+                  return (
+                    <tr
+                      key={l.id || l.name}
+                      onClick={() => setSelected(l)}
+                      className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC]/60 transition-colors cursor-pointer"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="size-9 rounded-full grid place-items-center text-white text-[11.5px] font-semibold shrink-0"
+                            style={{ background: c }}
+                          >
+                            {initials(displayName(l)) || "?"}
+                          </div>
+                          <span className="font-semibold text-[#0F172A]">
+                            {displayName(l)}
+                          </span>
                         </div>
-                        <span className="font-semibold text-[#0F172A]">{displayName(l)}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-[#0F172A]">{l.phone}</p>
-                      <p className="text-[12px] text-[#94A3B8] mt-0.5">{l.email}</p>
-                    </td>
-                    <td className="px-6 py-4 text-[#475569]">{l.source}</td>
-                    <td className="px-6 py-4 text-[#475569]">{l.intent}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-block text-[11px] px-2.5 py-1 rounded-full border font-medium ${
-                          STATUS_CLS[l.status] || "bg-[#F1F5F9] text-[#475569] border-[#E2E8F0]"
-                        }`}
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-[#0F172A]">{l.phone}</p>
+                        <p className="text-[12px] text-[#94A3B8] mt-0.5">
+                          {l.email}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 text-[#475569]">{l.source}</td>
+                      <td className="px-6 py-4 text-[#475569]">{l.intent}</td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-block text-[11px] px-2.5 py-1 rounded-full border font-medium ${
+                            STATUS_CLS[l.status] ||
+                            "bg-[#F1F5F9] text-[#475569] border-[#E2E8F0]"
+                          }`}
+                        >
+                          {l.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <ScorePill score={l.score} />
+                      </td>
+                      <td className="px-6 py-4 text-[#475569] whitespace-nowrap">
+                        {l.date}
+                      </td>
+                      <td
+                        className="px-6 py-4"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        {l.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <ScorePill score={l.score} />
-                    </td>
-                    <td className="px-6 py-4 text-[#475569] whitespace-nowrap">{l.date}</td>
-                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-1">
-                        <IconBtn ariaLabel="View" testId={`lead-view-${l.id || l.name}`} onClick={() => setSelected(l)}>
-                          <Eye size={14} className="text-[#64748B]" />
-                        </IconBtn>
-                        <IconBtn ariaLabel="Edit" testId={`lead-edit-${l.id || l.name}`} onClick={() => setSelected(l)}>
-                          <Pencil size={14} className="text-[#64748B]" />
-                        </IconBtn>
-                        <IconBtn ariaLabel="Delete" testId={`lead-delete-${l.id || l.name}`} danger onClick={() => handleDelete(l)}>
-                          <Trash2 size={14} className="text-[#EF4444]" />
-                        </IconBtn>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                        <div className="flex items-center justify-end gap-1">
+                          <IconBtn
+                            ariaLabel="View"
+                            testId={`lead-view-${l.id || l.name}`}
+                            onClick={() => setSelected(l)}
+                          >
+                            <Eye size={14} className="text-[#64748B]" />
+                          </IconBtn>
+                          <IconBtn
+                            ariaLabel="Edit"
+                            testId={`lead-edit-${l.id || l.name}`}
+                            onClick={() => setSelected(l)}
+                          >
+                            <Pencil size={14} className="text-[#64748B]" />
+                          </IconBtn>
+                          <IconBtn
+                            ariaLabel="Delete"
+                            testId={`lead-delete-${l.id || l.name}`}
+                            danger
+                            onClick={() => handleDelete(l)}
+                          >
+                            <Trash2 size={14} className="text-[#EF4444]" />
+                          </IconBtn>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-[#F1F5F9] flex items-center justify-between flex-wrap gap-3">
-          <p className="text-[12px] text-[#64748B]">
-            Showing <span className="font-semibold text-[#0F172A]">{(page - 1) * perPage + 1}</span> to{" "}
-            <span className="font-semibold text-[#0F172A]">{Math.min(page * perPage, visibleLeads.length)}</span> of{" "}
-            <span className="font-semibold text-[#0F172A]">{visibleLeads.length.toLocaleString()}</span> entries
-          </p>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <select
-                value={perPage}
-                onChange={(e) => {
-                  setPerPage(Number(e.target.value));
-                  setPage(1);
-                }}
-                className="appearance-none pl-3 pr-8 py-2 rounded-xl border border-[#E2E8F0] bg-white text-[12px] font-medium text-[#475569] hover:bg-[#F8FAFC] cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10"
-                data-testid="leads-per-page"
-              >
-                {[10, 25, 50, 100].map((n) => (
-                  <option key={n} value={n}>
-                    {n} per page
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={13} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none" />
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-[#F1F5F9] flex items-center justify-between flex-wrap gap-3">
+            <p className="text-[12px] text-[#64748B]">
+              Showing{" "}
+              <span className="font-semibold text-[#0F172A]">
+                {(page - 1) * perPage + 1}
+              </span>{" "}
+              to{" "}
+              <span className="font-semibold text-[#0F172A]">
+                {Math.min(page * perPage, visibleLeads.length)}
+              </span>{" "}
+              of{" "}
+              <span className="font-semibold text-[#0F172A]">
+                {visibleLeads.length.toLocaleString()}
+              </span>{" "}
+              entries
+            </p>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <select
+                  value={perPage}
+                  onChange={(e) => {
+                    setPerPage(Number(e.target.value));
+                    setPage(1);
+                  }}
+                  className="appearance-none pl-3 pr-8 py-2 rounded-xl border border-[#E2E8F0] bg-white text-[12px] font-medium text-[#475569] hover:bg-[#F8FAFC] cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10"
+                  data-testid="leads-per-page"
+                >
+                  {[10, 25, 50, 100].map((n) => (
+                    <option key={n} value={n}>
+                      {n} per page
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={13}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none"
+                />
+              </div>
+              <Pager
+                page={page}
+                total={Math.max(totalPages, 5)}
+                onChange={setPage}
+              />
             </div>
-            <Pager page={page} total={Math.max(totalPages, 5)} onChange={setPage} />
           </div>
         </div>
-      </div>
       )}
 
       {/* Lead detail drawer */}
@@ -544,7 +701,9 @@ export default function Leads() {
         onClose={() => setSelected(null)}
         onMove={changeStatus}
         onSaved={applyLeadUpdate}
-        onDelete={(l) => { handleDelete(l); }}
+        onDelete={(l) => {
+          handleDelete(l);
+        }}
         onOpenConversation={(cid) => nav(`/app/conversations?c=${cid}`)}
       />
     </div>
@@ -553,7 +712,14 @@ export default function Leads() {
 
 /* ---------- helpers ---------- */
 
-function SelectFilter({ value, onChange, placeholder, options, values, testid }) {
+function SelectFilter({
+  value,
+  onChange,
+  placeholder,
+  options,
+  values,
+  testid,
+}) {
   return (
     <div className="relative">
       <select
@@ -569,7 +735,10 @@ function SelectFilter({ value, onChange, placeholder, options, values, testid })
           </option>
         ))}
       </select>
-      <ChevronDown size={13} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none" />
+      <ChevronDown
+        size={13}
+        className="absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none"
+      />
     </div>
   );
 }
@@ -592,26 +761,40 @@ function PipelineBoard({ leads, onMove, onOpen }) {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" data-testid="leads-pipeline">
+    <div
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
+      data-testid="leads-pipeline"
+    >
       {PIPELINE.map((stage) => (
         <div
           key={stage}
-          onDragOver={(e) => { e.preventDefault(); setOverCol(stage); }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setOverCol(stage);
+          }}
           onDragLeave={() => setOverCol((c) => (c === stage ? null : c))}
           onDrop={() => drop(stage)}
           className={`rounded-2xl border p-3 min-h-[160px] transition-colors ${
-            overCol === stage ? "border-[#2563EB] bg-[#EFF6FF]/60" : "border-[#E7EAF1] bg-[#F8FAFC]/50"
+            overCol === stage
+              ? "border-[#2563EB] bg-[#EFF6FF]/60"
+              : "border-[#E7EAF1] bg-[#F8FAFC]/50"
           }`}
           data-testid={`pipeline-col-${stage.toLowerCase()}`}
         >
           <div className="flex items-center justify-between mb-3 px-1">
-            <span className={`inline-flex items-center gap-2 text-[12px] font-semibold ${
-              STATUS_CLS[stage]?.includes("text-") ? "" : "text-[#0F172A]"
-            }`}>
-              <span className={`size-2 rounded-full ${STATUS_DOT[stage] || "bg-[#94A3B8]"}`} />
+            <span
+              className={`inline-flex items-center gap-2 text-[12px] font-semibold ${
+                STATUS_CLS[stage]?.includes("text-") ? "" : "text-[#0F172A]"
+              }`}
+            >
+              <span
+                className={`size-2 rounded-full ${STATUS_DOT[stage] || "bg-[#94A3B8]"}`}
+              />
               {stage}
             </span>
-            <span className="text-[11px] font-semibold text-[#94A3B8]">{cols[stage]?.length || 0}</span>
+            <span className="text-[11px] font-semibold text-[#94A3B8]">
+              {cols[stage]?.length || 0}
+            </span>
           </div>
           <div className="space-y-2">
             {(cols[stage] || []).map((l) => (
@@ -619,7 +802,10 @@ function PipelineBoard({ leads, onMove, onOpen }) {
                 key={l.id}
                 draggable
                 onDragStart={() => setDragId(l.id)}
-                onDragEnd={() => { setDragId(null); setOverCol(null); }}
+                onDragEnd={() => {
+                  setDragId(null);
+                  setOverCol(null);
+                }}
                 onClick={() => onOpen(l)}
                 className={`w-full text-left rounded-xl bg-white border border-[#E7EAF1] p-3 shadow-[0_1px_2px_rgba(16,24,40,0.04)] hover:shadow-premium hover:-translate-y-0.5 transition-all ${
                   dragId === l.id ? "opacity-50" : ""
@@ -627,16 +813,25 @@ function PipelineBoard({ leads, onMove, onOpen }) {
                 data-testid={`pipeline-card-${l.id}`}
               >
                 <div className="flex items-center gap-2">
-                  <div className="size-7 rounded-full grid place-items-center text-white text-[10px] font-semibold shrink-0" style={{ background: colorFor(l.id || l.name) }}>
+                  <div
+                    className="size-7 rounded-full grid place-items-center text-white text-[10px] font-semibold shrink-0"
+                    style={{ background: colorFor(l.id || l.name) }}
+                  >
                     {initials(l.name)}
                   </div>
-                  <span className="font-semibold text-[13px] text-[#0F172A] truncate">{l.name || "Unknown"}</span>
+                  <span className="font-semibold text-[13px] text-[#0F172A] truncate">
+                    {l.name || "Unknown"}
+                  </span>
                 </div>
                 {l.intent && l.intent !== "—" && (
-                  <p className="mt-2 text-[12px] text-[#64748B] line-clamp-2">{l.intent}</p>
+                  <p className="mt-2 text-[12px] text-[#64748B] line-clamp-2">
+                    {l.intent}
+                  </p>
                 )}
                 <div className="mt-2.5 flex items-center justify-between">
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium capitalize ${TEMP_CLS[l.temperature] || "bg-[#F1F5F9] text-[#475569] border-[#E2E8F0]"}`}>
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-full border font-medium capitalize ${TEMP_CLS[l.temperature] || "bg-[#F1F5F9] text-[#475569] border-[#E2E8F0]"}`}
+                  >
                     {l.temperature}
                   </span>
                   <ScorePill score={l.score} />
@@ -644,7 +839,9 @@ function PipelineBoard({ leads, onMove, onOpen }) {
               </button>
             ))}
             {(cols[stage]?.length || 0) === 0 && (
-              <p className="text-[11.5px] text-[#94A3B8] text-center py-4">Drop leads here</p>
+              <p className="text-[11.5px] text-[#94A3B8] text-center py-4">
+                Drop leads here
+              </p>
             )}
           </div>
         </div>
@@ -665,15 +862,30 @@ function aiSummary(lead) {
   if (!lead) return "";
   const bits = [];
   const who = lead.name || "This contact";
-  const via = lead.source && lead.source !== "manual" ? ` via ${lead.source}` : "";
+  const via =
+    lead.source && lead.source !== "manual" ? ` via ${lead.source}` : "";
   bits.push(`${who} came in${via} and is currently **${lead.status}**.`);
-  if (lead.intent && lead.intent !== "—") bits.push(`They're interested in ${lead.intent.toLowerCase()}.`);
-  if (lead.temperature) bits.push(`Engagement is rated **${lead.temperature}** with a lead score of ${lead.score}/100.`);
-  if (lead.message) bits.push(`Last message: “${lead.message.slice(0, 160)}${lead.message.length > 160 ? "…" : ""}”`);
+  if (lead.intent && lead.intent !== "—")
+    bits.push(`They're interested in ${lead.intent.toLowerCase()}.`);
+  if (lead.temperature)
+    bits.push(
+      `Engagement is rated **${lead.temperature}** with a lead score of ${lead.score}/100.`,
+    );
+  if (lead.message)
+    bits.push(
+      `Last message: “${lead.message.slice(0, 160)}${lead.message.length > 160 ? "…" : ""}”`,
+    );
   return bits.join(" ");
 }
 
-function LeadDrawer({ lead, onClose, onMove, onSaved, onDelete, onOpenConversation }) {
+function LeadDrawer({
+  lead,
+  onClose,
+  onMove,
+  onSaved,
+  onDelete,
+  onOpenConversation,
+}) {
   const [notes, setNotes] = useState("");
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
@@ -690,20 +902,36 @@ function LeadDrawer({ lead, onClose, onMove, onSaved, onDelete, onOpenConversati
     setTags(Array.isArray(lead.tags) ? lead.tags : []);
     setScore(typeof lead.score === "number" ? lead.score : 0);
     setTemp(lead.temperature || "warm");
-    baseline.current = JSON.stringify({ notes: lead.notes || "", tags: lead.tags || [], score: lead.score || 0, temp: lead.temperature || "warm" });
+    baseline.current = JSON.stringify({
+      notes: lead.notes || "",
+      tags: lead.tags || [],
+      score: lead.score || 0,
+      temp: lead.temperature || "warm",
+    });
   }, [lead]);
 
   // Pull the full chat thread that produced this lead, shown inline below.
   useEffect(() => {
-    if (!lead?.id) { setConvo(null); return; }
+    if (!lead?.id) {
+      setConvo(null);
+      return;
+    }
     let cancelled = false;
     setConvoLoading(true);
     api
       .get(`/leads/${lead.id}/conversation`)
-      .then(({ data }) => { if (!cancelled) setConvo(data || { messages: [] }); })
-      .catch(() => { if (!cancelled) setConvo({ messages: [] }); })
-      .finally(() => { if (!cancelled) setConvoLoading(false); });
-    return () => { cancelled = true; };
+      .then(({ data }) => {
+        if (!cancelled) setConvo(data || { messages: [] });
+      })
+      .catch(() => {
+        if (!cancelled) setConvo({ messages: [] });
+      })
+      .finally(() => {
+        if (!cancelled) setConvoLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [lead?.id]);
 
   // Lock body scroll + close on Escape while open.
@@ -716,7 +944,8 @@ function LeadDrawer({ lead, onClose, onMove, onSaved, onDelete, onOpenConversati
 
   if (!lead) return null;
 
-  const dirty = baseline.current !== JSON.stringify({ notes, tags, score, temp });
+  const dirty =
+    baseline.current !== JSON.stringify({ notes, tags, score, temp });
 
   const addTag = () => {
     const t = tagInput.trim().slice(0, 40);
@@ -743,19 +972,36 @@ function LeadDrawer({ lead, onClose, onMove, onSaved, onDelete, onOpenConversati
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" data-testid="lead-drawer">
-      <div className="absolute inset-0 bg-[#0F172A]/40 backdrop-blur-[1px]" onClick={onClose} />
+    <div
+      className="fixed inset-0 z-50 flex justify-end"
+      data-testid="lead-drawer"
+    >
+      <div
+        className="absolute inset-0 bg-[#0F172A]/40 backdrop-blur-[1px]"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-[440px] h-full bg-white shadow-2xl flex flex-col animate-slideIn">
         {/* Header */}
         <div className="px-6 py-5 border-b border-[#F1F5F9] flex items-start gap-3">
-          <div className="size-11 rounded-full grid place-items-center text-white text-[14px] font-semibold shrink-0" style={{ background: colorFor(lead.id || lead.name) }}>
+          <div
+            className="size-11 rounded-full grid place-items-center text-white text-[14px] font-semibold shrink-0"
+            style={{ background: colorFor(lead.id || lead.name) }}
+          >
             {initials(displayName(lead)) || "?"}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-[16px] font-bold text-[#0F172A] truncate">{displayName(lead)}</h3>
-            <p className="text-[12px] text-[#94A3B8] mt-0.5 capitalize">{lead.source} lead · {lead.date}</p>
+            <h3 className="text-[16px] font-bold text-[#0F172A] truncate">
+              {displayName(lead)}
+            </h3>
+            <p className="text-[12px] text-[#94A3B8] mt-0.5 capitalize">
+              {lead.source} lead · {lead.date}
+            </p>
           </div>
-          <button onClick={onClose} className="size-8 rounded-lg grid place-items-center hover:bg-[#F1F5F9]" data-testid="lead-drawer-close">
+          <button
+            onClick={onClose}
+            className="size-8 rounded-lg grid place-items-center hover:bg-[#F1F5F9]"
+            data-testid="lead-drawer-close"
+          >
             <X size={16} className="text-[#64748B]" />
           </button>
         </div>
@@ -763,8 +1009,13 @@ function LeadDrawer({ lead, onClose, onMove, onSaved, onDelete, onOpenConversati
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
           {/* Pipeline stage */}
           <div>
-            <p className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-2">Pipeline stage</p>
-            <div className="flex flex-wrap gap-1.5" data-testid="lead-drawer-stages">
+            <p className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-2">
+              Pipeline stage
+            </p>
+            <div
+              className="flex flex-wrap gap-1.5"
+              data-testid="lead-drawer-stages"
+            >
               {PIPELINE.map((s) => (
                 <button
                   key={s}
@@ -783,11 +1034,24 @@ function LeadDrawer({ lead, onClose, onMove, onSaved, onDelete, onOpenConversati
 
           {/* Contact */}
           <div className="space-y-2">
-            <p className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold">Contact</p>
-            <ContactRow icon={Mail} value={lead.email} href={lead.email ? `mailto:${lead.email}` : null} />
-            <ContactRow icon={Phone} value={lead.phone} href={lead.phone ? `tel:${lead.phone}` : null} />
+            <p className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold">
+              Contact
+            </p>
+            <ContactRow
+              icon={Mail}
+              value={lead.email}
+              href={lead.email ? `mailto:${lead.email}` : null}
+            />
+            <ContactRow
+              icon={Phone}
+              value={lead.phone}
+              href={lead.phone ? `tel:${lead.phone}` : null}
+            />
             <ContactRow icon={Building2} value={lead.company} />
-            <ContactRow icon={MessageSquare} value={lead.intent !== "—" ? lead.intent : null} />
+            <ContactRow
+              icon={MessageSquare}
+              value={lead.intent !== "—" ? lead.intent : null}
+            />
           </div>
 
           {/* AI summary */}
@@ -795,8 +1059,16 @@ function LeadDrawer({ lead, onClose, onMove, onSaved, onDelete, onOpenConversati
             <p className="flex items-center gap-1.5 text-[12px] font-semibold text-[#2563EB] mb-1.5">
               <Sparkles size={13} /> AI summary
             </p>
-            <p className="text-[12.5px] text-[#475569] leading-relaxed" data-testid="lead-ai-summary"
-               dangerouslySetInnerHTML={{ __html: aiSummary(lead).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>") }} />
+            <p
+              className="text-[12.5px] text-[#475569] leading-relaxed"
+              data-testid="lead-ai-summary"
+              dangerouslySetInnerHTML={{
+                __html: aiSummary(lead).replace(
+                  /\*\*(.+?)\*\*/g,
+                  "<strong>$1</strong>",
+                ),
+              }}
+            />
           </div>
 
           {/* Conversation transcript — the whole thread, even for anon visitors */}
@@ -806,15 +1078,21 @@ function LeadDrawer({ lead, onClose, onMove, onSaved, onDelete, onOpenConversati
             </p>
             {convoLoading ? (
               <div className="flex items-center gap-2 text-[12.5px] text-[#94A3B8] py-3">
-                <Loader2 size={14} className="animate-spin" /> Loading conversation…
+                <Loader2 size={14} className="animate-spin" /> Loading
+                conversation…
               </div>
-            ) : convo && Array.isArray(convo.messages) && convo.messages.length > 0 ? (
+            ) : convo &&
+              Array.isArray(convo.messages) &&
+              convo.messages.length > 0 ? (
               <div
                 className="rounded-xl border border-[#E7EAF1] bg-[#F8FAFC] p-3 space-y-2 max-h-[320px] overflow-y-auto"
                 data-testid="lead-conversation"
               >
                 {convo.messages.map((m, i) => (
-                  <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <div
+                    key={i}
+                    className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                  >
                     <div
                       className={`max-w-[82%] rounded-2xl px-3 py-2 text-[12.5px] leading-relaxed whitespace-pre-wrap break-words ${
                         m.role === "user"
@@ -837,23 +1115,32 @@ function LeadDrawer({ lead, onClose, onMove, onSaved, onDelete, onOpenConversati
           {/* Score + temperature */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold">Score: {score}</label>
+              <label className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold">
+                Score: {score}
+              </label>
               <input
-                type="range" min={0} max={100} value={score}
+                type="range"
+                min={0}
+                max={100}
+                value={score}
                 onChange={(e) => setScore(Number(e.target.value))}
                 className="w-full mt-2 accent-[#2563EB]"
                 data-testid="lead-drawer-score"
               />
             </div>
             <div>
-              <label className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold">Temperature</label>
+              <label className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold">
+                Temperature
+              </label>
               <div className="flex gap-1.5 mt-2">
                 {TEMPERATURES.map((t) => (
                   <button
                     key={t}
                     onClick={() => setTemp(t)}
                     className={`flex-1 text-[11.5px] py-1.5 rounded-lg border font-medium capitalize transition-colors ${
-                      temp === t ? TEMP_CLS[t] : "bg-white text-[#64748B] border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                      temp === t
+                        ? TEMP_CLS[t]
+                        : "bg-white text-[#64748B] border-[#E2E8F0] hover:bg-[#F8FAFC]"
                     }`}
                   >
                     {t}
@@ -868,21 +1155,37 @@ function LeadDrawer({ lead, onClose, onMove, onSaved, onDelete, onOpenConversati
             <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-2">
               <Tag size={12} /> Tags
             </p>
-            <div className="flex flex-wrap gap-1.5 mb-2" data-testid="lead-tags">
+            <div
+              className="flex flex-wrap gap-1.5 mb-2"
+              data-testid="lead-tags"
+            >
               {tags.map((t) => (
-                <span key={t} className="inline-flex items-center gap-1 text-[11.5px] px-2 py-1 rounded-full bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] font-medium">
+                <span
+                  key={t}
+                  className="inline-flex items-center gap-1 text-[11.5px] px-2 py-1 rounded-full bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] font-medium"
+                >
                   {t}
-                  <button onClick={() => setTags(tags.filter((x) => x !== t))} className="hover:text-[#1E40AF]">
+                  <button
+                    onClick={() => setTags(tags.filter((x) => x !== t))}
+                    className="hover:text-[#1E40AF]"
+                  >
                     <X size={11} />
                   </button>
                 </span>
               ))}
-              {tags.length === 0 && <span className="text-[12px] text-[#94A3B8]">No tags yet</span>}
+              {tags.length === 0 && (
+                <span className="text-[12px] text-[#94A3B8]">No tags yet</span>
+              )}
             </div>
             <input
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addTag();
+                }
+              }}
               placeholder="Add a tag and press Enter"
               data-testid="lead-tag-input"
               className="w-full px-3 py-2 rounded-xl border border-[#E2E8F0] text-[12.5px] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15"
@@ -891,7 +1194,9 @@ function LeadDrawer({ lead, onClose, onMove, onSaved, onDelete, onOpenConversati
 
           {/* Notes */}
           <div>
-            <p className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-2">Notes</p>
+            <p className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-2">
+              Notes
+            </p>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -907,9 +1212,20 @@ function LeadDrawer({ lead, onClose, onMove, onSaved, onDelete, onOpenConversati
             <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-3">
               <Clock size={12} /> Timeline
             </p>
-            <ol className="relative border-l border-[#E2E8F0] ml-1 space-y-4" data-testid="lead-timeline">
-              <TimelineItem label="Lead created" at={lead.created_at} tone="#2563EB" />
-              <TimelineItem label="Last updated" at={lead.updated_at} tone="#16A34A" />
+            <ol
+              className="relative border-l border-[#E2E8F0] ml-1 space-y-4"
+              data-testid="lead-timeline"
+            >
+              <TimelineItem
+                label="Lead created"
+                at={lead.created_at}
+                tone="#2563EB"
+              />
+              <TimelineItem
+                label="Last updated"
+                at={lead.updated_at}
+                tone="#16A34A"
+              />
               {lead.conversation_id && (
                 <li className="ml-4">
                   <span className="absolute -left-[5px] size-2.5 rounded-full bg-[#4F46E5] border-2 border-white" />
@@ -948,7 +1264,12 @@ function LeadDrawer({ lead, onClose, onMove, onSaved, onDelete, onOpenConversati
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#2563EB] text-white text-[12.5px] font-semibold shadow-sm transition-colors hover:bg-[#1D4ED8] disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="lead-drawer-save"
           >
-            {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} Save
+            {saving ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <Save size={14} />
+            )}{" "}
+            Save
           </button>
         </div>
       </div>
@@ -963,15 +1284,26 @@ function ContactRow({ icon: Icon, value, href }) {
       <Icon size={14} className="text-[#94A3B8] shrink-0" /> {value}
     </span>
   );
-  return href ? <a href={href} className="block hover:text-[#2563EB]">{content}</a> : content;
+  return href ? (
+    <a href={href} className="block hover:text-[#2563EB]">
+      {content}
+    </a>
+  ) : (
+    content
+  );
 }
 
 function TimelineItem({ label, at, tone }) {
   return (
     <li className="ml-4">
-      <span className="absolute -left-[5px] size-2.5 rounded-full border-2 border-white" style={{ background: tone }} />
+      <span
+        className="absolute -left-[5px] size-2.5 rounded-full border-2 border-white"
+        style={{ background: tone }}
+      />
       <p className="text-[12.5px] font-medium text-[#0F172A]">{label}</p>
-      <p className="text-[11.5px] text-[#94A3B8]">{at ? new Date(at).toLocaleString() : "—"}</p>
+      <p className="text-[11.5px] text-[#94A3B8]">
+        {at ? new Date(at).toLocaleString() : "—"}
+      </p>
     </li>
   );
 }
@@ -996,7 +1328,10 @@ function ScorePill({ score = 0 }) {
   return (
     <div className="flex items-center gap-3">
       <div className="w-16 h-1.5 rounded-full bg-[#F1F5F9] overflow-hidden">
-        <div className="h-full rounded-full bg-[#2563EB]" style={{ width: `${pct}%` }} />
+        <div
+          className="h-full rounded-full bg-[#2563EB]"
+          style={{ width: `${pct}%` }}
+        />
       </div>
       <span className="font-semibold text-[#0F172A] tabular-nums">{score}</span>
     </div>
@@ -1020,7 +1355,9 @@ function Pager({ page, total, onChange }) {
           key={n}
           onClick={() => onChange(n)}
           className={`size-8 rounded-lg font-semibold text-[12.5px] transition-colors ${
-            n === page ? "bg-[#2563EB] text-white" : "text-[#475569] hover:bg-[#F1F5F9]"
+            n === page
+              ? "bg-[#2563EB] text-white"
+              : "text-[#475569] hover:bg-[#F1F5F9]"
           }`}
         >
           {n}
@@ -1030,7 +1367,9 @@ function Pager({ page, total, onChange }) {
       <button
         onClick={() => onChange(total)}
         className={`size-8 rounded-lg font-semibold text-[12.5px] transition-colors ${
-          total === page ? "bg-[#2563EB] text-white" : "text-[#475569] hover:bg-[#F1F5F9]"
+          total === page
+            ? "bg-[#2563EB] text-white"
+            : "text-[#475569] hover:bg-[#F1F5F9]"
         }`}
       >
         {total}

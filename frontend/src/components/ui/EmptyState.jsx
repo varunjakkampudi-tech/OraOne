@@ -14,16 +14,16 @@ import { OraMark } from "@/components/marketing/Logo";
  *  - testId, className
  */
 const TONES = {
-  blue:   { bg: "#EFF6FF", fg: "#2563EB" },
+  blue: { bg: "#EFF6FF", fg: "#2563EB" },
   violet: { bg: "#F5F3FF", fg: "#7C3AED" },
-  green:  { bg: "#ECFDF5", fg: "#16A34A" },
-  amber:  { bg: "#FEF3C7", fg: "#D97706" },
+  green: { bg: "#ECFDF5", fg: "#16A34A" },
+  amber: { bg: "#FEF3C7", fg: "#D97706" },
 };
 
 const SIZES = {
-  sm: { pad: "px-6 py-10", orb: 84,  title: "text-base",  desc: "text-[13px]" },
-  md: { pad: "px-6 py-12", orb: 110, title: "text-lg",    desc: "text-sm" },
-  lg: { pad: "px-6 py-16", orb: 140, title: "text-xl",    desc: "text-[15px]" },
+  sm: { pad: "px-6 py-10", orb: 84, title: "text-base", desc: "text-[13px]" },
+  md: { pad: "px-6 py-12", orb: 110, title: "text-lg", desc: "text-sm" },
+  lg: { pad: "px-6 py-16", orb: 140, title: "text-xl", desc: "text-[15px]" },
 };
 
 export function EmptyState({
@@ -43,7 +43,9 @@ export function EmptyState({
 }) {
   const s = SIZES[size] || SIZES.md;
   const t = TONES[tone] || TONES.blue;
-  const border = dashed ? "border-2 border-dashed border-[#E2E8F0]" : "border border-[#E2E8F0]";
+  const border = dashed
+    ? "border-2 border-dashed border-[#E2E8F0]"
+    : "border border-[#E2E8F0]";
 
   return (
     <div
@@ -79,12 +81,16 @@ export function EmptyState({
         ) : null}
 
         {title && (
-          <h3 className={`${Icon || showOrb ? "mt-5" : ""} ${s.title} font-bold tracking-tight text-[#0F172A]`}>
+          <h3
+            className={`${Icon || showOrb ? "mt-5" : ""} ${s.title} font-bold tracking-tight text-[#0F172A]`}
+          >
             {title}
           </h3>
         )}
         {description && (
-          <p className={`mt-1.5 ${s.desc} text-[#64748B] max-w-md mx-auto leading-relaxed`}>
+          <p
+            className={`mt-1.5 ${s.desc} text-[#64748B] max-w-md mx-auto leading-relaxed`}
+          >
             {description}
           </p>
         )}

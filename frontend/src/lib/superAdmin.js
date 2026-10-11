@@ -2,7 +2,8 @@ import { api } from "@/lib/api";
 
 // Super Admin Control Center API client. All routes are platform-scoped and
 // gated server-side by the database-backed platform role.
-const get = (path, params) => api.get(`/super-admin${path}`, { params }).then((r) => r.data);
+const get = (path, params) =>
+  api.get(`/super-admin${path}`, { params }).then((r) => r.data);
 
 export const superAdminApi = {
   me: () => get("/me"),
@@ -18,7 +19,8 @@ export const superAdminApi = {
   infrastructure: () => get("/infrastructure"),
   releases: () => get("/releases"),
   featureFlags: () => get("/feature-flags"),
-  setFeatureFlag: (key, body) => api.patch(`/super-admin/feature-flags/${key}`, body).then((r) => r.data),
+  setFeatureFlag: (key, body) =>
+    api.patch(`/super-admin/feature-flags/${key}`, body).then((r) => r.data),
   secrets: () => get("/secrets"),
   resources: (kind, params) => get(`/resources/${kind}`, params),
 
@@ -26,13 +28,17 @@ export const superAdminApi = {
   products: () => get("/products"),
   entitlementsOverview: () => get("/entitlements/overview"),
   authzMetrics: () => get("/authz-metrics"),
-  setProduct: (key, body) => api.patch(`/super-admin/products/${key}`, body).then((r) => r.data),
+  setProduct: (key, body) =>
+    api.patch(`/super-admin/products/${key}`, body).then((r) => r.data),
   customerEntitlements: (orgId) => get(`/customers/${orgId}/entitlements`),
   setCustomerEntitlement: (orgId, productKey, body) =>
-    api.patch(`/super-admin/customers/${orgId}/entitlements/${productKey}`, body).then((r) => r.data),
+    api
+      .patch(`/super-admin/customers/${orgId}/entitlements/${productKey}`, body)
+      .then((r) => r.data),
 
   // Platform intelligence
-  costOptimization: (days) => get("/cost-optimization", days ? { days } : undefined),
+  costOptimization: (days) =>
+    get("/cost-optimization", days ? { days } : undefined),
   quality: () => get("/quality"),
   selfImprovement: () => get("/self-improvement"),
   benchmarking: () => get("/benchmarking"),
@@ -43,6 +49,7 @@ export const superAdminApi = {
 
   // Universal search / Ora Copilot / Report generator
   search: (q, limit = 8) => get("/search", { q, limit }),
-  copilot: (question) => api.post(`/super-admin/copilot`, { question }).then((r) => r.data),
+  copilot: (question) =>
+    api.post(`/super-admin/copilot`, { question }).then((r) => r.data),
   report: (period) => get(`/reports/${period}`),
 };

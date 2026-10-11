@@ -41,13 +41,18 @@ export class ErrorBoundary extends React.Component {
       >
         <div className="max-w-md text-center">
           <div className="mx-auto size-16 rounded-2xl bg-[#FEF2F2] grid place-items-center">
-            <AlertTriangle size={28} className="text-[#DC2626]" aria-hidden="true" />
+            <AlertTriangle
+              size={28}
+              className="text-[#DC2626]"
+              aria-hidden="true"
+            />
           </div>
           <h1 className="mt-6 text-2xl sm:text-3xl font-bold tracking-tight text-[#0F172A]">
             Something went wrong
           </h1>
           <p className="mt-3 text-[#64748B] text-sm">
-            An unexpected error occurred while rendering this page. You can retry, or head back home.
+            An unexpected error occurred while rendering this page. You can
+            retry, or head back home.
           </p>
           <div className="mt-7 flex items-center justify-center gap-2.5">
             <button

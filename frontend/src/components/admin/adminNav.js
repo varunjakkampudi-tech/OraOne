@@ -1,11 +1,50 @@
 import {
-  LayoutDashboard, Users, Building2, Bot, MessagesSquare, Target, BookOpen,
-  Workflow, Rocket, Share2, CreditCard, Repeat, Gauge, Plug, KeyRound,
-  Server, Database, ListTree, ScrollText, Activity, BellRing, ShieldCheck,
-  Flag, GitBranch, FileClock, LifeBuoy, BarChart3, Archive, HardDriveDownload,
-  Settings, TerminalSquare, Lock, BrainCircuit, Sparkles,
-  DollarSign, Award, Lightbulb, TrendingUp, HeartPulse, ShieldAlert,
-  FileCheck, Network, Search, Wand2, FileBarChart2, Boxes,
+  LayoutDashboard,
+  Users,
+  Building2,
+  Bot,
+  MessagesSquare,
+  Target,
+  BookOpen,
+  Workflow,
+  Rocket,
+  Share2,
+  CreditCard,
+  Repeat,
+  Gauge,
+  Plug,
+  KeyRound,
+  Server,
+  Database,
+  ListTree,
+  ScrollText,
+  Activity,
+  BellRing,
+  ShieldCheck,
+  Flag,
+  GitBranch,
+  FileClock,
+  LifeBuoy,
+  BarChart3,
+  Archive,
+  HardDriveDownload,
+  Settings,
+  TerminalSquare,
+  Lock,
+  BrainCircuit,
+  Sparkles,
+  DollarSign,
+  Award,
+  Lightbulb,
+  TrendingUp,
+  HeartPulse,
+  ShieldAlert,
+  FileCheck,
+  Network,
+  Search,
+  Wand2,
+  FileBarChart2,
+  Boxes,
 } from "lucide-react";
 
 // Canonical Super Admin navigation. Each item declares how its page is
@@ -29,7 +68,11 @@ export const ADMIN_NAV = [
     items: [
       { to: "/admin/customers", label: "Customers", icon: Users },
       { to: "/admin/workspaces", label: "Workspaces", icon: Building2 },
-      { to: "/admin/conversations", label: "Conversations", icon: MessagesSquare },
+      {
+        to: "/admin/conversations",
+        label: "Conversations",
+        icon: MessagesSquare,
+      },
       { to: "/admin/leads", label: "Leads", icon: Target },
       { to: "/admin/support", label: "Support", icon: LifeBuoy },
     ],
@@ -58,7 +101,11 @@ export const ADMIN_NAV = [
     items: [
       { to: "/admin/cost", label: "Cost Optimization", icon: DollarSign },
       { to: "/admin/quality", label: "Quality Monitoring", icon: Award },
-      { to: "/admin/self-improvement", label: "Self-Improvement", icon: Lightbulb },
+      {
+        to: "/admin/self-improvement",
+        label: "Self-Improvement",
+        icon: Lightbulb,
+      },
       { to: "/admin/benchmarking", label: "Benchmarking", icon: TrendingUp },
       { to: "/admin/health", label: "Health Monitor", icon: HeartPulse },
     ],
@@ -89,28 +136,44 @@ export const ADMIN_NAV = [
       { to: "/admin/security", label: "Security", icon: ShieldCheck },
       { to: "/admin/fraud", label: "Fraud Detection", icon: ShieldAlert },
       { to: "/admin/compliance", label: "Compliance", icon: FileCheck },
-      { to: "/admin/tenant-isolation", label: "Tenant Isolation", icon: Network },
+      {
+        to: "/admin/tenant-isolation",
+        label: "Tenant Isolation",
+        icon: Network,
+      },
       { to: "/admin/secrets", label: "Secrets", icon: Lock },
-      { to: "/admin/ai-operations", label: "AI Operations", icon: BrainCircuit },
+      {
+        to: "/admin/ai-operations",
+        label: "AI Operations",
+        icon: BrainCircuit,
+      },
     ],
   },
   {
     group: "Reliability",
     items: [
       { to: "/admin/backups", label: "Backups", icon: Archive },
-      { to: "/admin/disaster-recovery", label: "Disaster Recovery", icon: HardDriveDownload },
+      {
+        to: "/admin/disaster-recovery",
+        label: "Disaster Recovery",
+        icon: HardDriveDownload,
+      },
     ],
   },
   {
     group: "System",
     items: [
       { to: "/admin/settings", label: "System Settings", icon: Settings },
-      { to: "/admin/developer", label: "Developer Console", icon: TerminalSquare },
+      {
+        to: "/admin/developer",
+        label: "Developer Console",
+        icon: TerminalSquare,
+      },
     ],
   },
 ];
 
 // Flat list for the command palette / global search.
 export const ADMIN_NAV_FLAT = ADMIN_NAV.flatMap((g) =>
-  g.items.map((it) => ({ ...it, group: g.group }))
+  g.items.map((it) => ({ ...it, group: g.group })),
 );

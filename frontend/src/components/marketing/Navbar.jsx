@@ -50,7 +50,7 @@ export default function Navbar() {
           pathname: location.pathname,
           search: params.toString() ? `?${params.toString()}` : "",
         },
-        { replace: true }
+        { replace: true },
       );
     }
   };
@@ -94,7 +94,10 @@ export default function Navbar() {
     }
 
     if (authMode === "signup") {
-      setInfo(res?.message || "Signup successful. Please verify your email if required, then log in.");
+      setInfo(
+        res?.message ||
+          "Signup successful. Please verify your email if required, then log in.",
+      );
       setAuthMode("login");
       return;
     }
@@ -108,7 +111,11 @@ export default function Navbar() {
       <div className="border-b border-[#E2E8F0]/60 bg-white/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-16 flex items-center justify-between gap-2 sm:gap-4">
-            <Link to="/" className="flex-shrink-0 flex items-center" data-testid="navbar-brand-link">
+            <Link
+              to="/"
+              className="flex-shrink-0 flex items-center"
+              data-testid="navbar-brand-link"
+            >
               <Logo className="h-9 sm:h-10 w-auto object-contain" />
             </Link>
 
@@ -228,7 +235,10 @@ export default function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="absolute inset-0 bg-[#0F172A]/55" onClick={closeAuth} />
+            <div
+              className="absolute inset-0 bg-[#0F172A]/55"
+              onClick={closeAuth}
+            />
             <div className="absolute inset-0 p-4 sm:p-6 grid place-items-center">
               <motion.div
                 role="dialog"
@@ -258,7 +268,9 @@ export default function Navbar() {
                       setInfo("");
                     }}
                     className={`px-3 py-1.5 rounded-lg text-sm font-semibold ${
-                      authMode === "login" ? "bg-[#EFF6FF] text-[#2563EB]" : "text-[#64748B]"
+                      authMode === "login"
+                        ? "bg-[#EFF6FF] text-[#2563EB]"
+                        : "text-[#64748B]"
                     }`}
                   >
                     Login
@@ -271,7 +283,9 @@ export default function Navbar() {
                       setInfo("");
                     }}
                     className={`px-3 py-1.5 rounded-lg text-sm font-semibold ${
-                      authMode === "signup" ? "bg-[#EFF6FF] text-[#2563EB]" : "text-[#64748B]"
+                      authMode === "signup"
+                        ? "bg-[#EFF6FF] text-[#2563EB]"
+                        : "text-[#64748B]"
                     }`}
                   >
                     Sign Up
@@ -279,10 +293,13 @@ export default function Navbar() {
                 </div>
 
                 <h3 className="text-xl font-bold text-[#0F172A]">
-                  {authMode === "signup" ? "Create your account" : "Welcome back"}
+                  {authMode === "signup"
+                    ? "Create your account"
+                    : "Welcome back"}
                 </h3>
                 <p className="mt-1 text-sm text-[#64748B]">
-                  Enter your email and password. Passwords are hashed with Argon2 on the backend.
+                  Enter your email and password. Passwords are hashed with
+                  Argon2 on the backend.
                 </p>
 
                 <form className="mt-5 space-y-3" onSubmit={handleAuthSubmit}>
@@ -327,7 +344,11 @@ export default function Navbar() {
                     disabled={busy}
                     className="w-full rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold py-3 transition-colors disabled:opacity-60"
                   >
-                    {busy ? "Checking..." : authMode === "signup" ? "Sign Up" : "Login"}
+                    {busy
+                      ? "Checking..."
+                      : authMode === "signup"
+                        ? "Sign Up"
+                        : "Login"}
                   </button>
                 </form>
 

@@ -40,20 +40,90 @@ import WorkflowCanvas from "./WorkflowCanvas";
 
 /* ── Step type catalog ── */
 const STEP_TYPES = [
-  { type: "ai_prompt", label: "AI Prompt", icon: Sparkles, hint: "Ask the LLM with a templated prompt." },
-  { type: "ai_classify", label: "AI Classify", icon: Tags, hint: "Classify text into one of your categories." },
-  { type: "ai_extract", label: "AI Extract", icon: ScanText, hint: "Extract structured fields into variables." },
-  { type: "ai_summarize", label: "AI Summarize", icon: FileText, hint: "Summarize long text." },
-  { type: "ai_sentiment", label: "AI Sentiment", icon: Gauge, hint: "Detect positive / negative / neutral." },
-  { type: "ai_translate", label: "AI Translate", icon: Languages, hint: "Translate text to a target language." },
-  { type: "kb_query", label: "Knowledge Base", icon: BookOpen, hint: "Retrieve relevant context from your KB." },
-  { type: "agent_run", label: "Run Agent", icon: Bot, hint: "Run one of your configured agents." },
-  { type: "transform", label: "Transform", icon: Wand2, hint: "Render a template into a new variable." },
-  { type: "condition", label: "Condition", icon: GitBranch, hint: "Stop the run unless a predicate holds." },
-  { type: "approval", label: "Human Approval", icon: ShieldCheck, hint: "Pause for a human to approve or reject." },
-  { type: "notification", label: "Notify", icon: Bell, hint: "Emit a notification (logged)." },
-  { type: "delay", label: "Delay", icon: Timer, hint: "Wait a bounded number of seconds." },
-  { type: "webhook", label: "Webhook", icon: Webhook, hint: "POST to an external URL." },
+  {
+    type: "ai_prompt",
+    label: "AI Prompt",
+    icon: Sparkles,
+    hint: "Ask the LLM with a templated prompt.",
+  },
+  {
+    type: "ai_classify",
+    label: "AI Classify",
+    icon: Tags,
+    hint: "Classify text into one of your categories.",
+  },
+  {
+    type: "ai_extract",
+    label: "AI Extract",
+    icon: ScanText,
+    hint: "Extract structured fields into variables.",
+  },
+  {
+    type: "ai_summarize",
+    label: "AI Summarize",
+    icon: FileText,
+    hint: "Summarize long text.",
+  },
+  {
+    type: "ai_sentiment",
+    label: "AI Sentiment",
+    icon: Gauge,
+    hint: "Detect positive / negative / neutral.",
+  },
+  {
+    type: "ai_translate",
+    label: "AI Translate",
+    icon: Languages,
+    hint: "Translate text to a target language.",
+  },
+  {
+    type: "kb_query",
+    label: "Knowledge Base",
+    icon: BookOpen,
+    hint: "Retrieve relevant context from your KB.",
+  },
+  {
+    type: "agent_run",
+    label: "Run Agent",
+    icon: Bot,
+    hint: "Run one of your configured agents.",
+  },
+  {
+    type: "transform",
+    label: "Transform",
+    icon: Wand2,
+    hint: "Render a template into a new variable.",
+  },
+  {
+    type: "condition",
+    label: "Condition",
+    icon: GitBranch,
+    hint: "Stop the run unless a predicate holds.",
+  },
+  {
+    type: "approval",
+    label: "Human Approval",
+    icon: ShieldCheck,
+    hint: "Pause for a human to approve or reject.",
+  },
+  {
+    type: "notification",
+    label: "Notify",
+    icon: Bell,
+    hint: "Emit a notification (logged).",
+  },
+  {
+    type: "delay",
+    label: "Delay",
+    icon: Timer,
+    hint: "Wait a bounded number of seconds.",
+  },
+  {
+    type: "webhook",
+    label: "Webhook",
+    icon: Webhook,
+    hint: "POST to an external URL.",
+  },
 ];
 
 const STEP_META = Object.fromEntries(STEP_TYPES.map((s) => [s.type, s]));
@@ -127,7 +197,8 @@ export default function Workflows() {
             Automate work across your AI stack.
           </h1>
           <p className="mt-1 text-sm text-[#64748B]">
-            Chain your AI, knowledge bases and agents into repeatable, multi-step automations.
+            Chain your AI, knowledge bases and agents into repeatable,
+            multi-step automations.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -158,7 +229,11 @@ export default function Workflows() {
           <AnalyticsStrip data={analytics} />
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {items.map((wf) => (
-              <WorkflowCard key={wf.id} workflow={wf} onOpen={() => setSelected(wf)} />
+              <WorkflowCard
+                key={wf.id}
+                workflow={wf}
+                onOpen={() => setSelected(wf)}
+              />
             ))}
           </div>
         </>
@@ -195,7 +270,9 @@ function EmptyState({ onCreate }) {
       <div className="mx-auto w-12 h-12 rounded-2xl bg-[#EFF6FF] flex items-center justify-center">
         <WorkflowIcon className="text-[#2563EB]" size={22} />
       </div>
-      <h3 className="mt-4 text-lg font-bold text-[#0F172A]">No workflows yet</h3>
+      <h3 className="mt-4 text-lg font-bold text-[#0F172A]">
+        No workflows yet
+      </h3>
       <p className="mt-1 text-sm text-[#64748B]">
         Build your first automation — retrieve, reason, and act in one flow.
       </p>
@@ -212,23 +289,45 @@ function EmptyState({ onCreate }) {
 function AnalyticsStrip({ data }) {
   if (!data) return null;
   const cards = [
-    { label: "Workflows", value: data.total_workflows, sub: `${data.active_workflows} active` },
-    { label: "Total runs", value: data.total_runs, sub: `${data.completed_runs} completed` },
-    { label: "Success rate", value: `${data.success_rate ?? 0}%`, sub: `${data.failed_runs} failed` },
+    {
+      label: "Workflows",
+      value: data.total_workflows,
+      sub: `${data.active_workflows} active`,
+    },
+    {
+      label: "Total runs",
+      value: data.total_runs,
+      sub: `${data.completed_runs} completed`,
+    },
+    {
+      label: "Success rate",
+      value: `${data.success_rate ?? 0}%`,
+      sub: `${data.failed_runs} failed`,
+    },
     {
       label: "Avg duration",
-      value: data.avg_duration_seconds != null ? `${data.avg_duration_seconds}s` : "—",
-      sub: data.awaiting_approval ? `${data.awaiting_approval} awaiting` : "all clear",
+      value:
+        data.avg_duration_seconds != null
+          ? `${data.avg_duration_seconds}s`
+          : "—",
+      sub: data.awaiting_approval
+        ? `${data.awaiting_approval} awaiting`
+        : "all clear",
     },
   ];
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {cards.map((c) => (
-        <div key={c.label} className="p-4 rounded-2xl border border-[#E2E8F0] bg-white">
+        <div
+          key={c.label}
+          className="p-4 rounded-2xl border border-[#E2E8F0] bg-white"
+        >
           <div className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-[#64748B] uppercase">
             <BarChart3 size={12} className="text-[#2563EB]" /> {c.label}
           </div>
-          <div className="mt-1.5 text-2xl font-black text-[#0F172A]">{c.value}</div>
+          <div className="mt-1.5 text-2xl font-black text-[#0F172A]">
+            {c.value}
+          </div>
           <div className="text-[12px] text-[#94A3B8]">{c.sub}</div>
         </div>
       ))}
@@ -250,11 +349,15 @@ function WorkflowCard({ workflow, onOpen }) {
         <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center">
           <WorkflowIcon className="text-[#2563EB]" size={18} />
         </div>
-        <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize ${STATUS_STYLES[workflow.status] || STATUS_STYLES.draft}`}>
+        <span
+          className={`px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize ${STATUS_STYLES[workflow.status] || STATUS_STYLES.draft}`}
+        >
           {workflow.status}
         </span>
       </div>
-      <h3 className="mt-3 font-bold text-[#0F172A] truncate">{workflow.name}</h3>
+      <h3 className="mt-3 font-bold text-[#0F172A] truncate">
+        {workflow.name}
+      </h3>
       <p className="mt-1 text-sm text-[#64748B] line-clamp-2 min-h-[40px]">
         {workflow.description || "No description."}
       </p>
@@ -288,8 +391,10 @@ function WorkflowEditor({ onClose, onSaved }) {
           api.get("/agents", { params: { limit: 100 } }),
           api.get("/knowledge-bases", { params: { limit: 100 } }),
         ]);
-        if (a.status === "fulfilled") setAgents(a.value.data.items || a.value.data || []);
-        if (k.status === "fulfilled") setKbs(k.value.data.items || k.value.data || []);
+        if (a.status === "fulfilled")
+          setAgents(a.value.data.items || a.value.data || []);
+        if (k.status === "fulfilled")
+          setKbs(k.value.data.items || k.value.data || []);
       } catch {
         /* optional helpers */
       }
@@ -302,7 +407,9 @@ function WorkflowEditor({ onClose, onSaved }) {
     setSteps((s) => s.map((st, idx) => (idx === i ? { ...st, ...patch } : st)));
   const setStepConfig = (i, key, value) =>
     setSteps((s) =>
-      s.map((st, idx) => (idx === i ? { ...st, config: { ...st.config, [key]: value } } : st))
+      s.map((st, idx) =>
+        idx === i ? { ...st, config: { ...st.config, [key]: value } } : st,
+      ),
     );
 
   const save = async () => {
@@ -339,7 +446,9 @@ function WorkflowEditor({ onClose, onSaved }) {
       <div className="p-6 border-b border-[#E2E8F0] flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-[#0F172A]">New Workflow</h2>
-          <p className="text-sm text-[#64748B]">Define the trigger and an ordered list of steps.</p>
+          <p className="text-sm text-[#64748B]">
+            Define the trigger and an ordered list of steps.
+          </p>
         </div>
         <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#F1F5F9]">
           <X size={18} className="text-[#64748B]" />
@@ -400,7 +509,8 @@ function WorkflowEditor({ onClose, onSaved }) {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-[#0F172A]">Steps</h3>
             <span className="text-[12px] text-[#94A3B8]">
-              Reference earlier outputs with <code className="px-1 bg-[#F1F5F9] rounded">{"{{var}}"}</code>
+              Reference earlier outputs with{" "}
+              <code className="px-1 bg-[#F1F5F9] rounded">{"{{var}}"}</code>
             </span>
           </div>
 
@@ -409,7 +519,9 @@ function WorkflowEditor({ onClose, onSaved }) {
             <WorkflowCanvas
               steps={steps}
               getMeta={getStepMeta}
-              triggerLabel={TRIGGERS.find((t) => t.value === triggerType)?.label || "Manual"}
+              triggerLabel={
+                TRIGGERS.find((t) => t.value === triggerType)?.label || "Manual"
+              }
             />
           </div>
 
@@ -422,7 +534,13 @@ function WorkflowEditor({ onClose, onSaved }) {
                 agents={agents}
                 kbs={kbs}
                 onName={(v) => updateStep(i, { name: v })}
-                onType={(v) => updateStep(i, { type: v, name: STEP_META[v].label, config: {} })}
+                onType={(v) =>
+                  updateStep(i, {
+                    type: v,
+                    name: STEP_META[v].label,
+                    config: {},
+                  })
+                }
                 onConfig={(key, val) => setStepConfig(i, key, val)}
                 onRemove={() => removeStep(i)}
               />
@@ -444,7 +562,10 @@ function WorkflowEditor({ onClose, onSaved }) {
       </div>
 
       <div className="p-6 border-t border-[#E2E8F0] flex items-center justify-end gap-2">
-        <button onClick={onClose} className="px-4 py-2 rounded-xl border border-[#E2E8F0] text-sm font-semibold text-[#334155] hover:bg-[#F8FAFC]">
+        <button
+          onClick={onClose}
+          className="px-4 py-2 rounded-xl border border-[#E2E8F0] text-sm font-semibold text-[#334155] hover:bg-[#F8FAFC]"
+        >
           Cancel
         </button>
         <button
@@ -452,7 +573,11 @@ function WorkflowEditor({ onClose, onSaved }) {
           disabled={saving}
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-60 text-white text-sm font-semibold"
         >
-          {saving ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+          {saving ? (
+            <Loader2 size={15} className="animate-spin" />
+          ) : (
+            <CheckCircle2 size={15} />
+          )}
           Create Workflow
         </button>
       </div>
@@ -460,7 +585,16 @@ function WorkflowEditor({ onClose, onSaved }) {
   );
 }
 
-function StepEditor({ index, step, agents, kbs, onName, onType, onConfig, onRemove }) {
+function StepEditor({
+  index,
+  step,
+  agents,
+  kbs,
+  onName,
+  onType,
+  onConfig,
+  onRemove,
+}) {
   const meta = STEP_META[step.type] || STEP_TYPES[0];
   const Icon = meta.icon;
   const c = step.config || {};
@@ -488,7 +622,10 @@ function StepEditor({ index, step, agents, kbs, onName, onType, onConfig, onRemo
           className="ml-auto w-44 px-2 py-1 rounded-lg border border-[#E2E8F0] text-[12px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
           placeholder="Step name"
         />
-        <button onClick={onRemove} className="p-1.5 rounded-lg hover:bg-[#FEF2F2]">
+        <button
+          onClick={onRemove}
+          className="p-1.5 rounded-lg hover:bg-[#FEF2F2]"
+        >
           <Trash2 size={14} className="text-[#EF4444]" />
         </button>
       </div>
@@ -501,7 +638,9 @@ function StepEditor({ index, step, agents, kbs, onName, onType, onConfig, onRemo
           </summary>
           <div className="mt-2 grid grid-cols-2 gap-2">
             <label className="block">
-              <span className="block text-[11px] text-[#64748B] mb-1">Retries</span>
+              <span className="block text-[11px] text-[#64748B] mb-1">
+                Retries
+              </span>
               <input
                 type="number"
                 min={0}
@@ -512,13 +651,17 @@ function StepEditor({ index, step, agents, kbs, onName, onType, onConfig, onRemo
               />
             </label>
             <label className="block">
-              <span className="block text-[11px] text-[#64748B] mb-1">Retry delay (s)</span>
+              <span className="block text-[11px] text-[#64748B] mb-1">
+                Retry delay (s)
+              </span>
               <input
                 type="number"
                 min={0}
                 max={30}
                 value={c.retry_delay ?? 2}
-                onChange={(e) => onConfig("retry_delay", Number(e.target.value))}
+                onChange={(e) =>
+                  onConfig("retry_delay", Number(e.target.value))
+                }
                 className="w-full px-2 py-1.5 rounded-lg border border-[#E2E8F0] text-[12px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
               />
             </label>
@@ -526,7 +669,9 @@ function StepEditor({ index, step, agents, kbs, onName, onType, onConfig, onRemo
               <input
                 type="checkbox"
                 checked={!!c.continue_on_error}
-                onChange={(e) => onConfig("continue_on_error", e.target.checked)}
+                onChange={(e) =>
+                  onConfig("continue_on_error", e.target.checked)
+                }
               />
               Continue the run even if this step fails
             </label>
@@ -552,7 +697,12 @@ function StepConfig({ step, agents, kbs, onConfig }) {
     <input
       type={type}
       value={c[key] ?? ""}
-      onChange={(e) => onConfig(key, type === "number" ? Number(e.target.value) : e.target.value)}
+      onChange={(e) =>
+        onConfig(
+          key,
+          type === "number" ? Number(e.target.value) : e.target.value,
+        )
+      }
       placeholder={ph}
       className="w-full px-3 py-2 rounded-lg border border-[#E2E8F0] text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
     />
@@ -571,7 +721,10 @@ function StepConfig({ step, agents, kbs, onConfig }) {
       return (
         <div className="space-y-2">
           {ta("input", "Text to classify. Supports {{vars}}.")}
-          {inp("categories", "Categories, comma-separated (e.g. Sales, Support, Spam)")}
+          {inp(
+            "categories",
+            "Categories, comma-separated (e.g. Sales, Support, Spam)",
+          )}
           {inp("output_var", "Output variable (default: classification)")}
         </div>
       );
@@ -609,7 +762,11 @@ function StepConfig({ step, agents, kbs, onConfig }) {
     case "approval":
       return (
         <div className="space-y-2">
-          {ta("message", "What should the reviewer approve? Supports {{vars}}.", 3)}
+          {ta(
+            "message",
+            "What should the reviewer approve? Supports {{vars}}.",
+            3,
+          )}
           <p className="text-[11px] text-[#94A3B8]">
             The run pauses here until an owner/admin approves or rejects it.
           </p>
@@ -625,7 +782,7 @@ function StepConfig({ step, agents, kbs, onConfig }) {
             onChange={(e) =>
               onConfig(
                 "knowledge_base_ids",
-                Array.from(e.target.selectedOptions).map((o) => o.value)
+                Array.from(e.target.selectedOptions).map((o) => o.value),
               )
             }
             className="w-full px-3 py-2 rounded-lg border border-[#E2E8F0] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
@@ -675,7 +832,15 @@ function StepConfig({ step, agents, kbs, onConfig }) {
             onChange={(e) => onConfig("op", e.target.value)}
             className="px-2 py-2 rounded-lg border border-[#E2E8F0] text-sm bg-white focus:outline-none"
           >
-            {["contains", "not_contains", "eq", "ne", "gt", "lt", "nonempty"].map((o) => (
+            {[
+              "contains",
+              "not_contains",
+              "eq",
+              "ne",
+              "gt",
+              "lt",
+              "nonempty",
+            ].map((o) => (
               <option key={o} value={o}>
                 {o}
               </option>
@@ -742,7 +907,9 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
   const runNow = async () => {
     setRunning(true);
     try {
-      const { data } = await api.post(`/workflows/${workflowId}/run`, { input: {} });
+      const { data } = await api.post(`/workflows/${workflowId}/run`, {
+        input: {},
+      });
       toast.success("Run started.");
       // Poll the run until it finishes.
       pollRun(data.id);
@@ -772,7 +939,11 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
             onChanged?.();
             return;
           }
-          if (data.status === "completed" || data.status === "failed" || data.status === "cancelled") {
+          if (
+            data.status === "completed" ||
+            data.status === "failed" ||
+            data.status === "cancelled"
+          ) {
             setRunning(false);
             load();
             onChanged?.();
@@ -786,7 +957,7 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
       };
       tick();
     },
-    [load, onChanged]
+    [load, onChanged],
   );
 
   const decide = async (decision) => {
@@ -794,7 +965,9 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
     setDeciding(true);
     try {
       await api.post(`/workflows/runs/${activeRun.id}/decision`, { decision });
-      toast.success(decision === "approve" ? "Approved — resuming." : "Rejected.");
+      toast.success(
+        decision === "approve" ? "Approved — resuming." : "Rejected.",
+      );
       if (decision === "approve") {
         setRunning(true);
         pollRun(activeRun.id, { resuming: true });
@@ -810,7 +983,12 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
   };
 
   const rollback = async (version) => {
-    if (!window.confirm(`Roll back to version ${version}? Current state is saved first.`)) return;
+    if (
+      !window.confirm(
+        `Roll back to version ${version}? Current state is saved first.`,
+      )
+    )
+      return;
     setBusy(true);
     try {
       await api.post(`/workflows/${workflowId}/versions/${version}/rollback`);
@@ -830,7 +1008,9 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
     setBusy(true);
     try {
       await api.patch(`/workflows/${workflowId}`, { status: next });
-      toast.success(next === "active" ? "Workflow activated." : "Workflow paused.");
+      toast.success(
+        next === "active" ? "Workflow activated." : "Workflow paused.",
+      );
       load();
       onChanged?.();
     } catch (e) {
@@ -866,13 +1046,22 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
           <div className="p-6 border-b border-[#E2E8F0]">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize ${STATUS_STYLES[wf.status]}`}>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize ${STATUS_STYLES[wf.status]}`}
+                >
                   {wf.status}
                 </span>
-                <h2 className="mt-2 text-lg font-bold text-[#0F172A]">{wf.name}</h2>
-                <p className="text-sm text-[#64748B]">{wf.description || "No description."}</p>
+                <h2 className="mt-2 text-lg font-bold text-[#0F172A]">
+                  {wf.name}
+                </h2>
+                <p className="text-sm text-[#64748B]">
+                  {wf.description || "No description."}
+                </p>
               </div>
-              <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#F1F5F9]">
+              <button
+                onClick={onClose}
+                className="p-2 rounded-lg hover:bg-[#F1F5F9]"
+              >
                 <X size={18} className="text-[#64748B]" />
               </button>
             </div>
@@ -882,7 +1071,11 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
                 disabled={running}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-60 text-white text-sm font-semibold"
               >
-                {running ? <Loader2 size={15} className="animate-spin" /> : <Play size={15} />}
+                {running ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <Play size={15} />
+                )}
                 {running ? "Running…" : "Run Now"}
               </button>
               <button
@@ -890,7 +1083,11 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
                 disabled={busy}
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] text-[#0F172A] text-sm font-semibold"
               >
-                {wf.status === "active" ? <PauseCircle size={14} /> : <PlayCircle size={14} />}
+                {wf.status === "active" ? (
+                  <PauseCircle size={14} />
+                ) : (
+                  <PlayCircle size={14} />
+                )}
                 {wf.status === "active" ? "Pause" : "Activate"}
               </button>
               <button
@@ -907,7 +1104,8 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
             {/* Steps */}
             <div>
               <h3 className="text-sm font-bold text-[#0F172A]">
-                Flow ({wf.steps?.length || 0} {wf.steps?.length === 1 ? "step" : "steps"})
+                Flow ({wf.steps?.length || 0}{" "}
+                {wf.steps?.length === 1 ? "step" : "steps"})
                 {activeRun && (
                   <span className="ml-2 align-middle text-[11px] font-medium text-[#94A3B8]">
                     · showing latest run
@@ -919,7 +1117,8 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
                   steps={wf.steps || []}
                   getMeta={STEP_META && ((t) => STEP_META[t] || STEP_TYPES[0])}
                   triggerLabel={
-                    TRIGGERS.find((t) => t.value === wf.trigger_type)?.label || "Manual"
+                    TRIGGERS.find((t) => t.value === wf.trigger_type)?.label ||
+                    "Manual"
                   }
                   runStatusByOrder={
                     activeRun
@@ -927,7 +1126,7 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
                           (activeRun.run_steps || []).map((rs) => [
                             rs.order_index,
                             rs.status,
-                          ])
+                          ]),
                         )
                       : null
                   }
@@ -969,8 +1168,13 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
             {/* Run history */}
             <div>
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-[#0F172A]">Run history</h3>
-                <button onClick={load} className="text-[12px] text-[#2563EB] font-semibold inline-flex items-center gap-1">
+                <h3 className="text-sm font-bold text-[#0F172A]">
+                  Run history
+                </h3>
+                <button
+                  onClick={load}
+                  className="text-[12px] text-[#2563EB] font-semibold inline-flex items-center gap-1"
+                >
                   <RefreshCw size={12} /> Refresh
                 </button>
               </div>
@@ -979,7 +1183,11 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
               ) : (
                 <div className="mt-2 space-y-2">
                   {runs.map((r) => (
-                    <RunRow key={r.id} run={r} onOpen={() => openRun(r.id, setActiveRun)} />
+                    <RunRow
+                      key={r.id}
+                      run={r}
+                      onOpen={() => openRun(r.id, setActiveRun)}
+                    />
                   ))}
                 </div>
               )}
@@ -989,7 +1197,8 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
             {versions.length > 0 && (
               <div>
                 <h3 className="text-sm font-bold text-[#0F172A] inline-flex items-center gap-1.5">
-                  <History size={14} className="text-[#2563EB]" /> Version history
+                  <History size={14} className="text-[#2563EB]" /> Version
+                  history
                 </h3>
                 <div className="mt-2 space-y-2">
                   {versions.map((v) => (
@@ -1004,7 +1213,7 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
                         {v.snapshot?.name || "Untitled"}
                       </span>
                       <span className="text-[11px] text-[#94A3B8]">
-                        {(v.snapshot?.steps?.length ?? 0)} steps
+                        {v.snapshot?.steps?.length ?? 0} steps
                       </span>
                       <button
                         onClick={() => rollback(v.version)}
@@ -1042,8 +1251,14 @@ function RunRow({ run, onOpen }) {
       onClick={onOpen}
       className="w-full text-left flex items-center gap-2.5 p-3 rounded-xl border border-[#E2E8F0] bg-white hover:bg-[#F8FAFC]"
     >
-      <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize inline-flex items-center gap-1 ${s.cls}`}>
-        <Icon size={11} className={run.status === "running" ? "animate-spin" : ""} /> {run.status}
+      <span
+        className={`px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize inline-flex items-center gap-1 ${s.cls}`}
+      >
+        <Icon
+          size={11}
+          className={run.status === "running" ? "animate-spin" : ""}
+        />{" "}
+        {run.status}
       </span>
       <span className="text-[12px] text-[#64748B]">
         {run.steps_completed}/{run.steps_total} steps
@@ -1063,18 +1278,31 @@ function RunTimeline({ run }) {
         const st = RUN_STATUS_STYLES[rs.status] || RUN_STATUS_STYLES.queued;
         const Icon = st.icon;
         const out = rs.output || {};
-        const preview = out.text || out.value || out.message || out.context || "";
+        const preview =
+          out.text || out.value || out.message || out.context || "";
         return (
           <div key={rs.id} className="p-3">
             <div className="flex items-center gap-2">
-              <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize inline-flex items-center gap-1 ${st.cls}`}>
-                <Icon size={11} className={rs.status === "running" ? "animate-spin" : ""} /> {rs.status}
+              <span
+                className={`px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize inline-flex items-center gap-1 ${st.cls}`}
+              >
+                <Icon
+                  size={11}
+                  className={rs.status === "running" ? "animate-spin" : ""}
+                />{" "}
+                {rs.status}
               </span>
-              <span className="text-sm font-semibold text-[#0F172A]">{rs.name}</span>
-              <span className="ml-auto text-[11px] text-[#94A3B8]">{meta.label}</span>
+              <span className="text-sm font-semibold text-[#0F172A]">
+                {rs.name}
+              </span>
+              <span className="ml-auto text-[11px] text-[#94A3B8]">
+                {meta.label}
+              </span>
             </div>
             {rs.error_message && (
-              <p className="mt-1.5 text-[12px] text-[#B91C1C]">{rs.error_message}</p>
+              <p className="mt-1.5 text-[12px] text-[#B91C1C]">
+                {rs.error_message}
+              </p>
             )}
             {preview && (
               <p className="mt-1.5 text-[12px] text-[#475569] line-clamp-3 whitespace-pre-wrap">
@@ -1116,7 +1344,9 @@ function Overlay({ children, onClose }) {
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="block text-[12px] font-semibold text-[#334155] mb-1.5">{label}</span>
+      <span className="block text-[12px] font-semibold text-[#334155] mb-1.5">
+        {label}
+      </span>
       {children}
     </label>
   );

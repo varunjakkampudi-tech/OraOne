@@ -41,7 +41,7 @@ export default function Marketplace() {
 
   const installedSlugs = useMemo(
     () => new Set(installs.map((i) => i.listing_slug)),
-    [installs]
+    [installs],
   );
 
   async function refresh() {
@@ -60,7 +60,10 @@ export default function Marketplace() {
       setListings(items);
       setInstalls(mine);
     } catch (e) {
-      setError(formatApiError(e?.response?.data?.detail) || "Failed to load marketplace.");
+      setError(
+        formatApiError(e?.response?.data?.detail) ||
+          "Failed to load marketplace.",
+      );
     } finally {
       setLoading(false);
     }
@@ -99,7 +102,9 @@ export default function Marketplace() {
       await marketplaceApi.uninstall(inst.id);
       await refresh();
     } catch (e) {
-      setError(formatApiError(e?.response?.data?.detail) || "Uninstall failed.");
+      setError(
+        formatApiError(e?.response?.data?.detail) || "Uninstall failed.",
+      );
     } finally {
       setBusy(null);
     }
@@ -144,7 +149,10 @@ export default function Marketplace() {
       {/* Installed strip */}
       {installs.length > 0 ? (
         <Card className="p-4">
-          <div className="mb-3 flex items-center gap-2 text-sm font-semibold" style={{ color: INK }}>
+          <div
+            className="mb-3 flex items-center gap-2 text-sm font-semibold"
+            style={{ color: INK }}
+          >
             <Check className="h-4 w-4 text-emerald-600" />
             Installed ({installs.length})
           </div>
@@ -177,7 +185,10 @@ export default function Marketplace() {
 
       {/* Catalogue grid */}
       {loading ? (
-        <div className="flex items-center justify-center py-20" style={{ color: SUB }}>
+        <div
+          className="flex items-center justify-center py-20"
+          style={{ color: SUB }}
+        >
           <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading marketplace…
         </div>
       ) : listings.length === 0 ? (
@@ -205,10 +216,16 @@ export default function Marketplace() {
                     </Badge>
                   ) : null}
                 </div>
-                <h3 className="mt-3 text-base font-semibold" style={{ color: INK }}>
+                <h3
+                  className="mt-3 text-base font-semibold"
+                  style={{ color: INK }}
+                >
                   {l.name}
                 </h3>
-                <p className="mt-1 flex-1 text-sm leading-relaxed" style={{ color: SUB }}>
+                <p
+                  className="mt-1 flex-1 text-sm leading-relaxed"
+                  style={{ color: SUB }}
+                >
                   {l.summary}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
@@ -232,10 +249,14 @@ export default function Marketplace() {
                   </span>
                   {isInstalled ? (
                     <GhostButton disabled>
-                      <Check className="mr-1.5 h-4 w-4 text-emerald-600" /> Installed
+                      <Check className="mr-1.5 h-4 w-4 text-emerald-600" />{" "}
+                      Installed
                     </GhostButton>
                   ) : (
-                    <PrimaryButton onClick={() => install(l)} disabled={busy === l.slug}>
+                    <PrimaryButton
+                      onClick={() => install(l)}
+                      disabled={busy === l.slug}
+                    >
                       {busy === l.slug ? (
                         <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
                       ) : (

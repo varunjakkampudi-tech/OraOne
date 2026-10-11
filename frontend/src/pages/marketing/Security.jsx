@@ -140,19 +140,63 @@ const COMPLIANCE = [
 ];
 
 const SUB_PROCESSORS = [
-  { name: "PostgreSQL + pgvector", purpose: "Application database and vector search", region: "Operator selected", icon: Database },
-  { name: "MinIO / S3-compatible storage", purpose: "Document and asset storage", region: "Operator selected", icon: Cloud },
-  { name: "Resend / Amazon SES", purpose: "Transactional emails (auth, notifications)", region: "us-east-1", icon: Mail },
-  { name: "Sentry", purpose: "Error monitoring & performance", region: "EU", icon: Eye },
+  {
+    name: "PostgreSQL + pgvector",
+    purpose: "Application database and vector search",
+    region: "Operator selected",
+    icon: Database,
+  },
+  {
+    name: "MinIO / S3-compatible storage",
+    purpose: "Document and asset storage",
+    region: "Operator selected",
+    icon: Cloud,
+  },
+  {
+    name: "Resend / Amazon SES",
+    purpose: "Transactional emails (auth, notifications)",
+    region: "us-east-1",
+    icon: Mail,
+  },
+  {
+    name: "Sentry",
+    purpose: "Error monitoring & performance",
+    region: "EU",
+    icon: Eye,
+  },
 ];
 
 const PRACTICES = [
-  { icon: GitMerge, title: "Secure SDLC", desc: "Code review, automated tests, dependency scanning and secret scanning on every PR." },
-  { icon: Server, title: "Infrastructure-as-Code", desc: "Reproducible infrastructure with peer-reviewed Terraform & GitOps." },
-  { icon: AlertTriangle, title: "Vulnerability Management", desc: "Continuous SCA + monthly third-party penetration testing scoped to public surfaces." },
-  { icon: Database, title: "Backups & Recovery", desc: "Encrypted daily backups, point-in-time recovery, quarterly restoration drills." },
-  { icon: Network, title: "Network Segmentation", desc: "Private subnets, least-privilege security groups, no direct database internet exposure." },
-  { icon: ClipboardList, title: "Incident Response", desc: "24×7 on-call rotation, runbooks, post-mortems published to affected customers within 5 business days." },
+  {
+    icon: GitMerge,
+    title: "Secure SDLC",
+    desc: "Code review, automated tests, dependency scanning and secret scanning on every PR.",
+  },
+  {
+    icon: Server,
+    title: "Infrastructure-as-Code",
+    desc: "Reproducible infrastructure with peer-reviewed Terraform & GitOps.",
+  },
+  {
+    icon: AlertTriangle,
+    title: "Vulnerability Management",
+    desc: "Continuous SCA + monthly third-party penetration testing scoped to public surfaces.",
+  },
+  {
+    icon: Database,
+    title: "Backups & Recovery",
+    desc: "Encrypted daily backups, point-in-time recovery, quarterly restoration drills.",
+  },
+  {
+    icon: Network,
+    title: "Network Segmentation",
+    desc: "Private subnets, least-privilege security groups, no direct database internet exposure.",
+  },
+  {
+    icon: ClipboardList,
+    title: "Incident Response",
+    desc: "24×7 on-call rotation, runbooks, post-mortems published to affected customers within 5 business days.",
+  },
 ];
 
 const DATA_RIGHTS = [
@@ -192,9 +236,10 @@ export default function SecurityPage() {
                 <span className="text-[#2563EB]">built from day one.</span>
               </h1>
               <p className="mt-5 text-base sm:text-lg text-[#475569] leading-relaxed max-w-2xl">
-                We treat your data — and your customers&apos; data — like the most valuable
-                asset in your business. Encrypted at every layer, governed by clear
-                controls, and aligned with the regulations that matter to enterprise buyers.
+                We treat your data — and your customers&apos; data — like the
+                most valuable asset in your business. Encrypted at every layer,
+                governed by clear controls, and aligned with the regulations
+                that matter to enterprise buyers.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -214,7 +259,13 @@ export default function SecurityPage() {
               </div>
 
               <div className="mt-8 flex flex-wrap items-center gap-4 text-[12.5px] text-[#475569]">
-                {["AES-256", "TLS 1.3", "GDPR", "India DPDP", "SOC 2 (in progress)"].map((b) => (
+                {[
+                  "AES-256",
+                  "TLS 1.3",
+                  "GDPR",
+                  "India DPDP",
+                  "SOC 2 (in progress)",
+                ].map((b) => (
                   <span key={b} className="inline-flex items-center gap-1.5">
                     <CheckCircle2 size={14} className="text-[#16A34A]" /> {b}
                   </span>
@@ -223,10 +274,7 @@ export default function SecurityPage() {
             </motion.div>
 
             {/* Right — vault illustration */}
-            <motion.div
-              {...fadeUp}
-              className="hidden lg:flex justify-center"
-            >
+            <motion.div {...fadeUp} className="hidden lg:flex justify-center">
               <SecurityVault />
             </motion.div>
           </div>
@@ -236,7 +284,10 @@ export default function SecurityPage() {
       {/* ============ CONTROLS ============ */}
       <section className="py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeUp} className="text-center max-w-2xl mx-auto mb-12">
+          <motion.div
+            {...fadeUp}
+            className="text-center max-w-2xl mx-auto mb-12"
+          >
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F1F5F9] text-[11px] font-bold tracking-[0.18em] text-[#475569] border border-[#E2E8F0] uppercase">
               <Sparkles size={11} /> Security Controls
             </span>
@@ -273,8 +324,12 @@ export default function SecurityPage() {
                     {c.badge}
                   </span>
                 </div>
-                <h3 className="text-[15px] font-semibold text-[#0F172A]">{c.title}</h3>
-                <p className="mt-2 text-[13px] text-[#64748B] leading-relaxed">{c.desc}</p>
+                <h3 className="text-[15px] font-semibold text-[#0F172A]">
+                  {c.title}
+                </h3>
+                <p className="mt-2 text-[13px] text-[#64748B] leading-relaxed">
+                  {c.desc}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -284,7 +339,10 @@ export default function SecurityPage() {
       {/* ============ COMPLIANCE ============ */}
       <section className="py-16 sm:py-20 bg-[#F8FAFC] border-y border-[#E2E8F0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeUp} className="text-center max-w-2xl mx-auto mb-12">
+          <motion.div
+            {...fadeUp}
+            className="text-center max-w-2xl mx-auto mb-12"
+          >
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-[11px] font-bold tracking-[0.18em] text-[#475569] border border-[#E2E8F0] uppercase">
               <FileCheck2 size={11} /> Compliance &amp; Certifications
             </span>
@@ -292,8 +350,8 @@ export default function SecurityPage() {
               Compliance, transparently tracked.
             </h2>
             <p className="mt-4 text-[#64748B] leading-relaxed">
-              We&apos;re honest about where we are. Active, in-progress and planned —
-              all called out clearly.
+              We&apos;re honest about where we are. Active, in-progress and
+              planned — all called out clearly.
             </p>
           </motion.div>
 
@@ -318,8 +376,12 @@ export default function SecurityPage() {
                     {c.status}
                   </span>
                 </div>
-                <h3 className="text-[15px] font-semibold text-[#0F172A]">{c.title}</h3>
-                <p className="mt-2 text-[13px] text-[#64748B] leading-relaxed">{c.desc}</p>
+                <h3 className="text-[15px] font-semibold text-[#0F172A]">
+                  {c.title}
+                </h3>
+                <p className="mt-2 text-[13px] text-[#64748B] leading-relaxed">
+                  {c.desc}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -329,7 +391,10 @@ export default function SecurityPage() {
       {/* ============ PRACTICES ============ */}
       <section className="py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeUp} className="grid lg:grid-cols-[1fr_1.4fr] gap-10 items-start">
+          <motion.div
+            {...fadeUp}
+            className="grid lg:grid-cols-[1fr_1.4fr] gap-10 items-start"
+          >
             <div>
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F1F5F9] text-[11px] font-bold tracking-[0.18em] text-[#475569] border border-[#E2E8F0] uppercase">
                 <ScrollText size={11} /> Engineering Practices
@@ -340,9 +405,10 @@ export default function SecurityPage() {
                 every day.
               </h2>
               <p className="mt-4 text-[#64748B] leading-relaxed">
-                Security isn&apos;t an audit you pass once. It&apos;s a set of habits — code
-                review, automated scanning, peer-reviewed infrastructure and 24/7
-                incident response — that we live every day.
+                Security isn&apos;t an audit you pass once. It&apos;s a set of
+                habits — code review, automated scanning, peer-reviewed
+                infrastructure and 24/7 incident response — that we live every
+                day.
               </p>
             </div>
 
@@ -355,8 +421,12 @@ export default function SecurityPage() {
                   <div className="size-10 rounded-xl bg-[#EFF6FF] grid place-items-center mb-3">
                     <p.icon size={18} className="text-[#2563EB]" />
                   </div>
-                  <p className="text-[14px] font-semibold text-[#0F172A]">{p.title}</p>
-                  <p className="mt-1.5 text-[12.5px] text-[#64748B] leading-snug">{p.desc}</p>
+                  <p className="text-[14px] font-semibold text-[#0F172A]">
+                    {p.title}
+                  </p>
+                  <p className="mt-1.5 text-[12.5px] text-[#64748B] leading-snug">
+                    {p.desc}
+                  </p>
                 </div>
               ))}
             </div>
@@ -367,7 +437,10 @@ export default function SecurityPage() {
       {/* ============ DATA RIGHTS ============ */}
       <section className="py-16 sm:py-20 bg-[#0F172A] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeUp} className="grid lg:grid-cols-2 gap-10 items-center">
+          <motion.div
+            {...fadeUp}
+            className="grid lg:grid-cols-2 gap-10 items-center"
+          >
             <div>
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[11px] font-bold tracking-[0.18em] text-white/80 uppercase">
                 <Users size={11} /> Your Rights
@@ -378,10 +451,13 @@ export default function SecurityPage() {
                 Always.
               </h2>
               <p className="mt-4 text-white/70 leading-relaxed max-w-md">
-                Under GDPR, the India DPDP Act and our own customer commitments, you have
-                full rights to your data. Exercise them anytime via your account or by
-                emailing{" "}
-                <a className="underline" href="mailto:privacy@oraone.in">privacy@oraone.in</a>.
+                Under GDPR, the India DPDP Act and our own customer commitments,
+                you have full rights to your data. Exercise them anytime via
+                your account or by emailing{" "}
+                <a className="underline" href="mailto:privacy@oraone.in">
+                  privacy@oraone.in
+                </a>
+                .
               </p>
             </div>
             <ul className="space-y-3">
@@ -393,7 +469,9 @@ export default function SecurityPage() {
                   <span className="size-6 rounded-full bg-[#2563EB] grid place-items-center shrink-0 mt-0.5">
                     <CheckCircle2 size={14} className="text-white" />
                   </span>
-                  <span className="text-[14px] text-white/90 leading-relaxed">{r}</span>
+                  <span className="text-[14px] text-white/90 leading-relaxed">
+                    {r}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -404,7 +482,10 @@ export default function SecurityPage() {
       {/* ============ SUB-PROCESSORS ============ */}
       <section id="sub-processors" className="py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeUp} className="text-center max-w-2xl mx-auto mb-10">
+          <motion.div
+            {...fadeUp}
+            className="text-center max-w-2xl mx-auto mb-10"
+          >
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F1F5F9] text-[11px] font-bold tracking-[0.18em] text-[#475569] border border-[#E2E8F0] uppercase">
               <Network size={11} /> Sub-Processor Transparency
             </span>
@@ -412,8 +493,8 @@ export default function SecurityPage() {
               Who else touches your data.
             </h2>
             <p className="mt-4 text-[#64748B] leading-relaxed">
-              We use a minimal, intentional set of sub-processors. Each is bound by a DPA
-              and only handles the data strictly needed for their role.
+              We use a minimal, intentional set of sub-processors. Each is bound
+              by a DPA and only handles the data strictly needed for their role.
             </p>
           </motion.div>
 
@@ -432,17 +513,23 @@ export default function SecurityPage() {
                   <div className="size-9 rounded-xl bg-[#EFF6FF] grid place-items-center shrink-0">
                     <s.icon size={16} className="text-[#2563EB]" />
                   </div>
-                  <span className="text-[13.5px] font-semibold text-[#0F172A]">{s.name}</span>
+                  <span className="text-[13.5px] font-semibold text-[#0F172A]">
+                    {s.name}
+                  </span>
                 </div>
-                <div className="col-span-5 text-[13px] text-[#475569]">{s.purpose}</div>
-                <div className="col-span-2 text-right text-[12px] text-[#64748B]">{s.region}</div>
+                <div className="col-span-5 text-[13px] text-[#475569]">
+                  {s.purpose}
+                </div>
+                <div className="col-span-2 text-right text-[12px] text-[#64748B]">
+                  {s.region}
+                </div>
               </div>
             ))}
           </div>
 
           <p className="mt-4 text-[12px] text-[#64748B] text-center">
-            We&apos;ll notify customers at least 30 days before adding a new sub-processor.
-            Subscribe to updates via your account settings.
+            We&apos;ll notify customers at least 30 days before adding a new
+            sub-processor. Subscribe to updates via your account settings.
           </p>
         </div>
       </section>
@@ -453,7 +540,9 @@ export default function SecurityPage() {
           <motion.div
             {...fadeUp}
             className="relative rounded-3xl p-10 sm:p-14 overflow-hidden text-white shadow-premium-lg"
-            style={{ background: "linear-gradient(135deg, #2563EB 0%, #1E40AF 100%)" }}
+            style={{
+              background: "linear-gradient(135deg, #2563EB 0%, #1E40AF 100%)",
+            }}
           >
             <div className="absolute -top-20 -right-20 size-80 rounded-full bg-white/10" />
             <div className="absolute -bottom-32 -left-32 size-96 rounded-full bg-white/5" />
@@ -466,8 +555,8 @@ export default function SecurityPage() {
                 </h2>
                 <p className="mt-4 text-white/85 max-w-2xl leading-relaxed">
                   We can share our SOC 2 letter of engagement, DPA, security
-                  questionnaire (SIG / CAIQ), penetration test summary and architecture
-                  diagrams under NDA. Procurement teams welcome.
+                  questionnaire (SIG / CAIQ), penetration test summary and
+                  architecture diagrams under NDA. Procurement teams welcome.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3 lg:justify-end">
@@ -507,7 +596,9 @@ function SecurityVault() {
               <Shield size={16} className="text-white" />
             </div>
             <div>
-              <p className="text-[12px] font-bold text-[#0F172A]">OraOne Trust Center</p>
+              <p className="text-[12px] font-bold text-[#0F172A]">
+                OraOne Trust Center
+              </p>
               <p className="text-[10px] text-[#64748B]">Live status</p>
             </div>
           </div>
@@ -518,27 +609,51 @@ function SecurityVault() {
         <div className="px-5 pt-5 grid grid-cols-2 gap-2.5">
           {[
             { label: "AES-256", icon: Lock, color: "#2563EB", bg: "#EFF6FF" },
-            { label: "TLS 1.3", icon: KeyRound, color: "#0EA5E9", bg: "#ECFEFF" },
+            {
+              label: "TLS 1.3",
+              icon: KeyRound,
+              color: "#0EA5E9",
+              bg: "#ECFEFF",
+            },
             { label: "RBAC", icon: Users, color: "#7C3AED", bg: "#F5F3FF" },
-            { label: "Audit Logs", icon: ScrollText, color: "#16A34A", bg: "#ECFDF5" },
-            { label: "GDPR", icon: FileCheck2, color: "#F59E0B", bg: "#FEF3C7" },
+            {
+              label: "Audit Logs",
+              icon: ScrollText,
+              color: "#16A34A",
+              bg: "#ECFDF5",
+            },
+            {
+              label: "GDPR",
+              icon: FileCheck2,
+              color: "#F59E0B",
+              bg: "#FEF3C7",
+            },
             { label: "DPDP", icon: Globe2, color: "#DB2777", bg: "#FCE7F3" },
           ].map((b) => (
             <div
               key={b.label}
               className="rounded-xl border border-[#E2E8F0] p-3 flex items-center gap-2.5"
             >
-              <div className="size-8 rounded-lg grid place-items-center shrink-0" style={{ background: b.bg }}>
+              <div
+                className="size-8 rounded-lg grid place-items-center shrink-0"
+                style={{ background: b.bg }}
+              >
                 <b.icon size={14} style={{ color: b.color }} />
               </div>
-              <span className="text-[11.5px] font-semibold text-[#0F172A]">{b.label}</span>
+              <span className="text-[11.5px] font-semibold text-[#0F172A]">
+                {b.label}
+              </span>
             </div>
           ))}
         </div>
         <div className="px-5 pt-4 mt-auto pb-5">
           <div className="rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] px-3 py-2.5 flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-[#475569]">SOC 2 Type II</span>
-            <span className="text-[10px] font-bold text-[#F59E0B]">IN PROGRESS</span>
+            <span className="text-[11px] font-semibold text-[#475569]">
+              SOC 2 Type II
+            </span>
+            <span className="text-[10px] font-bold text-[#F59E0B]">
+              IN PROGRESS
+            </span>
           </div>
         </div>
       </div>

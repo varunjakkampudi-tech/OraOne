@@ -101,7 +101,9 @@ export default function ContactPage() {
         demo_time: "",
       });
     } catch (err) {
-      toast.error(formatApiError(err.response?.data?.detail) || "Failed to submit");
+      toast.error(
+        formatApiError(err.response?.data?.detail) || "Failed to submit",
+      );
     } finally {
       setBusy(false);
     }
@@ -112,16 +114,31 @@ export default function ContactPage() {
       {/* Subtle ambient blobs */}
       <div
         className="absolute -top-32 -left-32 w-[480px] h-[480px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(37,99,235,0.12), transparent 65%)" }}
+        style={{
+          background:
+            "radial-gradient(circle, rgba(37,99,235,0.12), transparent 65%)",
+        }}
       />
       <div
         className="absolute -bottom-32 -right-32 w-[520px] h-[520px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(124,58,237,0.10), transparent 65%)" }}
+        style={{
+          background:
+            "radial-gradient(circle, rgba(124,58,237,0.10), transparent 65%)",
+        }}
       />
       {/* sparkle accents */}
-      <Sparkle className="absolute top-32 right-[18%] text-[#2563EB]/40" size={14} />
-      <Sparkle className="absolute top-[55%] left-[44%] text-[#7C3AED]/35" size={12} />
-      <Sparkle className="absolute bottom-32 left-[8%] text-[#2563EB]/30" size={16} />
+      <Sparkle
+        className="absolute top-32 right-[18%] text-[#2563EB]/40"
+        size={14}
+      />
+      <Sparkle
+        className="absolute top-[55%] left-[44%] text-[#7C3AED]/35"
+        size={12}
+      />
+      <Sparkle
+        className="absolute bottom-32 left-[8%] text-[#2563EB]/30"
+        size={16}
+      />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-14 lg:gap-20">
         {/* ============================== LEFT ============================== */}
@@ -137,35 +154,47 @@ export default function ContactPage() {
           </span>
 
           <h1 className="mt-6 text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-[#0F172A] leading-[1.05]">
-            Let&apos;s talk about<br />
+            Let&apos;s talk about
+            <br />
             your business
           </h1>
 
           <p className="mt-5 text-[#64748B] text-base sm:text-lg leading-relaxed max-w-md">
-            Book a personalized demo and see how OraOne answers customers instantly, captures every
-            lead, and works around the clock on your website.
+            Book a personalized demo and see how OraOne answers customers
+            instantly, captures every lead, and works around the clock on your
+            website.
           </p>
 
           {/* Contact info cards */}
           <div className="mt-10 space-y-4 max-w-md">
             <InfoCard icon={Mail} label="Email" value="sales@oraone.in" />
-            <InfoCard icon={Clock} label="Response time" value="Within 24 hours" />
+            <InfoCard
+              icon={Clock}
+              label="Response time"
+              value="Within 24 hours"
+            />
             <InfoCard icon={MapPin} label="Office" value="Mumbai, India" />
           </div>
 
           {/* Why book a demo? */}
           <div
             className="mt-10 rounded-2xl p-6 border border-[#DBEAFE] max-w-md"
-            style={{ background: "linear-gradient(135deg,#EFF6FF 0%,#F5F3FF 100%)" }}
+            style={{
+              background: "linear-gradient(135deg,#EFF6FF 0%,#F5F3FF 100%)",
+            }}
           >
-            <h3 className="text-[15px] font-semibold text-[#2563EB]">Why book a demo?</h3>
+            <h3 className="text-[15px] font-semibold text-[#2563EB]">
+              Why book a demo?
+            </h3>
             <ul className="mt-4 space-y-3">
               {BENEFITS.map((b) => (
                 <li key={b} className="flex items-start gap-3">
                   <span className="mt-0.5 size-5 rounded-full bg-[#2563EB] grid place-items-center shrink-0">
                     <Check size={12} className="text-white" strokeWidth={3} />
                   </span>
-                  <span className="text-[14px] text-[#334155] leading-snug">{b}</span>
+                  <span className="text-[14px] text-[#334155] leading-snug">
+                    {b}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -184,7 +213,10 @@ export default function ContactPage() {
           {/* Full Name */}
           <FormField label="Full Name" required>
             <div className="relative">
-              <User size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+              <User
+                size={17}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+              />
               <input
                 type="text"
                 required
@@ -200,7 +232,10 @@ export default function ContactPage() {
           {/* Email Address */}
           <FormField label="Email Address" required>
             <div className="relative">
-              <Mail size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+              <Mail
+                size={17}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+              />
               <input
                 type="email"
                 required
@@ -224,8 +259,13 @@ export default function ContactPage() {
                   data-testid="contact-country-code"
                   className="h-[52px] pl-11 pr-8 rounded-l-xl border border-[#E2E8F0] border-r-0 bg-white text-sm font-medium text-[#0F172A] hover:bg-[#F8FAFC] transition-colors flex items-center gap-2"
                 >
-                  <Phone size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
-                  <span className="text-base leading-none">{form.country.flag}</span>
+                  <Phone
+                    size={17}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+                  />
+                  <span className="text-base leading-none">
+                    {form.country.flag}
+                  </span>
                   <span>{form.country.code}</span>
                   <ChevronDown size={14} className="text-[#94A3B8]" />
                 </button>
@@ -243,7 +283,9 @@ export default function ContactPage() {
                       >
                         <span className="text-base">{c.flag}</span>
                         <span className="font-medium w-12">{c.code}</span>
-                        <span className="text-[#64748B] text-[13px] truncate">{c.name}</span>
+                        <span className="text-[#64748B] text-[13px] truncate">
+                          {c.name}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -253,7 +295,9 @@ export default function ContactPage() {
                 type="tel"
                 required
                 value={form.phone}
-                onChange={(e) => update("phone", e.target.value.replace(/[^\d\s-]/g, ""))}
+                onChange={(e) =>
+                  update("phone", e.target.value.replace(/[^\d\s-]/g, ""))
+                }
                 placeholder="Enter your phone number"
                 data-testid="contact-phone"
                 className="flex-1 min-w-0 h-[52px] px-4 rounded-r-xl border border-[#E2E8F0] bg-white text-sm text-[#0F172A] placeholder-[#94A3B8] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all"
@@ -270,7 +314,11 @@ export default function ContactPage() {
                 data-testid="contact-company-size"
                 className={`w-full text-left ${fieldCls("pr-11")} flex items-center justify-between`}
               >
-                <span className={form.company_size ? "text-[#0F172A]" : "text-[#94A3B8]"}>
+                <span
+                  className={
+                    form.company_size ? "text-[#0F172A]" : "text-[#94A3B8]"
+                  }
+                >
                   {form.company_size || "Select company size"}
                 </span>
                 <ChevronDown
@@ -314,7 +362,10 @@ export default function ContactPage() {
           {/* Preferred Demo Time */}
           <FormField label="Preferred Demo Time">
             <div className="relative">
-              <Calendar size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none" />
+              <Calendar
+                size={17}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none"
+              />
               <input
                 type="datetime-local"
                 value={form.demo_time}
@@ -340,7 +391,10 @@ export default function ContactPage() {
           >
             <Calendar size={17} />
             {busy ? "Sending..." : "Book a Demo"}
-            <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight
+              size={16}
+              className="transition-transform group-hover:translate-x-0.5"
+            />
           </button>
 
           {/* Footer link */}
@@ -385,7 +439,9 @@ function InfoCard({ icon: Icon, label, value }) {
       </div>
       <div>
         <p className="text-[12px] text-[#94A3B8]">{label}</p>
-        <p className="mt-0.5 text-[15px] font-semibold text-[#0F172A]">{value}</p>
+        <p className="mt-0.5 text-[15px] font-semibold text-[#0F172A]">
+          {value}
+        </p>
       </div>
     </div>
   );

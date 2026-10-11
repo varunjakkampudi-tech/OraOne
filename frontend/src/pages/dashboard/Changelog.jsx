@@ -1,12 +1,5 @@
 import { motion } from "framer-motion";
-import {
-  Sparkles,
-  Rocket,
-  Wand2,
-  Bug,
-  Zap,
-  ArrowUpRight,
-} from "lucide-react";
+import { Sparkles, Rocket, Wand2, Bug, Zap, ArrowUpRight } from "lucide-react";
 import { PageHeader, Card, Badge } from "@/components/dashboard/kit";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -28,9 +21,18 @@ const ENTRIES = [
     title: "OraOne now supports you with OraOne",
     highlight: true,
     changes: [
-      { tag: "new", text: "OraOne AI Support — an in-product assistant grounded in our docs, API, pricing, troubleshooting and release notes answers product questions anywhere in the dashboard." },
-      { tag: "new", text: "Was this helpful? 👍 👎 feedback on every AI answer feeds quality scoring and knowledge-gap detection." },
-      { tag: "new", text: "Product Status page with live health checks, and an in-product Changelog (this page)." },
+      {
+        tag: "new",
+        text: "OraOne AI Support — an in-product assistant grounded in our docs, API, pricing, troubleshooting and release notes answers product questions anywhere in the dashboard.",
+      },
+      {
+        tag: "new",
+        text: "Was this helpful? 👍 👎 feedback on every AI answer feeds quality scoring and knowledge-gap detection.",
+      },
+      {
+        tag: "new",
+        text: "Product Status page with live health checks, and an in-product Changelog (this page).",
+      },
     ],
   },
   {
@@ -38,12 +40,30 @@ const ENTRIES = [
     date: "June 22, 2026",
     title: "OraOne 1.0 — production launch",
     changes: [
-      { tag: "new", text: "Hybrid retrieval: dense vectors fused with BM25 keyword ranking plus a cross-encoder reranker for sharper, grounded answers. Configure the reranker engine in AI Models → Knowledge retrieval." },
-      { tag: "new", text: "Visual workflow builder: arrange AI prompt, classify, extract, knowledge lookup, run-agent, condition, human-approval, webhook and notify nodes on a canvas; runs show a live status overlay." },
-      { tag: "new", text: "Distributed website crawler with live telemetry, polite per-host rate limiting, JS rendering, and pause / resume / cancel." },
-      { tag: "new", text: "AI model routing: choose balanced / cheapest / fastest / highest-quality, set a monthly budget and latency cap with automatic fallback." },
-      { tag: "improved", text: "Conversation observability — per-message tokens, cost, latency, model and citations." },
-      { tag: "improved", text: "Cost & insights analytics: spend by agent / model / project, top questions and knowledge gaps." },
+      {
+        tag: "new",
+        text: "Hybrid retrieval: dense vectors fused with BM25 keyword ranking plus a cross-encoder reranker for sharper, grounded answers. Configure the reranker engine in AI Models → Knowledge retrieval.",
+      },
+      {
+        tag: "new",
+        text: "Visual workflow builder: arrange AI prompt, classify, extract, knowledge lookup, run-agent, condition, human-approval, webhook and notify nodes on a canvas; runs show a live status overlay.",
+      },
+      {
+        tag: "new",
+        text: "Distributed website crawler with live telemetry, polite per-host rate limiting, JS rendering, and pause / resume / cancel.",
+      },
+      {
+        tag: "new",
+        text: "AI model routing: choose balanced / cheapest / fastest / highest-quality, set a monthly budget and latency cap with automatic fallback.",
+      },
+      {
+        tag: "improved",
+        text: "Conversation observability — per-message tokens, cost, latency, model and citations.",
+      },
+      {
+        tag: "improved",
+        text: "Cost & insights analytics: spend by agent / model / project, top questions and knowledge gaps.",
+      },
     ],
   },
   {
@@ -51,10 +71,22 @@ const ENTRIES = [
     date: "June 10, 2026",
     title: "Channels, widgets & multi-tenant foundations",
     changes: [
-      { tag: "new", text: "Embeddable chat widget with theming, suggested questions, lead capture and escalation to a human." },
-      { tag: "new", text: "Workspace → Project hierarchy with strict per-organization isolation and role-based access." },
-      { tag: "performance", text: "Connection pooling and async I/O across the API for lower p95 latency under load." },
-      { tag: "fixed", text: "Resolved duplicate document chunks when re-uploading a file with the same name." },
+      {
+        tag: "new",
+        text: "Embeddable chat widget with theming, suggested questions, lead capture and escalation to a human.",
+      },
+      {
+        tag: "new",
+        text: "Workspace → Project hierarchy with strict per-organization isolation and role-based access.",
+      },
+      {
+        tag: "performance",
+        text: "Connection pooling and async I/O across the API for lower p95 latency under load.",
+      },
+      {
+        tag: "fixed",
+        text: "Resolved duplicate document chunks when re-uploading a file with the same name.",
+      },
     ],
   },
 ];
@@ -70,7 +102,9 @@ function ChangeRow({ change }) {
           {meta.label}
         </Badge>
       </span>
-      <p className="text-[13.5px] leading-relaxed text-[#334155]">{change.text}</p>
+      <p className="text-[13.5px] leading-relaxed text-[#334155]">
+        {change.text}
+      </p>
     </li>
   );
 }
@@ -112,15 +146,22 @@ export default function Changelog() {
                 <span className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-br from-[#EFF6FF] to-[#ECFEFF] px-2.5 py-1 text-[12px] font-bold text-[#1D4ED8] ring-1 ring-[#DBEAFE]">
                   v{entry.version}
                 </span>
-                <span className="text-[12.5px] font-medium text-[#94A3B8]">{entry.date}</span>
+                <span className="text-[12.5px] font-medium text-[#94A3B8]">
+                  {entry.date}
+                </span>
                 {entry.highlight && (
-                  <Badge tone="indigo" className="inline-flex items-center gap-1">
+                  <Badge
+                    tone="indigo"
+                    className="inline-flex items-center gap-1"
+                  >
                     <Sparkles size={11} />
                     Latest
                   </Badge>
                 )}
               </div>
-              <h3 className="mt-3 text-[16px] font-bold text-[#0F172A]">{entry.title}</h3>
+              <h3 className="mt-3 text-[16px] font-bold text-[#0F172A]">
+                {entry.title}
+              </h3>
               <ul className="mt-4 space-y-3">
                 {entry.changes.map((c, j) => (
                   <ChangeRow key={j} change={c} />

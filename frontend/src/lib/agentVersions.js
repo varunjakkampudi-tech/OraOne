@@ -12,5 +12,7 @@ export const agentVersionsApi = {
       })
       .then((r) => r.data),
   restore: (agentId, version) =>
-    api.post(`/agents/${agentId}/versions/restore`, { version }).then((r) => r.data),
+    api
+      .post(`/agents/${agentId}/versions/restore`, { version })
+      .then((r) => r.data),
 };

@@ -45,20 +45,82 @@ const TYPE_FAMILY = {
 
 const FAMILY_STYLES = {
   ai: { ring: "#C7D2FE", accent: "#4F46E5", chip: "#EEF2FF", icon: "#4F46E5" },
-  data: { ring: "#BFDBFE", accent: "#2563EB", chip: "#EFF6FF", icon: "#2563EB" },
-  logic: { ring: "#FDE68A", accent: "#D97706", chip: "#FFFBEB", icon: "#D97706" },
-  approval: { ring: "#FBCFE8", accent: "#DB2777", chip: "#FDF2F8", icon: "#DB2777" },
+  data: {
+    ring: "#BFDBFE",
+    accent: "#2563EB",
+    chip: "#EFF6FF",
+    icon: "#2563EB",
+  },
+  logic: {
+    ring: "#FDE68A",
+    accent: "#D97706",
+    chip: "#FFFBEB",
+    icon: "#D97706",
+  },
+  approval: {
+    ring: "#FBCFE8",
+    accent: "#DB2777",
+    chip: "#FDF2F8",
+    icon: "#DB2777",
+  },
   io: { ring: "#CBD5E1", accent: "#475569", chip: "#F1F5F9", icon: "#475569" },
-  default: { ring: "#E2E8F0", accent: "#64748B", chip: "#F8FAFC", icon: "#64748B" },
+  default: {
+    ring: "#E2E8F0",
+    accent: "#64748B",
+    chip: "#F8FAFC",
+    icon: "#64748B",
+  },
 };
 
 const RUN_STATUS = {
-  pending: { border: "#E2E8F0", badge: "#F1F5F9", text: "#64748B", icon: Clock, label: "Pending", spin: false },
-  running: { border: "#2563EB", badge: "#EFF6FF", text: "#2563EB", icon: Loader2, label: "Running", spin: true },
-  awaiting_approval: { border: "#D97706", badge: "#FFFBEB", text: "#B45309", icon: ShieldCheck, label: "Awaiting approval", spin: false },
-  completed: { border: "#059669", badge: "#ECFDF5", text: "#047857", icon: CheckCircle2, label: "Completed", spin: false },
-  failed: { border: "#DC2626", badge: "#FEF2F2", text: "#B91C1C", icon: XCircle, label: "Failed", spin: false },
-  skipped: { border: "#CBD5E1", badge: "#F1F5F9", text: "#94A3B8", icon: CircleSlash, label: "Skipped", spin: false },
+  pending: {
+    border: "#E2E8F0",
+    badge: "#F1F5F9",
+    text: "#64748B",
+    icon: Clock,
+    label: "Pending",
+    spin: false,
+  },
+  running: {
+    border: "#2563EB",
+    badge: "#EFF6FF",
+    text: "#2563EB",
+    icon: Loader2,
+    label: "Running",
+    spin: true,
+  },
+  awaiting_approval: {
+    border: "#D97706",
+    badge: "#FFFBEB",
+    text: "#B45309",
+    icon: ShieldCheck,
+    label: "Awaiting approval",
+    spin: false,
+  },
+  completed: {
+    border: "#059669",
+    badge: "#ECFDF5",
+    text: "#047857",
+    icon: CheckCircle2,
+    label: "Completed",
+    spin: false,
+  },
+  failed: {
+    border: "#DC2626",
+    badge: "#FEF2F2",
+    text: "#B91C1C",
+    icon: XCircle,
+    label: "Failed",
+    spin: false,
+  },
+  skipped: {
+    border: "#CBD5E1",
+    badge: "#F1F5F9",
+    text: "#94A3B8",
+    icon: CircleSlash,
+    label: "Skipped",
+    spin: false,
+  },
 };
 
 function familyFor(type) {
@@ -69,7 +131,12 @@ function familyFor(type) {
 function Connector({ active }) {
   return (
     <div className="flex justify-center" aria-hidden="true">
-      <svg width="24" height="34" viewBox="0 0 24 34" className="overflow-visible">
+      <svg
+        width="24"
+        height="34"
+        viewBox="0 0 24 34"
+        className="overflow-visible"
+      >
         <line
           x1="12"
           y1="0"
@@ -147,7 +214,10 @@ export default function WorkflowCanvas({
         <Connector active={Boolean(runStatusByOrder)} />
 
         {steps.map((step, i) => {
-          const meta = (getMeta && getMeta(step.type)) || { label: step.type, icon: Zap };
+          const meta = (getMeta && getMeta(step.type)) || {
+            label: step.type,
+            icon: Zap,
+          };
           const Icon = meta.icon || Zap;
           const fam = familyFor(step.type);
           const status = runStatusByOrder ? runStatusByOrder[i] : null;
@@ -157,8 +227,8 @@ export default function WorkflowCanvas({
             step.type === "condition"
               ? "Stops the run if the predicate is false"
               : step.type === "approval"
-              ? "Pauses until a human approves"
-              : null;
+                ? "Pauses until a human approves"
+                : null;
 
           const NodeTag = clickable ? "button" : "div";
 
@@ -173,8 +243,14 @@ export default function WorkflowCanvas({
                     clickable ? "cursor-pointer hover:shadow-md" : ""
                   }`}
                   style={{
-                    borderColor: rs ? rs.border : selected ? fam.accent : fam.ring,
-                    boxShadow: selected ? `0 0 0 2px ${fam.accent}33` : undefined,
+                    borderColor: rs
+                      ? rs.border
+                      : selected
+                        ? fam.accent
+                        : fam.ring,
+                    boxShadow: selected
+                      ? `0 0 0 2px ${fam.accent}33`
+                      : undefined,
                   }}
                 >
                   <span
@@ -189,7 +265,11 @@ export default function WorkflowCanvas({
                     >
                       {i + 1}
                     </span>
-                    <Icon size={15} style={{ color: fam.icon }} className="shrink-0" />
+                    <Icon
+                      size={15}
+                      style={{ color: fam.icon }}
+                      className="shrink-0"
+                    />
                     <span className="min-w-0 flex-1 truncate text-sm font-semibold text-[#0F172A]">
                       {step.name || meta.label}
                     </span>
@@ -199,7 +279,10 @@ export default function WorkflowCanvas({
                         style={{ backgroundColor: rs.badge, color: rs.text }}
                         data-testid={`canvas-node-status-${i}`}
                       >
-                        <rs.icon size={10} className={rs.spin ? "animate-spin" : ""} />
+                        <rs.icon
+                          size={10}
+                          className={rs.spin ? "animate-spin" : ""}
+                        />
                         {rs.label}
                       </span>
                     ) : (
@@ -218,7 +301,7 @@ export default function WorkflowCanvas({
                   )}
                 </NodeTag>
               </div>
-              <Connector active={Boolean(rs && (rs.label === "Completed"))} />
+              <Connector active={Boolean(rs && rs.label === "Completed")} />
             </div>
           );
         })}

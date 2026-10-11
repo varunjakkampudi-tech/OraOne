@@ -36,25 +36,103 @@ function fmtRelative(value) {
 // Map a notification to an icon + the place it should open. Every notification
 // is actionable — clicking it navigates the user straight to the resource.
 const TYPE_META = {
-  agent_created: { icon: Bot, tint: "bg-[#EFF6FF] text-[#2563EB]", to: () => "/app/agents" },
-  agent_deployed: { icon: Bot, tint: "bg-[#EFF6FF] text-[#2563EB]", to: () => "/app/agents" },
-  knowledge_indexed: { icon: BookOpen, tint: "bg-[#DCFCE7] text-[#16A34A]", to: () => "/app/knowledge-base" },
-  knowledge_sync: { icon: BookOpen, tint: "bg-[#DCFCE7] text-[#16A34A]", to: () => "/app/knowledge-base" },
-  website_crawled: { icon: Globe, tint: "bg-[#EFF6FF] text-[#2563EB]", to: () => "/app/websites" },
-  website_failed: { icon: AlertTriangle, tint: "bg-[#FEE2E2] text-[#DC2626]", to: () => "/app/websites" },
-  crawl_failed: { icon: AlertTriangle, tint: "bg-[#FEE2E2] text-[#DC2626]", to: () => "/app/websites" },
-  integration_expired: { icon: Plug, tint: "bg-[#FEF3C7] text-[#B45309]", to: () => "/app/integrations" },
-  integration_disconnected: { icon: Plug, tint: "bg-[#FEE2E2] text-[#DC2626]", to: () => "/app/integrations" },
-  conversation: { icon: MessagesSquare, tint: "bg-[#DCFCE7] text-[#16A34A]", to: (n) => (n.resource_id ? `/app/chat/${n.resource_id}` : "/app/conversations") },
-  new_conversation: { icon: MessagesSquare, tint: "bg-[#DCFCE7] text-[#16A34A]", to: (n) => (n.resource_id ? `/app/chat/${n.resource_id}` : "/app/conversations") },
-  lead: { icon: Users, tint: "bg-[#E0F2FE] text-[#0EA5E9]", to: () => "/app/leads" },
-  new_lead: { icon: Users, tint: "bg-[#E0F2FE] text-[#0EA5E9]", to: () => "/app/leads" },
-  workflow_failed: { icon: Workflow, tint: "bg-[#FEE2E2] text-[#DC2626]", to: () => "/app/workflows" },
-  workflow_completed: { icon: Workflow, tint: "bg-[#DCFCE7] text-[#16A34A]", to: () => "/app/workflows" },
-  team_invite: { icon: Users, tint: "bg-[#EFF6FF] text-[#2563EB]", to: () => "/app/team" },
-  member_joined: { icon: Users, tint: "bg-[#EFF6FF] text-[#2563EB]", to: () => "/app/team" },
-  payment_failed: { icon: CreditCard, tint: "bg-[#FEE2E2] text-[#DC2626]", to: () => "/app/billing" },
-  usage_limit: { icon: Gauge, tint: "bg-[#FEF3C7] text-[#B45309]", to: () => "/app/usage" },
+  agent_created: {
+    icon: Bot,
+    tint: "bg-[#EFF6FF] text-[#2563EB]",
+    to: () => "/app/agents",
+  },
+  agent_deployed: {
+    icon: Bot,
+    tint: "bg-[#EFF6FF] text-[#2563EB]",
+    to: () => "/app/agents",
+  },
+  knowledge_indexed: {
+    icon: BookOpen,
+    tint: "bg-[#DCFCE7] text-[#16A34A]",
+    to: () => "/app/knowledge-base",
+  },
+  knowledge_sync: {
+    icon: BookOpen,
+    tint: "bg-[#DCFCE7] text-[#16A34A]",
+    to: () => "/app/knowledge-base",
+  },
+  website_crawled: {
+    icon: Globe,
+    tint: "bg-[#EFF6FF] text-[#2563EB]",
+    to: () => "/app/websites",
+  },
+  website_failed: {
+    icon: AlertTriangle,
+    tint: "bg-[#FEE2E2] text-[#DC2626]",
+    to: () => "/app/websites",
+  },
+  crawl_failed: {
+    icon: AlertTriangle,
+    tint: "bg-[#FEE2E2] text-[#DC2626]",
+    to: () => "/app/websites",
+  },
+  integration_expired: {
+    icon: Plug,
+    tint: "bg-[#FEF3C7] text-[#B45309]",
+    to: () => "/app/integrations",
+  },
+  integration_disconnected: {
+    icon: Plug,
+    tint: "bg-[#FEE2E2] text-[#DC2626]",
+    to: () => "/app/integrations",
+  },
+  conversation: {
+    icon: MessagesSquare,
+    tint: "bg-[#DCFCE7] text-[#16A34A]",
+    to: (n) =>
+      n.resource_id ? `/app/chat/${n.resource_id}` : "/app/conversations",
+  },
+  new_conversation: {
+    icon: MessagesSquare,
+    tint: "bg-[#DCFCE7] text-[#16A34A]",
+    to: (n) =>
+      n.resource_id ? `/app/chat/${n.resource_id}` : "/app/conversations",
+  },
+  lead: {
+    icon: Users,
+    tint: "bg-[#E0F2FE] text-[#0EA5E9]",
+    to: () => "/app/leads",
+  },
+  new_lead: {
+    icon: Users,
+    tint: "bg-[#E0F2FE] text-[#0EA5E9]",
+    to: () => "/app/leads",
+  },
+  workflow_failed: {
+    icon: Workflow,
+    tint: "bg-[#FEE2E2] text-[#DC2626]",
+    to: () => "/app/workflows",
+  },
+  workflow_completed: {
+    icon: Workflow,
+    tint: "bg-[#DCFCE7] text-[#16A34A]",
+    to: () => "/app/workflows",
+  },
+  team_invite: {
+    icon: Users,
+    tint: "bg-[#EFF6FF] text-[#2563EB]",
+    to: () => "/app/team",
+  },
+  member_joined: {
+    icon: Users,
+    tint: "bg-[#EFF6FF] text-[#2563EB]",
+    to: () => "/app/team",
+  },
+  payment_failed: {
+    icon: CreditCard,
+    tint: "bg-[#FEE2E2] text-[#DC2626]",
+    to: () => "/app/billing",
+  },
+  usage_limit: {
+    icon: Gauge,
+    tint: "bg-[#FEF3C7] text-[#B45309]",
+    to: () => "/app/usage",
+  },
 };
 
 function metaFor(n) {
@@ -78,7 +156,9 @@ export default function NotificationsMenu() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await api.get("/notifications", { params: { limit: 8 } });
+      const { data } = await api.get("/notifications", {
+        params: { limit: 8 },
+      });
       setItems(Array.isArray(data?.notifications) ? data.notifications : []);
       setUnread(data?.unread_count || 0);
     } catch {
@@ -94,7 +174,9 @@ export default function NotificationsMenu() {
     let on = true;
     const ping = async () => {
       try {
-        const { data } = await api.get("/notifications", { params: { limit: 1 } });
+        const { data } = await api.get("/notifications", {
+          params: { limit: 1 },
+        });
         if (on) setUnread(data?.unread_count || 0);
       } catch {
         /* ignore */
@@ -175,7 +257,9 @@ export default function NotificationsMenu() {
           data-testid="notifications-panel"
         >
           <div className="flex items-center justify-between border-b border-[#F1F5F9] px-4 py-3">
-            <span className="text-sm font-semibold text-[#0F172A]">Notifications</span>
+            <span className="text-sm font-semibold text-[#0F172A]">
+              Notifications
+            </span>
             {unread > 0 && (
               <button
                 onClick={markAll}
@@ -194,7 +278,9 @@ export default function NotificationsMenu() {
             ) : items.length === 0 ? (
               <div className="px-4 py-12 text-center">
                 <CheckCircle2 className="mx-auto mb-2 h-7 w-7 text-[#CBD5E1]" />
-                <p className="text-sm text-[#64748B]">You&apos;re all caught up.</p>
+                <p className="text-sm text-[#64748B]">
+                  You&apos;re all caught up.
+                </p>
               </div>
             ) : (
               <ul className="divide-y divide-[#F1F5F9]">
@@ -209,16 +295,26 @@ export default function NotificationsMenu() {
                           n.read ? "" : "bg-[#F8FAFF]"
                         }`}
                       >
-                        <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${meta.tint}`}>
+                        <span
+                          className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${meta.tint}`}
+                        >
                           <Icon className="h-4 w-4" />
                         </span>
                         <div className="min-w-0 flex-1">
                           <p className="flex items-center gap-1.5 text-[13px] font-semibold text-[#0F172A]">
-                            {!n.read && <span className="size-1.5 rounded-full bg-[#2563EB]" />}
+                            {!n.read && (
+                              <span className="size-1.5 rounded-full bg-[#2563EB]" />
+                            )}
                             <span className="truncate">{n.title}</span>
                           </p>
-                          {n.body && <p className="mt-0.5 line-clamp-2 text-[12px] text-[#64748B]">{n.body}</p>}
-                          <p className="mt-0.5 text-[11px] text-[#94A3B8]">{fmtRelative(n.created_at)}</p>
+                          {n.body && (
+                            <p className="mt-0.5 line-clamp-2 text-[12px] text-[#64748B]">
+                              {n.body}
+                            </p>
+                          )}
+                          <p className="mt-0.5 text-[11px] text-[#94A3B8]">
+                            {fmtRelative(n.created_at)}
+                          </p>
                         </div>
                         <ArrowUpRight
                           size={14}

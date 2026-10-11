@@ -1,6 +1,12 @@
 import * as React from "react";
 import { motion } from "framer-motion";
-import { MessageSquare, Sparkles, CheckCircle2, UserPlus, Building2 } from "lucide-react";
+import {
+  MessageSquare,
+  Sparkles,
+  CheckCircle2,
+  UserPlus,
+  Building2,
+} from "lucide-react";
 
 const STEPS = [
   {
@@ -69,8 +75,12 @@ export default function ConversionFlow() {
               >
                 <s.icon size={17} style={{ color: s.tone }} />
               </div>
-              <p className="text-[13px] font-semibold text-[#0F172A] leading-snug">{s.label}</p>
-              <p className="text-[11.5px] text-[#64748B] leading-snug">{s.detail}</p>
+              <p className="text-[13px] font-semibold text-[#0F172A] leading-snug">
+                {s.label}
+              </p>
+              <p className="text-[11.5px] text-[#64748B] leading-snug">
+                {s.detail}
+              </p>
             </motion.div>
             {i < STEPS.length - 1 && (
               <div
@@ -78,14 +88,29 @@ export default function ConversionFlow() {
                 aria-hidden="true"
               >
                 <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
-                  <path d="M1 7h14M10 1l6 6-6 6" stroke="#94A3B8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M1 7h14M10 1l6 6-6 6"
+                    stroke="#94A3B8"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </div>
             )}
             {i < STEPS.length - 1 && (
-              <div className="flex md:hidden items-center justify-center shrink-0 h-4" aria-hidden="true">
+              <div
+                className="flex md:hidden items-center justify-center shrink-0 h-4"
+                aria-hidden="true"
+              >
                 <svg width="14" height="20" viewBox="0 0 14 20" fill="none">
-                  <path d="M7 1v14M1 10l6 6 6-6" stroke="#94A3B8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M7 1v14M1 10l6 6 6-6"
+                    stroke="#94A3B8"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </div>
             )}

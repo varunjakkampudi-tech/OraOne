@@ -11,7 +11,7 @@ export const agentsService = {
     // List endpoint returns { items, total, limit, offset }.
     return {
       items: Array.isArray(data) ? data : data?.items || [],
-      total: Array.isArray(data) ? data.length : data?.total ?? 0,
+      total: Array.isArray(data) ? data.length : (data?.total ?? 0),
     };
   },
 

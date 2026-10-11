@@ -36,47 +36,48 @@ export function AuraOrb({ size = 120, dark = false, animated = true }) {
       data-testid="aura-orb"
     >
       {/* expanding ripples */}
-      {animated && ripples.map((delay, i) => (
-        <span
-          key={i}
-          aria-hidden="true"
-          className="absolute inset-0 rounded-full aura-ripple"
-          style={{
-            animationDelay: `${delay}s`,
-            border: `1.5px solid ${dark ? "rgba(96,165,250,0.55)" : "rgba(37,99,235,0.45)"}`,
-            background: dark
-              ? "radial-gradient(circle, rgba(6,182,212,0.18) 0%, rgba(37,99,235,0) 60%)"
-              : "radial-gradient(circle, rgba(6,182,212,0.16) 0%, rgba(37,99,235,0) 60%)",
-          }}
-        />
-      ))}
+      {animated &&
+        ripples.map((delay, i) => (
+          <span
+            key={i}
+            aria-hidden="true"
+            className="absolute inset-0 rounded-full aura-ripple"
+            style={{
+              animationDelay: `${delay}s`,
+              border: `1.5px solid ${dark ? "rgba(96,165,250,0.55)" : "rgba(37,99,235,0.45)"}`,
+              background: dark
+                ? "radial-gradient(circle, rgba(6,182,212,0.18) 0%, rgba(37,99,235,0) 60%)"
+                : "radial-gradient(circle, rgba(6,182,212,0.16) 0%, rgba(37,99,235,0) 60%)",
+            }}
+          />
+        ))}
 
       {/* orbiting thin arc */}
       {animated && (
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 100 100"
-        className="absolute inset-0 w-full h-full animate-spin"
-        style={{ animationDuration: "3.2s" }}
-      >
-        <defs>
-          <linearGradient id={`${id}-arc`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={C.blue} />
-            <stop offset="55%" stopColor={C.cyan} />
-            <stop offset="100%" stopColor={C.blue} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <circle
-          cx="50"
-          cy="50"
-          r="46"
-          fill="none"
-          stroke={`url(#${id}-arc)`}
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          strokeDasharray="120 200"
-        />
-      </svg>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 100 100"
+          className="absolute inset-0 w-full h-full animate-spin"
+          style={{ animationDuration: "3.2s" }}
+        >
+          <defs>
+            <linearGradient id={`${id}-arc`} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor={C.blue} />
+              <stop offset="55%" stopColor={C.cyan} />
+              <stop offset="100%" stopColor={C.blue} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <circle
+            cx="50"
+            cy="50"
+            r="46"
+            fill="none"
+            stroke={`url(#${id}-arc)`}
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeDasharray="120 200"
+          />
+        </svg>
       )}
 
       {/* orb core */}
@@ -141,7 +142,10 @@ export default function OraOneLoader({
       />
 
       {/* Label */}
-      <p className="text-[13px] font-medium tracking-wide" style={{ color: muted }}>
+      <p
+        className="text-[13px] font-medium tracking-wide"
+        style={{ color: muted }}
+      >
         {label}
       </p>
     </div>
@@ -162,7 +166,14 @@ export function ButtonSpinner({ size = 14, className = "" }) {
       aria-hidden="true"
       data-testid="button-spinner"
     >
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.18" strokeWidth="2.5" />
+      <circle
+        cx="12"
+        cy="12"
+        r="9"
+        stroke="currentColor"
+        strokeOpacity="0.18"
+        strokeWidth="2.5"
+      />
       <path
         d="M21 12a9 9 0 0 0-9-9"
         stroke="currentColor"
@@ -221,8 +232,7 @@ export function DotsLoader({ label, className = "" }) {
             className="size-2.5 rounded-full dot-bounce"
             style={{
               animationDelay: `${i * 0.16}s`,
-              background:
-                i === 0 ? C.blue : i === 1 ? C.cyan : "#0EA5E9",
+              background: i === 0 ? C.blue : i === 1 ? C.cyan : "#0EA5E9",
               boxShadow: `0 0 8px ${i === 0 ? "rgba(37,99,235,0.5)" : i === 1 ? "rgba(6,182,212,0.55)" : "rgba(14,165,233,0.5)"}`,
             }}
           />
@@ -266,18 +276,31 @@ export function ChatTyping({ label = "OraOne is typing…" }) {
    Skeleton primitives
    ────────────────────────────────────────────────────────────────── */
 export function Skeleton({ className = "", style }) {
-  return <div className={`skeleton rounded-lg ${className}`} style={style} aria-hidden="true" />;
+  return (
+    <div
+      className={`skeleton rounded-lg ${className}`}
+      style={style}
+      aria-hidden="true"
+    />
+  );
 }
 
 export function CardSkeleton({ rows = 3 }) {
   return (
-    <div className="p-5 rounded-2xl border border-[#E2E8F0] bg-white space-y-3" data-testid="card-skeleton">
+    <div
+      className="p-5 rounded-2xl border border-[#E2E8F0] bg-white space-y-3"
+      data-testid="card-skeleton"
+    >
       <div className="flex items-center gap-3">
         <Skeleton className="size-9 rounded-xl" />
         <Skeleton className="h-3 w-32" />
       </div>
       {Array.from({ length: rows }).map((_, i) => (
-        <Skeleton key={i} className="h-2.5 w-full" style={{ width: `${80 - i * 12}%` }} />
+        <Skeleton
+          key={i}
+          className="h-2.5 w-full"
+          style={{ width: `${80 - i * 12}%` }}
+        />
       ))}
     </div>
   );
@@ -285,7 +308,10 @@ export function CardSkeleton({ rows = 3 }) {
 
 export function TableSkeleton({ rows = 5, cols = 4 }) {
   return (
-    <div className="rounded-2xl border border-[#E2E8F0] bg-white overflow-hidden" data-testid="table-skeleton">
+    <div
+      className="rounded-2xl border border-[#E2E8F0] bg-white overflow-hidden"
+      data-testid="table-skeleton"
+    >
       <div className="px-5 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
         <Skeleton className="h-3 w-32" />
       </div>
@@ -294,7 +320,11 @@ export function TableSkeleton({ rows = 5, cols = 4 }) {
           <div key={r} className="px-5 py-4 flex items-center gap-4">
             <Skeleton className="size-9 rounded-full" />
             {Array.from({ length: cols - 1 }).map((__, c) => (
-              <Skeleton key={c} className="h-2.5 flex-1" style={{ maxWidth: `${120 + c * 30}px` }} />
+              <Skeleton
+                key={c}
+                className="h-2.5 flex-1"
+                style={{ maxWidth: `${120 + c * 30}px` }}
+              />
             ))}
           </div>
         ))}
@@ -331,9 +361,17 @@ export function EmptyStateLoader({
    ProgressStages — multi-step progress (Connecting → … → Done)
    ────────────────────────────────────────────────────────────────── */
 export function ProgressStages({ stages, current = 0 }) {
-  const list = stages || ["Connecting", "Fetching Data", "Processing", "Almost Done"];
+  const list = stages || [
+    "Connecting",
+    "Fetching Data",
+    "Processing",
+    "Almost Done",
+  ];
   return (
-    <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6" data-testid="progress-stages">
+    <div
+      className="rounded-2xl border border-[#E2E8F0] bg-white p-6"
+      data-testid="progress-stages"
+    >
       <div className="flex items-center justify-between gap-2">
         {list.map((s, i) => {
           const done = i < current;
@@ -346,8 +384,8 @@ export function ProgressStages({ stages, current = 0 }) {
                     done
                       ? "bg-[#2563EB] text-white"
                       : active
-                      ? "bg-white border-2 border-[#2563EB] text-[#2563EB] ring-4 ring-[#2563EB]/15"
-                      : "bg-[#F1F5F9] text-[#94A3B8] border border-[#E2E8F0]"
+                        ? "bg-white border-2 border-[#2563EB] text-[#2563EB] ring-4 ring-[#2563EB]/15"
+                        : "bg-[#F1F5F9] text-[#94A3B8] border border-[#E2E8F0]"
                   }`}
                 >
                   {i + 1}
@@ -363,7 +401,9 @@ export function ProgressStages({ stages, current = 0 }) {
               {i < list.length - 1 && (
                 <span
                   className={`flex-1 h-[2px] rounded-full ${
-                    i < current ? "bg-[#2563EB]" : "border-t-2 border-dashed border-[#E2E8F0]"
+                    i < current
+                      ? "bg-[#2563EB]"
+                      : "border-t-2 border-dashed border-[#E2E8F0]"
                   }`}
                 />
               )}
@@ -415,7 +455,9 @@ export function TopProgressBar({ active = true, label }) {
         />
       </div>
       {label && (
-        <p className="text-center text-[11px] text-[#64748B] mt-1 font-medium">{label}</p>
+        <p className="text-center text-[11px] text-[#64748B] mt-1 font-medium">
+          {label}
+        </p>
       )}
     </div>
   );

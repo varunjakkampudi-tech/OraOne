@@ -149,9 +149,11 @@ export default function Usage() {
   }, [snapshot]);
 
   const allMetrics = snapshot?.metrics || [];
-  const overCount = allMetrics.filter((m) => !m.unlimited && m.used > m.limit).length;
+  const overCount = allMetrics.filter(
+    (m) => !m.unlimited && m.used > m.limit,
+  ).length;
   const nearCount = allMetrics.filter(
-    (m) => !m.unlimited && m.used <= m.limit && m.percent >= 75
+    (m) => !m.unlimited && m.used <= m.limit && m.percent >= 75,
   ).length;
   const healthy = allMetrics.length - overCount - nearCount;
 
@@ -197,7 +199,11 @@ export default function Usage() {
       {/* Health summary */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Within limits", value: Math.max(0, healthy), tone: "#067647" },
+          {
+            label: "Within limits",
+            value: Math.max(0, healthy),
+            tone: "#067647",
+          },
           { label: "Approaching limit", value: nearCount, tone: "#B45309" },
           { label: "Over limit", value: overCount, tone: "#B42318" },
         ].map((s) => (
@@ -221,8 +227,8 @@ export default function Usage() {
         <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#FECACA] bg-[#FEF3F2] px-5 py-4">
           <p className="flex items-center gap-2 text-sm font-semibold text-[#B42318]">
             <TriangleAlert className="h-4 w-4" />
-            You've exceeded {overCount} plan limit{overCount > 1 ? "s" : ""}. Upgrade
-            to keep everything running smoothly.
+            You've exceeded {overCount} plan limit{overCount > 1 ? "s" : ""}.
+            Upgrade to keep everything running smoothly.
           </p>
           <PrimaryButton as={Link} to="/app/billing" className="shrink-0">
             Upgrade

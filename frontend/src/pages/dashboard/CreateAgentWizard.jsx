@@ -93,11 +93,36 @@ const GOALS = [
 ];
 
 const SOURCES = [
-  { id: "website", icon: Globe, title: "Crawl a Website", desc: "We'll read your site and learn from it." },
-  { id: "upload", icon: Upload, title: "Upload Files", desc: "PDF, DOCX, TXT, CSV, and more." },
-  { id: "text", icon: FileText, title: "Paste Text", desc: "Paste content directly." },
-  { id: "integration", icon: Plug, title: "Connect an App", desc: "Google Drive, Notion, and more." },
-  { id: "skip", icon: SkipForward, title: "Skip for now", desc: "Add knowledge later." },
+  {
+    id: "website",
+    icon: Globe,
+    title: "Crawl a Website",
+    desc: "We'll read your site and learn from it.",
+  },
+  {
+    id: "upload",
+    icon: Upload,
+    title: "Upload Files",
+    desc: "PDF, DOCX, TXT, CSV, and more.",
+  },
+  {
+    id: "text",
+    icon: FileText,
+    title: "Paste Text",
+    desc: "Paste content directly.",
+  },
+  {
+    id: "integration",
+    icon: Plug,
+    title: "Connect an App",
+    desc: "Google Drive, Notion, and more.",
+  },
+  {
+    id: "skip",
+    icon: SkipForward,
+    title: "Skip for now",
+    desc: "Add knowledge later.",
+  },
 ];
 
 const PROVIDERS = [
@@ -114,7 +139,14 @@ const TONES = [
   { id: "playful", label: "Playful", temperature: 1.0 },
 ];
 
-const STEPS = ["Goal", "Knowledge Sources", "Refine", "Model", "Customize", "Deploy"];
+const STEPS = [
+  "Goal",
+  "Knowledge Sources",
+  "Refine",
+  "Model",
+  "Customize",
+  "Deploy",
+];
 
 const inputCls =
   "w-full rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm text-[#0F172A] placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 outline-none transition";
@@ -169,7 +201,9 @@ export default function CreateAgentWizard() {
       try {
         const { data } = await api.get("/ai/models");
         if (!active) return;
-        const list = (data?.models || []).filter((m) => m.enabled && m.entitled && !m.disabled_by_org);
+        const list = (data?.models || []).filter(
+          (m) => m.enabled && m.entitled && !m.disabled_by_org,
+        );
         setModels(list);
         setModel((prev) => prev || data?.default_model || list[0]?.id || "");
       } catch (err) {
@@ -220,7 +254,7 @@ export default function CreateAgentWizard() {
 
   const kbName = useMemo(
     () => `${form.name || goal?.title || "Agent"} Knowledge`.slice(0, 160),
-    [form.name, goal]
+    [form.name, goal],
   );
 
   // Fold the clarifying answers into the agent's system prompt so the user sees
@@ -296,9 +330,13 @@ export default function CreateAgentWizard() {
             headers: { "Content-Type": "multipart/form-data" },
           });
         }
-        toast.success(`${files.length} file${files.length > 1 ? "s" : ""} uploaded.`);
+        toast.success(
+          `${files.length} file${files.length > 1 ? "s" : ""} uploaded.`,
+        );
       } else if (sourceKind === "text") {
-        const blob = new File([text.trim()], "pasted-content.txt", { type: "text/plain" });
+        const blob = new File([text.trim()], "pasted-content.txt", {
+          type: "text/plain",
+        });
         const fd = new FormData();
         fd.append("knowledge_base_id", kb.id);
         fd.append("file", blob);
@@ -308,7 +346,9 @@ export default function CreateAgentWizard() {
         toast.success("Text added to knowledge.");
       } else if (sourceKind === "integration") {
         await api.post("/integrations/connect", { provider, mock: true });
-        toast.success(`${PROVIDERS.find((p) => p.id === provider)?.label || "App"} connected.`);
+        toast.success(
+          `${PROVIDERS.find((p) => p.id === provider)?.label || "App"} connected.`,
+        );
       }
       return true;
     } catch (err) {
@@ -372,7 +412,9 @@ export default function CreateAgentWizard() {
           },
         });
         try {
-          const { data: pub } = await api.post(`/widgets/${w.id}/publish?publish=true`);
+          const { data: pub } = await api.post(
+            `/widgets/${w.id}/publish?publish=true`,
+          );
           widget = pub;
         } catch {
           widget = w; // created but not published — still usable
@@ -410,7 +452,9 @@ export default function CreateAgentWizard() {
             <Sparkles size={22} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Create your AI agent</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">
+              Create your AI agent
+            </h1>
             <p className="text-sm text-[#64748B]">
               One guided journey — we'll set up everything behind the scenes.
             </p>
@@ -438,8 +482,8 @@ export default function CreateAgentWizard() {
                     done
                       ? "bg-[#10B981] text-white"
                       : current
-                      ? "bg-[#2563EB] text-white"
-                      : "bg-[#E2E8F0] text-[#64748B]"
+                        ? "bg-[#2563EB] text-white"
+                        : "bg-[#E2E8F0] text-[#64748B]"
                   }`}
                 >
                   {done ? <Check size={14} /> : i + 1}
@@ -452,7 +496,9 @@ export default function CreateAgentWizard() {
                   {label}
                 </span>
               </div>
-              {i < STEPS.length - 1 && <div className="h-px flex-1 bg-[#E2E8F0]" />}
+              {i < STEPS.length - 1 && (
+                <div className="h-px flex-1 bg-[#E2E8F0]" />
+              )}
             </React.Fragment>
           );
         })}
@@ -469,7 +515,13 @@ export default function CreateAgentWizard() {
             transition={{ duration: 0.2 }}
           >
             {result ? (
-              <DeployedView result={result} goal={goal} copied={copied} onCopy={copySnippet} nav={nav} />
+              <DeployedView
+                result={result}
+                goal={goal}
+                copied={copied}
+                onCopy={copySnippet}
+                nav={nav}
+              />
             ) : step === 0 ? (
               <StepGoal goal={goal} onChoose={chooseGoal} />
             ) : step === 1 ? (
@@ -505,7 +557,14 @@ export default function CreateAgentWizard() {
             ) : step === 4 ? (
               <StepCustomize form={form} setForm={setForm} />
             ) : (
-              <StepDeploy goal={goal} form={form} kbId={kbId} sourceKind={sourceKind} model={model} url={url} />
+              <StepDeploy
+                goal={goal}
+                form={form}
+                kbId={kbId}
+                sourceKind={sourceKind}
+                model={model}
+                url={url}
+              />
             )}
           </motion.div>
         </AnimatePresence>
@@ -566,8 +625,12 @@ export default function CreateAgentWizard() {
 function StepGoal({ goal, onChoose }) {
   return (
     <div>
-      <h2 className="text-lg font-semibold text-[#0F172A]">What do you want your AI to do?</h2>
-      <p className="mt-1 text-sm text-[#64748B]">Pick a goal — no technical setup required.</p>
+      <h2 className="text-lg font-semibold text-[#0F172A]">
+        What do you want your AI to do?
+      </h2>
+      <p className="mt-1 text-sm text-[#64748B]">
+        Pick a goal — no technical setup required.
+      </p>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {GOALS.map((g) => {
           const active = goal?.id === g.id;
@@ -576,14 +639,21 @@ function StepGoal({ goal, onChoose }) {
               key={g.id}
               onClick={() => onChoose(g)}
               className={`flex items-start gap-3 rounded-2xl border-2 p-4 text-left transition-all ${
-                active ? "border-[#2563EB] bg-[#EFF6FF]" : "border-[#E2E8F0] bg-white hover:border-[#CBD5E1]"
+                active
+                  ? "border-[#2563EB] bg-[#EFF6FF]"
+                  : "border-[#E2E8F0] bg-white hover:border-[#CBD5E1]"
               }`}
             >
-              <div className="grid size-10 shrink-0 place-items-center rounded-xl" style={{ background: `${g.color}15` }}>
+              <div
+                className="grid size-10 shrink-0 place-items-center rounded-xl"
+                style={{ background: `${g.color}15` }}
+              >
                 <g.icon size={18} style={{ color: g.color }} />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-[#0F172A]">{g.title}</p>
+                <p className="text-sm font-semibold text-[#0F172A]">
+                  {g.title}
+                </p>
                 <p className="mt-0.5 text-xs text-[#64748B]">{g.desc}</p>
               </div>
             </button>
@@ -609,7 +679,9 @@ function StepKnowledge({
 }) {
   return (
     <div>
-      <h2 className="text-lg font-semibold text-[#0F172A]">Where should it learn from?</h2>
+      <h2 className="text-lg font-semibold text-[#0F172A]">
+        Where should it learn from?
+      </h2>
       <p className="mt-1 text-sm text-[#64748B]">
         Choose a source — we'll build and index the knowledge for you.
       </p>
@@ -621,14 +693,18 @@ function StepKnowledge({
               key={s.id}
               onClick={() => setSourceKind(s.id)}
               className={`flex items-start gap-3 rounded-2xl border-2 p-4 text-left transition-all ${
-                active ? "border-[#2563EB] bg-[#EFF6FF]" : "border-[#E2E8F0] bg-white hover:border-[#CBD5E1]"
+                active
+                  ? "border-[#2563EB] bg-[#EFF6FF]"
+                  : "border-[#E2E8F0] bg-white hover:border-[#CBD5E1]"
               }`}
             >
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#F1F5F9]">
                 <s.icon size={18} className="text-[#2563EB]" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-[#0F172A]">{s.title}</p>
+                <p className="text-sm font-semibold text-[#0F172A]">
+                  {s.title}
+                </p>
                 <p className="mt-0.5 text-xs text-[#64748B]">{s.desc}</p>
               </div>
             </button>
@@ -640,7 +716,9 @@ function StepKnowledge({
       <div className="mt-5">
         {sourceKind === "website" && (
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">Website URL</label>
+            <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">
+              Website URL
+            </label>
             <input
               className={inputCls}
               placeholder="https://yourcompany.com"
@@ -648,7 +726,8 @@ function StepKnowledge({
               onChange={(e) => setUrl(e.target.value)}
             />
             <p className="mt-1.5 text-xs text-[#94A3B8]">
-              We'll crawl your site and turn its pages into answerable knowledge.
+              We'll crawl your site and turn its pages into answerable
+              knowledge.
             </p>
           </div>
         )}
@@ -687,7 +766,9 @@ function StepKnowledge({
 
         {sourceKind === "text" && (
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">Paste your content</label>
+            <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">
+              Paste your content
+            </label>
             <textarea
               className={`${inputCls} min-h-[140px] resize-y`}
               placeholder="Paste FAQs, policies, product details…"
@@ -699,7 +780,9 @@ function StepKnowledge({
 
         {sourceKind === "integration" && (
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">Choose an app</label>
+            <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">
+              Choose an app
+            </label>
             <div className="grid gap-2 sm:grid-cols-2">
               {PROVIDERS.map((p) => {
                 const active = provider === p.id;
@@ -708,7 +791,9 @@ function StepKnowledge({
                     key={p.id}
                     onClick={() => setProvider(p.id)}
                     className={`flex items-center gap-3 rounded-xl border-2 p-3 text-left transition ${
-                      active ? "border-[#2563EB] bg-[#EFF6FF]" : "border-[#E2E8F0] hover:border-[#CBD5E1]"
+                      active
+                        ? "border-[#2563EB] bg-[#EFF6FF]"
+                        : "border-[#E2E8F0] hover:border-[#CBD5E1]"
                     }`}
                   >
                     <span
@@ -717,7 +802,9 @@ function StepKnowledge({
                     >
                       {p.label.slice(0, 1)}
                     </span>
-                    <span className="text-sm font-medium text-[#0F172A]">{p.label}</span>
+                    <span className="text-sm font-medium text-[#0F172A]">
+                      {p.label}
+                    </span>
                   </button>
                 );
               })}
@@ -727,7 +814,8 @@ function StepKnowledge({
 
         {sourceKind === "skip" && (
           <p className="rounded-xl bg-[#F8FAFC] px-4 py-3 text-sm text-[#64748B]">
-            No problem — you can add knowledge any time after your agent is live.
+            No problem — you can add knowledge any time after your agent is
+            live.
           </p>
         )}
       </div>
@@ -735,12 +823,21 @@ function StepKnowledge({
   );
 }
 
-function StepRefine({ loading, clarify, answers, setAnswers, extra, setExtra }) {
+function StepRefine({
+  loading,
+  clarify,
+  answers,
+  setAnswers,
+  extra,
+  setExtra,
+}) {
   const toggle = (q, label) => {
     setAnswers((prev) => {
       const cur = prev[q.id] || [];
       if (q.type === "multi") {
-        const next = cur.includes(label) ? cur.filter((x) => x !== label) : [...cur, label];
+        const next = cur.includes(label)
+          ? cur.filter((x) => x !== label)
+          : [...cur, label];
         return { ...prev, [q.id]: next };
       }
       // single-select
@@ -751,7 +848,8 @@ function StepRefine({ loading, clarify, answers, setAnswers, extra, setExtra }) 
   if (loading || !clarify) {
     return (
       <div className="flex items-center gap-2 py-10 text-sm text-[#64748B]">
-        <Loader2 size={16} className="animate-spin" /> Reviewing your knowledge and preparing a few questions…
+        <Loader2 size={16} className="animate-spin" /> Reviewing your knowledge
+        and preparing a few questions…
       </div>
     );
   }
@@ -763,7 +861,9 @@ function StepRefine({ loading, clarify, answers, setAnswers, extra, setExtra }) 
           <Sparkles size={18} />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-[#0F172A]">A few quick questions</h2>
+          <h2 className="text-lg font-semibold text-[#0F172A]">
+            A few quick questions
+          </h2>
           <p className="mt-1 text-sm text-[#64748B]">{clarify.intro}</p>
         </div>
       </div>
@@ -774,10 +874,14 @@ function StepRefine({ loading, clarify, answers, setAnswers, extra, setExtra }) 
             <p className="text-sm font-semibold text-[#0F172A]">
               {q.question}
               {q.type === "multi" && (
-                <span className="ml-2 text-xs font-normal text-[#64748B]">Choose any</span>
+                <span className="ml-2 text-xs font-normal text-[#64748B]">
+                  Choose any
+                </span>
               )}
               {q.optional && (
-                <span className="ml-2 text-xs font-normal text-[#64748B]">Optional</span>
+                <span className="ml-2 text-xs font-normal text-[#64748B]">
+                  Optional
+                </span>
               )}
             </p>
             <div className="mt-2.5 flex flex-wrap gap-2">
@@ -804,7 +908,9 @@ function StepRefine({ loading, clarify, answers, setAnswers, extra, setExtra }) 
         ))}
 
         <div>
-          <label className="block text-sm font-semibold text-[#0F172A]">{clarify.final_label}</label>
+          <label className="block text-sm font-semibold text-[#0F172A]">
+            {clarify.final_label}
+          </label>
           <textarea
             className={`${inputCls} mt-2 min-h-[90px] resize-y`}
             placeholder={clarify.final_placeholder}
@@ -812,7 +918,8 @@ function StepRefine({ loading, clarify, answers, setAnswers, extra, setExtra }) 
             onChange={(e) => setExtra(e.target.value)}
           />
           <p className="mt-1.5 text-xs text-[#94A3B8]">
-            Your answers refine the assistant's system prompt — you can fine-tune it in the next steps.
+            Your answers refine the assistant's system prompt — you can
+            fine-tune it in the next steps.
           </p>
         </div>
       </div>
@@ -823,14 +930,17 @@ function StepRefine({ loading, clarify, answers, setAnswers, extra, setExtra }) 
 function StepModel({ models, loading, model, setModel }) {
   return (
     <div>
-      <h2 className="text-lg font-semibold text-[#0F172A]">Choose the AI model</h2>
+      <h2 className="text-lg font-semibold text-[#0F172A]">
+        Choose the AI model
+      </h2>
       <p className="mt-1 text-sm text-[#64748B]">
         Pick the engine that powers your agent. You can change this later.
       </p>
 
       {loading ? (
         <div className="mt-6 flex items-center gap-2 text-sm text-[#64748B]">
-          <Loader2 size={16} className="animate-spin" /> Loading available models…
+          <Loader2 size={16} className="animate-spin" /> Loading available
+          models…
         </div>
       ) : models.length === 0 ? (
         <p className="mt-6 rounded-xl bg-[#F8FAFC] px-4 py-3 text-sm text-[#64748B]">
@@ -845,7 +955,9 @@ function StepModel({ models, loading, model, setModel }) {
                 key={m.id}
                 onClick={() => setModel(m.id)}
                 className={`flex items-start gap-3 rounded-2xl border-2 p-4 text-left transition-all ${
-                  active ? "border-[#2563EB] bg-[#EFF6FF]" : "border-[#E2E8F0] bg-white hover:border-[#CBD5E1]"
+                  active
+                    ? "border-[#2563EB] bg-[#EFF6FF]"
+                    : "border-[#E2E8F0] bg-white hover:border-[#CBD5E1]"
                 }`}
               >
                 <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#F1F5F9]">
@@ -853,22 +965,29 @@ function StepModel({ models, loading, model, setModel }) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="truncate text-sm font-semibold text-[#0F172A]">{m.label || m.id}</p>
-                    {active && <Check size={16} className="shrink-0 text-[#2563EB]" />}
+                    <p className="truncate text-sm font-semibold text-[#0F172A]">
+                      {m.label || m.id}
+                    </p>
+                    {active && (
+                      <Check size={16} className="shrink-0 text-[#2563EB]" />
+                    )}
                   </div>
-                  <p className="mt-0.5 text-xs capitalize text-[#64748B]">{m.provider}</p>
-                  {Array.isArray(m.capabilities) && m.capabilities.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {m.capabilities.slice(0, 3).map((c) => (
-                        <span
-                          key={c}
-                          className="rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[10px] font-medium text-[#2563EB]"
-                        >
-                          {c}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  <p className="mt-0.5 text-xs capitalize text-[#64748B]">
+                    {m.provider}
+                  </p>
+                  {Array.isArray(m.capabilities) &&
+                    m.capabilities.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {m.capabilities.slice(0, 3).map((c) => (
+                          <span
+                            key={c}
+                            className="rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[10px] font-medium text-[#2563EB]"
+                          >
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                 </div>
               </button>
             );
@@ -883,17 +1002,33 @@ function StepCustomize({ form, setForm }) {
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   return (
     <div>
-      <h2 className="text-lg font-semibold text-[#0F172A]">Customize your agent</h2>
-      <p className="mt-1 text-sm text-[#64748B]">Give it a name, a personality, and a greeting.</p>
+      <h2 className="text-lg font-semibold text-[#0F172A]">
+        Customize your agent
+      </h2>
+      <p className="mt-1 text-sm text-[#64748B]">
+        Give it a name, a personality, and a greeting.
+      </p>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">Name</label>
-          <input className={inputCls} value={form.name} onChange={(e) => set("name", e.target.value)} />
+          <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">
+            Name
+          </label>
+          <input
+            className={inputCls}
+            value={form.name}
+            onChange={(e) => set("name", e.target.value)}
+          />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">Language</label>
-          <select className={inputCls} value={form.language} onChange={(e) => set("language", e.target.value)}>
+          <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">
+            Language
+          </label>
+          <select
+            className={inputCls}
+            value={form.language}
+            onChange={(e) => set("language", e.target.value)}
+          >
             <option value="en-US">English (US)</option>
             <option value="en-GB">English (UK)</option>
             <option value="es-ES">Spanish</option>
@@ -906,12 +1041,20 @@ function StepCustomize({ form, setForm }) {
       </div>
 
       <div className="mt-4">
-        <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">Greeting</label>
-        <input className={inputCls} value={form.greeting} onChange={(e) => set("greeting", e.target.value)} />
+        <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">
+          Greeting
+        </label>
+        <input
+          className={inputCls}
+          value={form.greeting}
+          onChange={(e) => set("greeting", e.target.value)}
+        />
       </div>
 
       <div className="mt-4">
-        <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">Tone</label>
+        <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">
+          Tone
+        </label>
         <div className="flex flex-wrap gap-2">
           {TONES.map((t) => (
             <button
@@ -931,7 +1074,10 @@ function StepCustomize({ form, setForm }) {
 
       <div className="mt-4">
         <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">
-          Instructions <span className="font-normal text-[#64748B]">(how it should behave)</span>
+          Instructions{" "}
+          <span className="font-normal text-[#64748B]">
+            (how it should behave)
+          </span>
         </label>
         <textarea
           className={`${inputCls} min-h-[120px] resize-y`}
@@ -950,13 +1096,14 @@ function StepDeploy({ goal, form, kbId, sourceKind, model, url }) {
     !sourceKind || sourceKind === "skip"
       ? "None (add later)"
       : kbId
-      ? "Connected & indexing"
-      : sourceTitle || "Configured";
+        ? "Connected & indexing"
+        : sourceTitle || "Configured";
 
   let websiteValue = "—";
   if (sourceKind === "website" && url) {
     try {
-      websiteValue = new URL(url.startsWith("http") ? url : `https://${url}`).hostname;
+      websiteValue = new URL(url.startsWith("http") ? url : `https://${url}`)
+        .hostname;
     } catch {
       websiteValue = url;
     }
@@ -988,7 +1135,11 @@ function StepDeploy({ goal, form, kbId, sourceKind, model, url }) {
     {
       title: "Channel & policy",
       rows: [
-        { label: "Widget", value: isChat ? "Auto-published" : "Not applicable", icon: LayoutGrid },
+        {
+          label: "Widget",
+          value: isChat ? "Auto-published" : "Not applicable",
+          icon: LayoutGrid,
+        },
         { label: "Memory", value: "Enabled", icon: Brain },
         { label: "Conversation retention", value: "90 days", icon: Clock },
       ],
@@ -999,22 +1150,30 @@ function StepDeploy({ goal, form, kbId, sourceKind, model, url }) {
     <div>
       <div className="flex items-center gap-2">
         <Rocket size={18} className="text-[#2563EB]" />
-        <h2 className="text-lg font-semibold text-[#0F172A]">Review &amp; deploy</h2>
+        <h2 className="text-lg font-semibold text-[#0F172A]">
+          Review &amp; deploy
+        </h2>
       </div>
       <p className="mt-1 text-sm text-[#64748B]">
-        We'll create the agent{isChat ? ", publish a website widget," : ""} and connect your knowledge —
-        all in one click.
+        We'll create the agent{isChat ? ", publish a website widget," : ""} and
+        connect your knowledge — all in one click.
       </p>
 
       <div className="mt-5 space-y-4">
         {groups.map((g) => (
-          <div key={g.title} className="overflow-hidden rounded-2xl border border-[#E2E8F0]">
+          <div
+            key={g.title}
+            className="overflow-hidden rounded-2xl border border-[#E2E8F0]"
+          >
             <p className="border-b border-[#F1F5F9] bg-[#F8FAFC] px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-[#64748B]">
               {g.title}
             </p>
             <dl className="divide-y divide-[#F1F5F9]">
               {g.rows.map((r) => (
-                <div key={r.label} className="flex items-center justify-between gap-4 px-4 py-2.5">
+                <div
+                  key={r.label}
+                  className="flex items-center justify-between gap-4 px-4 py-2.5"
+                >
                   <dt className="inline-flex items-center gap-2 text-sm text-[#64748B]">
                     {r.icon && <r.icon size={14} className="text-[#94A3B8]" />}
                     {r.label}
@@ -1030,8 +1189,8 @@ function StepDeploy({ goal, form, kbId, sourceKind, model, url }) {
       </div>
 
       <p className="mt-4 flex items-center gap-1.5 text-xs text-[#94A3B8]">
-        <Sparkles size={12} /> Memory, retention and cost use your workspace defaults — adjust them anytime
-        from the agent settings.
+        <Sparkles size={12} /> Memory, retention and cost use your workspace
+        defaults — adjust them anytime from the agent settings.
       </p>
     </div>
   );
@@ -1067,16 +1226,21 @@ function DeployedView({ result, goal, copied, onCopy, nav }) {
       <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[#ECFDF5] text-[#10B981]">
         <Check size={28} />
       </div>
-      <h2 className="mt-4 text-xl font-bold text-[#0F172A]">{agent?.name} is live! 🎉</h2>
+      <h2 className="mt-4 text-xl font-bold text-[#0F172A]">
+        {agent?.name} is live! 🎉
+      </h2>
       <p className="mx-auto mt-1 max-w-md text-sm text-[#64748B]">
-        Your agent has been created and activated. {goal?.type === "chat" && snippet
+        Your agent has been created and activated.{" "}
+        {goal?.type === "chat" && snippet
           ? "Drop the snippet below on your website to go live."
           : "Configure its channel from the agent page to start talking to customers."}
       </p>
 
       {goal?.type === "chat" && snippet && (
         <div className="mt-6 text-left">
-          <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">Embed snippet</label>
+          <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">
+            Embed snippet
+          </label>
           <div className="relative">
             <pre className="overflow-x-auto rounded-2xl border border-[#E2E8F0] bg-[#0F172A] p-4 text-xs text-[#E2E8F0]">
               <code>{snippet}</code>

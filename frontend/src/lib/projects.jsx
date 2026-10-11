@@ -1,4 +1,11 @@
-import { createContext, useContext, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { api, getActiveProjectId, setActiveProjectId } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
@@ -72,7 +79,7 @@ export function ProjectProvider({ children }) {
       // Hard reload to re-scope all in-flight/cached data across the app.
       window.location.reload();
     },
-    [projects, activeProject]
+    [projects, activeProject],
   );
 
   const refreshProjects = useCallback(() => load(), [load]);
@@ -87,10 +94,12 @@ export function ProjectProvider({ children }) {
       switchProject,
       refreshProjects,
     }),
-    [projects, activeProject, loading, error, switchProject, refreshProjects]
+    [projects, activeProject, loading, error, switchProject, refreshProjects],
   );
 
-  return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>;
+  return (
+    <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>
+  );
 }
 
 export function useProjects() {

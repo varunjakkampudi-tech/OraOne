@@ -26,14 +26,37 @@ import { usePermissions } from "@/hooks/usePermissions";
 
 /* ── Role display config (keyed by backend role values) ── */
 const ROLE_META = {
-  owner: { label: "Owner", cls: "bg-amber-50 text-amber-700 border-amber-200", icon: Crown },
-  admin: { label: "Admin", cls: "bg-blue-50 text-blue-700 border-blue-200", icon: ShieldCheck },
-  member: { label: "Member", cls: "bg-purple-50 text-purple-700 border-purple-200", icon: UserCog },
-  viewer: { label: "Viewer", cls: "bg-slate-100 text-slate-700 border-slate-200", icon: Eye },
+  owner: {
+    label: "Owner",
+    cls: "bg-amber-50 text-amber-700 border-amber-200",
+    icon: Crown,
+  },
+  admin: {
+    label: "Admin",
+    cls: "bg-blue-50 text-blue-700 border-blue-200",
+    icon: ShieldCheck,
+  },
+  member: {
+    label: "Member",
+    cls: "bg-purple-50 text-purple-700 border-purple-200",
+    icon: UserCog,
+  },
+  viewer: {
+    label: "Viewer",
+    cls: "bg-slate-100 text-slate-700 border-slate-200",
+    icon: Eye,
+  },
 };
 const ASSIGNABLE = ["admin", "member", "viewer"];
 
-const AVATAR_COLORS = ["#2563EB", "#7C3AED", "#16A34A", "#DC2626", "#EA580C", "#0891B2"];
+const AVATAR_COLORS = [
+  "#2563EB",
+  "#7C3AED",
+  "#16A34A",
+  "#DC2626",
+  "#EA580C",
+  "#0891B2",
+];
 
 function initialsOf(name, email) {
   const base = (name || email || "?").trim();
@@ -97,16 +120,45 @@ export default function Team() {
     return members.filter(
       (m) =>
         (m.full_name || "").toLowerCase().includes(s) ||
-        (m.email || "").toLowerCase().includes(s)
+        (m.email || "").toLowerCase().includes(s),
     );
   }, [q, members]);
 
   const pendingInvites = invitations.filter((i) => i.status === "pending");
   const stats = [
-    { key: "total", label: "Total Members", value: members.length, icon: Users, tone: "#2563EB", bg: "#EFF6FF" },
-    { key: "active", label: "Active Members", value: members.filter((m) => m.status === "active").length, icon: Activity, tone: "#16A34A", bg: "#DCFCE7" },
-    { key: "pending", label: "Pending Invitations", value: pendingInvites.length, icon: Clock, tone: "#F59E0B", bg: "#FEF3C7" },
-    { key: "admins", label: "Owners & Admins", value: members.filter((m) => m.role === "owner" || m.role === "admin").length, icon: ShieldCheck, tone: "#7C3AED", bg: "#EDE9FE" },
+    {
+      key: "total",
+      label: "Total Members",
+      value: members.length,
+      icon: Users,
+      tone: "#2563EB",
+      bg: "#EFF6FF",
+    },
+    {
+      key: "active",
+      label: "Active Members",
+      value: members.filter((m) => m.status === "active").length,
+      icon: Activity,
+      tone: "#16A34A",
+      bg: "#DCFCE7",
+    },
+    {
+      key: "pending",
+      label: "Pending Invitations",
+      value: pendingInvites.length,
+      icon: Clock,
+      tone: "#F59E0B",
+      bg: "#FEF3C7",
+    },
+    {
+      key: "admins",
+      label: "Owners & Admins",
+      value: members.filter((m) => m.role === "owner" || m.role === "admin")
+        .length,
+      icon: ShieldCheck,
+      tone: "#7C3AED",
+      bg: "#EDE9FE",
+    },
   ];
 
   const sendInvite = async () => {
@@ -143,7 +195,9 @@ export default function Team() {
   const changeRole = async (member, role) => {
     try {
       await api.patch(`/team/members/${member.id}`, { role });
-      toast.success(`${member.full_name || member.email} is now ${ROLE_META[role]?.label || role}.`);
+      toast.success(
+        `${member.full_name || member.email} is now ${ROLE_META[role]?.label || role}.`,
+      );
       await load();
     } catch (e) {
       toast.error(formatApiError(e));
@@ -151,7 +205,12 @@ export default function Team() {
   };
 
   const removeMember = async (member) => {
-    if (!window.confirm(`Remove ${member.full_name || member.email} from the team?`)) return;
+    if (
+      !window.confirm(
+        `Remove ${member.full_name || member.email} from the team?`,
+      )
+    )
+      return;
     try {
       await api.delete(`/team/members/${member.id}`);
       toast.success("Member removed.");
@@ -208,7 +267,10 @@ export default function Team() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" data-testid="team-stats">
+      <div
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+        data-testid="team-stats"
+      >
         {stats.map((s, i) => (
           <motion.div
             key={s.key}
@@ -219,22 +281,36 @@ export default function Team() {
             data-testid={`team-stat-${s.key}`}
           >
             <div className="flex items-center justify-between">
-              <span className="size-10 rounded-xl grid place-items-center" style={{ background: s.bg }}>
+              <span
+                className="size-10 rounded-xl grid place-items-center"
+                style={{ background: s.bg }}
+              >
                 <s.icon size={17} style={{ color: s.tone }} />
               </span>
             </div>
-            <p className="mt-3 text-3xl font-black text-[#0F172A] tabular-nums">{s.value}</p>
-            <p className="text-[12.5px] text-[#0F172A] font-semibold mt-1">{s.label}</p>
+            <p className="mt-3 text-3xl font-black text-[#0F172A] tabular-nums">
+              {s.value}
+            </p>
+            <p className="text-[12.5px] text-[#0F172A] font-semibold mt-1">
+              {s.label}
+            </p>
           </motion.div>
         ))}
       </div>
 
       {/* Members table */}
-      <Section title="Team Members" subtitle="Everyone with access to your workspace" icon={Users}>
+      <Section
+        title="Team Members"
+        subtitle="Everyone with access to your workspace"
+        icon={Users}
+      >
         <div className="rounded-2xl border border-[#E2E8F0] bg-white overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3.5 border-b border-[#E2E8F0] bg-[#F8FAFC]">
             <div className="relative max-w-xs w-full">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+              <Search
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+              />
               <input
                 type="text"
                 value={q}
@@ -269,7 +345,10 @@ export default function Team() {
                 )}
                 {!loading && filtered.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-5 py-10 text-center text-[13px] text-[#64748B]">
+                    <td
+                      colSpan={5}
+                      className="px-5 py-10 text-center text-[13px] text-[#64748B]"
+                    >
                       No members match your search.
                     </td>
                   </tr>
@@ -278,9 +357,14 @@ export default function Team() {
                   filtered.map((m) => {
                     const meta = ROLE_META[m.role] || ROLE_META.viewer;
                     const RoleIcon = meta.icon;
-                    const editable = canManage && m.role !== "owner" && !m.is_you;
+                    const editable =
+                      canManage && m.role !== "owner" && !m.is_you;
                     return (
-                      <tr key={m.id} className="hover:bg-[#F8FAFC] transition-colors" data-testid={`member-${m.id}`}>
+                      <tr
+                        key={m.id}
+                        className="hover:bg-[#F8FAFC] transition-colors"
+                        data-testid={`member-${m.id}`}
+                      >
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
                             <span
@@ -298,7 +382,9 @@ export default function Team() {
                                   </span>
                                 )}
                               </p>
-                              <p className="text-[12px] text-[#64748B]">{m.email}</p>
+                              <p className="text-[12px] text-[#64748B]">
+                                {m.email}
+                              </p>
                             </div>
                           </div>
                         </td>
@@ -317,7 +403,9 @@ export default function Team() {
                               ))}
                             </select>
                           ) : (
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11.5px] font-semibold ${meta.cls}`}>
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11.5px] font-semibold ${meta.cls}`}
+                            >
                               <RoleIcon size={11} />
                               {meta.label}
                             </span>
@@ -325,11 +413,15 @@ export default function Team() {
                         </td>
                         <td className="px-5 py-4">
                           <span className="inline-flex items-center gap-1.5 text-[12.5px] capitalize">
-                            <span className={`size-1.5 rounded-full ${m.status === "active" ? "bg-[#16A34A]" : "bg-[#94A3B8]"}`} />
+                            <span
+                              className={`size-1.5 rounded-full ${m.status === "active" ? "bg-[#16A34A]" : "bg-[#94A3B8]"}`}
+                            />
                             {m.status}
                           </span>
                         </td>
-                        <td className="px-5 py-4 text-[12.5px] text-[#64748B]">{timeAgo(m.joined_at)}</td>
+                        <td className="px-5 py-4 text-[12.5px] text-[#64748B]">
+                          {timeAgo(m.joined_at)}
+                        </td>
                         <td className="px-5 py-4 text-right">
                           {editable && (
                             <button
@@ -351,8 +443,15 @@ export default function Team() {
       </Section>
 
       {/* Invitations */}
-      <Section title="Invitations" subtitle="Share invite links to add teammates" icon={Mail}>
-        <div className="rounded-2xl border border-[#E2E8F0] bg-white overflow-x-auto" data-testid="invitations">
+      <Section
+        title="Invitations"
+        subtitle="Share invite links to add teammates"
+        icon={Mail}
+      >
+        <div
+          className="rounded-2xl border border-[#E2E8F0] bg-white overflow-x-auto"
+          data-testid="invitations"
+        >
           <table className="w-full">
             <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
               <tr>
@@ -367,7 +466,10 @@ export default function Team() {
             <tbody className="divide-y divide-[#E2E8F0]">
               {invitations.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-[13px] text-[#64748B]">
+                  <td
+                    colSpan={6}
+                    className="px-5 py-8 text-center text-[13px] text-[#64748B]"
+                  >
                     No invitations yet.
                   </td>
                 </tr>
@@ -375,15 +477,27 @@ export default function Team() {
               {invitations.map((i) => {
                 const meta = ROLE_META[i.role] || ROLE_META.viewer;
                 return (
-                  <tr key={i.id} className="hover:bg-[#F8FAFC] transition-colors" data-testid={`invite-${i.id}`}>
-                    <td className="px-5 py-3.5 text-[13px] font-semibold text-[#0F172A]">{i.email}</td>
+                  <tr
+                    key={i.id}
+                    className="hover:bg-[#F8FAFC] transition-colors"
+                    data-testid={`invite-${i.id}`}
+                  >
+                    <td className="px-5 py-3.5 text-[13px] font-semibold text-[#0F172A]">
+                      {i.email}
+                    </td>
                     <td className="px-5 py-3.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11.5px] font-semibold ${meta.cls}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11.5px] font-semibold ${meta.cls}`}
+                      >
                         {meta.label}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-[12.5px] text-[#64748B]">{i.invited_by || "—"}</td>
-                    <td className="px-5 py-3.5 text-[12.5px] text-[#64748B]">{timeAgo(i.created_at)}</td>
+                    <td className="px-5 py-3.5 text-[12.5px] text-[#64748B]">
+                      {i.invited_by || "—"}
+                    </td>
+                    <td className="px-5 py-3.5 text-[12.5px] text-[#64748B]">
+                      {timeAgo(i.created_at)}
+                    </td>
                     <td className="px-5 py-3.5">
                       <StatusBadge status={i.status} />
                     </td>
@@ -420,8 +534,15 @@ export default function Team() {
       </Section>
 
       {/* Permission Matrix (live from RBAC) */}
-      <Section title="Permission Matrix" subtitle="What each role can do across OraOne" icon={Lock}>
-        <div className="rounded-2xl border border-[#E2E8F0] bg-white overflow-x-auto" data-testid="permission-matrix">
+      <Section
+        title="Permission Matrix"
+        subtitle="What each role can do across OraOne"
+        icon={Lock}
+      >
+        <div
+          className="rounded-2xl border border-[#E2E8F0] bg-white overflow-x-auto"
+          data-testid="permission-matrix"
+        >
           {matrix ? (
             <table className="w-full">
               <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
@@ -431,7 +552,10 @@ export default function Team() {
                     const meta = ROLE_META[r] || { label: r, icon: Eye };
                     const I = meta.icon;
                     return (
-                      <th key={r} className="px-5 py-3 text-center text-[11px] font-bold tracking-wider text-[#64748B] uppercase">
+                      <th
+                        key={r}
+                        className="px-5 py-3 text-center text-[11px] font-bold tracking-wider text-[#64748B] uppercase"
+                      >
                         <span className="inline-flex items-center gap-1.5 justify-center">
                           <I size={12} />
                           {meta.label}
@@ -444,7 +568,9 @@ export default function Team() {
               <tbody className="divide-y divide-[#E2E8F0]">
                 {matrix.permissions.map((perm) => (
                   <tr key={perm}>
-                    <td className="px-5 py-3 text-[13px] font-mono text-[#0F172A]">{perm}</td>
+                    <td className="px-5 py-3 text-[13px] font-mono text-[#0F172A]">
+                      {perm}
+                    </td>
                     {Object.keys(matrix.roles).map((r) => (
                       <td key={r} className="px-5 py-3 text-center">
                         <PermCell on={matrix.roles[r].includes(perm)} />
@@ -455,7 +581,9 @@ export default function Team() {
               </tbody>
             </table>
           ) : (
-            <div className="px-5 py-8 text-center text-[13px] text-[#64748B]">Loading permissions…</div>
+            <div className="px-5 py-8 text-center text-[13px] text-[#64748B]">
+              Loading permissions…
+            </div>
           )}
         </div>
       </Section>
@@ -479,14 +607,21 @@ export default function Team() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="px-6 py-5 border-b border-[#E2E8F0] flex items-center justify-between">
-                <h3 className="text-lg font-bold text-[#0F172A]">Invite a teammate</h3>
-                <button onClick={() => setShowInvite(false)} className="text-[#94A3B8] hover:text-[#0F172A]">
+                <h3 className="text-lg font-bold text-[#0F172A]">
+                  Invite a teammate
+                </h3>
+                <button
+                  onClick={() => setShowInvite(false)}
+                  className="text-[#94A3B8] hover:text-[#0F172A]"
+                >
                   <X size={18} />
                 </button>
               </div>
               <div className="px-6 py-5 space-y-4">
                 <div>
-                  <label className="text-[12px] font-semibold text-[#0F172A]">Email</label>
+                  <label className="text-[12px] font-semibold text-[#0F172A]">
+                    Email
+                  </label>
                   <input
                     type="email"
                     value={inviteEmail}
@@ -497,7 +632,9 @@ export default function Team() {
                   />
                 </div>
                 <div>
-                  <label className="text-[12px] font-semibold text-[#0F172A]">Role</label>
+                  <label className="text-[12px] font-semibold text-[#0F172A]">
+                    Role
+                  </label>
                   <div className="mt-2 grid grid-cols-3 gap-2">
                     {ASSIGNABLE.map((r) => {
                       const meta = ROLE_META[r];
@@ -522,7 +659,8 @@ export default function Team() {
                 </div>
                 <p className="text-[12px] text-[#64748B] flex items-start gap-1.5">
                   <Mail size={13} className="mt-0.5 flex-shrink-0" />
-                  We'll generate a secure invite link — copy and share it with your teammate to let them join.
+                  We'll generate a secure invite link — copy and share it with
+                  your teammate to let them join.
                 </p>
               </div>
               <div className="px-6 py-4 bg-[#F8FAFC] border-t border-[#E2E8F0] flex justify-end gap-2">
@@ -538,7 +676,11 @@ export default function Team() {
                   data-testid="invite-submit"
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-60 text-white text-sm font-semibold"
                 >
-                  {sending ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+                  {sending ? (
+                    <Loader2 size={13} className="animate-spin" />
+                  ) : (
+                    <Send size={13} />
+                  )}
                   Create Invite
                 </button>
               </div>
@@ -553,15 +695,29 @@ export default function Team() {
 /* ── Helpers ── */
 function StatusBadge({ status }) {
   const map = {
-    pending: { cls: "text-[#92400E] bg-[#FEF3C7]", icon: Clock, label: "Pending" },
-    accepted: { cls: "text-[#15803D] bg-[#DCFCE7]", icon: CheckCircle2, label: "Accepted" },
+    pending: {
+      cls: "text-[#92400E] bg-[#FEF3C7]",
+      icon: Clock,
+      label: "Pending",
+    },
+    accepted: {
+      cls: "text-[#15803D] bg-[#DCFCE7]",
+      icon: CheckCircle2,
+      label: "Accepted",
+    },
     revoked: { cls: "text-[#94A3B8] bg-[#F1F5F9]", icon: X, label: "Revoked" },
-    expired: { cls: "text-[#94A3B8] bg-[#F1F5F9]", icon: Clock, label: "Expired" },
+    expired: {
+      cls: "text-[#94A3B8] bg-[#F1F5F9]",
+      icon: Clock,
+      label: "Expired",
+    },
   };
   const m = map[status] || map.pending;
   const I = m.icon;
   return (
-    <span className={`inline-flex items-center gap-1 text-[12px] font-semibold px-2 py-0.5 rounded-full ${m.cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 text-[12px] font-semibold px-2 py-0.5 rounded-full ${m.cls}`}
+    >
       <I size={11} /> {m.label}
     </span>
   );
@@ -591,7 +747,9 @@ function Section({ title, subtitle, icon: Icon, children }) {
         </span>
         <div>
           <h2 className="text-[15px] font-bold text-[#0F172A]">{title}</h2>
-          {subtitle && <p className="text-[11.5px] text-[#64748B]">{subtitle}</p>}
+          {subtitle && (
+            <p className="text-[11.5px] text-[#64748B]">{subtitle}</p>
+          )}
         </div>
       </div>
       {children}

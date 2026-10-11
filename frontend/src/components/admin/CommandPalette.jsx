@@ -23,7 +23,9 @@ export default function CommandPalette({ open, onClose }) {
     const term = q.trim().toLowerCase();
     if (!term) return ADMIN_NAV_FLAT;
     return ADMIN_NAV_FLAT.filter(
-      (it) => it.label.toLowerCase().includes(term) || it.group.toLowerCase().includes(term)
+      (it) =>
+        it.label.toLowerCase().includes(term) ||
+        it.group.toLowerCase().includes(term),
     );
   }, [q]);
 
@@ -40,21 +42,39 @@ export default function CommandPalette({ open, onClose }) {
   };
 
   const onKey = (e) => {
-    if (e.key === "ArrowDown") { e.preventDefault(); setActive((a) => Math.min(a + 1, results.length - 1)); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); setActive((a) => Math.max(a - 1, 0)); }
-    else if (e.key === "Enter") { e.preventDefault(); go(results[active]); }
-    else if (e.key === "Escape") { onClose(); }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActive((a) => Math.min(a + 1, results.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive((a) => Math.max(a - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      go(results[active]);
+    } else if (e.key === "Escape") {
+      onClose();
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center p-4 pt-[12vh]" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[60] flex items-start justify-center p-4 pt-[12vh]"
+      onClick={onClose}
+    >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div
         className="relative w-full max-w-xl overflow-hidden rounded-2xl"
         onClick={(e) => e.stopPropagation()}
-        style={{ background: t.glassSolid, border: `1px solid ${t.line}`, boxShadow: t.shadow }}
+        style={{
+          background: t.glassSolid,
+          border: `1px solid ${t.line}`,
+          boxShadow: t.shadow,
+        }}
       >
-        <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: `1px solid ${t.line}` }}>
+        <div
+          className="flex items-center gap-2 px-4 py-3"
+          style={{ borderBottom: `1px solid ${t.line}` }}
+        >
           <Search className="h-4 w-4" style={{ color: t.sub }} />
           <input
             ref={inputRef}
@@ -65,11 +85,21 @@ export default function CommandPalette({ open, onClose }) {
             className="w-full bg-transparent text-sm outline-none"
             style={{ color: t.ink }}
           />
-          <kbd className="rounded px-1.5 py-0.5 text-[10px]" style={{ background: t.hover, color: t.muted }}>ESC</kbd>
+          <kbd
+            className="rounded px-1.5 py-0.5 text-[10px]"
+            style={{ background: t.hover, color: t.muted }}
+          >
+            ESC
+          </kbd>
         </div>
         <div className="max-h-80 overflow-y-auto p-2 scrollbar-thin">
           {results.length === 0 ? (
-            <div className="px-3 py-6 text-center text-sm" style={{ color: t.sub }}>No matches</div>
+            <div
+              className="px-3 py-6 text-center text-sm"
+              style={{ color: t.sub }}
+            >
+              No matches
+            </div>
           ) : (
             results.map((it, i) => (
               <button
@@ -77,14 +107,24 @@ export default function CommandPalette({ open, onClose }) {
                 onMouseEnter={() => setActive(i)}
                 onClick={() => go(it)}
                 className="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition"
-                style={{ background: i === active ? t.hover : "transparent", color: t.ink }}
+                style={{
+                  background: i === active ? t.hover : "transparent",
+                  color: t.ink,
+                }}
               >
                 <span className="flex items-center gap-2.5">
                   <it.icon className="h-4 w-4" style={{ color: t.brand }} />
                   {it.label}
-                  <span className="text-[11px]" style={{ color: t.muted }}>· {it.group}</span>
+                  <span className="text-[11px]" style={{ color: t.muted }}>
+                    · {it.group}
+                  </span>
                 </span>
-                {i === active ? <CornerDownLeft className="h-3.5 w-3.5" style={{ color: t.muted }} /> : null}
+                {i === active ? (
+                  <CornerDownLeft
+                    className="h-3.5 w-3.5"
+                    style={{ color: t.muted }}
+                  />
+                ) : null}
               </button>
             ))
           )}

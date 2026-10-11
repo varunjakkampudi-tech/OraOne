@@ -28,7 +28,12 @@ const inputWithIconCls =
 export function IconInput({ icon: Icon, ...props }) {
   return (
     <div className="relative">
-      {Icon && <Icon size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" />}
+      {Icon && (
+        <Icon
+          size={17}
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+        />
+      )}
       <input {...props} className={Icon ? inputWithIconCls : inputCls} />
     </div>
   );
@@ -41,7 +46,12 @@ export function PasswordInput({ icon: Icon, "data-testid": testId, ...props }) {
   const [show, setShow] = React.useState(false);
   return (
     <div className="relative">
-      {Icon && <Icon size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" />}
+      {Icon && (
+        <Icon
+          size={17}
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+        />
+      )}
       <input
         {...props}
         type={show ? "text" : "password"}
@@ -67,7 +77,11 @@ export const PASSWORD_RULES = [
   { id: "len", label: "8+ characters", test: (v) => v.length >= 8 },
   { id: "upper", label: "1 uppercase", test: (v) => /[A-Z]/.test(v) },
   { id: "num", label: "1 number", test: (v) => /\d/.test(v) },
-  { id: "special", label: "1 special character", test: (v) => /[^A-Za-z0-9]/.test(v) },
+  {
+    id: "special",
+    label: "1 special character",
+    test: (v) => /[^A-Za-z0-9]/.test(v),
+  },
 ];
 
 export function passwordValid(value) {
@@ -81,7 +95,10 @@ export function PasswordRulesInline({ value = "" }) {
       {PASSWORD_RULES.map((rule) => {
         const ok = rule.test(value);
         return (
-          <span key={rule.id} className="inline-flex items-center gap-1.5 text-xs">
+          <span
+            key={rule.id}
+            className="inline-flex items-center gap-1.5 text-xs"
+          >
             <span
               className={`grid size-4 place-items-center rounded-full transition-colors ${
                 ok ? "bg-[#16A34A] text-white" : "bg-[#E2E8F0] text-transparent"
@@ -89,7 +106,9 @@ export function PasswordRulesInline({ value = "" }) {
             >
               <Check size={11} strokeWidth={3} />
             </span>
-            <span className={ok ? "text-[#16A34A]" : "text-[#64748B]"}>{rule.label}</span>
+            <span className={ok ? "text-[#16A34A]" : "text-[#64748B]"}>
+              {rule.label}
+            </span>
           </span>
         );
       })}
@@ -111,7 +130,9 @@ export function PasswordChecklist({ value = "" }) {
             >
               <Check size={11} strokeWidth={3} />
             </span>
-            <span className={ok ? "text-[#16A34A]" : "text-[#64748B]"}>{rule.label}</span>
+            <span className={ok ? "text-[#16A34A]" : "text-[#64748B]"}>
+              {rule.label}
+            </span>
           </li>
         );
       })}
@@ -122,12 +143,22 @@ export function PasswordChecklist({ value = "" }) {
 /* ─────────────────────────────────────────────────────────── */
 /* Checkbox — custom styled, used for remember-me / terms       */
 /* ─────────────────────────────────────────────────────────── */
-export function Checkbox({ checked, onChange, children, id, accentClass, "data-testid": testId }) {
+export function Checkbox({
+  checked,
+  onChange,
+  children,
+  id,
+  accentClass,
+  "data-testid": testId,
+}) {
   const accent =
     accentClass ||
     "peer-checked:border-[#2563EB] peer-checked:bg-[#2563EB] peer-focus-visible:ring-[#2563EB]/15";
   return (
-    <label htmlFor={id} className="flex cursor-pointer select-none items-start gap-2.5 text-sm text-[#64748B]">
+    <label
+      htmlFor={id}
+      className="flex cursor-pointer select-none items-start gap-2.5 text-sm text-[#64748B]"
+    >
       <span className="relative mt-0.5 inline-flex">
         <input
           id={id}
@@ -137,8 +168,12 @@ export function Checkbox({ checked, onChange, children, id, accentClass, "data-t
           data-testid={testId}
           className="peer sr-only"
         />
-        <span className={`grid size-[18px] place-items-center rounded-md border border-[#CBD5E1] bg-white transition-all peer-focus-visible:ring-4 ${accent}`}>
-          {checked && <Check size={12} strokeWidth={3} className="text-white" />}
+        <span
+          className={`grid size-[18px] place-items-center rounded-md border border-[#CBD5E1] bg-white transition-all peer-focus-visible:ring-4 ${accent}`}
+        >
+          {checked && (
+            <Check size={12} strokeWidth={3} className="text-white" />
+          )}
         </span>
       </span>
       <span className="leading-snug">{children}</span>
@@ -149,7 +184,12 @@ export function Checkbox({ checked, onChange, children, id, accentClass, "data-t
 /* ─────────────────────────────────────────────────────────── */
 /* OtpInput — 6 single-digit boxes with auto-advance + paste     */
 /* ─────────────────────────────────────────────────────────── */
-export function OtpInput({ value = "", onChange, length = 6, "data-testid": testId }) {
+export function OtpInput({
+  value = "",
+  onChange,
+  length = 6,
+  "data-testid": testId,
+}) {
   const refs = useRef([]);
   const digits = Array.from({ length }, (_, i) => value[i] || "");
 
@@ -182,7 +222,9 @@ export function OtpInput({ value = "", onChange, length = 6, "data-testid": test
 
   const handlePaste = (e) => {
     e.preventDefault();
-    const pasted = (e.clipboardData.getData("text") || "").replace(/\D/g, "").slice(0, length);
+    const pasted = (e.clipboardData.getData("text") || "")
+      .replace(/\D/g, "")
+      .slice(0, length);
     if (pasted) {
       onChange(pasted);
       refs.current[Math.min(pasted.length, length - 1)]?.focus();
@@ -190,7 +232,10 @@ export function OtpInput({ value = "", onChange, length = 6, "data-testid": test
   };
 
   return (
-    <div className="flex items-center justify-center gap-2 sm:gap-3" data-testid={testId}>
+    <div
+      className="flex items-center justify-center gap-2 sm:gap-3"
+      data-testid={testId}
+    >
       {digits.map((d, i) => (
         <input
           key={i}

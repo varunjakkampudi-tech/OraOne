@@ -52,17 +52,40 @@ function fmtLatency(ms) {
 }
 
 const STRATEGIES = [
-  { key: "balanced", label: "Balanced", icon: Scale, hint: "Curated default order" },
-  { key: "cheapest", label: "Cheapest", icon: TrendingDown, hint: "Lowest cost first" },
+  {
+    key: "balanced",
+    label: "Balanced",
+    icon: Scale,
+    hint: "Curated default order",
+  },
+  {
+    key: "cheapest",
+    label: "Cheapest",
+    icon: TrendingDown,
+    hint: "Lowest cost first",
+  },
   { key: "fastest", label: "Fastest", icon: Zap, hint: "Lowest latency first" },
-  { key: "quality", label: "Highest quality", icon: Trophy, hint: "Most capable first" },
+  {
+    key: "quality",
+    label: "Highest quality",
+    icon: Trophy,
+    hint: "Most capable first",
+  },
 ];
 
 const RERANKERS = [
-  { key: "heuristic", label: "Built-in", hint: "BM25 + lexical cross-scoring (no setup)" },
+  {
+    key: "heuristic",
+    label: "Built-in",
+    hint: "BM25 + lexical cross-scoring (no setup)",
+  },
   { key: "cohere", label: "Cohere", hint: "Rerank API · needs COHERE_API_KEY" },
   { key: "jina", label: "Jina", hint: "Reranker API · needs JINA_API_KEY" },
-  { key: "local", label: "Local BGE", hint: "bge-reranker · needs sentence-transformers" },
+  {
+    key: "local",
+    label: "Local BGE",
+    hint: "bge-reranker · needs sentence-transformers",
+  },
   { key: "none", label: "Off", hint: "Keep fused vector + BM25 order" },
 ];
 
@@ -107,8 +130,12 @@ export default function AIModels() {
       setFallbacks(data.fallback_models || []);
       setDisabled(data.disabled_models || []);
       setStrategy(data.routing_strategy || "balanced");
-      setBudget(data.monthly_budget_usd != null ? String(data.monthly_budget_usd) : "");
-      setMaxLatency(data.max_latency_ms != null ? String(data.max_latency_ms) : "");
+      setBudget(
+        data.monthly_budget_usd != null ? String(data.monthly_budget_usd) : "",
+      );
+      setMaxLatency(
+        data.max_latency_ms != null ? String(data.max_latency_ms) : "",
+      );
       setHybridEnabled(data.retrieval?.hybrid_enabled !== false);
       setReranker(data.retrieval?.reranker || "heuristic");
     } catch (e) {
@@ -147,7 +174,17 @@ export default function AIModels() {
       r: view.retrieval?.reranker || "heuristic",
     });
     return a !== b;
-  }, [view, defaultModel, fallbacks, disabled, strategy, budget, maxLatency, hybridEnabled, reranker]);
+  }, [
+    view,
+    defaultModel,
+    fallbacks,
+    disabled,
+    strategy,
+    budget,
+    maxLatency,
+    hybridEnabled,
+    reranker,
+  ]);
 
   const setAsDefault = (id) => {
     setDefaultModel(id);
@@ -158,7 +195,7 @@ export default function AIModels() {
   const toggleFallback = (id) => {
     if (id === defaultModel) return;
     setFallbacks((prev) =>
-      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id],
     );
     setDisabled((prev) => prev.filter((d) => d !== id));
   };
@@ -166,7 +203,7 @@ export default function AIModels() {
   const toggleDisabled = (id) => {
     if (id === defaultModel) return;
     setDisabled((prev) =>
-      prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id],
     );
     setFallbacks((prev) => prev.filter((f) => f !== id));
   };
@@ -189,8 +226,12 @@ export default function AIModels() {
       setFallbacks(data.fallback_models || []);
       setDisabled(data.disabled_models || []);
       setStrategy(data.routing_strategy || "balanced");
-      setBudget(data.monthly_budget_usd != null ? String(data.monthly_budget_usd) : "");
-      setMaxLatency(data.max_latency_ms != null ? String(data.max_latency_ms) : "");
+      setBudget(
+        data.monthly_budget_usd != null ? String(data.monthly_budget_usd) : "",
+      );
+      setMaxLatency(
+        data.max_latency_ms != null ? String(data.max_latency_ms) : "",
+      );
       setHybridEnabled(data.retrieval?.hybrid_enabled !== false);
       setReranker(data.retrieval?.reranker || "heuristic");
       toast.success("Model routing policy saved");
@@ -221,10 +262,12 @@ export default function AIModels() {
             <Cpu className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-[#0F172A]">AI Model Router</h1>
+            <h1 className="text-xl font-bold text-[#0F172A]">
+              AI Model Router
+            </h1>
             <p className="text-sm text-[#64748B]">
-              Choose the default model, set fallbacks, and control which
-              models your agents may use.
+              Choose the default model, set fallbacks, and control which models
+              your agents may use.
             </p>
           </div>
         </div>
@@ -278,9 +321,7 @@ export default function AIModels() {
           <p className="mt-2 text-sm font-medium text-[#0F172A]">
             {fallbacks.length
               ? fallbacks
-                  .map(
-                    (f) => view?.models.find((m) => m.id === f)?.label || f
-                  )
+                  .map((f) => view?.models.find((m) => m.id === f)?.label || f)
                   .join(" → ")
               : "None configured"}
           </p>
@@ -423,7 +464,7 @@ export default function AIModels() {
                       100,
                       ((view.current_month_spend_usd ?? 0) /
                         (view.monthly_budget_usd || 1)) *
-                        100
+                        100,
                     )}%`,
                   }}
                 />
@@ -439,20 +480,25 @@ export default function AIModels() {
       </div>
 
       {/* Retrieval & reranking */}
-      <div className="rounded-2xl border border-[#E2E8F0] bg-white p-5" data-testid="retrieval-panel">
+      <div
+        className="rounded-2xl border border-[#E2E8F0] bg-white p-5"
+        data-testid="retrieval-panel"
+      >
         <div className="flex items-center gap-2 text-[#0F172A]">
           <Layers className="h-4 w-4 text-[#4F46E5]" />
           <h2 className="text-sm font-bold">Knowledge retrieval</h2>
         </div>
         <p className="mt-1 text-xs text-[#64748B]">
           Answers use hybrid search — dense vectors fused with BM25 keyword
-          ranking — then a cross-encoder reranker re-scores the top passages
-          for sharper grounding.
+          ranking — then a cross-encoder reranker re-scores the top passages for
+          sharper grounding.
         </p>
 
         <label
           className={`mt-4 flex items-center justify-between gap-3 rounded-xl border p-3 ${
-            hybridEnabled ? "border-[#4F46E5] bg-[#EEF2FF]" : "border-[#E2E8F0] bg-white"
+            hybridEnabled
+              ? "border-[#4F46E5] bg-[#EEF2FF]"
+              : "border-[#E2E8F0] bg-white"
           } ${!canManage ? "opacity-60" : "cursor-pointer"}`}
         >
           <span>
@@ -530,7 +576,9 @@ export default function AIModels() {
               <th className="px-5 py-3 font-semibold">Cost / 1K (in / out)</th>
               <th className="px-5 py-3 font-semibold">Latency</th>
               <th className="px-5 py-3 font-semibold">Status</th>
-              {canManage && <th className="px-5 py-3 text-right font-semibold">Routing</th>}
+              {canManage && (
+                <th className="px-5 py-3 text-right font-semibold">Routing</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -664,9 +712,9 @@ export default function AIModels() {
       </div>
 
       <p className="text-xs text-[#94A3B8]">
-        The router picks an agent's model in this order: the agent's
-        requested model (if allowed) → your default → fallbacks → first
-        available model. Disabled models are never used.
+        The router picks an agent's model in this order: the agent's requested
+        model (if allowed) → your default → fallbacks → first available model.
+        Disabled models are never used.
       </p>
     </motion.div>
   );

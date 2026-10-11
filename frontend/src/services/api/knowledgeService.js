@@ -24,17 +24,25 @@ export const knowledgeService = {
   },
 
   listDocuments: async (baseId, params = {}) => {
-    const { data } = await api.get(`/knowledge-bases/${baseId}/documents`, { params });
+    const { data } = await api.get(`/knowledge-bases/${baseId}/documents`, {
+      params,
+    });
     return Array.isArray(data) ? data : data?.items || [];
   },
 
   uploadDocument: async (baseId, file, extra = {}) => {
     const form = new FormData();
     form.append("file", file);
-    Object.entries(extra).forEach(([k, v]) => v !== undefined && form.append(k, v));
-    const { data } = await api.post(`/knowledge-bases/${baseId}/documents`, form, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    Object.entries(extra).forEach(
+      ([k, v]) => v !== undefined && form.append(k, v),
+    );
+    const { data } = await api.post(
+      `/knowledge-bases/${baseId}/documents`,
+      form,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      },
+    );
     return data;
   },
 

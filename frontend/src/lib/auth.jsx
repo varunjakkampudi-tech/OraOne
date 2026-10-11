@@ -1,5 +1,19 @@
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
-import { api, formatApiError, setTokens, clearTokens, getToken, getRefreshToken } from "./api";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
+import {
+  api,
+  formatApiError,
+  setTokens,
+  clearTokens,
+  getToken,
+  getRefreshToken,
+} from "./api";
 import { cognitoEnabled, completeCognitoLogin } from "./cognito";
 
 const AuthContext = createContext(null);
@@ -152,7 +166,9 @@ export function AuthProvider({ children }) {
   }, [fetchMe, clearIdentity]);
 
   const _err = (e) =>
-    formatApiError(e?.response?.data?.detail) || e?.message || "Something went wrong.";
+    formatApiError(e?.response?.data?.detail) ||
+    e?.message ||
+    "Something went wrong.";
 
   const clearEstablishedSession = useCallback(async () => {
     // Cognito session establishment sets an httpOnly cookie that JavaScript
@@ -169,80 +185,110 @@ export function AuthProvider({ children }) {
     setUser(false);
   }, [clearIdentity]);
 
-  const login = useCallback(async ({ email, password } = {}) => {
-    const normalizedEmail = String(email || "").trim().toLowerCase();
-    const normalizedPassword = String(password || "");
+  const login = useCallback(
+    async ({ email, password } = {}) => {
+      const normalizedEmail = String(email || "")
+        .trim()
+        .toLowerCase();
+      const normalizedPassword = String(password || "");
 
-    if (!normalizedEmail || !normalizedPassword) {
-      return { ok: false, error: "Please enter both email and password." };
-    }
-
-    try {
-      const { data } = await api.post("/auth/login", {
-        email: normalizedEmail,
-        password: normalizedPassword,
-      });
-
-      // Password verified — a one-time code was emailed. Sign-in completes
-      // in verifyLoginOtp() once the caller submits that code.
-      if (data?.otp_required) {
-        setPendingEmail(normalizedEmail);
-        return { ok: true, otpRequired: true, email: normalizedEmail };
+      if (!normalizedEmail || !normalizedPassword) {
+        return { ok: false, error: "Please enter both email and password." };
       }
 
-      setTokens(data.access_token, data.refresh_token ?? null, { persistent: true });
-      await fetchMe();
-      const identityResult = await fetchIdentity();
-      if (!identityResult.ok) {
-        await clearEstablishedSession();
-        return { ok: false, error: identityResult.error || "Could not load account identity." };
-      }
-      return { ok: true, identity: identityResult.identity };
-    } catch (e) {
-      return { ok: false, error: _err(e) };
-    }
-  }, [fetchMe, fetchIdentity, clearEstablishedSession]);
+      try {
+        const { data } = await api.post("/auth/login", {
+          email: normalizedEmail,
+          password: normalizedPassword,
+        });
 
-  const completeCognitoSession = useCallback(async (code, state) => {
-    if (!cognitoEnabled) return { ok: false, error: "Cognito authentication is not enabled." };
-    try {
-      const tokens = await completeCognitoLogin(code, state);
-      await api.post("/auth/cognito/session", {
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-      });
-      await fetchMe();
-      const identityResult = await fetchIdentity();
-      if (!identityResult.ok) {
-        await clearEstablishedSession();
-        return { ok: false, error: identityResult.error || "Could not load account identity." };
-      }
-      return { ok: true, identity: identityResult.identity };
-    } catch (e) {
-      return { ok: false, error: _err(e) };
-    }
-  }, [fetchMe, fetchIdentity, clearEstablishedSession]);
+        // Password verified — a one-time code was emailed. Sign-in completes
+        // in verifyLoginOtp() once the caller submits that code.
+        if (data?.otp_required) {
+          setPendingEmail(normalizedEmail);
+          return { ok: true, otpRequired: true, email: normalizedEmail };
+        }
 
-  const verifyLoginOtp = useCallback(async ({ email, code } = {}) => {
-    try {
-      const { data } = await api.post("/auth/login/verify-otp", { email, code });
-      setTokens(data.access_token, data.refresh_token ?? null, { persistent: true });
-      await fetchMe();
-      // Block resolution on identity so the caller can redirect *only after*
-      // user + organization context are ready (Phase 4 requirement #6).
-      const identityResult = await fetchIdentity();
-      if (!identityResult.ok) {
-        await clearEstablishedSession();
-        return { ok: false, error: identityResult.error || "Could not load account identity." };
+        setTokens(data.access_token, data.refresh_token ?? null, {
+          persistent: true,
+        });
+        await fetchMe();
+        const identityResult = await fetchIdentity();
+        if (!identityResult.ok) {
+          await clearEstablishedSession();
+          return {
+            ok: false,
+            error: identityResult.error || "Could not load account identity.",
+          };
+        }
+        return { ok: true, identity: identityResult.identity };
+      } catch (e) {
+        return { ok: false, error: _err(e) };
       }
-      return { ok: true, identity: identityResult.identity };
-    } catch (e) {
-      return { ok: false, error: _err(e) };
-    }
-  }, [fetchMe, fetchIdentity, clearEstablishedSession]);
+    },
+    [fetchMe, fetchIdentity, clearEstablishedSession],
+  );
+
+  const completeCognitoSession = useCallback(
+    async (code, state) => {
+      if (!cognitoEnabled)
+        return { ok: false, error: "Cognito authentication is not enabled." };
+      try {
+        const tokens = await completeCognitoLogin(code, state);
+        await api.post("/auth/cognito/session", {
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+        });
+        await fetchMe();
+        const identityResult = await fetchIdentity();
+        if (!identityResult.ok) {
+          await clearEstablishedSession();
+          return {
+            ok: false,
+            error: identityResult.error || "Could not load account identity.",
+          };
+        }
+        return { ok: true, identity: identityResult.identity };
+      } catch (e) {
+        return { ok: false, error: _err(e) };
+      }
+    },
+    [fetchMe, fetchIdentity, clearEstablishedSession],
+  );
+
+  const verifyLoginOtp = useCallback(
+    async ({ email, code } = {}) => {
+      try {
+        const { data } = await api.post("/auth/login/verify-otp", {
+          email,
+          code,
+        });
+        setTokens(data.access_token, data.refresh_token ?? null, {
+          persistent: true,
+        });
+        await fetchMe();
+        // Block resolution on identity so the caller can redirect *only after*
+        // user + organization context are ready (Phase 4 requirement #6).
+        const identityResult = await fetchIdentity();
+        if (!identityResult.ok) {
+          await clearEstablishedSession();
+          return {
+            ok: false,
+            error: identityResult.error || "Could not load account identity.",
+          };
+        }
+        return { ok: true, identity: identityResult.identity };
+      } catch (e) {
+        return { ok: false, error: _err(e) };
+      }
+    },
+    [fetchMe, fetchIdentity, clearEstablishedSession],
+  );
 
   const signup = useCallback(async ({ email, password, name } = {}) => {
-    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const normalizedEmail = String(email || "")
+      .trim()
+      .toLowerCase();
     const normalizedPassword = String(password || "");
     const normalizedName = String(name || "").trim();
 
@@ -262,7 +308,9 @@ export function AuthProvider({ children }) {
       setPendingEmail(normalizedEmail);
       return {
         ok: true,
-        message: data?.message || "Signup successful. Please verify your email if prompted, then log in.",
+        message:
+          data?.message ||
+          "Signup successful. Please verify your email if prompted, then log in.",
       };
     } catch (e) {
       return { ok: false, error: _err(e) };
@@ -323,13 +371,16 @@ export function AuthProvider({ children }) {
       if (shouldRevoke) {
         await api.post(
           cognitoEnabled ? "/auth/cognito/logout" : "/auth/logout",
-          cognitoEnabled ? {} : (refreshToken ? { refresh_token: refreshToken } : {})
+          cognitoEnabled
+            ? {}
+            : refreshToken
+              ? { refresh_token: refreshToken }
+              : {},
         );
       }
     } catch {
       // Best-effort logout; always clear local session.
     }
-
   }, [clearIdentity]);
 
   const logoutAll = useCallback(async () => {
@@ -357,14 +408,20 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const changePassword = useCallback(async ({ current_password, new_password }) => {
-    try {
-      await api.post("/auth/change-password", { current_password, new_password });
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: _err(e) };
-    }
-  }, []);
+  const changePassword = useCallback(
+    async ({ current_password, new_password }) => {
+      try {
+        await api.post("/auth/change-password", {
+          current_password,
+          new_password,
+        });
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: _err(e) };
+      }
+    },
+    [],
+  );
 
   const refresh = fetchMe;
   const refreshSession = fetchMe;

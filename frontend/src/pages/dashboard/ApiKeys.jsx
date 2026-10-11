@@ -58,7 +58,7 @@ function CreateKeyModal({ scopes, onClose, onCreated }) {
 
   const toggle = (scope) =>
     setSelected((prev) =>
-      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope]
+      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope],
     );
 
   const submit = async () => {
@@ -233,7 +233,7 @@ function RevealKeyModal({ payload, onClose }) {
               <Terminal className="h-3.5 w-3.5" /> Example request
             </div>
             <pre className="overflow-x-auto whitespace-pre-wrap font-mono">
-{`curl https://api.oraone.app/api/v1/ping \\
+              {`curl https://api.oraone.app/api/v1/ping \\
   -H "Authorization: Bearer ${fullKey}"`}
             </pre>
           </div>
@@ -322,7 +322,8 @@ export default function ApiKeys() {
             <h1 className="text-xl font-bold text-[#0F172A]">API Keys</h1>
             <p className="text-sm text-[#64748B]">
               Programmatic access to your organization via the{" "}
-              <span className="font-mono text-[#4F46E5]">/api/v1</span> REST API.
+              <span className="font-mono text-[#4F46E5]">/api/v1</span> REST
+              API.
             </p>
           </div>
         </div>
@@ -349,10 +350,12 @@ export default function ApiKeys() {
       {!hasKeys ? (
         <div className="grid place-items-center rounded-2xl border border-dashed border-[#CBD5E1] bg-white py-16 text-center">
           <KeyRound className="mb-3 h-10 w-10 text-[#CBD5E1]" />
-          <p className="text-sm font-semibold text-[#0F172A]">No API keys yet</p>
+          <p className="text-sm font-semibold text-[#0F172A]">
+            No API keys yet
+          </p>
           <p className="mt-1 max-w-sm text-sm text-[#64748B]">
-            Create a key to call the OraOne API from your own servers,
-            scripts, or integrations.
+            Create a key to call the OraOne API from your own servers, scripts,
+            or integrations.
           </p>
           {canManage && (
             <button
@@ -433,7 +436,7 @@ export default function ApiKeys() {
           .
         </p>
         <pre className="mt-3 overflow-x-auto rounded-xl bg-[#0F172A] p-4 font-mono text-xs text-[#CBD5E1]">
-{`# List your agents
+          {`# List your agents
 curl https://api.oraone.app/api/v1/agents \\
   -H "Authorization: Bearer sk_ora_xxx"`}
         </pre>
@@ -447,10 +450,7 @@ curl https://api.oraone.app/api/v1/agents \\
         />
       )}
       {revealed && (
-        <RevealKeyModal
-          payload={revealed}
-          onClose={() => setRevealed(null)}
-        />
+        <RevealKeyModal payload={revealed} onClose={() => setRevealed(null)} />
       )}
     </motion.div>
   );

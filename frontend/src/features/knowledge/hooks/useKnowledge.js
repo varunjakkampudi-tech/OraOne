@@ -39,7 +39,8 @@ export function useCreateKnowledgeBase() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload) => knowledgeService.createBase(payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: knowledgeKeys.lists() }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: knowledgeKeys.lists() }),
   });
 }
 
@@ -47,16 +48,20 @@ export function useDeleteKnowledgeBase() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id) => knowledgeService.removeBase(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: knowledgeKeys.lists() }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: knowledgeKeys.lists() }),
   });
 }
 
 export function useUploadDocument() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ baseId, file, extra }) => knowledgeService.uploadDocument(baseId, file, extra),
+    mutationFn: ({ baseId, file, extra }) =>
+      knowledgeService.uploadDocument(baseId, file, extra),
     onSuccess: (_data, { baseId }) => {
-      queryClient.invalidateQueries({ queryKey: knowledgeKeys.documents(baseId) });
+      queryClient.invalidateQueries({
+        queryKey: knowledgeKeys.documents(baseId),
+      });
       queryClient.invalidateQueries({ queryKey: knowledgeKeys.detail(baseId) });
     },
   });
@@ -65,9 +70,12 @@ export function useUploadDocument() {
 export function useDeleteDocument() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ baseId, docId }) => knowledgeService.removeDocument(baseId, docId),
+    mutationFn: ({ baseId, docId }) =>
+      knowledgeService.removeDocument(baseId, docId),
     onSuccess: (_data, { baseId }) => {
-      queryClient.invalidateQueries({ queryKey: knowledgeKeys.documents(baseId) });
+      queryClient.invalidateQueries({
+        queryKey: knowledgeKeys.documents(baseId),
+      });
     },
   });
 }

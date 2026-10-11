@@ -32,7 +32,9 @@ export default function SimpleIcon({
 
   if (!src) {
     if (process.env.NODE_ENV !== "production") {
-      console.warn(`[SimpleIcon] No icon URL could be generated for slug "${slug}".`);
+      console.warn(
+        `[SimpleIcon] No icon URL could be generated for slug "${slug}".`,
+      );
     }
     return null;
   }

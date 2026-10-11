@@ -116,14 +116,23 @@ function SubmitDialog({ open, onClose, onCreated, authorName }) {
             className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl"
           >
             <div className="flex items-center justify-between border-b border-[#F1F5F9] px-5 py-4">
-              <h3 className="text-[15px] font-bold text-[#0F172A]">Create a support ticket</h3>
-              <button type="button" onClick={onClose} aria-label="Close dialog" className="text-[#94A3B8] hover:text-[#475569]">
+              <h3 className="text-[15px] font-bold text-[#0F172A]">
+                Create a support ticket
+              </h3>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close dialog"
+                className="text-[#94A3B8] hover:text-[#475569]"
+              >
                 <X size={18} />
               </button>
             </div>
             <div className="space-y-4 p-5">
               <div>
-                <label className="mb-1.5 block text-[12.5px] font-semibold text-[#334155]">Type</label>
+                <label className="mb-1.5 block text-[12.5px] font-semibold text-[#334155]">
+                  Type
+                </label>
                 <div className="grid grid-cols-4 gap-2">
                   {Object.entries(TYPES).map(([k, t]) => {
                     const Icon = t.icon;
@@ -148,7 +157,9 @@ function SubmitDialog({ open, onClose, onCreated, authorName }) {
                 </div>
               </div>
               <div>
-                <label className="mb-1.5 block text-[12.5px] font-semibold text-[#334155]">Priority</label>
+                <label className="mb-1.5 block text-[12.5px] font-semibold text-[#334155]">
+                  Priority
+                </label>
                 <div className="grid grid-cols-4 gap-2">
                   {PRIORITY_ORDER.map((k) => {
                     const p = PRIORITIES[k];
@@ -172,7 +183,9 @@ function SubmitDialog({ open, onClose, onCreated, authorName }) {
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-[12.5px] font-semibold text-[#334155]">Title</label>
+                <label className="mb-1 block text-[12.5px] font-semibold text-[#334155]">
+                  Title
+                </label>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -183,7 +196,9 @@ function SubmitDialog({ open, onClose, onCreated, authorName }) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-[12.5px] font-semibold text-[#334155]">Details (optional)</label>
+                <label className="mb-1 block text-[12.5px] font-semibold text-[#334155]">
+                  Details (optional)
+                </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -196,9 +211,19 @@ function SubmitDialog({ open, onClose, onCreated, authorName }) {
               </div>
             </div>
             <div className="flex justify-end gap-2 border-t border-[#F1F5F9] px-5 py-4">
-              <GhostButton type="button" onClick={onClose}>Cancel</GhostButton>
-              <PrimaryButton type="submit" disabled={saving} data-testid="feature-request-submit">
-                {saving ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
+              <GhostButton type="button" onClick={onClose}>
+                Cancel
+              </GhostButton>
+              <PrimaryButton
+                type="submit"
+                disabled={saving}
+                data-testid="feature-request-submit"
+              >
+                {saving ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <Send size={15} />
+                )}
                 Submit ticket
               </PrimaryButton>
             </div>
@@ -215,7 +240,10 @@ function RequestRow({ item, onVote, onDelete }) {
   const p = PRIORITIES[item.priority];
   const TIcon = t.icon;
   return (
-    <div className="flex items-start gap-4 px-5 py-4" data-testid={`feature-request-${item.id}`}>
+    <div
+      className="flex items-start gap-4 px-5 py-4"
+      data-testid={`feature-request-${item.id}`}
+    >
       <button
         type="button"
         onClick={() => onVote(item)}
@@ -239,9 +267,13 @@ function RequestRow({ item, onVote, onDelete }) {
           {p && <Badge tone={p.tone}>{p.label} priority</Badge>}
           <Badge tone={s.tone}>{s.label}</Badge>
         </div>
-        <p className="mt-1.5 text-[14px] font-semibold text-[#0F172A]">{item.title}</p>
+        <p className="mt-1.5 text-[14px] font-semibold text-[#0F172A]">
+          {item.title}
+        </p>
         {item.description && (
-          <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-[#64748B]">{item.description}</p>
+          <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-[#64748B]">
+            {item.description}
+          </p>
         )}
         <p className="mt-1.5 text-[11.5px] text-[#94A3B8]">
           {item.author_name ? `${item.author_name} · ` : ""}
@@ -295,9 +327,13 @@ export default function FeatureRequests() {
     setItems((prev) =>
       prev.map((r) =>
         r.id === item.id
-          ? { ...r, has_voted: !r.has_voted, votes: r.votes + (r.has_voted ? -1 : 1) }
-          : r
-      )
+          ? {
+              ...r,
+              has_voted: !r.has_voted,
+              votes: r.votes + (r.has_voted ? -1 : 1),
+            }
+          : r,
+      ),
     );
     try {
       const { data } = await api.post(`/feature-requests/${item.id}/vote`);
@@ -335,7 +371,10 @@ export default function FeatureRequests() {
         title="Support Tickets"
         subtitle="Report a bug, ask for help, or suggest an idea — set a priority and we'll follow up."
         actions={
-          <PrimaryButton onClick={() => setDialogOpen(true)} data-testid="feature-request-new">
+          <PrimaryButton
+            onClick={() => setDialogOpen(true)}
+            data-testid="feature-request-new"
+          >
             <Plus size={15} />
             New ticket
           </PrimaryButton>
@@ -350,7 +389,9 @@ export default function FeatureRequests() {
               onClick={() => setTab(t.value)}
               data-testid={`feature-request-tab-${t.value}`}
               className={`rounded-lg px-3.5 py-1.5 text-[13px] font-semibold transition ${
-                tab === t.value ? "bg-white text-[#0F172A] shadow-sm" : "text-[#64748B] hover:text-[#0F172A]"
+                tab === t.value
+                  ? "bg-white text-[#0F172A] shadow-sm"
+                  : "text-[#64748B] hover:text-[#0F172A]"
               }`}
             >
               {t.label}
@@ -363,7 +404,9 @@ export default function FeatureRequests() {
               key={s}
               onClick={() => setSort(s)}
               className={`rounded-lg px-3.5 py-1.5 text-[13px] font-semibold capitalize transition ${
-                sort === s ? "bg-white text-[#0F172A] shadow-sm" : "text-[#64748B] hover:text-[#0F172A]"
+                sort === s
+                  ? "bg-white text-[#0F172A] shadow-sm"
+                  : "text-[#64748B] hover:text-[#0F172A]"
               }`}
             >
               {s === "top" ? "Top voted" : "Newest"}
@@ -394,7 +437,12 @@ export default function FeatureRequests() {
         ) : (
           <div className="divide-y divide-[#F1F5F9]">
             {sorted.map((item) => (
-              <RequestRow key={item.id} item={item} onVote={onVote} onDelete={onDelete} />
+              <RequestRow
+                key={item.id}
+                item={item}
+                onVote={onVote}
+                onDelete={onDelete}
+              />
             ))}
           </div>
         )}

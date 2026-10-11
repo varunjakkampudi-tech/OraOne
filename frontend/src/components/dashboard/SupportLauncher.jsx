@@ -75,7 +75,7 @@ export default function SupportLauncher() {
     try {
       // Pull the sanitized public config via the public surface.
       const res = await fetch(
-        `${API_BASE}/widget/config?key=${encodeURIComponent(SUPPORT_WIDGET_KEY)}`
+        `${API_BASE}/widget/config?key=${encodeURIComponent(SUPPORT_WIDGET_KEY)}`,
       );
       if (!res.ok) {
         setUnavailable(true);
@@ -110,14 +110,16 @@ export default function SupportLauncher() {
                       cfg.settings?.welcome_message ||
                       "Hi! How can I help you with OraOne?",
                   },
-                ]
+                ],
           );
         }
       } catch {
         setMessages([
           {
             role: "agent",
-            text: cfg.settings?.welcome_message || "Hi! How can I help you with OraOne?",
+            text:
+              cfg.settings?.welcome_message ||
+              "Hi! How can I help you with OraOne?",
           },
         ]);
       }
@@ -190,7 +192,7 @@ export default function SupportLauncher() {
         setSending(false);
       }
     },
-    [input, sending, config]
+    [input, sending, config],
   );
 
   /* Was this answer helpful? — records CSAT via the public feedback endpoint. */
@@ -198,8 +200,8 @@ export default function SupportLauncher() {
     (index, helpful) => {
       setMessages((m) =>
         m.map((msg, i) =>
-          i === index ? { ...msg, feedback: helpful ? "up" : "down" } : msg
-        )
+          i === index ? { ...msg, feedback: helpful ? "up" : "down" } : msg,
+        ),
       );
       const msg = messages[index];
       if (!config) return;
@@ -218,7 +220,7 @@ export default function SupportLauncher() {
         /* best-effort */
       }
     },
-    [messages, config]
+    [messages, config],
   );
 
   const primary = config?.theme?.primary_color || "#2563EB";
@@ -231,7 +233,10 @@ export default function SupportLauncher() {
     async (e) => {
       if (e) e.preventDefault();
       const message = fbMsg.trim();
-      if (!message) { setFbErr("Please enter a message."); return; }
+      if (!message) {
+        setFbErr("Please enter a message.");
+        return;
+      }
       setFbErr("");
       setFbBusy(true);
       try {
@@ -249,7 +254,7 @@ export default function SupportLauncher() {
         setFbBusy(false);
       }
     },
-    [fbMsg, user]
+    [fbMsg, user],
   );
 
   return (
@@ -265,11 +270,21 @@ export default function SupportLauncher() {
       >
         <AnimatePresence mode="wait" initial={false}>
           {open ? (
-            <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}>
+            <motion.span
+              key="x"
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+            >
               <X size={22} />
             </motion.span>
           ) : (
-            <motion.span key="chat" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }}>
+            <motion.span
+              key="chat"
+              initial={{ rotate: 90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: -90, opacity: 0 }}
+            >
               <MessageCircle size={24} />
             </motion.span>
           )}
@@ -288,37 +303,98 @@ export default function SupportLauncher() {
             className="fixed bottom-24 right-5 z-[60] flex h-[560px] max-h-[calc(100vh-7rem)] w-[380px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center gap-3 px-4 py-3 text-white" style={{ backgroundColor: primary }}>
+            <div
+              className="flex items-center gap-3 px-4 py-3 text-white"
+              style={{ backgroundColor: primary }}
+            >
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20">
                 <Sparkles size={18} />
               </div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-bold">{config?.agent_name || "OraOne Support"}</p>
-                <p className="truncate text-[11px] text-white/80">{unavailable ? "Typically replies within 24 hours" : "Grounded in OraOne product knowledge"}</p>
+                <p className="truncate text-sm font-bold">
+                  {config?.agent_name || "OraOne Support"}
+                </p>
+                <p className="truncate text-[11px] text-white/80">
+                  {unavailable
+                    ? "Typically replies within 24 hours"
+                    : "Grounded in OraOne product knowledge"}
+                </p>
               </div>
             </div>
 
             {/* Fallback: contact panel when there's no live AI support widget */}
             {unavailable && (
-              <div className="flex-1 overflow-y-auto bg-[#F8FAFC] p-4 space-y-3" data-testid="support-fallback">
+              <div
+                className="flex-1 overflow-y-auto bg-[#F8FAFC] p-4 space-y-3"
+                data-testid="support-fallback"
+              >
                 {fbSent ? (
                   <div className="py-8 text-center">
-                    <span className="mx-auto grid size-12 place-items-center rounded-full bg-[#DCFCE7] text-[#16A34A]"><Check size={24} /></span>
-                    <p className="mt-3 text-sm font-semibold text-[#0F172A]">Message sent!</p>
-                    <p className="mt-1 text-[12.5px] text-[#64748B]">Our team will get back to you within 24 hours.</p>
+                    <span className="mx-auto grid size-12 place-items-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
+                      <Check size={24} />
+                    </span>
+                    <p className="mt-3 text-sm font-semibold text-[#0F172A]">
+                      Message sent!
+                    </p>
+                    <p className="mt-1 text-[12.5px] text-[#64748B]">
+                      Our team will get back to you within 24 hours.
+                    </p>
                   </div>
                 ) : (
                   <>
-                    <p className="text-[13px] text-[#475569]">Hi{user?.full_name ? ` ${user.full_name.split(" ")[0]}` : ""} 👋 How can we help? Send a message or explore these:</p>
+                    <p className="text-[13px] text-[#475569]">
+                      Hi
+                      {user?.full_name
+                        ? ` ${user.full_name.split(" ")[0]}`
+                        : ""}{" "}
+                      👋 How can we help? Send a message or explore these:
+                    </p>
                     <div className="space-y-2">
-                      <Link to="/app/getting-started" onClick={() => setOpen(false)} className="flex items-center gap-2.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2.5 text-[13px] font-medium text-[#334155] transition hover:border-[#BFD3F5] hover:bg-[#EFF6FF]"><Rocket size={15} className="text-[#2563EB]" /> Getting started</Link>
-                      <Link to="/app/guide" onClick={() => setOpen(false)} className="flex items-center gap-2.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2.5 text-[13px] font-medium text-[#334155] transition hover:border-[#BFD3F5] hover:bg-[#EFF6FF]"><LifeBuoy size={15} className="text-[#2563EB]" /> Help &amp; docs</Link>
-                      <a href="mailto:sales@oraone.in" className="flex items-center gap-2.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2.5 text-[13px] font-medium text-[#334155] transition hover:border-[#BFD3F5] hover:bg-[#EFF6FF]"><Mail size={15} className="text-[#2563EB]" /> sales@oraone.in</a>
+                      <Link
+                        to="/app/getting-started"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center gap-2.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2.5 text-[13px] font-medium text-[#334155] transition hover:border-[#BFD3F5] hover:bg-[#EFF6FF]"
+                      >
+                        <Rocket size={15} className="text-[#2563EB]" /> Getting
+                        started
+                      </Link>
+                      <Link
+                        to="/app/guide"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center gap-2.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2.5 text-[13px] font-medium text-[#334155] transition hover:border-[#BFD3F5] hover:bg-[#EFF6FF]"
+                      >
+                        <LifeBuoy size={15} className="text-[#2563EB]" /> Help
+                        &amp; docs
+                      </Link>
+                      <a
+                        href="mailto:sales@oraone.in"
+                        className="flex items-center gap-2.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2.5 text-[13px] font-medium text-[#334155] transition hover:border-[#BFD3F5] hover:bg-[#EFF6FF]"
+                      >
+                        <Mail size={15} className="text-[#2563EB]" />{" "}
+                        sales@oraone.in
+                      </a>
                     </div>
                     <form onSubmit={submitContact} className="space-y-2 pt-1">
-                      <textarea value={fbMsg} onChange={(e) => setFbMsg(e.target.value)} rows={3} placeholder="Describe your question…" data-testid="support-fallback-input" className="w-full resize-none rounded-xl border border-[#E2E8F0] px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30" />
-                      {fbErr && <p className="text-[12px] text-[#DC2626]">{fbErr}</p>}
-                      <button type="submit" disabled={fbBusy} data-testid="support-fallback-send" className="w-full rounded-xl py-2.5 text-[13px] font-semibold text-white transition disabled:opacity-60" style={{ backgroundColor: primary }}>{fbBusy ? "Sending…" : "Send message"}</button>
+                      <textarea
+                        value={fbMsg}
+                        onChange={(e) => setFbMsg(e.target.value)}
+                        rows={3}
+                        placeholder="Describe your question…"
+                        data-testid="support-fallback-input"
+                        className="w-full resize-none rounded-xl border border-[#E2E8F0] px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
+                      />
+                      {fbErr && (
+                        <p className="text-[12px] text-[#DC2626]">{fbErr}</p>
+                      )}
+                      <button
+                        type="submit"
+                        disabled={fbBusy}
+                        data-testid="support-fallback-send"
+                        className="w-full rounded-xl py-2.5 text-[13px] font-semibold text-white transition disabled:opacity-60"
+                        style={{ backgroundColor: primary }}
+                      >
+                        {fbBusy ? "Sending…" : "Send message"}
+                      </button>
                     </form>
                   </>
                 )}
@@ -327,133 +403,151 @@ export default function SupportLauncher() {
 
             {/* Messages */}
             {!unavailable && (
-            <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto bg-[#F8FAFC] p-4">
-              {booting && (
-                <div className="flex items-center justify-center py-10 text-[#94A3B8]">
-                  <Loader2 className="animate-spin" size={20} />
-                </div>
-              )}
-              {messages.map((m, i) => (
-                <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                ref={scrollRef}
+                className="flex-1 space-y-3 overflow-y-auto bg-[#F8FAFC] p-4"
+              >
+                {booting && (
+                  <div className="flex items-center justify-center py-10 text-[#94A3B8]">
+                    <Loader2 className="animate-spin" size={20} />
+                  </div>
+                )}
+                {messages.map((m, i) => (
                   <div
-                    className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed ${
-                      m.role === "user"
-                        ? "rounded-br-md bg-[#2563EB] text-white"
-                        : "rounded-bl-md border border-[#E2E8F0] bg-white text-[#0F172A]"
-                    }`}
-                    style={m.role === "user" ? { backgroundColor: primary } : undefined}
+                    key={i}
+                    className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                   >
-                    <p className="whitespace-pre-wrap">{m.text}</p>
-                    {m.role === "agent" && m.sources?.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {m.sources.slice(0, 4).map((s, j) => (
-                          <span
-                            key={j}
-                            className="inline-flex items-center gap-1 rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[10px] font-medium text-[#2563EB]"
-                          >
-                            <FileText size={10} />
-                            {s.title || s.url || "Source"}
-                          </span>
-                        ))}
-                        {typeof m.confidence === "number" && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[#ECFDF5] px-2 py-0.5 text-[10px] font-medium text-[#047857]">
-                            <ShieldCheck size={10} />
-                            {Math.round(m.confidence * 100)}% match
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    {m.role === "agent" && i > 0 && (
-                      <div
-                        className="mt-2 flex items-center gap-1.5 border-t border-[#F1F5F9] pt-1.5"
-                        data-testid={`support-feedback-${i}`}
-                      >
-                        {m.feedback ? (
-                          <span className="text-[10px] font-medium text-[#16A34A]">
-                            Thanks for the feedback!
-                          </span>
-                        ) : (
-                          <>
-                            <span className="text-[10px] text-[#94A3B8]">
-                              Was this helpful?
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => sendFeedback(i, true)}
-                              data-testid={`support-feedback-up-${i}`}
-                              aria-label="Helpful"
-                              className="flex h-6 w-6 items-center justify-center rounded-md text-[#94A3B8] transition hover:bg-[#ECFDF5] hover:text-[#047857]"
-                            >
-                              <ThumbsUp size={12} />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => sendFeedback(i, false)}
-                              data-testid={`support-feedback-down-${i}`}
-                              aria-label="Not helpful"
-                              className="flex h-6 w-6 items-center justify-center rounded-md text-[#94A3B8] transition hover:bg-[#FEF2F2] hover:text-[#DC2626]"
-                            >
-                              <ThumbsDown size={12} />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-              {sending && (
-                <div className="flex justify-start">
-                  <div className="rounded-2xl rounded-bl-md border border-[#E2E8F0] bg-white px-3.5 py-2.5">
-                    <Loader2 className="animate-spin text-[#94A3B8]" size={14} />
-                  </div>
-                </div>
-              )}
-
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="space-y-1.5 pt-1" data-testid="support-suggestions">
-                  {suggestions.slice(0, 3).map((s, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => send(s)}
-                      className="block w-full truncate rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-left text-[12px] font-medium text-[#334155] transition hover:border-[#BFD3F5] hover:bg-[#EFF6FF]"
+                    <div
+                      className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed ${
+                        m.role === "user"
+                          ? "rounded-br-md bg-[#2563EB] text-white"
+                          : "rounded-bl-md border border-[#E2E8F0] bg-white text-[#0F172A]"
+                      }`}
+                      style={
+                        m.role === "user"
+                          ? { backgroundColor: primary }
+                          : undefined
+                      }
                     >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                      <p className="whitespace-pre-wrap">{m.text}</p>
+                      {m.role === "agent" && m.sources?.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {m.sources.slice(0, 4).map((s, j) => (
+                            <span
+                              key={j}
+                              className="inline-flex items-center gap-1 rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[10px] font-medium text-[#2563EB]"
+                            >
+                              <FileText size={10} />
+                              {s.title || s.url || "Source"}
+                            </span>
+                          ))}
+                          {typeof m.confidence === "number" && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[#ECFDF5] px-2 py-0.5 text-[10px] font-medium text-[#047857]">
+                              <ShieldCheck size={10} />
+                              {Math.round(m.confidence * 100)}% match
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {m.role === "agent" && i > 0 && (
+                        <div
+                          className="mt-2 flex items-center gap-1.5 border-t border-[#F1F5F9] pt-1.5"
+                          data-testid={`support-feedback-${i}`}
+                        >
+                          {m.feedback ? (
+                            <span className="text-[10px] font-medium text-[#16A34A]">
+                              Thanks for the feedback!
+                            </span>
+                          ) : (
+                            <>
+                              <span className="text-[10px] text-[#94A3B8]">
+                                Was this helpful?
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => sendFeedback(i, true)}
+                                data-testid={`support-feedback-up-${i}`}
+                                aria-label="Helpful"
+                                className="flex h-6 w-6 items-center justify-center rounded-md text-[#94A3B8] transition hover:bg-[#ECFDF5] hover:text-[#047857]"
+                              >
+                                <ThumbsUp size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => sendFeedback(i, false)}
+                                data-testid={`support-feedback-down-${i}`}
+                                aria-label="Not helpful"
+                                className="flex h-6 w-6 items-center justify-center rounded-md text-[#94A3B8] transition hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                              >
+                                <ThumbsDown size={12} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {sending && (
+                  <div className="flex justify-start">
+                    <div className="rounded-2xl rounded-bl-md border border-[#E2E8F0] bg-white px-3.5 py-2.5">
+                      <Loader2
+                        className="animate-spin text-[#94A3B8]"
+                        size={14}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {showSuggestions && suggestions.length > 0 && (
+                  <div
+                    className="space-y-1.5 pt-1"
+                    data-testid="support-suggestions"
+                  >
+                    {suggestions.slice(0, 3).map((s, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => send(s)}
+                        className="block w-full truncate rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-left text-[12px] font-medium text-[#334155] transition hover:border-[#BFD3F5] hover:bg-[#EFF6FF]"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Composer */}
             {!unavailable && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                send();
-              }}
-              className="flex items-center gap-2 border-t border-[#E2E8F0] bg-white p-3"
-            >
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={config?.settings?.input_placeholder || "Ask about OraOne…"}
-                disabled={!config || sending}
-                data-testid="support-input"
-                className="flex-1 rounded-xl border border-[#E2E8F0] px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 disabled:opacity-60"
-              />
-              <button
-                type="submit"
-                disabled={!input.trim() || sending || !config}
-                data-testid="support-send"
-                className="flex h-9 w-9 items-center justify-center rounded-xl text-white disabled:opacity-50"
-                style={{ backgroundColor: primary }}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  send();
+                }}
+                className="flex items-center gap-2 border-t border-[#E2E8F0] bg-white p-3"
               >
-                <Send size={16} />
-              </button>
-            </form>
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={
+                    config?.settings?.input_placeholder || "Ask about OraOne…"
+                  }
+                  disabled={!config || sending}
+                  data-testid="support-input"
+                  className="flex-1 rounded-xl border border-[#E2E8F0] px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 disabled:opacity-60"
+                />
+                <button
+                  type="submit"
+                  disabled={!input.trim() || sending || !config}
+                  data-testid="support-send"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl text-white disabled:opacity-50"
+                  style={{ backgroundColor: primary }}
+                >
+                  <Send size={16} />
+                </button>
+              </form>
             )}
             {!unavailable && config?.settings?.show_branding !== false && (
               <div className="bg-white pb-2 text-center text-[10px] text-[#94A3B8]">

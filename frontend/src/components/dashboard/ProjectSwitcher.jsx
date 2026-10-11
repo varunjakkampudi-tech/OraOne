@@ -1,9 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, ChevronsUpDown, FolderKanban, Plus, Settings2 } from "lucide-react";
+import {
+  Check,
+  ChevronsUpDown,
+  FolderKanban,
+  Plus,
+  Settings2,
+} from "lucide-react";
 import { useProjects } from "@/lib/projects";
 
-const DOT_COLORS = ["#2563EB", "#06B6D4", "#0EA5E9", "#F59E0B", "#10B981", "#EF4444", "#EC4899"];
+const DOT_COLORS = [
+  "#2563EB",
+  "#06B6D4",
+  "#0EA5E9",
+  "#F59E0B",
+  "#10B981",
+  "#EF4444",
+  "#EC4899",
+];
 
 function colorFor(project, index) {
   return project?.color || DOT_COLORS[index % DOT_COLORS.length];
@@ -50,7 +64,10 @@ export default function ProjectSwitcher({ onNavigate = () => {} }) {
 
   if (loading && !activeProject) {
     return (
-      <div className="mx-3 mt-3 h-11 rounded-xl bg-[#F1F5F9] animate-pulse" data-testid="project-switcher-loading" />
+      <div
+        className="mx-3 mt-3 h-11 rounded-xl bg-[#F1F5F9] animate-pulse"
+        data-testid="project-switcher-loading"
+      />
     );
   }
 
@@ -68,7 +85,11 @@ export default function ProjectSwitcher({ onNavigate = () => {} }) {
   }
 
   return (
-    <div className="relative mx-3 mt-3" ref={ref} data-testid="project-switcher">
+    <div
+      className="relative mx-3 mt-3"
+      ref={ref}
+      data-testid="project-switcher"
+    >
       <button
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center gap-2.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2.5 text-left transition-colors hover:bg-[#F8FAFC]"
@@ -127,13 +148,20 @@ export default function ProjectSwitcher({ onNavigate = () => {} }) {
                     <FolderKanban size={13} />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-medium text-[#0F172A]">{p.name}</span>
+                    <span className="block truncate font-medium text-[#0F172A]">
+                      {p.name}
+                    </span>
                     <span className="block text-[11px] text-[#94A3B8]">
                       {p.is_default ? "Default · " : ""}
-                      {p.resource_counts?.agents ?? 0} {(p.resource_counts?.agents ?? 0) === 1 ? "agent" : "agents"}
+                      {p.resource_counts?.agents ?? 0}{" "}
+                      {(p.resource_counts?.agents ?? 0) === 1
+                        ? "agent"
+                        : "agents"}
                     </span>
                   </span>
-                  {active && <Check size={15} className="flex-shrink-0 text-[#2563EB]" />}
+                  {active && (
+                    <Check size={15} className="flex-shrink-0 text-[#2563EB]" />
+                  )}
                 </button>
               );
             })}

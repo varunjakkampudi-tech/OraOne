@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, KeyRound, ArrowRight, Clock, ShieldCheck } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  KeyRound,
+  ArrowRight,
+  Clock,
+  ShieldCheck,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { AUTH } from "@/constants/testIds";
@@ -23,21 +30,35 @@ import {
   TipBox,
 } from "@/components/auth/AuthShell";
 
-const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+const fmt = (s) =>
+  `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
 function CognitoManagedAuthNotice({ title, message, endpoint = "login" }) {
   return (
     <AuthShell cardTestId="cognito-managed-auth">
       <IconBadge icon={Mail} />
-      <h1 className="mt-5 text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">{title}</h1>
-      <p className="mt-2 text-center text-sm leading-relaxed text-[#64748B]">{message}</p>
+      <h1 className="mt-5 text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">
+        {title}
+      </h1>
+      <p className="mt-2 text-center text-sm leading-relaxed text-[#64748B]">
+        {message}
+      </p>
       <div className="mt-8">
-        <GradientButton type="button" trailingIcon={ArrowRight} onClick={() => beginCognitoLogin({ endpoint })}>
+        <GradientButton
+          type="button"
+          trailingIcon={ArrowRight}
+          onClick={() => beginCognitoLogin({ endpoint })}
+        >
           Continue to secure account access
         </GradientButton>
       </div>
       <p className="mt-6 text-center text-sm text-[#64748B]">
-        <Link to="/login" className="font-semibold text-[#2563EB] hover:underline">Back to sign in</Link>
+        <Link
+          to="/login"
+          className="font-semibold text-[#2563EB] hover:underline"
+        >
+          Back to sign in
+        </Link>
       </p>
     </AuthShell>
   );
@@ -47,7 +68,10 @@ function CognitoManagedAuthNotice({ title, message, endpoint = "login" }) {
 /* Verify Email — confirm signup with 6-digit Cognito code      */
 /* ─────────────────────────────────────────────────────────── */
 export function VerifyEmail() {
-  useSEO({ title: "Verify Email", description: "Verify your OraOne email address." });
+  useSEO({
+    title: "Verify Email",
+    description: "Verify your OraOne email address.",
+  });
   const { verify, resend, pendingEmail, setPendingEmail } = useAuth();
   const nav = useNavigate();
 
@@ -70,13 +94,21 @@ export function VerifyEmail() {
   }, [seconds]);
 
   if (cognitoEnabled) {
-    return <CognitoManagedAuthNotice title="Verify Your Email" message="Email verification is completed securely in the Cognito account flow." />;
+    return (
+      <CognitoManagedAuthNotice
+        title="Verify Your Email"
+        message="Email verification is completed securely in the Cognito account flow."
+      />
+    );
   }
 
   const submit = async (e) => {
     e.preventDefault();
     setBusy(true);
-    const res = await verify({ email: email.trim().toLowerCase(), code: code.trim() });
+    const res = await verify({
+      email: email.trim().toLowerCase(),
+      code: code.trim(),
+    });
     setBusy(false);
     if (res.ok) {
       toast.success("Email verified!");
@@ -113,7 +145,9 @@ export function VerifyEmail() {
       <p className="mt-2 text-center text-sm leading-relaxed text-[#64748B]">
         We&apos;ve sent a 6-digit verification code to
         <br />
-        <span className="font-semibold text-[#2563EB]">{email || "your inbox"}</span>{" "}
+        <span className="font-semibold text-[#2563EB]">
+          {email || "your inbox"}
+        </span>{" "}
         <button
           type="button"
           onClick={() => setEditingEmail((v) => !v)}
@@ -140,8 +174,15 @@ export function VerifyEmail() {
       )}
 
       <form onSubmit={submit} className="mt-7">
-        <p className="mb-3 text-sm font-medium text-[#0F172A]">Enter 6-digit code</p>
-        <OtpInput value={code} onChange={setCode} length={6} data-testid="verify-code-input" />
+        <p className="mb-3 text-sm font-medium text-[#0F172A]">
+          Enter 6-digit code
+        </p>
+        <OtpInput
+          value={code}
+          onChange={setCode}
+          length={6}
+          data-testid="verify-code-input"
+        />
 
         <p className="mt-5 text-center text-sm text-[#64748B]">
           Didn&apos;t receive the code?{" "}
@@ -160,7 +201,10 @@ export function VerifyEmail() {
           <Clock size={14} />
           {seconds > 0 ? (
             <>
-              Resend code in <span className="font-semibold text-[#2563EB]">{fmt(seconds)}</span>
+              Resend code in{" "}
+              <span className="font-semibold text-[#2563EB]">
+                {fmt(seconds)}
+              </span>
             </>
           ) : (
             <span>You can resend the code now</span>
@@ -182,7 +226,10 @@ export function VerifyEmail() {
 
       <p className="mt-6 text-center text-sm text-[#64748B]">
         Wrong email address?{" "}
-        <Link to="/signup" className="font-semibold text-[#2563EB] hover:underline">
+        <Link
+          to="/signup"
+          className="font-semibold text-[#2563EB] hover:underline"
+        >
           Go back
         </Link>
       </p>
@@ -194,14 +241,25 @@ export function VerifyEmail() {
 /* Forgot Password — request a reset code                       */
 /* ─────────────────────────────────────────────────────────── */
 export function ForgotPassword() {
-  const authProvider = (process.env.REACT_APP_AUTH_PROVIDER || "self_hosted").toLowerCase();
-  useSEO({ title: "Forgot Password", description: "Reset your OraOne password." });
+  const authProvider = (
+    process.env.REACT_APP_AUTH_PROVIDER || "self_hosted"
+  ).toLowerCase();
+  useSEO({
+    title: "Forgot Password",
+    description: "Reset your OraOne password.",
+  });
   const { forgotPassword } = useAuth();
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   if (authProvider === "cognito") {
-    return <CognitoManagedAuthNotice endpoint="forgotPassword" title="Recover Your Account" message="Password recovery is completed securely in the Cognito account flow." />;
+    return (
+      <CognitoManagedAuthNotice
+        endpoint="forgotPassword"
+        title="Recover Your Account"
+        message="Password recovery is completed securely in the Cognito account flow."
+      />
+    );
   }
 
   const submit = async (e) => {
@@ -224,7 +282,8 @@ export function ForgotPassword() {
         Forgot Password?
       </h1>
       <p className="mt-2 text-center text-sm leading-relaxed text-[#64748B]">
-        Enter your email and we&apos;ll send you a 6-digit code to reset your password.
+        Enter your email and we&apos;ll send you a 6-digit code to reset your
+        password.
       </p>
 
       <form onSubmit={submit} className="mt-7 space-y-5" noValidate>
@@ -240,7 +299,13 @@ export function ForgotPassword() {
           />
         </Field>
 
-        <GradientButton type="submit" busy={busy} busyLabel="Sending..." trailingIcon={ArrowRight} data-testid={AUTH.forgotSubmit}>
+        <GradientButton
+          type="submit"
+          busy={busy}
+          busyLabel="Sending..."
+          trailingIcon={ArrowRight}
+          data-testid={AUTH.forgotSubmit}
+        >
           Send Reset Code
         </GradientButton>
       </form>
@@ -250,7 +315,8 @@ export function ForgotPassword() {
       <OutlineButton to="/login">Back to Sign In</OutlineButton>
 
       <TipBox icon={ShieldCheck} title="Security Tip">
-        Reset codes expire shortly. Request a new one if it doesn&apos;t arrive within a few minutes.
+        Reset codes expire shortly. Request a new one if it doesn&apos;t arrive
+        within a few minutes.
       </TipBox>
     </AuthShell>
   );
@@ -260,8 +326,12 @@ export function ForgotPassword() {
 /* Reset Password — submit code + new password                  */
 /* ─────────────────────────────────────────────────────────── */
 export function ResetPassword() {
-  useSEO({ title: "Reset Password", description: "Set a new OraOne password." });
-  const { resetPassword, forgotPassword, pendingEmail, setPendingEmail } = useAuth();
+  useSEO({
+    title: "Reset Password",
+    description: "Set a new OraOne password.",
+  });
+  const { resetPassword, forgotPassword, pendingEmail, setPendingEmail } =
+    useAuth();
   const nav = useNavigate();
 
   const [email, setEmail] = useState(pendingEmail || "");
@@ -272,7 +342,13 @@ export function ResetPassword() {
   const [resending, setResending] = useState(false);
 
   if (cognitoEnabled) {
-    return <CognitoManagedAuthNotice endpoint="forgotPassword" title="Reset Your Password" message="Password reset is completed securely in the Cognito account flow." />;
+    return (
+      <CognitoManagedAuthNotice
+        endpoint="forgotPassword"
+        title="Reset Your Password"
+        message="Password reset is completed securely in the Cognito account flow."
+      />
+    );
   }
 
   const submit = async (e) => {
@@ -359,7 +435,9 @@ export function ResetPassword() {
             required
             maxLength={6}
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            onChange={(e) =>
+              setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+            }
             placeholder="6-digit code"
             data-testid="reset-code-input"
           />
@@ -392,7 +470,12 @@ export function ResetPassword() {
           />
         </Field>
 
-        <GradientButton type="submit" busy={busy} busyLabel="Saving..." data-testid={AUTH.resetSubmit}>
+        <GradientButton
+          type="submit"
+          busy={busy}
+          busyLabel="Saving..."
+          data-testid={AUTH.resetSubmit}
+        >
           Reset Password
         </GradientButton>
       </form>

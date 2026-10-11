@@ -54,7 +54,10 @@ function ActivityList() {
     setLoading(true);
     api
       .get("/activity", { params: { limit: 100 } })
-      .then(({ data }) => on && setItems(Array.isArray(data?.activity) ? data.activity : []))
+      .then(
+        ({ data }) =>
+          on && setItems(Array.isArray(data?.activity) ? data.activity : []),
+      )
       .catch((e) => toast.error(formatApiError(e)))
       .finally(() => on && setLoading(false));
     return () => {
@@ -70,21 +73,32 @@ function ActivityList() {
     );
   }
   if (!items.length) {
-    return <p className="py-16 text-center text-sm text-[#94A3B8]">No activity yet.</p>;
+    return (
+      <p className="py-16 text-center text-sm text-[#94A3B8]">
+        No activity yet.
+      </p>
+    );
   }
   return (
     <ul className="divide-y divide-[#F1F5F9]">
       {items.map((ev) => {
-        const meta = ACTION_META[ev.action] || { icon: ActivityIcon, tint: "bg-[#F1F5F9] text-[#475569]" };
+        const meta = ACTION_META[ev.action] || {
+          icon: ActivityIcon,
+          tint: "bg-[#F1F5F9] text-[#475569]",
+        };
         const Icon = meta.icon;
         return (
           <li key={ev.id} className="flex items-start gap-3 px-5 py-3.5">
-            <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${meta.tint}`}>
+            <div
+              className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${meta.tint}`}
+            >
               <Icon className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm text-[#0F172A]">
-                <span className="font-semibold">{ev.actor?.name || "Someone"}</span>{" "}
+                <span className="font-semibold">
+                  {ev.actor?.name || "Someone"}
+                </span>{" "}
                 <span className="text-[#64748B]">{ev.summary}</span>
               </p>
               {ev.resource_type && (
@@ -94,7 +108,9 @@ function ActivityList() {
                 </p>
               )}
             </div>
-            <span className="shrink-0 text-[11px] text-[#94A3B8]">{fmtRelative(ev.created_at)}</span>
+            <span className="shrink-0 text-[11px] text-[#94A3B8]">
+              {fmtRelative(ev.created_at)}
+            </span>
           </li>
         );
       })}
@@ -111,7 +127,9 @@ function NotificationsList() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await api.get("/notifications", { params: { limit: 100 } });
+      const { data } = await api.get("/notifications", {
+        params: { limit: 100 },
+      });
       setItems(Array.isArray(data?.notifications) ? data.notifications : []);
       setUnread(data?.unread_count || 0);
     } catch (e) {
@@ -128,7 +146,9 @@ function NotificationsList() {
   const markRead = async (id) => {
     try {
       await api.put(`/notifications/${id}/read`);
-      setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+      setItems((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+      );
       setUnread((u) => Math.max(0, u - 1));
     } catch (e) {
       toast.error(formatApiError(e));
@@ -173,27 +193,42 @@ function NotificationsList() {
         )}
       </div>
       {!items.length ? (
-        <p className="py-16 text-center text-sm text-[#94A3B8]">No notifications yet.</p>
+        <p className="py-16 text-center text-sm text-[#94A3B8]">
+          No notifications yet.
+        </p>
       ) : (
         <ul className="divide-y divide-[#F1F5F9]">
           {items.map((n) => {
-            const meta = NOTIF_META[n.type] || { icon: Bell, tint: "bg-[#F1F5F9] text-[#475569]" };
+            const meta = NOTIF_META[n.type] || {
+              icon: Bell,
+              tint: "bg-[#F1F5F9] text-[#475569]",
+            };
             const Icon = meta.icon;
             return (
               <li
                 key={n.id}
                 className={`flex items-start gap-3 px-5 py-3.5 ${n.read ? "" : "bg-[#F8FAFF]"}`}
               >
-                <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${meta.tint}`}>
+                <div
+                  className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${meta.tint}`}
+                >
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="flex items-center gap-1 text-sm font-semibold text-[#0F172A]">
-                    {!n.read && <Dot className="-ml-2 h-5 w-5 text-[#2563EB]" />}
+                    {!n.read && (
+                      <Dot className="-ml-2 h-5 w-5 text-[#2563EB]" />
+                    )}
                     {n.title}
                   </p>
-                  {n.body && <p className="mt-0.5 text-[12px] text-[#64748B]">{n.body}</p>}
-                  <p className="mt-0.5 text-[11px] text-[#94A3B8]">{fmtRelative(n.created_at)}</p>
+                  {n.body && (
+                    <p className="mt-0.5 text-[12px] text-[#64748B]">
+                      {n.body}
+                    </p>
+                  )}
+                  <p className="mt-0.5 text-[11px] text-[#94A3B8]">
+                    {fmtRelative(n.created_at)}
+                  </p>
                 </div>
                 {!n.read && (
                   <button
@@ -220,7 +255,7 @@ export default function ActivityCenter({ defaultTab = "activity" }) {
       { key: "activity", label: "Activity", icon: ActivityIcon },
       { key: "notifications", label: "Notifications", icon: Bell },
     ],
-    []
+    [],
   );
 
   return (
@@ -234,8 +269,12 @@ export default function ActivityCenter({ defaultTab = "activity" }) {
           <ActivityIcon className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-[#0F172A]">Activity & Notifications</h1>
-          <p className="text-sm text-[#64748B]">Stay on top of what's happening across your workspace.</p>
+          <h1 className="text-xl font-bold text-[#0F172A]">
+            Activity & Notifications
+          </h1>
+          <p className="text-sm text-[#64748B]">
+            Stay on top of what's happening across your workspace.
+          </p>
         </div>
       </div>
 
@@ -245,7 +284,9 @@ export default function ActivityCenter({ defaultTab = "activity" }) {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${
-              tab === t.key ? "bg-[#2563EB] text-white" : "text-[#475569] hover:bg-[#F8FAFC]"
+              tab === t.key
+                ? "bg-[#2563EB] text-white"
+                : "text-[#475569] hover:bg-[#F8FAFC]"
             }`}
           >
             <t.icon className="h-4 w-4" /> {t.label}

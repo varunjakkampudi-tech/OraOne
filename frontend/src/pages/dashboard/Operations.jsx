@@ -50,13 +50,20 @@ const SEVERITY_STYLES = {
 function SeverityBadge({ severity }) {
   const cls = SEVERITY_STYLES[severity] || SEVERITY_STYLES.info;
   return (
-    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize ${cls}`}>
+    <span
+      className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize ${cls}`}
+    >
       {severity}
     </span>
   );
 }
 
-const HEALTH_ICONS = { database: Database, ai_provider: Cpu, object_storage: Server, auth: Lock };
+const HEALTH_ICONS = {
+  database: Database,
+  ai_provider: Cpu,
+  object_storage: Server,
+  auth: Lock,
+};
 
 function statusDot(status) {
   if (status === "healthy" || status === "configured") return "bg-[#16A34A]";
@@ -73,7 +80,10 @@ function HealthTab() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [h, m] = await Promise.all([api.get("/system/health"), api.get("/system/metrics")]);
+      const [h, m] = await Promise.all([
+        api.get("/system/health"),
+        api.get("/system/metrics"),
+      ]);
       setHealth(h.data);
       setMetrics(m.data);
     } catch (e) {
@@ -95,13 +105,21 @@ function HealthTab() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className={`h-2.5 w-2.5 rounded-full ${statusDot(health?.status)}`} />
-          <span className="text-sm font-bold capitalize text-[#0F172A]">{health?.status || "unknown"}</span>
+          <span
+            className={`h-2.5 w-2.5 rounded-full ${statusDot(health?.status)}`}
+          />
+          <span className="text-sm font-bold capitalize text-[#0F172A]">
+            {health?.status || "unknown"}
+          </span>
           <span className="text-[12px] text-[#94A3B8]">
-            v{health?.version} · up {Math.floor((health?.uptime_seconds || 0) / 60)}m
+            v{health?.version} · up{" "}
+            {Math.floor((health?.uptime_seconds || 0) / 60)}m
           </span>
         </div>
-        <button onClick={load} className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#4F46E5] hover:underline">
+        <button
+          onClick={load}
+          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#4F46E5] hover:underline"
+        >
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
         </button>
       </div>
@@ -110,12 +128,19 @@ function HealthTab() {
         {(health?.checks || []).map((c) => {
           const Icon = HEALTH_ICONS[c.component] || Server;
           return (
-            <div key={c.component} className="rounded-2xl border border-[#E2E8F0] bg-white p-4">
+            <div
+              key={c.component}
+              className="rounded-2xl border border-[#E2E8F0] bg-white p-4"
+            >
               <div className="flex items-center justify-between">
                 <Icon className="h-4.5 w-4.5 text-[#4F46E5]" />
-                <span className={`h-2 w-2 rounded-full ${statusDot(c.status)}`} />
+                <span
+                  className={`h-2 w-2 rounded-full ${statusDot(c.status)}`}
+                />
               </div>
-              <p className="mt-3 text-sm font-semibold capitalize text-[#0F172A]">{c.component.replace(/_/g, " ")}</p>
+              <p className="mt-3 text-sm font-semibold capitalize text-[#0F172A]">
+                {c.component.replace(/_/g, " ")}
+              </p>
               <p className="text-[12px] capitalize text-[#64748B]">
                 {c.status}
                 {c.latency_ms != null ? ` · ${c.latency_ms}ms` : ""}
@@ -127,9 +152,19 @@ function HealthTab() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Requests (24h)" value={api_.requests ?? 0} />
-        <MetricCard label="Error rate" value={`${api_.error_rate ?? 0}%`} tone={api_.error_rate > 5 ? "warn" : "ok"} />
-        <MetricCard label="Avg latency" value={`${Math.round(api_.avg_latency_ms ?? 0)}ms`} />
-        <MetricCard label="Security events" value={metrics?.security_events ?? 0} />
+        <MetricCard
+          label="Error rate"
+          value={`${api_.error_rate ?? 0}%`}
+          tone={api_.error_rate > 5 ? "warn" : "ok"}
+        />
+        <MetricCard
+          label="Avg latency"
+          value={`${Math.round(api_.avg_latency_ms ?? 0)}ms`}
+        />
+        <MetricCard
+          label="Security events"
+          value={metrics?.security_events ?? 0}
+        />
       </div>
     </div>
   );
@@ -140,7 +175,9 @@ function MetricCard({ label, value, tone }) {
   return (
     <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4">
       <p className="text-[12px] font-medium text-[#64748B]">{label}</p>
-      <p className={`mt-1 text-2xl font-bold tabular-nums ${valCls}`}>{value}</p>
+      <p className={`mt-1 text-2xl font-bold tabular-nums ${valCls}`}>
+        {value}
+      </p>
     </div>
   );
 }
@@ -177,7 +214,9 @@ function ScannerTab() {
               key={d}
               onClick={() => setDirection(d)}
               className={`rounded-lg px-4 py-1.5 text-[13px] font-semibold capitalize transition ${
-                direction === d ? "bg-[#4F46E5] text-white" : "text-[#475569] hover:bg-[#F8FAFC]"
+                direction === d
+                  ? "bg-[#4F46E5] text-white"
+                  : "text-[#475569] hover:bg-[#F8FAFC]"
               }`}
             >
               {d === "input" ? "Prompt (input)" : "Response (output)"}
@@ -200,7 +239,11 @@ function ScannerTab() {
           disabled={scanning}
           className="inline-flex items-center gap-2 rounded-xl bg-[#4F46E5] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4338CA] disabled:opacity-60"
         >
-          {scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <ScanLine className="h-4 w-4" />}
+          {scanning ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <ScanLine className="h-4 w-4" />
+          )}
           Scan
         </button>
       </div>
@@ -210,7 +253,9 @@ function ScannerTab() {
           <div className="grid h-full place-items-center text-center">
             <div>
               <ScanLine className="mx-auto h-8 w-8 text-[#CBD5E1]" />
-              <p className="mt-2 text-sm text-[#94A3B8]">Run a scan to see results.</p>
+              <p className="mt-2 text-sm text-[#94A3B8]">
+                Run a scan to see results.
+              </p>
             </div>
           </div>
         ) : (
@@ -222,7 +267,9 @@ function ScannerTab() {
                 ) : (
                   <AlertTriangle className="h-5 w-5 text-[#C2410C]" />
                 )}
-                <span className="text-sm font-bold text-[#0F172A]">{result.safe ? "Safe" : "Issues detected"}</span>
+                <span className="text-sm font-bold text-[#0F172A]">
+                  {result.safe ? "Safe" : "Issues detected"}
+                </span>
               </div>
               <SeverityBadge severity={result.severity} />
             </div>
@@ -230,17 +277,29 @@ function ScannerTab() {
             <ScanRow
               label="PII"
               flagged={result.pii?.detected}
-              detail={result.pii?.types?.length ? result.pii.types.join(", ") : "None found"}
+              detail={
+                result.pii?.types?.length
+                  ? result.pii.types.join(", ")
+                  : "None found"
+              }
             />
             <ScanRow
               label="Prompt injection"
               flagged={result.prompt_injection?.injection}
-              detail={result.prompt_injection?.flags?.length ? result.prompt_injection.flags.join(", ") : "None found"}
+              detail={
+                result.prompt_injection?.flags?.length
+                  ? result.prompt_injection.flags.join(", ")
+                  : "None found"
+              }
             />
             <ScanRow
               label="Content moderation"
               flagged={result.moderation?.flagged}
-              detail={result.moderation?.categories?.length ? result.moderation.categories.join(", ") : "None found"}
+              detail={
+                result.moderation?.categories?.length
+                  ? result.moderation.categories.join(", ")
+                  : "None found"
+              }
             />
             {result.output_validation && (
               <ScanRow
@@ -269,9 +328,15 @@ function ScanRow({ label, flagged, detail }) {
         ) : (
           <CheckCircle2 className="h-4 w-4 text-[#16A34A]" />
         )}
-        <span className="text-[13px] font-semibold text-[#0F172A]">{label}</span>
+        <span className="text-[13px] font-semibold text-[#0F172A]">
+          {label}
+        </span>
       </div>
-      <span className={`text-right text-[12px] ${flagged ? "text-[#C2410C]" : "text-[#94A3B8]"}`}>{detail}</span>
+      <span
+        className={`text-right text-[12px] ${flagged ? "text-[#C2410C]" : "text-[#94A3B8]"}`}
+      >
+        {detail}
+      </span>
     </div>
   );
 }
@@ -301,17 +366,24 @@ function EventsTab() {
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
         {Object.keys(bySeverity).length === 0 ? (
-          <span className="text-[12px] text-[#94A3B8]">No security events recorded.</span>
+          <span className="text-[12px] text-[#94A3B8]">
+            No security events recorded.
+          </span>
         ) : (
           Object.entries(bySeverity).map(([sev, n]) => (
-            <span key={sev} className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-[12px] font-semibold ${SEVERITY_STYLES[sev] || SEVERITY_STYLES.info}`}>
+            <span
+              key={sev}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-[12px] font-semibold ${SEVERITY_STYLES[sev] || SEVERITY_STYLES.info}`}
+            >
               {sev}: {n}
             </span>
           ))
         )}
       </div>
       {events.length === 0 ? (
-        <p className="py-12 text-center text-sm text-[#94A3B8]">No events to show.</p>
+        <p className="py-12 text-center text-sm text-[#94A3B8]">
+          No events to show.
+        </p>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white">
           <table className="w-full text-sm">
@@ -325,11 +397,20 @@ function EventsTab() {
             </thead>
             <tbody>
               {events.map((e) => (
-                <tr key={e.id} className="border-b border-[#F1F5F9] last:border-0">
-                  <td className="px-4 py-2.5"><SeverityBadge severity={e.severity} /></td>
-                  <td className="px-4 py-2.5 font-mono text-[12px] text-[#475569]">{e.event_type}</td>
+                <tr
+                  key={e.id}
+                  className="border-b border-[#F1F5F9] last:border-0"
+                >
+                  <td className="px-4 py-2.5">
+                    <SeverityBadge severity={e.severity} />
+                  </td>
+                  <td className="px-4 py-2.5 font-mono text-[12px] text-[#475569]">
+                    {e.event_type}
+                  </td>
                   <td className="px-4 py-2.5 text-[#0F172A]">{e.title}</td>
-                  <td className="px-4 py-2.5 text-[12px] text-[#64748B]">{fmtRelative(e.created_at)}</td>
+                  <td className="px-4 py-2.5 text-[12px] text-[#64748B]">
+                    {fmtRelative(e.created_at)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -349,7 +430,10 @@ function AuditTab() {
     let on = true;
     api
       .get("/security/audit", { params: { limit: 100 } })
-      .then(({ data }) => on && setEntries(Array.isArray(data?.entries) ? data.entries : []))
+      .then(
+        ({ data }) =>
+          on && setEntries(Array.isArray(data?.entries) ? data.entries : []),
+      )
       .catch((e) => toast.error(formatApiError(e)))
       .finally(() => on && setLoading(false));
     return () => {
@@ -358,7 +442,12 @@ function AuditTab() {
   }, []);
 
   if (loading) return <TabSpinner />;
-  if (!entries.length) return <p className="py-12 text-center text-sm text-[#94A3B8]">No audit entries.</p>;
+  if (!entries.length)
+    return (
+      <p className="py-12 text-center text-sm text-[#94A3B8]">
+        No audit entries.
+      </p>
+    );
 
   return (
     <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white">
@@ -380,9 +469,18 @@ function AuditTab() {
               </td>
               <td className="px-4 py-2.5 text-[#0F172A]">
                 {a.resource}
-                {a.resource_id ? <span className="text-[#94A3B8]"> · {a.resource_id.slice(0, 8)}</span> : ""}
+                {a.resource_id ? (
+                  <span className="text-[#94A3B8]">
+                    {" "}
+                    · {a.resource_id.slice(0, 8)}
+                  </span>
+                ) : (
+                  ""
+                )}
               </td>
-              <td className="px-4 py-2.5 text-[12px] text-[#64748B]">{fmtRelative(a.created_at)}</td>
+              <td className="px-4 py-2.5 text-[12px] text-[#64748B]">
+                {fmtRelative(a.created_at)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -418,7 +516,9 @@ function FlagsTab({ canManage }) {
     setBusyId(flag.id);
     try {
       await api.put(`/system/features/${flag.id}`, { enabled: !flag.enabled });
-      setFlags((prev) => prev.map((f) => (f.id === flag.id ? { ...f, enabled: !f.enabled } : f)));
+      setFlags((prev) =>
+        prev.map((f) => (f.id === flag.id ? { ...f, enabled: !f.enabled } : f)),
+      );
     } catch (e) {
       toast.error(formatApiError(e));
     } finally {
@@ -441,14 +541,21 @@ function FlagsTab({ canManage }) {
         </div>
       )}
       {flags.length === 0 ? (
-        <p className="py-12 text-center text-sm text-[#94A3B8]">No feature flags yet.</p>
+        <p className="py-12 text-center text-sm text-[#94A3B8]">
+          No feature flags yet.
+        </p>
       ) : (
         <div className="space-y-2">
           {flags.map((f) => (
-            <div key={f.id} className="flex items-center gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-4">
+            <div
+              key={f.id}
+              className="flex items-center gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-4"
+            >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="font-mono text-sm font-semibold text-[#0F172A]">{f.name}</p>
+                  <p className="font-mono text-sm font-semibold text-[#0F172A]">
+                    {f.name}
+                  </p>
                   <span className="rounded bg-[#F1F5F9] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#64748B]">
                     {f.environment}
                   </span>
@@ -456,8 +563,14 @@ function FlagsTab({ canManage }) {
                     {f.scope}
                   </span>
                 </div>
-                {f.description && <p className="mt-0.5 text-[12px] text-[#64748B]">{f.description}</p>}
-                <p className="mt-0.5 text-[11px] text-[#94A3B8]">Rollout {f.rollout_percentage}%</p>
+                {f.description && (
+                  <p className="mt-0.5 text-[12px] text-[#64748B]">
+                    {f.description}
+                  </p>
+                )}
+                <p className="mt-0.5 text-[11px] text-[#94A3B8]">
+                  Rollout {f.rollout_percentage}%
+                </p>
               </div>
               <button
                 onClick={() => canManage && toggle(f)}
@@ -499,7 +612,9 @@ function CreateFlagModal({ onClose, onCreated }) {
 
   const submit = async () => {
     if (!/^[a-z0-9_]+$/i.test(name.trim())) {
-      toast.error("Use a key like beta_feature (letters, numbers, underscores).");
+      toast.error(
+        "Use a key like beta_feature (letters, numbers, underscores).",
+      );
       return;
     }
     setSubmitting(true);
@@ -529,13 +644,18 @@ function CreateFlagModal({ onClose, onCreated }) {
       >
         <div className="flex items-start justify-between">
           <h2 className="text-lg font-bold text-[#0F172A]">New feature flag</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]">
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="mt-5 space-y-4">
           <div>
-            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">Key</label>
+            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">
+              Key
+            </label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -544,7 +664,9 @@ function CreateFlagModal({ onClose, onCreated }) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">Description</label>
+            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">
+              Description
+            </label>
             <input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -554,11 +676,17 @@ function CreateFlagModal({ onClose, onCreated }) {
           </div>
           <div className="flex items-center gap-4">
             <label className="flex items-center gap-2 text-sm text-[#334155]">
-              <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={enabled}
+                onChange={(e) => setEnabled(e.target.checked)}
+              />
               Enabled
             </label>
             <div className="flex items-center gap-2">
-              <label className="text-[12px] font-semibold text-[#334155]">Rollout %</label>
+              <label className="text-[12px] font-semibold text-[#334155]">
+                Rollout %
+              </label>
               <input
                 type="number"
                 min={0}
@@ -571,7 +699,10 @@ function CreateFlagModal({ onClose, onCreated }) {
           </div>
         </div>
         <div className="mt-6 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-xl px-4 py-2 text-sm font-semibold text-[#475569] hover:bg-[#F1F5F9]">
+          <button
+            onClick={onClose}
+            className="rounded-xl px-4 py-2 text-sm font-semibold text-[#475569] hover:bg-[#F1F5F9]"
+          >
             Cancel
           </button>
           <button
@@ -611,7 +742,9 @@ function ReadinessTab() {
     <div className="space-y-5">
       <div className="flex items-center gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-5">
         <div className="grid h-16 w-16 place-items-center rounded-2xl bg-[#F0FDF4]">
-          <span className="text-xl font-bold text-[#16A34A]">{data?.score ?? 0}%</span>
+          <span className="text-xl font-bold text-[#16A34A]">
+            {data?.score ?? 0}%
+          </span>
         </div>
         <div>
           <p className="text-sm font-bold text-[#0F172A]">Release readiness</p>
@@ -622,7 +755,10 @@ function ReadinessTab() {
       </div>
       <div className="grid gap-2 sm:grid-cols-2">
         {(data?.items || []).map((it) => (
-          <div key={it.area} className="flex items-start gap-3 rounded-2xl border border-[#E2E8F0] bg-white p-4">
+          <div
+            key={it.area}
+            className="flex items-start gap-3 rounded-2xl border border-[#E2E8F0] bg-white p-4"
+          >
             {it.status === "pass" ? (
               <CheckCircle2 className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[#16A34A]" />
             ) : (
@@ -684,27 +820,42 @@ function DeploymentsTab({ canManage }) {
         </div>
       )}
       {items.length === 0 ? (
-        <p className="py-12 text-center text-sm text-[#94A3B8]">No deployments recorded.</p>
+        <p className="py-12 text-center text-sm text-[#94A3B8]">
+          No deployments recorded.
+        </p>
       ) : (
         <div className="space-y-2">
           {items.map((d) => (
-            <div key={d.id} className="flex items-center gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-4">
+            <div
+              key={d.id}
+              className="flex items-center gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-4"
+            >
               <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#EEF2FF] text-[#4F46E5]">
                 <Rocket className="h-5 w-5" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="font-mono text-sm font-bold text-[#0F172A]">v{d.version}</p>
+                  <p className="font-mono text-sm font-bold text-[#0F172A]">
+                    v{d.version}
+                  </p>
                   <span className="rounded bg-[#F1F5F9] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#64748B]">
                     {d.environment}
                   </span>
                 </div>
-                {d.notes && <p className="mt-0.5 truncate text-[12px] text-[#64748B]">{d.notes}</p>}
+                {d.notes && (
+                  <p className="mt-0.5 truncate text-[12px] text-[#64748B]">
+                    {d.notes}
+                  </p>
+                )}
               </div>
-              <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize ${statusStyle[d.status] || statusStyle.pending}`}>
+              <span
+                className={`rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize ${statusStyle[d.status] || statusStyle.pending}`}
+              >
                 {String(d.status).replace(/_/g, " ")}
               </span>
-              <span className="shrink-0 text-[11px] text-[#94A3B8]">{fmtRelative(d.created_at)}</span>
+              <span className="shrink-0 text-[11px] text-[#94A3B8]">
+                {fmtRelative(d.created_at)}
+              </span>
             </div>
           ))}
         </div>
@@ -758,14 +909,21 @@ function RecordDeployModal({ onClose, onCreated }) {
         className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
       >
         <div className="flex items-start justify-between">
-          <h2 className="text-lg font-bold text-[#0F172A]">Record deployment</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]">
+          <h2 className="text-lg font-bold text-[#0F172A]">
+            Record deployment
+          </h2>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="mt-5 space-y-4">
           <div>
-            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">Version</label>
+            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">
+              Version
+            </label>
             <input
               value={version}
               onChange={(e) => setVersion(e.target.value)}
@@ -774,7 +932,9 @@ function RecordDeployModal({ onClose, onCreated }) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">Status</label>
+            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">
+              Status
+            </label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
@@ -788,7 +948,9 @@ function RecordDeployModal({ onClose, onCreated }) {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">Notes</label>
+            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">
+              Notes
+            </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -799,7 +961,10 @@ function RecordDeployModal({ onClose, onCreated }) {
           </div>
         </div>
         <div className="mt-6 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-xl px-4 py-2 text-sm font-semibold text-[#475569] hover:bg-[#F1F5F9]">
+          <button
+            onClick={onClose}
+            className="rounded-xl px-4 py-2 text-sm font-semibold text-[#475569] hover:bg-[#F1F5F9]"
+          >
             Cancel
           </button>
           <button
@@ -876,9 +1041,12 @@ export default function Operations() {
           <ShieldCheck className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-[#0F172A]">Operations & Security</h1>
+          <h1 className="text-xl font-bold text-[#0F172A]">
+            Operations & Security
+          </h1>
           <p className="text-sm text-[#64748B]">
-            System health, security scanning, audit trail, feature flags and release readiness.
+            System health, security scanning, audit trail, feature flags and
+            release readiness.
           </p>
         </div>
       </div>
@@ -889,7 +1057,9 @@ export default function Operations() {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-[13px] font-semibold transition ${
-              tab === t.key ? "bg-[#4F46E5] text-white" : "text-[#475569] hover:bg-[#F8FAFC]"
+              tab === t.key
+                ? "bg-[#4F46E5] text-white"
+                : "text-[#475569] hover:bg-[#F8FAFC]"
             }`}
           >
             <t.icon className="h-4 w-4" /> {t.label}

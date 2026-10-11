@@ -11,7 +11,10 @@ import App from "@/App";
 // exact message so all other warnings still surface.
 const __origWarn = console.warn;
 console.warn = (...args) => {
-  if (typeof args[0] === "string" && args[0].includes("of chart should be greater than 0")) {
+  if (
+    typeof args[0] === "string" &&
+    args[0].includes("of chart should be greater than 0")
+  ) {
     return;
   }
   __origWarn(...args);

@@ -63,7 +63,11 @@ export default function AuditLogs() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState({});
-  const [filters, setFilters] = useState({ action: "", resource: "", days: "" });
+  const [filters, setFilters] = useState({
+    action: "",
+    resource: "",
+    days: "",
+  });
   const [offset, setOffset] = useState(0);
 
   const load = useCallback(async () => {
@@ -121,7 +125,8 @@ export default function AuditLogs() {
             <ScrollText size={24} /> Audit Log
           </h1>
           <p className="mt-1 text-sm text-[#64748B]">
-            Every change in your workspace, captured for security and compliance.
+            Every change in your workspace, captured for security and
+            compliance.
           </p>
         </div>
         <button
@@ -146,7 +151,9 @@ export default function AuditLogs() {
         >
           <option value="">All actions</option>
           {(data?.actions || []).map((a) => (
-            <option key={a} value={a}>{a}</option>
+            <option key={a} value={a}>
+              {a}
+            </option>
           ))}
         </select>
         <select
@@ -157,7 +164,9 @@ export default function AuditLogs() {
         >
           <option value="">All resources</option>
           {(data?.resources || []).map((r) => (
-            <option key={r} value={r}>{r}</option>
+            <option key={r} value={r}>
+              {r}
+            </option>
           ))}
         </select>
         <select
@@ -193,7 +202,9 @@ export default function AuditLogs() {
           <div className="grid h-64 place-items-center px-6 text-center">
             <div>
               <ScrollText size={32} className="mx-auto text-[#CBD5E1]" />
-              <p className="mt-3 text-sm font-medium text-[#475569]">No audit events</p>
+              <p className="mt-3 text-sm font-medium text-[#475569]">
+                No audit events
+              </p>
               <p className="mt-1 text-xs text-[#94A3B8]">
                 {hasFilters
                   ? "No events match your filters."
@@ -210,7 +221,8 @@ export default function AuditLogs() {
                 <div key={l.id} data-testid={`audit-row-${l.id}`}>
                   <button
                     onClick={() =>
-                      hasDetail && setExpanded((e) => ({ ...e, [l.id]: !e[l.id] }))
+                      hasDetail &&
+                      setExpanded((e) => ({ ...e, [l.id]: !e[l.id] }))
                     }
                     className={`flex w-full items-center gap-3 px-4 py-3 text-left ${
                       hasDetail ? "hover:bg-[#F8FAFC]" : "cursor-default"
@@ -218,7 +230,11 @@ export default function AuditLogs() {
                   >
                     <span className="w-4 shrink-0 text-[#94A3B8]">
                       {hasDetail ? (
-                        open ? <ChevronDown size={15} /> : <ChevronRight size={15} />
+                        open ? (
+                          <ChevronDown size={15} />
+                        ) : (
+                          <ChevronRight size={15} />
+                        )
                       ) : null}
                     </span>
                     <span className="w-20 shrink-0">

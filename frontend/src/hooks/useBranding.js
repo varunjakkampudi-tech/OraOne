@@ -44,7 +44,7 @@ export function BrandingProvider({ children }) {
 
   const value = useMemo(
     () => ({ branding, loading, refresh }),
-    [branding, loading, refresh]
+    [branding, loading, refresh],
   );
 
   const style = branding?.primary_color

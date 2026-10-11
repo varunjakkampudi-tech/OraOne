@@ -31,9 +31,21 @@ const STATUS = {
 };
 
 const TYPES = [
-  { value: "bubble", label: "Chat bubble", hint: "Floating launcher in the corner" },
-  { value: "popup", label: "Auto popup", hint: "Opens automatically after a delay" },
-  { value: "button", label: "Inline button", hint: "Triggered by a page button" },
+  {
+    value: "bubble",
+    label: "Chat bubble",
+    hint: "Floating launcher in the corner",
+  },
+  {
+    value: "popup",
+    label: "Auto popup",
+    hint: "Opens automatically after a delay",
+  },
+  {
+    value: "button",
+    label: "Inline button",
+    hint: "Triggered by a page button",
+  },
   { value: "inline", label: "Inline embed", hint: "Rendered within the page" },
   { value: "fullpage", label: "Full page", hint: "Dedicated chat page" },
 ];
@@ -44,12 +56,22 @@ const POSITIONS = [
   { value: "inline", label: "Inline" },
 ];
 
-const PRESET_COLORS = ["#2563EB", "#7C3AED", "#0EA5E9", "#059669", "#DB2777", "#EA580C", "#0F172A"];
+const PRESET_COLORS = [
+  "#2563EB",
+  "#7C3AED",
+  "#0EA5E9",
+  "#059669",
+  "#DB2777",
+  "#EA580C",
+  "#0F172A",
+];
 
 function StatusBadge({ status }) {
   const s = STATUS[status] || STATUS.draft;
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${s.cls}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${s.cls}`}
+    >
       {s.label}
     </span>
   );
@@ -91,11 +113,12 @@ export default function Widgets() {
   const load = useCallback(async () => {
     try {
       const params = search ? { q: search } : undefined;
-      const [{ data: list }, { data: agentList }, { data: kbList }] = await Promise.all([
-        api.get("/widgets", { params }),
-        api.get("/agents", { params: { limit: 100 } }),
-        api.get("/knowledge-bases", { params: { limit: 100 } }),
-      ]);
+      const [{ data: list }, { data: agentList }, { data: kbList }] =
+        await Promise.all([
+          api.get("/widgets", { params }),
+          api.get("/agents", { params: { limit: 100 } }),
+          api.get("/knowledge-bases", { params: { limit: 100 } }),
+        ]);
       setItems(list.items || []);
       setAgents(agentList.items || []);
       setKbs(kbList.items || []);
@@ -122,7 +145,12 @@ export default function Widgets() {
   };
 
   const regenerate = async (w) => {
-    if (!window.confirm(`Regenerate the embed key for "${w.name}"? The old snippet will stop working.`)) return;
+    if (
+      !window.confirm(
+        `Regenerate the embed key for "${w.name}"? The old snippet will stop working.`,
+      )
+    )
+      return;
     try {
       await api.post(`/widgets/${w.id}/regenerate-key`);
       toast.success("Embed key regenerated");
@@ -150,7 +178,12 @@ export default function Widgets() {
     return [
       { icon: Code2, color: "#2563EB", label: "Widgets", value: total },
       { icon: Eye, color: "#059669", label: "Published", value: live },
-      { icon: MessageSquare, color: "#7C3AED", label: "Sessions", value: sessions },
+      {
+        icon: MessageSquare,
+        color: "#7C3AED",
+        label: "Sessions",
+        value: sessions,
+      },
     ];
   }, [items]);
 
@@ -158,7 +191,9 @@ export default function Widgets() {
     <div className="space-y-6" data-testid="widgets-page">
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0F172A]">Website Widgets</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0F172A]">
+            Website Widgets
+          </h2>
           <p className="text-sm text-[#64748B] mt-1">
             Embed your AI assistant on any website with a single line of code.
           </p>
@@ -175,7 +210,10 @@ export default function Widgets() {
       {/* KPIs */}
       <div className="grid grid-cols-3 gap-4">
         {kpis.map((k) => (
-          <div key={k.label} className="bg-white border border-[#E2E8F0] rounded-2xl p-4">
+          <div
+            key={k.label}
+            className="bg-white border border-[#E2E8F0] rounded-2xl p-4"
+          >
             <div className="flex items-center gap-3">
               <div
                 className="h-10 w-10 rounded-xl flex items-center justify-center"
@@ -184,7 +222,9 @@ export default function Widgets() {
                 <k.icon size={18} />
               </div>
               <div>
-                <div className="text-2xl font-bold text-[#0F172A]">{k.value}</div>
+                <div className="text-2xl font-bold text-[#0F172A]">
+                  {k.value}
+                </div>
                 <div className="text-xs text-[#64748B]">{k.label}</div>
               </div>
             </div>
@@ -194,7 +234,10 @@ export default function Widgets() {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+        <Search
+          size={16}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+        />
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -211,9 +254,12 @@ export default function Widgets() {
       ) : items.length === 0 ? (
         <div className="bg-white border border-dashed border-[#CBD5E1] rounded-2xl p-12 text-center">
           <Code2 size={40} className="mx-auto text-[#CBD5E1]" />
-          <h3 className="mt-3 text-lg font-semibold text-[#0F172A]">No widgets yet</h3>
+          <h3 className="mt-3 text-lg font-semibold text-[#0F172A]">
+            No widgets yet
+          </h3>
           <p className="text-sm text-[#64748B] mt-1">
-            Create a widget, connect an agent and knowledge base, then drop the snippet on your site.
+            Create a widget, connect an agent and knowledge base, then drop the
+            snippet on your site.
           </p>
           <button
             onClick={() => setEditing("new")}
@@ -257,14 +303,26 @@ export default function Widgets() {
 
       <AnimatePresence>
         {analytics && (
-          <AnalyticsDrawer widget={analytics} onClose={() => setAnalytics(null)} />
+          <AnalyticsDrawer
+            widget={analytics}
+            onClose={() => setAnalytics(null)}
+          />
         )}
       </AnimatePresence>
     </div>
   );
 }
 
-function WidgetCard({ widget: w, agents, kbs, onEdit, onAnalytics, onTogglePublish, onRegenerate, onRemove }) {
+function WidgetCard({
+  widget: w,
+  agents,
+  kbs,
+  onEdit,
+  onAnalytics,
+  onTogglePublish,
+  onRegenerate,
+  onRemove,
+}) {
   const agent = agents.find((a) => a.id === w.agent_id);
   const kb = kbs.find((k) => k.id === w.knowledge_base_id);
   const color = w.theme?.primary_color || "#2563EB";
@@ -274,10 +332,15 @@ function WidgetCard({ widget: w, agents, kbs, onEdit, onAnalytics, onTogglePubli
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: `${color}1A`, color }}>
+            <span
+              className="h-7 w-7 rounded-lg flex items-center justify-center"
+              style={{ background: `${color}1A`, color }}
+            >
               <Sparkles size={14} />
             </span>
-            <h3 className="text-base font-semibold text-[#0F172A] truncate">{w.name}</h3>
+            <h3 className="text-base font-semibold text-[#0F172A] truncate">
+              {w.name}
+            </h3>
             <StatusBadge status={w.status} />
             <span className="text-[11px] px-2 py-0.5 rounded-md bg-[#F1F5F9] text-[#64748B] capitalize">
               {(w.widget_type || "bubble").replace("-", " ")}
@@ -295,7 +358,8 @@ function WidgetCard({ widget: w, agents, kbs, onEdit, onAnalytics, onTogglePubli
             </span>
             {w.domains?.length > 0 && (
               <span className="inline-flex items-center gap-1">
-                <Users size={13} /> {w.domains.length} domain{w.domains.length > 1 ? "s" : ""}
+                <Users size={13} /> {w.domains.length} domain
+                {w.domains.length > 1 ? "s" : ""}
               </span>
             )}
           </div>
@@ -305,7 +369,11 @@ function WidgetCard({ widget: w, agents, kbs, onEdit, onAnalytics, onTogglePubli
             <code className="text-[11px] leading-relaxed text-[#E2E8F0] break-all flex-1 font-mono">
               {w.embed_snippet}
             </code>
-            <CopyButton text={w.embed_snippet || ""} className="text-[#93C5FD] hover:text-white shrink-0" label="" />
+            <CopyButton
+              text={w.embed_snippet || ""}
+              className="text-[#93C5FD] hover:text-white shrink-0"
+              label=""
+            />
           </div>
         </div>
 
@@ -313,7 +381,9 @@ function WidgetCard({ widget: w, agents, kbs, onEdit, onAnalytics, onTogglePubli
           <button
             onClick={onTogglePublish}
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${
-              published ? "bg-amber-50 text-amber-700 hover:bg-amber-100" : "bg-green-50 text-green-700 hover:bg-green-100"
+              published
+                ? "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                : "bg-green-50 text-green-700 hover:bg-green-100"
             }`}
           >
             {published ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -392,9 +462,13 @@ function WidgetPreview({ form }) {
                 <Bot size={15} />
               </span>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{form.agent_name || "Ora AI"}</p>
+                <p className="truncate text-sm font-semibold">
+                  {form.agent_name || "Ora AI"}
+                </p>
                 {form.company_name ? (
-                  <p className="truncate text-[11px] opacity-80">{form.company_name}</p>
+                  <p className="truncate text-[11px] opacity-80">
+                    {form.company_name}
+                  </p>
                 ) : (
                   <p className="text-[11px] opacity-80">Online</p>
                 )}
@@ -419,7 +493,10 @@ function WidgetPreview({ form }) {
             <div className="flex-1 rounded-full bg-[#F1F5F9] px-3 py-1.5 text-[11px] text-[#94A3B8]">
               Type your message…
             </div>
-            <span className="grid h-6 w-6 place-items-center rounded-full text-white" style={{ background: color }}>
+            <span
+              className="grid h-6 w-6 place-items-center rounded-full text-white"
+              style={{ background: color }}
+            >
               <ArrowUpRight size={12} />
             </span>
           </div>
@@ -438,7 +515,8 @@ function WidgetPreview({ form }) {
         </div>
       </div>
       <p className="mt-2 text-center text-[11px] text-[#94A3B8]">
-        Preview updates as you edit · {TYPES.find((t) => t.value === form.widget_type)?.label}
+        Preview updates as you edit ·{" "}
+        {TYPES.find((t) => t.value === form.widget_type)?.label}
       </p>
     </div>
   );
@@ -456,7 +534,8 @@ function WidgetModal({ widget, agents, kbs, onClose, onSaved }) {
     primary_color: widget?.theme?.primary_color || "#2563EB",
     agent_name: widget?.settings?.agent_name || "Ora AI",
     company_name: widget?.settings?.company_name || "",
-    welcome_message: widget?.settings?.welcome_message || "Hi! 👋 How can I help you today?",
+    welcome_message:
+      widget?.settings?.welcome_message || "Hi! 👋 How can I help you today?",
     suggested: (widget?.settings?.suggested_questions || []).join("\n"),
     domains: (widget?.domains || []).join("\n"),
     show_branding: widget?.settings?.show_branding ?? true,
@@ -478,18 +557,28 @@ function WidgetModal({ widget, agents, kbs, onClose, onSaved }) {
       knowledge_base_id: form.knowledge_base_id || null,
       widget_type: form.widget_type,
       position: form.position,
-      theme: { ...(widget?.theme || {}), primary_color: form.primary_color, bubble_color: form.primary_color },
+      theme: {
+        ...(widget?.theme || {}),
+        primary_color: form.primary_color,
+        bubble_color: form.primary_color,
+      },
       settings: {
         ...(widget?.settings || {}),
         agent_name: form.agent_name,
         company_name: form.company_name || null,
         welcome_message: form.welcome_message,
-        suggested_questions: form.suggested.split("\n").map((s) => s.trim()).filter(Boolean),
+        suggested_questions: form.suggested
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean),
         show_branding: form.show_branding,
         collect_leads: form.collect_leads,
         enable_escalation: form.enable_escalation,
       },
-      domains: form.domains.split("\n").map((s) => s.trim()).filter(Boolean),
+      domains: form.domains
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean),
     };
     try {
       if (isEdit) {
@@ -523,139 +612,189 @@ function WidgetModal({ widget, agents, kbs, onClose, onSaved }) {
         className="bg-white rounded-2xl w-full max-w-4xl max-h-[88vh] overflow-y-auto shadow-2xl"
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#EEF2F7] sticky top-0 bg-white z-10">
-          <h3 className="text-lg font-bold text-[#0F172A]">{isEdit ? "Edit widget" : "New widget"}</h3>
-          <button onClick={onClose} className="text-[#94A3B8] hover:text-[#0F172A]">
+          <h3 className="text-lg font-bold text-[#0F172A]">
+            {isEdit ? "Edit widget" : "New widget"}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-[#94A3B8] hover:text-[#0F172A]"
+          >
             <X size={20} />
           </button>
         </div>
 
         <div className="grid md:grid-cols-[1fr_320px]">
-        <div className="p-6 space-y-5">
-          <Field label="Name">
-            <input className={inputCls} value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Support assistant" />
-          </Field>
-
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="Agent" hint="answers visitors">
-              <select className={inputCls} value={form.agent_id} onChange={(e) => set("agent_id", e.target.value)}>
-                <option value="">Auto (first active agent)</option>
-                {agents.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Knowledge base" hint="grounds answers">
-              <select
-                className={inputCls}
-                value={form.knowledge_base_id}
-                onChange={(e) => set("knowledge_base_id", e.target.value)}
-              >
-                <option value="">All organization knowledge</option>
-                {kbs.map((k) => (
-                  <option key={k.id} value={k.id}>
-                    {k.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="Type">
-              <select className={inputCls} value={form.widget_type} onChange={(e) => set("widget_type", e.target.value)}>
-                {TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Position">
-              <select className={inputCls} value={form.position} onChange={(e) => set("position", e.target.value)}>
-                {POSITIONS.map((p) => (
-                  <option key={p.value} value={p.value}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          </div>
-
-          <Field label="Brand color">
-            <div className="flex items-center gap-2 flex-wrap">
-              {PRESET_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => set("primary_color", c)}
-                  className={`h-8 w-8 rounded-lg border-2 ${form.primary_color === c ? "border-[#0F172A]" : "border-transparent"}`}
-                  style={{ background: c }}
-                />
-              ))}
+          <div className="p-6 space-y-5">
+            <Field label="Name">
               <input
-                type="color"
-                value={form.primary_color}
-                onChange={(e) => set("primary_color", e.target.value)}
-                className="h-8 w-10 rounded-lg border border-[#E2E8F0] bg-white p-0.5"
+                className={inputCls}
+                value={form.name}
+                onChange={(e) => set("name", e.target.value)}
+                placeholder="Support assistant"
+              />
+            </Field>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Agent" hint="answers visitors">
+                <select
+                  className={inputCls}
+                  value={form.agent_id}
+                  onChange={(e) => set("agent_id", e.target.value)}
+                >
+                  <option value="">Auto (first active agent)</option>
+                  {agents.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Knowledge base" hint="grounds answers">
+                <select
+                  className={inputCls}
+                  value={form.knowledge_base_id}
+                  onChange={(e) => set("knowledge_base_id", e.target.value)}
+                >
+                  <option value="">All organization knowledge</option>
+                  {kbs.map((k) => (
+                    <option key={k.id} value={k.id}>
+                      {k.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Type">
+                <select
+                  className={inputCls}
+                  value={form.widget_type}
+                  onChange={(e) => set("widget_type", e.target.value)}
+                >
+                  {TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Position">
+                <select
+                  className={inputCls}
+                  value={form.position}
+                  onChange={(e) => set("position", e.target.value)}
+                >
+                  {POSITIONS.map((p) => (
+                    <option key={p.value} value={p.value}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+
+            <Field label="Brand color">
+              <div className="flex items-center gap-2 flex-wrap">
+                {PRESET_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => set("primary_color", c)}
+                    className={`h-8 w-8 rounded-lg border-2 ${form.primary_color === c ? "border-[#0F172A]" : "border-transparent"}`}
+                    style={{ background: c }}
+                  />
+                ))}
+                <input
+                  type="color"
+                  value={form.primary_color}
+                  onChange={(e) => set("primary_color", e.target.value)}
+                  className="h-8 w-10 rounded-lg border border-[#E2E8F0] bg-white p-0.5"
+                />
+              </div>
+            </Field>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Assistant name">
+                <input
+                  className={inputCls}
+                  value={form.agent_name}
+                  onChange={(e) => set("agent_name", e.target.value)}
+                />
+              </Field>
+              <Field label="Company name" hint="optional">
+                <input
+                  className={inputCls}
+                  value={form.company_name}
+                  onChange={(e) => set("company_name", e.target.value)}
+                />
+              </Field>
+            </div>
+
+            <Field label="Welcome message">
+              <textarea
+                rows={2}
+                className={inputCls}
+                value={form.welcome_message}
+                onChange={(e) => set("welcome_message", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Suggested questions" hint="one per line">
+              <textarea
+                rows={3}
+                className={inputCls}
+                value={form.suggested}
+                onChange={(e) => set("suggested", e.target.value)}
+                placeholder={
+                  "How do I get started?\nWhat are your pricing plans?"
+                }
+              />
+            </Field>
+
+            <Field
+              label="Allowed domains"
+              hint="one per line, empty = any domain"
+            >
+              <textarea
+                rows={2}
+                className={inputCls}
+                value={form.domains}
+                onChange={(e) => set("domains", e.target.value)}
+                placeholder={"example.com\napp.example.com"}
+              />
+            </Field>
+
+            <div className="flex flex-wrap gap-4">
+              <Toggle
+                label="Collect leads"
+                checked={form.collect_leads}
+                onChange={(v) => set("collect_leads", v)}
+              />
+              <Toggle
+                label="Allow escalation"
+                checked={form.enable_escalation}
+                onChange={(v) => set("enable_escalation", v)}
+              />
+              <Toggle
+                label="Show branding"
+                checked={form.show_branding}
+                onChange={(v) => set("show_branding", v)}
               />
             </div>
-          </Field>
-
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="Assistant name">
-              <input className={inputCls} value={form.agent_name} onChange={(e) => set("agent_name", e.target.value)} />
-            </Field>
-            <Field label="Company name" hint="optional">
-              <input className={inputCls} value={form.company_name} onChange={(e) => set("company_name", e.target.value)} />
-            </Field>
           </div>
-
-          <Field label="Welcome message">
-            <textarea
-              rows={2}
-              className={inputCls}
-              value={form.welcome_message}
-              onChange={(e) => set("welcome_message", e.target.value)}
-            />
-          </Field>
-
-          <Field label="Suggested questions" hint="one per line">
-            <textarea
-              rows={3}
-              className={inputCls}
-              value={form.suggested}
-              onChange={(e) => set("suggested", e.target.value)}
-              placeholder={"How do I get started?\nWhat are your pricing plans?"}
-            />
-          </Field>
-
-          <Field label="Allowed domains" hint="one per line, empty = any domain">
-            <textarea
-              rows={2}
-              className={inputCls}
-              value={form.domains}
-              onChange={(e) => set("domains", e.target.value)}
-              placeholder={"example.com\napp.example.com"}
-            />
-          </Field>
-
-          <div className="flex flex-wrap gap-4">
-            <Toggle label="Collect leads" checked={form.collect_leads} onChange={(v) => set("collect_leads", v)} />
-            <Toggle label="Allow escalation" checked={form.enable_escalation} onChange={(v) => set("enable_escalation", v)} />
-            <Toggle label="Show branding" checked={form.show_branding} onChange={(v) => set("show_branding", v)} />
+          <div className="hidden md:block border-l border-[#EEF2F7] bg-[#FBFCFE] p-4">
+            <div className="sticky top-20">
+              <WidgetPreview form={form} />
+            </div>
           </div>
-        </div>
-        <div className="hidden md:block border-l border-[#EEF2F7] bg-[#FBFCFE] p-4">
-          <div className="sticky top-20">
-            <WidgetPreview form={form} />
-          </div>
-        </div>
         </div>
 
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#EEF2F7] sticky bottom-0 bg-white">
-          <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm font-semibold text-[#475569] hover:bg-[#F1F5F9]">
+          <button
+            onClick={onClose}
+            className="px-4 py-2.5 rounded-xl text-sm font-semibold text-[#475569] hover:bg-[#F1F5F9]"
+          >
             Cancel
           </button>
           <button
@@ -714,12 +853,32 @@ function AnalyticsDrawer({ widget, onClose }) {
 
   const stats = data
     ? [
-        { label: "Sessions", value: data.sessions, icon: MessageSquare, color: "#2563EB" },
-        { label: "Conversations", value: data.conversations, icon: Bot, color: "#7C3AED" },
-        { label: "Messages", value: data.messages, icon: ArrowUpRight, color: "#0EA5E9" },
+        {
+          label: "Sessions",
+          value: data.sessions,
+          icon: MessageSquare,
+          color: "#2563EB",
+        },
+        {
+          label: "Conversations",
+          value: data.conversations,
+          icon: Bot,
+          color: "#7C3AED",
+        },
+        {
+          label: "Messages",
+          value: data.messages,
+          icon: ArrowUpRight,
+          color: "#0EA5E9",
+        },
         { label: "Opens", value: data.opens, icon: Eye, color: "#059669" },
         { label: "Leads", value: data.leads, icon: Users, color: "#DB2777" },
-        { label: "Escalations", value: data.escalations, icon: AlertTriangle, color: "#EA580C" },
+        {
+          label: "Escalations",
+          value: data.escalations,
+          icon: AlertTriangle,
+          color: "#EA580C",
+        },
       ]
     : [];
 
@@ -743,7 +902,10 @@ function AnalyticsDrawer({ widget, onClose }) {
             <h3 className="text-lg font-bold text-[#0F172A]">Analytics</h3>
             <p className="text-xs text-[#64748B]">{widget.name}</p>
           </div>
-          <button onClick={onClose} className="text-[#94A3B8] hover:text-[#0F172A]">
+          <button
+            onClick={onClose}
+            className="text-[#94A3B8] hover:text-[#0F172A]"
+          >
             <X size={20} />
           </button>
         </div>
@@ -756,11 +918,19 @@ function AnalyticsDrawer({ widget, onClose }) {
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-2 gap-3">
               {stats.map((s) => (
-                <div key={s.label} className="border border-[#E2E8F0] rounded-xl p-4">
-                  <div className="h-9 w-9 rounded-lg flex items-center justify-center mb-2" style={{ background: `${s.color}14`, color: s.color }}>
+                <div
+                  key={s.label}
+                  className="border border-[#E2E8F0] rounded-xl p-4"
+                >
+                  <div
+                    className="h-9 w-9 rounded-lg flex items-center justify-center mb-2"
+                    style={{ background: `${s.color}14`, color: s.color }}
+                  >
                     <s.icon size={16} />
                   </div>
-                  <div className="text-2xl font-bold text-[#0F172A]">{s.value ?? 0}</div>
+                  <div className="text-2xl font-bold text-[#0F172A]">
+                    {s.value ?? 0}
+                  </div>
                   <div className="text-xs text-[#64748B]">{s.label}</div>
                 </div>
               ))}
@@ -768,20 +938,33 @@ function AnalyticsDrawer({ widget, onClose }) {
 
             {data?.avg_csat != null && (
               <div className="border border-[#E2E8F0] rounded-xl p-4">
-                <div className="text-xs text-[#64748B]">Average satisfaction</div>
-                <div className="text-2xl font-bold text-[#0F172A] mt-1">{data.avg_csat.toFixed(1)} / 5</div>
+                <div className="text-xs text-[#64748B]">
+                  Average satisfaction
+                </div>
+                <div className="text-2xl font-bold text-[#0F172A] mt-1">
+                  {data.avg_csat.toFixed(1)} / 5
+                </div>
               </div>
             )}
 
             {data?.top_questions?.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold text-[#0F172A] mb-2">Top questions</h4>
+                <h4 className="text-sm font-semibold text-[#0F172A] mb-2">
+                  Top questions
+                </h4>
                 <div className="space-y-2">
                   {data.top_questions.slice(0, 8).map((q, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm text-[#334155]">
+                    <div
+                      key={i}
+                      className="flex items-start gap-2 text-sm text-[#334155]"
+                    >
                       <span className="text-[#94A3B8]">{i + 1}.</span>
                       <span className="flex-1">{q.question || q.text}</span>
-                      {q.count != null && <span className="text-xs text-[#94A3B8]">{q.count}×</span>}
+                      {q.count != null && (
+                        <span className="text-xs text-[#94A3B8]">
+                          {q.count}×
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>

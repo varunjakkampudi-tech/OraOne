@@ -24,20 +24,20 @@ const STORAGE_KEY = "oraone_analytics_consent";
 
 /** Canonical event name registry — keep in sync with product specs. */
 export const EVENTS = Object.freeze({
-  PAGE_VIEW:          "page_view",
-  SIGNUP:             "signup",
-  LOGIN:              "login",
-  LOGOUT:             "logout",
-  CREATE_AGENT:       "create_agent",
-  CONNECT_WHATSAPP:   "connect_whatsapp",
-  CONNECT_INTEGRATION:"connect_integration",
-  CREATE_LEAD:        "create_lead",
-  EXPORT_LEADS:       "export_leads",
-  BOOK_DEMO:          "book_demo",
-  START_FREE:         "start_free",
-  DEPLOY_TEMPLATE:    "deploy_template",
-  UPLOAD_KNOWLEDGE:   "upload_knowledge",
-  INVITE_TEAM:        "invite_team",
+  PAGE_VIEW: "page_view",
+  SIGNUP: "signup",
+  LOGIN: "login",
+  LOGOUT: "logout",
+  CREATE_AGENT: "create_agent",
+  CONNECT_WHATSAPP: "connect_whatsapp",
+  CONNECT_INTEGRATION: "connect_integration",
+  CREATE_LEAD: "create_lead",
+  EXPORT_LEADS: "export_leads",
+  BOOK_DEMO: "book_demo",
+  START_FREE: "start_free",
+  DEPLOY_TEMPLATE: "deploy_template",
+  UPLOAD_KNOWLEDGE: "upload_knowledge",
+  INVITE_TEAM: "invite_team",
 });
 
 let buffer = [];
@@ -55,7 +55,11 @@ function readConsent() {
 /** Update consent and flush/discard the buffer accordingly. */
 export function setConsent(next) {
   consent = next;
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* storage blocked */ }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    /* storage blocked */
+  }
   if (next?.analytics) {
     buffer.forEach(({ name, props }) => dispatch(name, props));
   }
@@ -78,11 +82,17 @@ function dispatch(name, props) {
   }
   // Microsoft Clarity custom events
   if (typeof window !== "undefined" && typeof window.clarity === "function") {
-    try { window.clarity("event", name); } catch { /* clarity rejects long names */ }
+    try {
+      window.clarity("event", name);
+    } catch {
+      /* clarity rejects long names */
+    }
   }
   // Always emit a CustomEvent so test agents / Sentry breadcrumbs can listen
   if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent("oraone:analytics", { detail: { name, props } }));
+    window.dispatchEvent(
+      new CustomEvent("oraone:analytics", { detail: { name, props } }),
+    );
   }
 }
 
@@ -112,5 +122,8 @@ export function identify(userId, traits = {}) {
 
 /** Track page views (called on every route change). */
 export function trackPageView(path) {
-  track(EVENTS.PAGE_VIEW, { path: path || (typeof window !== "undefined" ? window.location.pathname : "") });
+  track(EVENTS.PAGE_VIEW, {
+    path:
+      path || (typeof window !== "undefined" ? window.location.pathname : ""),
+  });
 }

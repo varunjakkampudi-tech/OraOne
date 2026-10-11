@@ -31,9 +31,12 @@ export function useConversationMessages(id) {
 export function useSendMessage() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }) => conversationsService.sendMessage(id, payload),
+    mutationFn: ({ id, payload }) =>
+      conversationsService.sendMessage(id, payload),
     onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: conversationKeys.messages(id) });
+      queryClient.invalidateQueries({
+        queryKey: conversationKeys.messages(id),
+      });
       queryClient.invalidateQueries({ queryKey: conversationKeys.lists() });
     },
   });
@@ -43,7 +46,8 @@ export function useUpdateConversation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, payload }) => conversationsService.update(id, payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: conversationKeys.all }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: conversationKeys.all }),
   });
 }
 
@@ -51,6 +55,7 @@ export function useDeleteConversation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id) => conversationsService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: conversationKeys.lists() }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: conversationKeys.lists() }),
   });
 }

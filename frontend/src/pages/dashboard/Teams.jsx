@@ -21,7 +21,14 @@ const ROLE_STYLES = {
   viewer: "bg-[#F1F5F9] text-[#475569]",
 };
 
-const TEAM_COLORS = ["#6366F1", "#0891B2", "#16A34A", "#B45309", "#A21CAF", "#DC2626"];
+const TEAM_COLORS = [
+  "#6366F1",
+  "#0891B2",
+  "#16A34A",
+  "#B45309",
+  "#A21CAF",
+  "#DC2626",
+];
 
 function initials(name = "") {
   return name
@@ -35,7 +42,9 @@ function initials(name = "") {
 function RoleBadge({ role }) {
   const cls = ROLE_STYLES[role] || ROLE_STYLES.viewer;
   return (
-    <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize ${cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize ${cls}`}
+    >
       {role === "lead" && <Crown className="h-3 w-3" />}
       {role}
     </span>
@@ -78,13 +87,18 @@ function CreateTeamModal({ onClose, onCreated }) {
       >
         <div className="flex items-start justify-between">
           <h2 className="text-lg font-bold text-[#0F172A]">New team</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]">
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="mt-5 space-y-4">
           <div>
-            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">Name</label>
+            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">
+              Name
+            </label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -93,7 +107,9 @@ function CreateTeamModal({ onClose, onCreated }) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">Description</label>
+            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">
+              Description
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -103,7 +119,9 @@ function CreateTeamModal({ onClose, onCreated }) {
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-[12px] font-semibold text-[#334155]">Color</label>
+            <label className="mb-1.5 block text-[12px] font-semibold text-[#334155]">
+              Color
+            </label>
             <div className="flex gap-2">
               {TEAM_COLORS.map((c) => (
                 <button
@@ -121,7 +139,10 @@ function CreateTeamModal({ onClose, onCreated }) {
           </div>
         </div>
         <div className="mt-6 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-xl px-4 py-2 text-sm font-semibold text-[#475569] hover:bg-[#F1F5F9]">
+          <button
+            onClick={onClose}
+            className="rounded-xl px-4 py-2 text-sm font-semibold text-[#475569] hover:bg-[#F1F5F9]"
+          >
             Cancel
           </button>
           <button
@@ -164,11 +185,11 @@ function TeamDetailDrawer({ teamId, members, canManage, onClose, onChanged }) {
 
   const memberUserIds = useMemo(
     () => new Set((team?.members || []).map((m) => m.user_id)),
-    [team]
+    [team],
   );
   const candidates = useMemo(
     () => members.filter((m) => !memberUserIds.has(m.user_id)),
-    [members, memberUserIds]
+    [members, memberUserIds],
   );
 
   const addMember = async () => {
@@ -178,7 +199,10 @@ function TeamDetailDrawer({ teamId, members, canManage, onClose, onChanged }) {
     }
     setBusy(true);
     try {
-      await api.post(`/teams/${teamId}/members`, { user_id: pickUser, role: pickRole });
+      await api.post(`/teams/${teamId}/members`, {
+        user_id: pickUser,
+        role: pickRole,
+      });
       toast.success("Member added");
       setAdding(false);
       setPickUser("");
@@ -223,11 +247,18 @@ function TeamDetailDrawer({ teamId, members, canManage, onClose, onChanged }) {
               <Users2 className="h-4.5 w-4.5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-[#0F172A]">{team?.name || "Team"}</h2>
-              <p className="text-[12px] text-[#94A3B8]">{team?.members?.length || 0} members</p>
+              <h2 className="text-sm font-bold text-[#0F172A]">
+                {team?.name || "Team"}
+              </h2>
+              <p className="text-[12px] text-[#94A3B8]">
+                {team?.members?.length || 0} members
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]">
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -239,11 +270,15 @@ function TeamDetailDrawer({ teamId, members, canManage, onClose, onChanged }) {
         ) : (
           <div className="flex-1 overflow-y-auto p-5">
             {team?.description && (
-              <p className="mb-4 rounded-xl bg-[#F8FAFC] px-3 py-2.5 text-sm text-[#475569]">{team.description}</p>
+              <p className="mb-4 rounded-xl bg-[#F8FAFC] px-3 py-2.5 text-sm text-[#475569]">
+                {team.description}
+              </p>
             )}
 
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-[12px] font-bold uppercase tracking-wide text-[#94A3B8]">Members</h3>
+              <h3 className="text-[12px] font-bold uppercase tracking-wide text-[#94A3B8]">
+                Members
+              </h3>
               {canManage && !adding && (
                 <button
                   onClick={() => setAdding(true)}
@@ -306,8 +341,12 @@ function TeamDetailDrawer({ teamId, members, canManage, onClose, onChanged }) {
                     {initials(m.user?.name) || "•"}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-[#0F172A]">{m.user?.name || "Member"}</p>
-                    <p className="truncate text-[11px] text-[#94A3B8]">{m.user?.email}</p>
+                    <p className="truncate text-sm font-medium text-[#0F172A]">
+                      {m.user?.name || "Member"}
+                    </p>
+                    <p className="truncate text-[11px] text-[#94A3B8]">
+                      {m.user?.email}
+                    </p>
                   </div>
                   <RoleBadge role={m.role} />
                   {canManage && (
@@ -343,7 +382,10 @@ export default function Teams() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [t, m] = await Promise.all([api.get("/teams"), api.get("/collab/members")]);
+      const [t, m] = await Promise.all([
+        api.get("/teams"),
+        api.get("/collab/members"),
+      ]);
       setTeams(Array.isArray(t.data) ? t.data : t.data?.teams || []);
       setMembers(Array.isArray(m.data?.members) ? m.data.members : []);
     } catch (e) {
@@ -358,7 +400,8 @@ export default function Teams() {
   }, [load]);
 
   const remove = async (team) => {
-    if (!window.confirm(`Delete team "${team.name}"? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete team "${team.name}"? This cannot be undone.`))
+      return;
     setBusyId(team.id);
     try {
       await api.delete(`/teams/${team.id}`);
@@ -393,7 +436,8 @@ export default function Teams() {
           <div>
             <h1 className="text-xl font-bold text-[#0F172A]">Teams</h1>
             <p className="text-sm text-[#64748B]">
-              Group members into departments and share resources with the whole team at once.
+              Group members into departments and share resources with the whole
+              team at once.
             </p>
           </div>
         </div>
@@ -410,8 +454,12 @@ export default function Teams() {
       {teams.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[#CBD5E1] bg-white py-16 text-center">
           <Users2 className="mx-auto h-8 w-8 text-[#CBD5E1]" />
-          <p className="mt-3 text-sm font-medium text-[#475569]">No teams yet</p>
-          <p className="text-[13px] text-[#94A3B8]">Create your first team to start collaborating.</p>
+          <p className="mt-3 text-sm font-medium text-[#475569]">
+            No teams yet
+          </p>
+          <p className="text-[13px] text-[#94A3B8]">
+            Create your first team to start collaborating.
+          </p>
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -420,7 +468,10 @@ export default function Teams() {
               key={team.id}
               className="group relative rounded-2xl border border-[#E2E8F0] bg-white p-4 transition hover:border-[#C7D2FE] hover:shadow-sm"
             >
-              <button onClick={() => setOpenTeam(team.id)} className="block w-full text-left">
+              <button
+                onClick={() => setOpenTeam(team.id)}
+                className="block w-full text-left"
+              >
                 <div className="flex items-center gap-3">
                   <div
                     className="grid h-10 w-10 place-items-center rounded-xl text-white"
@@ -429,12 +480,18 @@ export default function Teams() {
                     <Users2 className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-[#0F172A]">{team.name}</p>
-                    <p className="text-[12px] text-[#94A3B8]">{team.member_count ?? team.members?.length ?? 0} members</p>
+                    <p className="truncate text-sm font-bold text-[#0F172A]">
+                      {team.name}
+                    </p>
+                    <p className="text-[12px] text-[#94A3B8]">
+                      {team.member_count ?? team.members?.length ?? 0} members
+                    </p>
                   </div>
                 </div>
                 {team.description && (
-                  <p className="mt-3 line-clamp-2 text-[13px] text-[#64748B]">{team.description}</p>
+                  <p className="mt-3 line-clamp-2 text-[13px] text-[#64748B]">
+                    {team.description}
+                  </p>
                 )}
               </button>
               <div className="mt-3 flex items-center justify-between">

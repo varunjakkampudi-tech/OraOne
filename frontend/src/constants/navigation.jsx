@@ -34,45 +34,110 @@ import { DASH } from "@/constants/testIds";
 export const NAV_GROUPS = [
   {
     items: [
-      { to: "/app/dashboard", icon: LayoutDashboard, label: "Dashboard", id: DASH.sidebarOverview, end: true },
+      {
+        to: "/app/dashboard",
+        icon: LayoutDashboard,
+        label: "Dashboard",
+        id: DASH.sidebarOverview,
+        end: true,
+      },
     ],
   },
   {
     label: "AI Agents",
     items: [
-      { to: "/app/agents", icon: Bot, label: "Chat Agents", id: DASH.sidebarAgents, tour: "nav-agents" },
-      { to: "/app/agents/whatsapp", icon: MessageCircle, label: "WhatsApp Agents", id: "nav-whatsapp-agents", disabled: true, badge: "Soon" },
-      { to: "/app/agents/call", icon: Phone, label: "Call Agents", id: "nav-call-agents", disabled: true, badge: "Soon" },
+      {
+        to: "/app/agents",
+        icon: Bot,
+        label: "Chat Agents",
+        id: DASH.sidebarAgents,
+        tour: "nav-agents",
+      },
+      {
+        to: "/app/agents/whatsapp",
+        icon: MessageCircle,
+        label: "WhatsApp Agents",
+        id: "nav-whatsapp-agents",
+        disabled: true,
+        badge: "Soon",
+      },
+      {
+        to: "/app/agents/call",
+        icon: Phone,
+        label: "Call Agents",
+        id: "nav-call-agents",
+        disabled: true,
+        badge: "Soon",
+      },
     ],
   },
   {
     label: "Engage",
     items: [
-      { to: "/app/conversations", icon: MessagesSquare, label: "Conversations", id: DASH.sidebarConversations, tour: "nav-conversations" },
+      {
+        to: "/app/conversations",
+        icon: MessagesSquare,
+        label: "Conversations",
+        id: DASH.sidebarConversations,
+        tour: "nav-conversations",
+      },
       { to: "/app/leads", icon: Users, label: "Leads", id: DASH.sidebarLeads },
     ],
   },
   {
     label: "Knowledge & Apps",
     items: [
-      { to: "/app/knowledge-base", icon: BookOpen, label: "Knowledge Base", id: DASH.sidebarKnowledge, tour: "nav-knowledge" },
-      { to: "/app/integrations", icon: Plug, label: "Integrations", id: DASH.sidebarIntegrations },
+      {
+        to: "/app/knowledge-base",
+        icon: BookOpen,
+        label: "Knowledge Base",
+        id: DASH.sidebarKnowledge,
+        tour: "nav-knowledge",
+      },
+      {
+        to: "/app/integrations",
+        icon: Plug,
+        label: "Integrations",
+        id: DASH.sidebarIntegrations,
+      },
     ],
   },
   {
     label: "Resources",
     items: [
-      { to: "/app/getting-started", icon: Rocket, label: "Getting Started", id: "nav-getting-started" },
-      { to: "/app/guide", icon: LifeBuoy, label: "Help & Docs", id: "nav-guide" },
-      { to: "/app/changelog", icon: Megaphone, label: "What's New", id: "nav-changelog" },
-      { to: "/app/status", icon: Activity, label: "Product Status", id: "nav-status" },
+      {
+        to: "/app/getting-started",
+        icon: Rocket,
+        label: "Getting Started",
+        id: "nav-getting-started",
+      },
+      {
+        to: "/app/guide",
+        icon: LifeBuoy,
+        label: "Help & Docs",
+        id: "nav-guide",
+      },
+      {
+        to: "/app/changelog",
+        icon: Megaphone,
+        label: "What's New",
+        id: "nav-changelog",
+      },
+      {
+        to: "/app/status",
+        icon: Activity,
+        label: "Product Status",
+        id: "nav-status",
+      },
     ],
   },
 ];
 
 // Flat list of navigable (non-disabled) destinations — used for tab-title
 // resolution and simple lookups. Derived from NAV_GROUPS so it never drifts.
-export const PRIMARY_NAV = NAV_GROUPS.flatMap((g) => g.items).filter((i) => !i.disabled);
+export const PRIMARY_NAV = NAV_GROUPS.flatMap((g) => g.items).filter(
+  (i) => !i.disabled,
+);
 
 // Retained for back-compat with importers; the sidebar now renders NAV_GROUPS.
 export const SECONDARY_NAV = [];
@@ -86,7 +151,11 @@ export const SECTIONS = {
     label: "AI Agents",
     tabs: [
       { to: "/app/agents", label: "Overview", end: true },
-      { to: "/app/agents/templates", label: "Templates", feature: "marketplace" },
+      {
+        to: "/app/agents/templates",
+        label: "Templates",
+        feature: "marketplace",
+      },
     ],
   },
   "/app/knowledge-base": {
@@ -111,10 +180,15 @@ export function resolveSection(pathname) {
 
 // Filter a list of nav/tab entries by the caller's entitlements. `check` is
 // `{ isProductEnabled, isFeatureEnabled }` from `useEntitlements()`.
-export function filterByEntitlements(items, { isProductEnabled, isFeatureEnabled } = {}) {
+export function filterByEntitlements(
+  items,
+  { isProductEnabled, isFeatureEnabled } = {},
+) {
   return items.filter((it) => {
-    if (it.product && isProductEnabled && !isProductEnabled(it.product)) return false;
-    if (it.feature && isFeatureEnabled && !isFeatureEnabled(it.feature)) return false;
+    if (it.product && isProductEnabled && !isProductEnabled(it.product))
+      return false;
+    if (it.feature && isFeatureEnabled && !isFeatureEnabled(it.feature))
+      return false;
     return true;
   });
 }

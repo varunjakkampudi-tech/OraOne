@@ -1,4 +1,3 @@
-
 /* =========================================================================
    OraOne brand logo — "Orbit": one central AI core with a conversation node
    orbiting a continuous (always-on) ring, in the brand blue -> cyan gradient.
@@ -33,7 +32,13 @@ export const MARK_SRC = "/assets/oraone-mark.png";
  * both light and dark surfaces, so `light` is accepted for API
  * compatibility but does not change the artwork.
  */
-export function OraMark({ size = 40, className = "", light = false, style, ...rest }) {
+export function OraMark({
+  size = 40,
+  className = "",
+  light = false,
+  style,
+  ...rest
+}) {
   return (
     <img
       src={MARK_SRC}
@@ -106,17 +111,33 @@ export function Logo({
   stacked = false,
   ...rest
 }) {
-  const sizeMap = { "h-6": 24, "h-7": 28, "h-8": 32, "h-9": 36, "h-10": 40, "h-11": 44, "h-12": 48, "h-14": 56, "h-16": 64, "h-20": 80, "h-24": 96 };
+  const sizeMap = {
+    "h-6": 24,
+    "h-7": 28,
+    "h-8": 32,
+    "h-9": 36,
+    "h-10": 40,
+    "h-11": 44,
+    "h-12": 48,
+    "h-14": 56,
+    "h-16": 64,
+    "h-20": 80,
+    "h-24": 96,
+  };
   const heightClass = (className.match(/h-\d+/) || ["h-9"])[0];
   const orbSize = sizeMap[heightClass] || 36;
   const wordSize = orbSize * (stacked ? 0.74 : 0.66);
 
   const wordmark = (
-    <span className="font-extrabold tracking-tight leading-none" style={{ fontSize: wordSize }}>
+    <span
+      className="font-extrabold tracking-tight leading-none"
+      style={{ fontSize: wordSize }}
+    >
       <span style={{ color: light ? "#FFFFFF" : "#0A1B3A" }}>Ora</span>
       <span
         style={{
-          backgroundImage: "linear-gradient(90deg,#2563EB 0%,#7C3AED 55%,#DB2777 100%)",
+          backgroundImage:
+            "linear-gradient(90deg,#2563EB 0%,#7C3AED 55%,#DB2777 100%)",
           WebkitBackgroundClip: "text",
           backgroundClip: "text",
           WebkitTextFillColor: "transparent",
@@ -130,7 +151,10 @@ export function Logo({
 
   if (stacked) {
     return (
-      <span className="inline-flex flex-col items-center gap-2 select-none" {...rest}>
+      <span
+        className="inline-flex flex-col items-center gap-2 select-none"
+        {...rest}
+      >
         <OraMark size={orbSize} light={light} />
         {showWordmark && wordmark}
         {showTagline && <Tagline size={wordSize} light={light} />}
@@ -158,14 +182,20 @@ function Tagline({ size = 24, light = false }) {
       className="mt-1 inline-flex items-center gap-1.5"
       style={{ fontSize: Math.max(9, size * 0.34) }}
     >
-      <span className="h-px w-3" style={{ background: light ? "#7DD3FC" : "#1E73E8" }} />
+      <span
+        className="h-px w-3"
+        style={{ background: light ? "#7DD3FC" : "#1E73E8" }}
+      />
       <span
         className="font-semibold tracking-tight whitespace-nowrap"
         style={{ color: light ? "rgba(255,255,255,0.75)" : "#475569" }}
       >
         One AI. Every Conversation.
       </span>
-      <span className="h-px w-3" style={{ background: light ? "#7DD3FC" : "#1E73E8" }} />
+      <span
+        className="h-px w-3"
+        style={{ background: light ? "#7DD3FC" : "#1E73E8" }}
+      />
     </span>
   );
 }

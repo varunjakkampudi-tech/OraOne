@@ -54,7 +54,9 @@ export default function KnowledgeBase() {
         api.get("/knowledge-bases", { params }),
         api.get("/knowledge/stats"),
       ]);
-      setItems(listRes.status === "fulfilled" ? listRes.value.data.items || [] : []);
+      setItems(
+        listRes.status === "fulfilled" ? listRes.value.data.items || [] : [],
+      );
       if (statsRes.status === "fulfilled") setStats(statsRes.value.data);
     } finally {
       setLoading(false);
@@ -107,7 +109,7 @@ export default function KnowledgeBase() {
         value: stats.total_embeddings,
       },
     ],
-    [stats]
+    [stats],
   );
 
   return (

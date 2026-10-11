@@ -1,7 +1,14 @@
-const AUTH_PROVIDER = (process.env.REACT_APP_AUTH_PROVIDER || "self_hosted").toLowerCase();
-const COGNITO_DOMAIN = (process.env.REACT_APP_COGNITO_DOMAIN || "").replace(/\/$/, "");
+const AUTH_PROVIDER = (
+  process.env.REACT_APP_AUTH_PROVIDER || "self_hosted"
+).toLowerCase();
+const COGNITO_DOMAIN = (process.env.REACT_APP_COGNITO_DOMAIN || "").replace(
+  /\/$/,
+  "",
+);
 const CLIENT_ID = process.env.REACT_APP_COGNITO_CLIENT_ID || "";
-const REDIRECT_URI = process.env.REACT_APP_COGNITO_REDIRECT_URI || `${window.location.origin}/auth/callback`;
+const REDIRECT_URI =
+  process.env.REACT_APP_COGNITO_REDIRECT_URI ||
+  `${window.location.origin}/auth/callback`;
 const PKCE_VERIFIER_KEY = "oraone_cognito_pkce_verifier";
 const OAUTH_STATE_KEY = "oraone_cognito_oauth_state";
 
@@ -14,7 +21,9 @@ export function clearCognitoTransaction() {
 
 function base64Url(bytes) {
   return btoa(String.fromCharCode(...new Uint8Array(bytes)))
-    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 }
 
 async function sha256(value) {
@@ -60,9 +69,17 @@ export async function beginCognitoLogin({ endpoint = "login" } = {}) {
 export async function completeCognitoLogin(code, state) {
   const verifier = sessionStorage.getItem(PKCE_VERIFIER_KEY);
   const expectedState = sessionStorage.getItem(OAUTH_STATE_KEY);
-  if (!code || !verifier || !expectedState || !state || state !== expectedState) {
+  if (
+    !code ||
+    !verifier ||
+    !expectedState ||
+    !state ||
+    state !== expectedState
+  ) {
     clearCognitoTransaction();
-    throw new Error("The Cognito login session is invalid or has expired. Please try again.");
+    throw new Error(
+      "The Cognito login session is invalid or has expired. Please try again.",
+    );
   }
   // Consume the transaction before exchanging the one-time authorization
   // code, so a refresh/replay of the callback cannot reuse the verifier.
@@ -78,6 +95,7 @@ export async function completeCognitoLogin(code, state) {
       code_verifier: verifier,
     }),
   });
-  if (!response.ok) throw new Error("Cognito authorization could not be completed.");
+  if (!response.ok)
+    throw new Error("Cognito authorization could not be completed.");
   return response.json();
 }

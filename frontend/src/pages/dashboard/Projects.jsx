@@ -20,7 +20,16 @@ import { toast } from "sonner";
 import { api, formatApiError } from "@/lib/api";
 import { useProjects } from "@/lib/projects";
 
-const SWATCHES = ["#2563EB", "#06B6D4", "#0EA5E9", "#F59E0B", "#10B981", "#EF4444", "#EC4899", "#0F172A"];
+const SWATCHES = [
+  "#2563EB",
+  "#06B6D4",
+  "#0EA5E9",
+  "#F59E0B",
+  "#10B981",
+  "#EF4444",
+  "#EC4899",
+  "#0F172A",
+];
 
 const COUNT_META = [
   { key: "agents", label: "Agents", icon: Bot },
@@ -77,7 +86,10 @@ function ProjectModal({ open, mode, initial, onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-4">
-      <div className="absolute inset-0 bg-[#0F172A]/50 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-[#0F172A]/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <motion.form
         initial={{ opacity: 0, y: 12, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -89,12 +101,18 @@ function ProjectModal({ open, mode, initial, onClose, onSaved }) {
           <h2 className="text-lg font-bold text-[#0F172A]">
             {mode === "edit" ? "Edit project" : "New project"}
           </h2>
-          <button type="button" onClick={onClose} className="rounded-lg p-2 text-[#64748B] hover:bg-[#F1F5F9]">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-2 text-[#64748B] hover:bg-[#F1F5F9]"
+          >
             <X size={18} />
           </button>
         </div>
 
-        <label className="mb-1.5 block text-sm font-medium text-[#334155]">Name</label>
+        <label className="mb-1.5 block text-sm font-medium text-[#334155]">
+          Name
+        </label>
         <input
           autoFocus
           value={form.name}
@@ -105,16 +123,22 @@ function ProjectModal({ open, mode, initial, onClose, onSaved }) {
           data-testid="project-name-input"
         />
 
-        <label className="mb-1.5 block text-sm font-medium text-[#334155]">Description</label>
+        <label className="mb-1.5 block text-sm font-medium text-[#334155]">
+          Description
+        </label>
         <textarea
           value={form.description}
-          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, description: e.target.value }))
+          }
           placeholder="What is this project for?"
           rows={3}
           className="mb-4 w-full resize-none rounded-xl border border-[#E2E8F0] px-3.5 py-2.5 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20"
         />
 
-        <label className="mb-2 block text-sm font-medium text-[#334155]">Color</label>
+        <label className="mb-2 block text-sm font-medium text-[#334155]">
+          Color
+        </label>
         <div className="mb-6 flex flex-wrap gap-2">
           {SWATCHES.map((c) => (
             <button
@@ -122,12 +146,16 @@ function ProjectModal({ open, mode, initial, onClose, onSaved }) {
               type="button"
               onClick={() => setForm((f) => ({ ...f, color: c }))}
               className={`size-8 rounded-lg transition-transform ${
-                form.color === c ? "ring-2 ring-offset-2 ring-[#0F172A] scale-105" : ""
+                form.color === c
+                  ? "ring-2 ring-offset-2 ring-[#0F172A] scale-105"
+                  : ""
               }`}
               style={{ background: c }}
               aria-label={`Color ${c}`}
             >
-              {form.color === c && <Check size={16} className="mx-auto text-white" />}
+              {form.color === c && (
+                <Check size={16} className="mx-auto text-white" />
+              )}
             </button>
           ))}
         </div>
@@ -156,8 +184,13 @@ function ProjectModal({ open, mode, initial, onClose, onSaved }) {
 }
 
 export default function Projects() {
-  const { projects, activeProjectId, loading, refreshProjects, switchProject } = useProjects();
-  const [modal, setModal] = useState({ open: false, mode: "create", initial: null });
+  const { projects, activeProjectId, loading, refreshProjects, switchProject } =
+    useProjects();
+  const [modal, setModal] = useState({
+    open: false,
+    mode: "create",
+    initial: null,
+  });
   const [busyId, setBusyId] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -178,15 +211,21 @@ export default function Projects() {
         const c = p.resource_counts || {};
         return sum + Object.values(c).reduce((a, b) => a + (Number(b) || 0), 0);
       }, 0),
-    [projects]
+    [projects],
   );
 
-  const openCreate = () => setModal({ open: true, mode: "create", initial: null });
+  const openCreate = () =>
+    setModal({ open: true, mode: "create", initial: null });
   const openEdit = (p) =>
     setModal({
       open: true,
       mode: "edit",
-      initial: { id: p.id, name: p.name, description: p.description || "", color: p.color || SWATCHES[0] },
+      initial: {
+        id: p.id,
+        name: p.name,
+        description: p.description || "",
+        color: p.color || SWATCHES[0],
+      },
     });
 
   const handleDelete = async (p) => {
@@ -195,12 +234,16 @@ export default function Projects() {
       return;
     }
     const counts = p.resource_counts || {};
-    const used = Object.values(counts).reduce((a, b) => a + (Number(b) || 0), 0);
+    const used = Object.values(counts).reduce(
+      (a, b) => a + (Number(b) || 0),
+      0,
+    );
     if (used > 0) {
       toast.error("Move or remove this project's resources before deleting it");
       return;
     }
-    if (!window.confirm(`Delete project "${p.name}"? This can't be undone.`)) return;
+    if (!window.confirm(`Delete project "${p.name}"? This can't be undone.`))
+      return;
     setBusyId(p.id);
     try {
       await api.delete(`/projects/${p.id}`);
@@ -222,7 +265,9 @@ export default function Projects() {
     setBusyId(p.id);
     try {
       await api.patch(`/projects/${p.id}`, { status: next });
-      toast.success(next === "archived" ? "Project archived" : "Project restored");
+      toast.success(
+        next === "archived" ? "Project archived" : "Project restored",
+      );
       refreshProjects();
     } catch (err) {
       toast.error(formatApiError(err.response?.data?.detail));
@@ -240,7 +285,8 @@ export default function Projects() {
             Projects
           </h1>
           <p className="mt-1 text-sm text-[#64748B]">
-            Organize your workspace into projects. Each project keeps its own agents, knowledge, and conversations.
+            Organize your workspace into projects. Each project keeps its own
+            agents, knowledge, and conversations.
           </p>
         </div>
         <button
@@ -267,7 +313,10 @@ export default function Projects() {
       {loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-44 animate-pulse rounded-2xl bg-[#F1F5F9]" />
+            <div
+              key={i}
+              className="h-44 animate-pulse rounded-2xl bg-[#F1F5F9]"
+            />
           ))}
         </div>
       ) : (
@@ -285,7 +334,9 @@ export default function Projects() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.97 }}
                   className={`flex flex-col rounded-2xl border bg-white p-5 shadow-sm transition-shadow hover:shadow-md ${
-                    active ? "border-[#2563EB] ring-1 ring-[#2563EB]" : "border-[#E2E8F0]"
+                    active
+                      ? "border-[#2563EB] ring-1 ring-[#2563EB]"
+                      : "border-[#E2E8F0]"
                   } ${archived ? "opacity-70" : ""}`}
                   data-testid="project-card"
                 >
@@ -298,7 +349,9 @@ export default function Projects() {
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="truncate font-semibold text-[#0F172A]">{p.name}</h3>
+                        <h3 className="truncate font-semibold text-[#0F172A]">
+                          {p.name}
+                        </h3>
                         {p.is_default && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[11px] font-semibold text-[#2563EB]">
                             <Star size={10} /> Default
@@ -318,10 +371,17 @@ export default function Projects() {
 
                   <div className="mb-4 grid grid-cols-4 gap-2">
                     {COUNT_META.map(({ key, label, icon: Icon }) => (
-                      <div key={key} className="rounded-lg bg-[#F8FAFC] p-2 text-center">
+                      <div
+                        key={key}
+                        className="rounded-lg bg-[#F8FAFC] p-2 text-center"
+                      >
                         <Icon size={14} className="mx-auto text-[#94A3B8]" />
-                        <div className="mt-1 text-sm font-bold text-[#0F172A]">{counts[key] ?? 0}</div>
-                        <div className="text-[10px] text-[#94A3B8]">{label}</div>
+                        <div className="mt-1 text-sm font-bold text-[#0F172A]">
+                          {counts[key] ?? 0}
+                        </div>
+                        <div className="text-[10px] text-[#94A3B8]">
+                          {label}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -353,7 +413,9 @@ export default function Projects() {
                         onClick={() => handleArchiveToggle(p)}
                         disabled={busyId === p.id}
                         className="rounded-xl border border-[#E2E8F0] p-2 text-[#475569] hover:bg-[#F8FAFC] disabled:opacity-50"
-                        aria-label={archived ? "Restore project" : "Archive project"}
+                        aria-label={
+                          archived ? "Restore project" : "Archive project"
+                        }
                       >
                         <Archive size={15} />
                       </button>
@@ -365,7 +427,11 @@ export default function Projects() {
                         className="rounded-xl border border-[#E2E8F0] p-2 text-[#EF4444] hover:bg-red-50 disabled:opacity-50"
                         aria-label="Delete project"
                       >
-                        {busyId === p.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                        {busyId === p.id ? (
+                          <Loader2 size={15} className="animate-spin" />
+                        ) : (
+                          <Trash2 size={15} />
+                        )}
                       </button>
                     )}
                   </div>

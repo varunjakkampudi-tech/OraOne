@@ -1,7 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { MessageSquare, X, Send, BookOpen, Calendar, Mail, Check, Loader2 } from "lucide-react";
+import {
+  MessageSquare,
+  X,
+  Send,
+  BookOpen,
+  Calendar,
+  Mail,
+  Check,
+  Loader2,
+} from "lucide-react";
 import { api, formatApiError } from "@/lib/api";
 import { OraMark } from "@/components/marketing/Logo";
 
@@ -56,7 +65,10 @@ export default function SupportWidget() {
       setSent(true);
       setForm({ name: "", email: "", message: "" });
     } catch (err) {
-      setError(formatApiError(err.response?.data?.detail) || "Couldn't send — please email us instead.");
+      setError(
+        formatApiError(err.response?.data?.detail) ||
+          "Couldn't send — please email us instead.",
+      );
     } finally {
       setBusy(false);
     }
@@ -95,8 +107,12 @@ export default function SupportWidget() {
                   <OraMark size={22} light />
                 </span>
                 <div>
-                  <p className="text-[15px] font-bold leading-tight">OraOne Support</p>
-                  <p className="text-[12px] text-white/80">Typically replies within 24 hours</p>
+                  <p className="text-[15px] font-bold leading-tight">
+                    OraOne Support
+                  </p>
+                  <p className="text-[12px] text-white/80">
+                    Typically replies within 24 hours
+                  </p>
                 </div>
               </div>
             </div>
@@ -108,9 +124,12 @@ export default function SupportWidget() {
                   <span className="mx-auto grid size-12 place-items-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
                     <Check size={24} />
                   </span>
-                  <p className="mt-3 text-[15px] font-semibold text-[#0F172A]">Message sent!</p>
+                  <p className="mt-3 text-[15px] font-semibold text-[#0F172A]">
+                    Message sent!
+                  </p>
                   <p className="mt-1 text-[13px] text-[#64748B]">
-                    Thanks for reaching out — our team will get back to you within 24 hours.
+                    Thanks for reaching out — our team will get back to you
+                    within 24 hours.
                   </p>
                   <button
                     onClick={() => setSent(false)}
@@ -123,8 +142,8 @@ export default function SupportWidget() {
                 <>
                   {/* Greeting bubble */}
                   <div className="mb-3 rounded-2xl rounded-tl-sm bg-[#F1F5F9] px-3.5 py-2.5 text-[13px] leading-relaxed text-[#334155]">
-                    Hi there! 👋 How can we help? Send us a message and we'll reply by email, or use a
-                    quick link below.
+                    Hi there! 👋 How can we help? Send us a message and we'll
+                    reply by email, or use a quick link below.
                   </div>
 
                   {/* Quick links */}
@@ -136,13 +155,18 @@ export default function SupportWidget() {
                         onClick={() => setOpen(false)}
                         className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] px-3 py-2 text-[12.5px] font-semibold text-[#334155] transition-colors hover:border-[#2563EB]/40 hover:bg-[#F8FAFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
                       >
-                        <q.icon size={15} className="text-[#2563EB]" /> {q.label}
+                        <q.icon size={15} className="text-[#2563EB]" />{" "}
+                        {q.label}
                       </Link>
                     ))}
                   </div>
 
                   {/* Message form */}
-                  <form onSubmit={submit} className="space-y-2" data-testid="support-form">
+                  <form
+                    onSubmit={submit}
+                    className="space-y-2"
+                    data-testid="support-form"
+                  >
                     <input
                       ref={firstFieldRef}
                       value={form.name}
@@ -167,14 +191,20 @@ export default function SupportWidget() {
                       rows={3}
                       className="w-full resize-none rounded-xl border border-[#E2E8F0] px-3 py-2 text-[13px] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15"
                     />
-                    {error && <p className="text-[12px] text-[#DC2626]">{error}</p>}
+                    {error && (
+                      <p className="text-[12px] text-[#DC2626]">{error}</p>
+                    )}
                     <button
                       type="submit"
                       disabled={busy}
                       data-testid="support-send"
                       className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#1D4ED8] disabled:opacity-60"
                     >
-                      {busy ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
+                      {busy ? (
+                        <Loader2 size={15} className="animate-spin" />
+                      ) : (
+                        <Send size={15} />
+                      )}
                       {busy ? "Sending…" : "Send message"}
                     </button>
                   </form>

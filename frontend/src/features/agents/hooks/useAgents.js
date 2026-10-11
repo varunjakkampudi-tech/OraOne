@@ -70,7 +70,8 @@ export function useDuplicateAgent() {
 export function useBulkUpdateAgentStatus() {
   const invalidate = useInvalidateAgents();
   return useMutation({
-    mutationFn: ({ ids, status }) => agentsService.bulkUpdateStatus(ids, status),
+    mutationFn: ({ ids, status }) =>
+      agentsService.bulkUpdateStatus(ids, status),
     onSuccess: invalidate,
   });
 }

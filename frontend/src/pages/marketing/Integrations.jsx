@@ -21,12 +21,48 @@ const CAT_STYLES = {
 };
 
 const INTEGRATIONS = [
-  { slug: "google-drive", name: "Google Drive", category: "Documents", desc: "Auto-sync Drive folders straight into your Knowledge Base.", logo: "google-drive" },
-  { slug: "notion", name: "Notion", category: "Documents", desc: "Sync pages, databases and wikis into your Knowledge Base.", logo: "notion" },
-  { slug: "slack", name: "Slack", category: "Communication", desc: "Search channels and get notified about new leads and conversations.", logo: "slack" },
-  { slug: "gmail", name: "Gmail", category: "Communication", desc: "Read, search and summarize email, and draft AI replies.", logo: "gmail" },
-  { slug: "hubspot", name: "HubSpot", category: "CRM", desc: "Sync contacts and deals with HubSpot CRM.", logo: "hubspot" },
-  { slug: "salesforce", name: "Salesforce", category: "CRM", desc: "Sync leads, opportunities and accounts to Salesforce.", logo: "salesforce" },
+  {
+    slug: "google-drive",
+    name: "Google Drive",
+    category: "Documents",
+    desc: "Auto-sync Drive folders straight into your Knowledge Base.",
+    logo: "google-drive",
+  },
+  {
+    slug: "notion",
+    name: "Notion",
+    category: "Documents",
+    desc: "Sync pages, databases and wikis into your Knowledge Base.",
+    logo: "notion",
+  },
+  {
+    slug: "slack",
+    name: "Slack",
+    category: "Communication",
+    desc: "Search channels and get notified about new leads and conversations.",
+    logo: "slack",
+  },
+  {
+    slug: "gmail",
+    name: "Gmail",
+    category: "Communication",
+    desc: "Read, search and summarize email, and draft AI replies.",
+    logo: "gmail",
+  },
+  {
+    slug: "hubspot",
+    name: "HubSpot",
+    category: "CRM",
+    desc: "Sync contacts and deals with HubSpot CRM.",
+    logo: "hubspot",
+  },
+  {
+    slug: "salesforce",
+    name: "Salesforce",
+    category: "CRM",
+    desc: "Sync leads, opportunities and accounts to Salesforce.",
+    logo: "salesforce",
+  },
 ];
 
 const CATEGORIES = ["All", "CRM", "Communication", "Documents"];
@@ -35,25 +71,41 @@ export default function IntegrationsPage() {
   const [active, setActive] = useState("All");
   useSEO({
     title: "Integrations",
-    description: "Connect OraOne with Google Drive, Notion, Slack, Gmail, HubSpot and Salesforce — sync your knowledge, capture leads and automate workflows.",
+    description:
+      "Connect OraOne with Google Drive, Notion, Slack, Gmail, HubSpot and Salesforce — sync your knowledge, capture leads and automate workflows.",
   });
 
-  const list = active === "All" ? INTEGRATIONS : INTEGRATIONS.filter((i) => i.category === active);
+  const list =
+    active === "All"
+      ? INTEGRATIONS
+      : INTEGRATIONS.filter((i) => i.category === active);
 
   return (
     <div className="bg-white">
       {/* ====== HERO ====== */}
       <section className="relative pt-24 pb-14 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.span {...fadeUp} className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#2563EB]">
+          <motion.span
+            {...fadeUp}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#2563EB]"
+          >
             <span className="size-1.5 rounded-full bg-[#2563EB]" />
             SEAMLESS INTEGRATIONS
           </motion.span>
-          <motion.h1 {...fadeUp} className="mt-6 text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter text-[#0F172A]">
-            Integrate with Your <span className="gradient-text">Favorite Tools</span>
+          <motion.h1
+            {...fadeUp}
+            className="mt-6 text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter text-[#0F172A]"
+          >
+            Integrate with Your{" "}
+            <span className="gradient-text">Favorite Tools</span>
           </motion.h1>
-          <motion.p {...fadeUp} className="mt-5 text-[#64748B] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
-            Connect OraOne with the tools you use every day.<br className="hidden sm:block" /> Automate workflows and streamline your operations.
+          <motion.p
+            {...fadeUp}
+            className="mt-5 text-[#64748B] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed"
+          >
+            Connect OraOne with the tools you use every day.
+            <br className="hidden sm:block" /> Automate workflows and streamline
+            your operations.
           </motion.p>
 
           {/* Filter pills */}
@@ -79,7 +131,10 @@ export default function IntegrationsPage() {
       {/* ====== INTEGRATION GRID ====== */}
       <section className="pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <motion.div
+            layout
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+          >
             {list.map((i, idx) => {
               const cat = CAT_STYLES[i.category] || CAT_STYLES.Other;
               return (
@@ -95,7 +150,9 @@ export default function IntegrationsPage() {
                 >
                   <BrandLogo name={i.logo} />
 
-                  <h3 className="mt-5 text-lg font-bold tracking-tight text-[#0F172A]">{i.name}</h3>
+                  <h3 className="mt-5 text-lg font-bold tracking-tight text-[#0F172A]">
+                    {i.name}
+                  </h3>
                   <span
                     className="mt-1.5 inline-flex items-center self-start px-2.5 py-0.5 rounded-md text-[11px] font-semibold"
                     style={{ background: cat.bg, color: cat.color }}
@@ -103,7 +160,9 @@ export default function IntegrationsPage() {
                     {i.category}
                   </span>
 
-                  <p className="mt-3 text-sm text-[#64748B] leading-relaxed flex-1">{i.desc}</p>
+                  <p className="mt-3 text-sm text-[#64748B] leading-relaxed flex-1">
+                    {i.desc}
+                  </p>
                 </motion.div>
               );
             })}
@@ -114,7 +173,10 @@ export default function IntegrationsPage() {
       {/* ====== COMING SOON BANNER ====== */}
       <section className="pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeUp} className="rounded-3xl bg-[#F8FAFC] border border-[#E2E8F0] p-8 sm:p-12">
+          <motion.div
+            {...fadeUp}
+            className="rounded-3xl bg-[#F8FAFC] border border-[#E2E8F0] p-8 sm:p-12"
+          >
             <div className="grid lg:grid-cols-2 gap-10 items-center">
               {/* Left illustration */}
               <ConnectionIllustration />
@@ -128,7 +190,8 @@ export default function IntegrationsPage() {
                   We're adding more integrations every month.
                 </h2>
                 <p className="mt-4 text-[#64748B] leading-relaxed">
-                  Can't find the integration you need? Our team can help you build a custom integration.
+                  Can't find the integration you need? Our team can help you
+                  build a custom integration.
                 </p>
                 <Link
                   to="/contact"
@@ -165,7 +228,9 @@ const BRAND_ICONS = {
 function BrandLogo({ name }) {
   const cfg = BRAND_ICONS[name];
   if (!cfg) {
-    return <div className="size-12 rounded-2xl bg-[#F1F5F9] border border-[#E2E8F0]" />;
+    return (
+      <div className="size-12 rounded-2xl bg-[#F1F5F9] border border-[#E2E8F0]" />
+    );
   }
 
   // Special-case branded coloured tile (e.g. WhatsApp)
@@ -175,14 +240,25 @@ function BrandLogo({ name }) {
         className="size-12 rounded-2xl grid place-items-center shrink-0"
         style={{ background: cfg.tile }}
       >
-        <SimpleIcon slug={cfg.slug} size={28} color={`#${cfg.color}`} title={name} />
+        <SimpleIcon
+          slug={cfg.slug}
+          size={28}
+          color={`#${cfg.color}`}
+          title={name}
+        />
       </div>
     );
   }
 
   return (
     <div className="size-12 rounded-2xl bg-white grid place-items-center shrink-0">
-      <SimpleIcon slug={cfg.slug} size={40} color={cfg.color ? `#${cfg.color}` : undefined} useBrandColor={cfg.useBrandColor} title={name} />
+      <SimpleIcon
+        slug={cfg.slug}
+        size={40}
+        color={cfg.color ? `#${cfg.color}` : undefined}
+        useBrandColor={cfg.useBrandColor}
+        title={name}
+      />
     </div>
   );
 }
@@ -213,10 +289,33 @@ function ConnectionIllustration() {
       </div>
 
       {/* Connection lines (SVG) */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 280" fill="none" preserveAspectRatio="none">
-        <path d="M 200 60 Q 300 50 320 110" stroke="#3B82F6" strokeWidth="1.5" strokeDasharray="3 4" fill="none" />
-        <path d="M 200 150 Q 280 180 310 200" stroke="#F59E0B" strokeWidth="1.5" strokeDasharray="3 4" fill="none" />
-        <path d="M 100 200 Q 60 220 80 250" stroke="#3B82F6" strokeWidth="1.5" strokeDasharray="3 4" fill="none" />
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        viewBox="0 0 400 280"
+        fill="none"
+        preserveAspectRatio="none"
+      >
+        <path
+          d="M 200 60 Q 300 50 320 110"
+          stroke="#3B82F6"
+          strokeWidth="1.5"
+          strokeDasharray="3 4"
+          fill="none"
+        />
+        <path
+          d="M 200 150 Q 280 180 310 200"
+          stroke="#F59E0B"
+          strokeWidth="1.5"
+          strokeDasharray="3 4"
+          fill="none"
+        />
+        <path
+          d="M 100 200 Q 60 220 80 250"
+          stroke="#3B82F6"
+          strokeWidth="1.5"
+          strokeDasharray="3 4"
+          fill="none"
+        />
       </svg>
 
       {/* Floating tool tiles */}
@@ -230,20 +329,51 @@ function ConnectionIllustration() {
         </svg>
       </div>
 
-      <div className="absolute right-10 top-32 size-14 rounded-2xl bg-white border border-[#E2E8F0] shadow-premium grid place-items-center float-anim" style={{ animationDelay: "0.6s" }}>
+      <div
+        className="absolute right-10 top-32 size-14 rounded-2xl bg-white border border-[#E2E8F0] shadow-premium grid place-items-center float-anim"
+        style={{ animationDelay: "0.6s" }}
+      >
         <svg width="28" height="28" viewBox="0 0 48 48">
-          <circle cx="32" cy="22" r="10" fill="none" stroke="#FF7A59" strokeWidth="3" />
+          <circle
+            cx="32"
+            cy="22"
+            r="10"
+            fill="none"
+            stroke="#FF7A59"
+            strokeWidth="3"
+          />
           <circle cx="32" cy="22" r="3" fill="#FF7A59" />
-          <line x1="16" y1="36" x2="28" y2="24" stroke="#FF7A59" strokeWidth="3" strokeLinecap="round" />
+          <line
+            x1="16"
+            y1="36"
+            x2="28"
+            y2="24"
+            stroke="#FF7A59"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
           <circle cx="14" cy="38" r="4" fill="#FF7A59" />
         </svg>
       </div>
 
-      <div className="absolute left-2 bottom-2 size-14 rounded-2xl bg-white border border-[#E2E8F0] shadow-premium grid place-items-center float-anim" style={{ animationDelay: "1.2s" }}>
+      <div
+        className="absolute left-2 bottom-2 size-14 rounded-2xl bg-white border border-[#E2E8F0] shadow-premium grid place-items-center float-anim"
+        style={{ animationDelay: "1.2s" }}
+      >
         <svg width="26" height="26" viewBox="0 0 48 48">
           <rect x="6" y="8" width="36" height="36" rx="4" fill="white" />
           <rect x="6" y="8" width="36" height="8" rx="4" fill="#4285F4" />
-          <text x="24" y="34" textAnchor="middle" fontSize="14" fontWeight="700" fill="#4285F4" fontFamily="Inter, sans-serif">31</text>
+          <text
+            x="24"
+            y="34"
+            textAnchor="middle"
+            fontSize="14"
+            fontWeight="700"
+            fill="#4285F4"
+            fontFamily="Inter, sans-serif"
+          >
+            31
+          </text>
         </svg>
       </div>
     </div>

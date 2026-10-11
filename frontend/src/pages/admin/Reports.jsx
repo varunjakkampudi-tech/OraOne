@@ -1,7 +1,20 @@
 import { useState } from "react";
-import { FileBarChart2, Download, RefreshCw, Sparkles, CheckCircle2 } from "lucide-react";
 import {
-  PageHeader, Glass, Badge, Btn, StatCard, SectionTitle, LoadingState, useAdminTheme,
+  FileBarChart2,
+  Download,
+  RefreshCw,
+  Sparkles,
+  CheckCircle2,
+} from "lucide-react";
+import {
+  PageHeader,
+  Glass,
+  Badge,
+  Btn,
+  StatCard,
+  SectionTitle,
+  LoadingState,
+  useAdminTheme,
 } from "@/components/admin/adminKit";
 import { superAdminApi } from "@/lib/superAdmin";
 
@@ -15,21 +28,53 @@ const PERIODS = [
 function MarkdownLite({ text, t }) {
   const fmt = (s) =>
     s.split(/(\*\*[^*]+\*\*)/g).map((p, i) =>
-      p.startsWith("**") && p.endsWith("**")
-        ? <strong key={i} style={{ color: t.ink }}>{p.slice(2, -2)}</strong>
-        : <span key={i}>{p}</span>
+      p.startsWith("**") && p.endsWith("**") ? (
+        <strong key={i} style={{ color: t.ink }}>
+          {p.slice(2, -2)}
+        </strong>
+      ) : (
+        <span key={i}>{p}</span>
+      ),
     );
   return (
-    <div className="space-y-1.5 text-sm leading-relaxed" style={{ color: t.sub }}>
-      {String(text || "").split("\n").map((ln, i) => {
-        const s = ln.trim();
-        if (!s) return <div key={i} className="h-1" />;
-        if (s.startsWith("## ")) return <h3 key={i} className="pt-1 text-base font-semibold" style={{ color: t.ink }}>{s.slice(3)}</h3>;
-        if (s.startsWith("# ")) return <h2 key={i} className="pt-1 text-lg font-semibold" style={{ color: t.ink }}>{s.slice(2)}</h2>;
-        if (s.startsWith("- ") || s.startsWith("* "))
-          return <div key={i} className="flex gap-2"><span style={{ color: t.brand }}>•</span><span>{fmt(s.slice(2))}</span></div>;
-        return <p key={i}>{fmt(s)}</p>;
-      })}
+    <div
+      className="space-y-1.5 text-sm leading-relaxed"
+      style={{ color: t.sub }}
+    >
+      {String(text || "")
+        .split("\n")
+        .map((ln, i) => {
+          const s = ln.trim();
+          if (!s) return <div key={i} className="h-1" />;
+          if (s.startsWith("## "))
+            return (
+              <h3
+                key={i}
+                className="pt-1 text-base font-semibold"
+                style={{ color: t.ink }}
+              >
+                {s.slice(3)}
+              </h3>
+            );
+          if (s.startsWith("# "))
+            return (
+              <h2
+                key={i}
+                className="pt-1 text-lg font-semibold"
+                style={{ color: t.ink }}
+              >
+                {s.slice(2)}
+              </h2>
+            );
+          if (s.startsWith("- ") || s.startsWith("* "))
+            return (
+              <div key={i} className="flex gap-2">
+                <span style={{ color: t.brand }}>•</span>
+                <span>{fmt(s.slice(2))}</span>
+              </div>
+            );
+          return <p key={i}>{fmt(s)}</p>;
+        })}
     </div>
   );
 }
@@ -44,7 +89,8 @@ export default function AdminReports() {
   const generate = async (p) => {
     const period_ = p || period;
     setPeriod(period_);
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
       setData(await superAdminApi.report(period_));
     } catch (e) {
@@ -67,19 +113,35 @@ export default function AdminReports() {
 
   return (
     <div>
-      <PageHeader icon={FileBarChart2} title="AI Report Generator"
+      <PageHeader
+        icon={FileBarChart2}
+        title="AI Report Generator"
         subtitle="Auto-assembled platform reports from live data — daily, weekly, monthly, quarterly"
-        actions={data ? (
-          <Btn variant="ghost" size="sm" onClick={downloadCsv}><Download className="h-4 w-4" /> CSV</Btn>
-        ) : null} />
+        actions={
+          data ? (
+            <Btn variant="ghost" size="sm" onClick={downloadCsv}>
+              <Download className="h-4 w-4" /> CSV
+            </Btn>
+          ) : null
+        }
+      />
 
       <Glass className="mb-5 flex flex-wrap items-center gap-2 p-3">
         {PERIODS.map((p) => (
-          <button key={p.key} onClick={() => setPeriod(p.key)}
+          <button
+            key={p.key}
+            onClick={() => setPeriod(p.key)}
             className="rounded-full px-3 py-1.5 text-xs font-medium transition"
-            style={p.key === period
-              ? { background: t.brand, color: "#fff" }
-              : { background: t.chipBg, color: t.sub, border: `1px solid ${t.line}` }}>
+            style={
+              p.key === period
+                ? { background: t.brand, color: "#fff" }
+                : {
+                    background: t.chipBg,
+                    color: t.sub,
+                    border: `1px solid ${t.line}`,
+                  }
+            }
+          >
             {p.label}
           </button>
         ))}
@@ -91,7 +153,11 @@ export default function AdminReports() {
       </Glass>
 
       {loading && <LoadingState label="Assembling report…" />}
-      {error && <Glass className="p-4 text-sm" style={{ color: "#DC2626" }}>{error}</Glass>}
+      {error && (
+        <Glass className="p-4 text-sm" style={{ color: "#DC2626" }}>
+          {error}
+        </Glass>
+      )}
 
       {data && !loading && (
         <div className="space-y-5">
@@ -100,8 +166,13 @@ export default function AdminReports() {
               <SectionTitle>{sec.title}</SectionTitle>
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 {sec.metrics.map((m) => (
-                  <StatCard key={m.label} label={m.label}
-                    value={m.value === null || m.value === undefined ? "—" : m.value} />
+                  <StatCard
+                    key={m.label}
+                    label={m.label}
+                    value={
+                      m.value === null || m.value === undefined ? "—" : m.value
+                    }
+                  />
                 ))}
               </div>
             </div>
@@ -122,8 +193,15 @@ export default function AdminReports() {
               <SectionTitle>Recommended actions</SectionTitle>
               <div className="mt-2 space-y-2">
                 {data.recommendations.map((r, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm" style={{ color: t.sub }}>
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" style={{ color: t.brand }} />
+                  <div
+                    key={i}
+                    className="flex items-start gap-2 text-sm"
+                    style={{ color: t.sub }}
+                  >
+                    <CheckCircle2
+                      className="mt-0.5 h-4 w-4 shrink-0"
+                      style={{ color: t.brand }}
+                    />
                     <span>{r}</span>
                   </div>
                 ))}
@@ -139,7 +217,10 @@ export default function AdminReports() {
           <div className="text-sm" style={{ color: t.sub }}>
             Pick a period and generate a fresh report from live platform data.
           </div>
-          <Btn size="sm" onClick={() => generate()}><RefreshCw className="h-4 w-4" /> Generate {PERIODS.find((p) => p.key === period)?.label} report</Btn>
+          <Btn size="sm" onClick={() => generate()}>
+            <RefreshCw className="h-4 w-4" /> Generate{" "}
+            {PERIODS.find((p) => p.key === period)?.label} report
+          </Btn>
         </Glass>
       )}
     </div>

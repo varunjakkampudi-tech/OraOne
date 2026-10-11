@@ -36,7 +36,7 @@ export function usePermissions() {
 
   const can = useCallback(
     (permission) => permissions.includes(permission),
-    [permissions]
+    [permissions],
   );
 
   return { role, platformRole, permissions, can, loading };

@@ -24,8 +24,14 @@ const SOURCE_FILTERS = [
 ];
 
 function confidenceTone(c) {
-  if (c >= 0.7) return { label: "High confidence", cls: "text-green-700", bar: "#059669" };
-  if (c >= 0.4) return { label: "Medium confidence", cls: "text-amber-700", bar: "#D97706" };
+  if (c >= 0.7)
+    return { label: "High confidence", cls: "text-green-700", bar: "#059669" };
+  if (c >= 0.4)
+    return {
+      label: "Medium confidence",
+      cls: "text-amber-700",
+      bar: "#D97706",
+    };
   return { label: "Low confidence", cls: "text-red-700", bar: "#DC2626" };
 }
 
@@ -84,17 +90,37 @@ export default function KnowledgeSearch() {
         setLoading(false);
       }
     },
-    [query, mode, kbId, sourceFilter]
+    [query, mode, kbId, sourceFilter],
   );
 
   const kpis = useMemo(
     () => [
-      { icon: BookOpen, color: "#2563EB", label: "Knowledge Bases", value: stats?.knowledge_bases ?? "—" },
-      { icon: FileText, color: "#0891B2", label: "Documents", value: stats?.documents ?? "—" },
-      { icon: Globe, color: "#0EA5E9", label: "Websites", value: stats?.websites ?? "—" },
-      { icon: Layers, color: "#059669", label: "Chunks", value: stats?.chunks ?? "—" },
+      {
+        icon: BookOpen,
+        color: "#2563EB",
+        label: "Knowledge Bases",
+        value: stats?.knowledge_bases ?? "—",
+      },
+      {
+        icon: FileText,
+        color: "#0891B2",
+        label: "Documents",
+        value: stats?.documents ?? "—",
+      },
+      {
+        icon: Globe,
+        color: "#0EA5E9",
+        label: "Websites",
+        value: stats?.websites ?? "—",
+      },
+      {
+        icon: Layers,
+        color: "#059669",
+        label: "Chunks",
+        value: stats?.chunks ?? "—",
+      },
     ],
-    [stats]
+    [stats],
   );
 
   return (
@@ -104,13 +130,17 @@ export default function KnowledgeSearch() {
           Ask Your Knowledge
         </h2>
         <p className="text-sm text-[#64748B] mt-1">
-          Grounded answers and hybrid search across your documents and crawled websites.
+          Grounded answers and hybrid search across your documents and crawled
+          websites.
         </p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((k) => (
-          <div key={k.label} className="bg-white border border-[#E2E8F0] rounded-2xl p-4">
+          <div
+            key={k.label}
+            className="bg-white border border-[#E2E8F0] rounded-2xl p-4"
+          >
             <div className="flex items-center gap-3">
               <div
                 className="h-10 w-10 rounded-xl flex items-center justify-center"
@@ -119,7 +149,9 @@ export default function KnowledgeSearch() {
                 <k.icon size={18} />
               </div>
               <div>
-                <div className="text-2xl font-bold text-[#0F172A]">{k.value}</div>
+                <div className="text-2xl font-bold text-[#0F172A]">
+                  {k.value}
+                </div>
                 <div className="text-xs text-[#64748B]">{k.label}</div>
               </div>
             </div>
@@ -131,7 +163,10 @@ export default function KnowledgeSearch() {
       <div className="bg-white border border-[#E2E8F0] rounded-2xl p-4 space-y-3">
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+            <Search
+              size={18}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+            />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -146,7 +181,13 @@ export default function KnowledgeSearch() {
             disabled={loading || !query.trim()}
             className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 text-white text-sm font-semibold"
           >
-            {loading ? <Loader2 size={16} className="animate-spin" /> : mode === "ask" ? <Send size={16} /> : <Search size={16} />}
+            {loading ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : mode === "ask" ? (
+              <Send size={16} />
+            ) : (
+              <Search size={16} />
+            )}
             {mode === "ask" ? "Ask" : "Search"}
           </button>
         </div>
@@ -157,7 +198,9 @@ export default function KnowledgeSearch() {
                 key={m}
                 onClick={() => setMode(m)}
                 className={`px-3 py-1.5 rounded-md text-xs font-semibold capitalize ${
-                  mode === m ? "bg-[#2563EB] text-white" : "text-[#64748B] hover:text-[#475569]"
+                  mode === m
+                    ? "bg-[#2563EB] text-white"
+                    : "text-[#64748B] hover:text-[#475569]"
                 }`}
               >
                 {m === "ask" ? "Ask AI" : "Hybrid search"}
@@ -203,7 +246,14 @@ export default function KnowledgeSearch() {
             <Loader2 className="animate-spin" />
           </motion.div>
         ) : answer ? (
-          <AnswerView key="answer" answer={answer} onAsk={(q) => { setQuery(q); run(q); }} />
+          <AnswerView
+            key="answer"
+            answer={answer}
+            onAsk={(q) => {
+              setQuery(q);
+              run(q);
+            }}
+          />
         ) : hits ? (
           <HitsView key="hits" hits={hits} />
         ) : (
@@ -238,7 +288,9 @@ function AnswerView({ answer, onAsk }) {
                 Extractive fallback
               </span>
             )}
-            <span className={`inline-flex items-center gap-1 text-xs font-medium ${tone.cls}`}>
+            <span
+              className={`inline-flex items-center gap-1 text-xs font-medium ${tone.cls}`}
+            >
               <ShieldCheck size={13} /> {tone.label}
             </span>
           </div>
@@ -246,7 +298,10 @@ function AnswerView({ answer, onAsk }) {
         <div className="h-1.5 w-full bg-[#F1F5F9] rounded-full overflow-hidden mb-4">
           <div
             className="h-full rounded-full transition-all"
-            style={{ width: `${Math.round((answer.confidence || 0) * 100)}%`, background: tone.bar }}
+            style={{
+              width: `${Math.round((answer.confidence || 0) * 100)}%`,
+              background: tone.bar,
+            }}
           />
         </div>
         <p className="text-[15px] leading-relaxed text-[#1E293B] whitespace-pre-wrap">
@@ -269,7 +324,9 @@ function AnswerView({ answer, onAsk }) {
 
       {answer.related_questions?.length > 0 && (
         <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5">
-          <div className="text-sm font-semibold text-[#0F172A] mb-3">Related questions</div>
+          <div className="text-sm font-semibold text-[#0F172A] mb-3">
+            Related questions
+          </div>
           <div className="flex flex-wrap gap-2">
             {answer.related_questions.map((q, i) => (
               <button
@@ -308,14 +365,28 @@ function SourceRow({ index, source }) {
         </div>
         {(source.url || source.page != null || source.section) && (
           <div className="text-[11px] text-[#64748B] truncate">
-            {isWeb ? source.url : [source.section, source.page != null ? `p.${source.page}` : null].filter(Boolean).join(" · ")}
+            {isWeb
+              ? source.url
+              : [
+                  source.section,
+                  source.page != null ? `p.${source.page}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
           </div>
         )}
       </div>
       {source.score != null && (
-        <span className="text-[11px] text-[#94A3B8] shrink-0">{Math.round(source.score * 100)}%</span>
+        <span className="text-[11px] text-[#94A3B8] shrink-0">
+          {Math.round(source.score * 100)}%
+        </span>
       )}
-      {href && <ExternalLink size={13} className="text-[#94A3B8] group-hover:text-[#2563EB] shrink-0" />}
+      {href && (
+        <ExternalLink
+          size={13}
+          className="text-[#94A3B8] group-hover:text-[#2563EB] shrink-0"
+        />
+      )}
     </Wrapper>
   );
 }
@@ -332,7 +403,10 @@ function HitsView({ hits }) {
         <EmptyState noData />
       ) : (
         hits.map((h, i) => (
-          <div key={i} className="bg-white border border-[#E2E8F0] rounded-2xl p-5">
+          <div
+            key={i}
+            className="bg-white border border-[#E2E8F0] rounded-2xl p-5"
+          >
             <div className="flex items-center justify-between gap-3 mb-2">
               <div className="inline-flex items-center gap-2 min-w-0">
                 <span className="text-[#64748B]">
@@ -342,7 +416,12 @@ function HitsView({ hits }) {
                   {h.title || h.url}
                 </span>
                 {h.url && (
-                  <a href={h.url} target="_blank" rel="noreferrer" className="text-[#94A3B8] hover:text-[#2563EB]">
+                  <a
+                    href={h.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[#94A3B8] hover:text-[#2563EB]"
+                  >
                     <ExternalLink size={12} />
                   </a>
                 )}
@@ -353,7 +432,9 @@ function HitsView({ hits }) {
                 </span>
               )}
             </div>
-            <p className="text-sm text-[#475569] leading-relaxed line-clamp-4">{h.content}</p>
+            <p className="text-sm text-[#475569] leading-relaxed line-clamp-4">
+              {h.content}
+            </p>
             {h.components && (
               <div className="flex flex-wrap gap-2 mt-3">
                 {h.components.vector != null && (

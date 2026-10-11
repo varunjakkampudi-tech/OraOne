@@ -26,20 +26,40 @@ import { PageHeader } from "@/components/dashboard/kit";
 /* ---------- Data ---------- */
 
 const CHANNEL = {
-  chat:     { icon: MessageSquare, color: "#0891B2", bg: "#ECFEFF", label: "Website Chat" },
-  whatsapp: { icon: MessageCircle, color: "#16A34A", bg: "#DCFCE7", label: "WhatsApp" },
+  chat: {
+    icon: MessageSquare,
+    color: "#0891B2",
+    bg: "#ECFEFF",
+    label: "Website Chat",
+  },
+  whatsapp: {
+    icon: MessageCircle,
+    color: "#16A34A",
+    bg: "#DCFCE7",
+    label: "WhatsApp",
+  },
 };
 
 const STATUS_META = {
-  active:    { label: "Active",    cls: "bg-blue-50 text-blue-700 border-blue-200" },
-  completed: { label: "Completed", cls: "bg-green-50 text-green-700 border-green-200" },
-  qualified: { label: "Qualified", cls: "bg-cyan-50 text-cyan-700 border-cyan-200" },
-  failed:    { label: "Failed",    cls: "bg-red-50 text-red-700 border-red-200" },
-  lost:      { label: "Lost",      cls: "bg-orange-50 text-orange-700 border-orange-200" },
+  active: { label: "Active", cls: "bg-blue-50 text-blue-700 border-blue-200" },
+  completed: {
+    label: "Completed",
+    cls: "bg-green-50 text-green-700 border-green-200",
+  },
+  qualified: {
+    label: "Qualified",
+    cls: "bg-cyan-50 text-cyan-700 border-cyan-200",
+  },
+  failed: { label: "Failed", cls: "bg-red-50 text-red-700 border-red-200" },
+  lost: {
+    label: "Lost",
+    cls: "bg-orange-50 text-orange-700 border-orange-200",
+  },
 };
 
 const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : "");
-const statusCls = (raw) => STATUS_META[raw]?.cls || "bg-[#F1F5F9] text-[#475569] border-[#E2E8F0]";
+const statusCls = (raw) =>
+  STATUS_META[raw]?.cls || "bg-[#F1F5F9] text-[#475569] border-[#E2E8F0]";
 const statusLabel = (raw) => STATUS_META[raw]?.label || cap(raw);
 
 const fmtCost = (n) => {
@@ -83,8 +103,8 @@ function normalizeConv(c) {
 }
 
 const FILTERS = [
-  { k: "all",      l: "All",          icon: null },
-  { k: "chat",     l: "Chats",        icon: MessageSquare },
+  { k: "all", l: "All", icon: null },
+  { k: "chat", l: "Chats", icon: MessageSquare },
 ];
 
 /* ---------- Page ---------- */
@@ -110,7 +130,9 @@ export default function Conversations() {
       setConversations(data);
       if (data.length > 0) setActive(data[0]);
     } catch (err) {
-      const message = formatApiError(err.response?.data?.detail) || "Failed to load conversations";
+      const message =
+        formatApiError(err.response?.data?.detail) ||
+        "Failed to load conversations";
       setError(message);
       setConversations([]);
       toast.error(message);
@@ -134,7 +156,13 @@ export default function Conversations() {
     return conversations.filter((c) => {
       if (filter !== "all" && c.channel !== filter) return false;
       if (statusFilter !== "all" && c.status !== statusFilter) return false;
-      if (q && !`${c.name || ""} ${c.phone || ""}`.toLowerCase().includes(q.toLowerCase())) return false;
+      if (
+        q &&
+        !`${c.name || ""} ${c.phone || ""}`
+          .toLowerCase()
+          .includes(q.toLowerCase())
+      )
+        return false;
       return true;
     });
   }, [conversations, filter, statusFilter, q]);
@@ -180,7 +208,10 @@ export default function Conversations() {
           {/* Search */}
           <div className="p-3 border-b border-[#E2E8F0] flex items-center gap-2">
             <div className="relative flex-1">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+              <Search
+                size={15}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+              />
               <input
                 type="search"
                 value={q}
@@ -209,8 +240,13 @@ export default function Conversations() {
 
           {/* Status filter menu */}
           {showStatus && (
-            <div className="px-3 py-2.5 border-b border-[#E2E8F0] bg-[#F8FAFC]/60" data-testid="conv-status-filter">
-              <p className="text-[10.5px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-2">Filter by status</p>
+            <div
+              className="px-3 py-2.5 border-b border-[#E2E8F0] bg-[#F8FAFC]/60"
+              data-testid="conv-status-filter"
+            >
+              <p className="text-[10.5px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-2">
+                Filter by status
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 {statuses.map((s) => (
                   <button
@@ -234,39 +270,54 @@ export default function Conversations() {
           <ul className="flex-1 overflow-y-auto max-h-[640px] scrollbar-thin">
             {filtered.length === 0 ? (
               loading ? (
-                <li className="p-10 flex flex-col items-center justify-center text-center gap-3" data-testid="conv-list-loading">
+                <li
+                  className="p-10 flex flex-col items-center justify-center text-center gap-3"
+                  data-testid="conv-list-loading"
+                >
                   <Loader2 size={22} className="animate-spin text-[#2563EB]" />
-                  <span className="text-[13px] text-[#94A3B8]">Loading conversations…</span>
+                  <span className="text-[13px] text-[#94A3B8]">
+                    Loading conversations…
+                  </span>
                 </li>
               ) : (
-              <li className="p-5">
-                <EmptyState
-                  testId={error ? "conv-list-error" : "conv-list-empty"}
-                  size="sm"
-                  dashed={false}
-                  icon={MessageSquare}
-                  title={error ? "Couldn't load conversations" : "No conversations match"}
-                  description={
-                    error
-                      ? error
-                      : q
-                      ? `We couldn't find anything for "${q}". Try a different name, phone or channel.`
-                      : "No conversations in this channel yet. Once your AI agents talk to leads, they'll show up here."
-                  }
-                  actionLabel={error ? "Retry" : (q || filter !== "all" || statusFilter !== "all" ? "Clear filters" : undefined)}
-                  onAction={
-                    error
-                      ? loadConversations
-                      : q || filter !== "all" || statusFilter !== "all"
-                      ? () => {
-                          setQ("");
-                          setFilter("all");
-                          setStatusFilter("all");
-                        }
-                      : undefined
-                  }
-                />
-              </li>
+                <li className="p-5">
+                  <EmptyState
+                    testId={error ? "conv-list-error" : "conv-list-empty"}
+                    size="sm"
+                    dashed={false}
+                    icon={MessageSquare}
+                    title={
+                      error
+                        ? "Couldn't load conversations"
+                        : "No conversations match"
+                    }
+                    description={
+                      error
+                        ? error
+                        : q
+                          ? `We couldn't find anything for "${q}". Try a different name, phone or channel.`
+                          : "No conversations in this channel yet. Once your AI agents talk to leads, they'll show up here."
+                    }
+                    actionLabel={
+                      error
+                        ? "Retry"
+                        : q || filter !== "all" || statusFilter !== "all"
+                          ? "Clear filters"
+                          : undefined
+                    }
+                    onAction={
+                      error
+                        ? loadConversations
+                        : q || filter !== "all" || statusFilter !== "all"
+                          ? () => {
+                              setQ("");
+                              setFilter("all");
+                              setStatusFilter("all");
+                            }
+                          : undefined
+                    }
+                  />
+                </li>
               )
             ) : null}
             {filtered.map((c) => {
@@ -294,16 +345,21 @@ export default function Conversations() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <p className="text-[13.5px] font-semibold text-[#0F172A] truncate">{c.name}</p>
-                        <span className="text-[11px] text-[#94A3B8] whitespace-nowrap">{c.time}</span>
+                        <p className="text-[13.5px] font-semibold text-[#0F172A] truncate">
+                          {c.name}
+                        </p>
+                        <span className="text-[11px] text-[#94A3B8] whitespace-nowrap">
+                          {c.time}
+                        </span>
                       </div>
                       <p className="text-[11.5px] text-[#64748B] mt-0.5 truncate">
-                        {c.phone} <span className="text-[#CBD5E1]">·</span> {meta.label}
+                        {c.phone} <span className="text-[#CBD5E1]">·</span>{" "}
+                        {meta.label}
                       </p>
                       <div className="mt-2 flex items-center gap-2 flex-wrap">
                         <span
                           className={`inline-block text-[10.5px] px-2 py-0.5 rounded-full border font-medium ${statusCls(
-                            c.statusRaw
+                            c.statusRaw,
                           )}`}
                         >
                           {c.statusLabel}
@@ -334,11 +390,7 @@ export default function Conversations() {
           {/* Pagination */}
           {filtered.length > 0 && (
             <div className="p-3 border-t border-[#E2E8F0] flex items-center justify-center gap-1 text-[12.5px]">
-              <Pager
-                page={page}
-                total={12}
-                onChange={setPage}
-              />
+              <Pager page={page} total={12} onChange={setPage} />
             </div>
           )}
         </div>
@@ -381,7 +433,9 @@ function Pager({ page, total, onChange }) {
       <button
         onClick={() => onChange(total)}
         className={`size-8 rounded-lg font-semibold transition-colors ${
-          total === page ? "bg-[#2563EB] text-white" : "text-[#475569] hover:bg-[#F1F5F9]"
+          total === page
+            ? "bg-[#2563EB] text-white"
+            : "text-[#475569] hover:bg-[#F1F5F9]"
         }`}
       >
         {total}
@@ -421,7 +475,9 @@ function ConversationPanel({ conv }) {
       } catch (err) {
         if (!cancelled) {
           setMessages([]);
-          const message = formatApiError(err.response?.data?.detail) || "Failed to load messages";
+          const message =
+            formatApiError(err.response?.data?.detail) ||
+            "Failed to load messages";
           setMsgError(message);
           toast.error(message);
         }
@@ -455,15 +511,20 @@ function ConversationPanel({ conv }) {
     <div className="rounded-2xl bg-white border border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)] flex flex-col overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-[#E2E8F0] flex items-center gap-3">
-        <div className="size-10 rounded-xl grid place-items-center shrink-0" style={{ background: meta.bg }}>
+        <div
+          className="size-10 rounded-xl grid place-items-center shrink-0"
+          style={{ background: meta.bg }}
+        >
           <Icon size={16} style={{ color: meta.color }} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="text-[15px] font-semibold text-[#0F172A] truncate">{conv.name}</h3>
+            <h3 className="text-[15px] font-semibold text-[#0F172A] truncate">
+              {conv.name}
+            </h3>
             <span
               className={`text-[10.5px] px-2 py-0.5 rounded-full border font-medium ${statusCls(
-                conv.statusRaw
+                conv.statusRaw,
               )}`}
             >
               {conv.statusLabel}
@@ -476,27 +537,56 @@ function ConversationPanel({ conv }) {
         <div className="hidden sm:flex items-center gap-3 text-[12px] text-[#64748B]">
           {conv.startedAt && (
             <span className="inline-flex items-center gap-1.5">
-              <Calendar size={13} /> {new Date(conv.startedAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}
+              <Calendar size={13} />{" "}
+              {new Date(conv.startedAt).toLocaleDateString([], {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
             </span>
           )}
           <span className="text-[#CBD5E1]">·</span>
           <span>{conv.time}</span>
         </div>
-        <button className="size-9 rounded-lg grid place-items-center hover:bg-[#F1F5F9]" aria-label="More">
+        <button
+          className="size-9 rounded-lg grid place-items-center hover:bg-[#F1F5F9]"
+          aria-label="More"
+        >
           <MoreVertical size={15} className="text-[#64748B]" />
         </button>
       </div>
 
       {/* Observability rollup */}
-      {(conv.msgCount > 0 || conv.tokens > 0 || conv.cost > 0 || conv.model) && (
+      {(conv.msgCount > 0 ||
+        conv.tokens > 0 ||
+        conv.cost > 0 ||
+        conv.model) && (
         <div className="px-5 py-2.5 border-b border-[#F1F5F9] bg-[#FAFBFC] flex items-center gap-4 flex-wrap text-[11.5px]">
-          <RollupStat icon={MessageSquare} label="Messages" value={conv.msgCount || messages.length} />
-          <RollupStat icon={Zap} label="Tokens" value={fmtTokens(conv.tokens)} />
-          <RollupStat icon={DollarSign} label="Cost" value={fmtCost(conv.cost)} />
+          <RollupStat
+            icon={MessageSquare}
+            label="Messages"
+            value={conv.msgCount || messages.length}
+          />
+          <RollupStat
+            icon={Zap}
+            label="Tokens"
+            value={fmtTokens(conv.tokens)}
+          />
+          <RollupStat
+            icon={DollarSign}
+            label="Cost"
+            value={fmtCost(conv.cost)}
+          />
           {conv.avgLatency != null && (
-            <RollupStat icon={Clock} label="Avg latency" value={`${conv.avgLatency} ms`} />
+            <RollupStat
+              icon={Clock}
+              label="Avg latency"
+              value={`${conv.avgLatency} ms`}
+            />
           )}
-          {conv.model && <RollupStat icon={Cpu} label="Model" value={conv.model} />}
+          {conv.model && (
+            <RollupStat icon={Cpu} label="Model" value={conv.model} />
+          )}
         </div>
       )}
 
@@ -515,11 +605,15 @@ function ConversationPanel({ conv }) {
               <Loader2 size={15} className="animate-spin" /> Loading transcript…
             </div>
           ) : messages.length > 0 ? (
-            messages.map((m, i) => <MessageBubble key={m.id || i} message={m} />)
+            messages.map((m, i) => (
+              <MessageBubble key={m.id || i} message={m} />
+            ))
           ) : msgError ? (
             <p className="text-center text-red-500 text-sm py-8">{msgError}</p>
           ) : (
-            <p className="text-center text-[#94A3B8] text-sm py-8">No messages in this conversation yet.</p>
+            <p className="text-center text-[#94A3B8] text-sm py-8">
+              No messages in this conversation yet.
+            </p>
           )}
         </div>
       </div>
@@ -561,7 +655,10 @@ function MessageBubble({ message }) {
   const time =
     message.time ||
     (message.created_at
-      ? new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      ? new Date(message.created_at).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
       : "");
   const tokens = message.total_tokens ?? message.token_count ?? 0;
   const cost = message.cost_usd ?? 0;
@@ -570,18 +667,25 @@ function MessageBubble({ message }) {
   const confidence = message.confidence ?? null;
   const grounded = message.grounded;
   const citations = Array.isArray(message.citations) ? message.citations : [];
-  const hasObs = !isCustomer && (tokens > 0 || cost > 0 || latency != null || model);
+  const hasObs =
+    !isCustomer && (tokens > 0 || cost > 0 || latency != null || model);
 
   return (
-    <div className={`flex items-start gap-3 ${isCustomer ? "flex-row-reverse" : ""}`}>
+    <div
+      className={`flex items-start gap-3 ${isCustomer ? "flex-row-reverse" : ""}`}
+    >
       <div
         className={`size-9 rounded-full grid place-items-center shrink-0 ${
-          isCustomer ? "bg-[#DBEAFE] text-[#2563EB]" : "bg-[#EFF6FF] text-[#2563EB]"
+          isCustomer
+            ? "bg-[#DBEAFE] text-[#2563EB]"
+            : "bg-[#EFF6FF] text-[#2563EB]"
         }`}
       >
         {isCustomer ? <User size={15} /> : <Bot size={15} />}
       </div>
-      <div className={`max-w-[72%] ${isCustomer ? "items-end text-right" : "items-start text-left"} flex flex-col`}>
+      <div
+        className={`max-w-[72%] ${isCustomer ? "items-end text-right" : "items-start text-left"} flex flex-col`}
+      >
         <p className="text-[10.5px] text-[#94A3B8] mb-1 font-medium">
           {isCustomer ? "Customer" : "Agent"}
           {time && (
@@ -611,7 +715,9 @@ function MessageBubble({ message }) {
                 title={c.title || c.source || c.text || ""}
               >
                 <Quote size={10} className="text-[#2563EB] shrink-0" />
-                <span className="truncate">{c.title || c.source || c.text || `Source ${i + 1}`}</span>
+                <span className="truncate">
+                  {c.title || c.source || c.text || `Source ${i + 1}`}
+                </span>
               </span>
             ))}
           </div>
@@ -645,13 +751,19 @@ function MessageBubble({ message }) {
                 className={`inline-flex items-center gap-1 ${
                   grounded ? "text-[#16A34A]" : "text-[#D97706]"
                 }`}
-                title={grounded ? "Answer grounded in knowledge base" : "Not grounded in knowledge base"}
+                title={
+                  grounded
+                    ? "Answer grounded in knowledge base"
+                    : "Not grounded in knowledge base"
+                }
               >
                 <ShieldCheck size={10} /> {grounded ? "Grounded" : "Ungrounded"}
               </span>
             )}
             {confidence != null && (
-              <span className="inline-flex items-center gap-1">{Math.round(confidence * 100)}% conf.</span>
+              <span className="inline-flex items-center gap-1">
+                {Math.round(confidence * 100)}% conf.
+              </span>
             )}
           </div>
         )}

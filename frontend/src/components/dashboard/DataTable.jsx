@@ -43,7 +43,7 @@ function Menu({ button, children, align = "right" }) {
         <div
           className={cx(
             "absolute z-30 mt-1.5 min-w-[190px] rounded-xl border border-line bg-white p-1.5 shadow-pop",
-            align === "right" ? "right-0" : "left-0"
+            align === "right" ? "right-0" : "left-0",
           )}
           onClick={() => setOpen(false)}
         >
@@ -59,7 +59,9 @@ export function MenuItem({ icon: Icon, children, danger, ...rest }) {
     <button
       className={cx(
         "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] font-medium transition-colors",
-        danger ? "text-danger hover:bg-danger-soft" : "text-body hover:bg-canvas"
+        danger
+          ? "text-danger hover:bg-danger-soft"
+          : "text-body hover:bg-canvas",
       )}
       {...rest}
     >
@@ -104,14 +106,20 @@ export default function DataTable({
       const needle = q.toLowerCase();
       const keys = searchKeys || columns.map((c) => c.key);
       out = out.filter((r) =>
-        keys.some((k) => String(r[k] ?? "").toLowerCase().includes(needle))
+        keys.some((k) =>
+          String(r[k] ?? "")
+            .toLowerCase()
+            .includes(needle),
+        ),
       );
     }
     // filters
     for (const f of filters) {
       const val = activeFilters[f.key];
       if (val != null && val !== "") {
-        out = out.filter((r) => String(f.accessor ? f.accessor(r) : r[f.key]) === String(val));
+        out = out.filter(
+          (r) => String(f.accessor ? f.accessor(r) : r[f.key]) === String(val),
+        );
       }
     }
     // sort
@@ -141,7 +149,8 @@ export default function DataTable({
   const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const selectedRows = (rows || []).filter((r) => selected[rowKey(r)]);
-  const allOnPageSelected = pageRows.length > 0 && pageRows.every((r) => selected[rowKey(r)]);
+  const allOnPageSelected =
+    pageRows.length > 0 && pageRows.every((r) => selected[rowKey(r)]);
 
   const toggleAllOnPage = () => {
     const next = { ...selected };
@@ -156,11 +165,12 @@ export default function DataTable({
     setSort((s) =>
       s.key === col.key
         ? { key: col.key, dir: s.dir === "asc" ? "desc" : "asc" }
-        : { key: col.key, dir: "asc" }
+        : { key: col.key, dir: "asc" },
     );
   };
 
-  const hasToolbar = search || filters.length > 0 || bulkActions || toolbarExtra;
+  const hasToolbar =
+    search || filters.length > 0 || bulkActions || toolbarExtra;
 
   return (
     <div className="space-y-3">
@@ -169,7 +179,10 @@ export default function DataTable({
         <div className="flex flex-wrap items-center gap-2">
           {search && (
             <div className="relative min-w-[220px] flex-1 sm:max-w-xs">
-              <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
+              <Search
+                size={15}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint"
+              />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
@@ -185,7 +198,9 @@ export default function DataTable({
             <select
               key={f.key}
               value={activeFilters[f.key] ?? ""}
-              onChange={(e) => setActiveFilters((s) => ({ ...s, [f.key]: e.target.value }))}
+              onChange={(e) =>
+                setActiveFilters((s) => ({ ...s, [f.key]: e.target.value }))
+              }
               aria-label={`Filter by ${f.label}`}
               className="h-9 rounded-full border border-stroke bg-white px-3 text-[13px] font-medium text-body outline-none focus:border-brand focus-visible:ring-2 focus-visible:ring-brand/25"
             >
@@ -198,14 +213,15 @@ export default function DataTable({
             </select>
           ))}
 
-          {filters.length > 0 && Object.values(activeFilters).some((v) => v) && (
-            <button
-              onClick={() => setActiveFilters({})}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-[13px] font-semibold text-sub hover:text-ink"
-            >
-              <SlidersHorizontal size={14} /> Clear
-            </button>
-          )}
+          {filters.length > 0 &&
+            Object.values(activeFilters).some((v) => v) && (
+              <button
+                onClick={() => setActiveFilters({})}
+                className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-[13px] font-semibold text-sub hover:text-ink"
+              >
+                <SlidersHorizontal size={14} /> Clear
+              </button>
+            )}
 
           <div className="ml-auto flex items-center gap-2">
             {toolbarExtra}
@@ -226,7 +242,14 @@ export default function DataTable({
                   }}
                   className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] font-medium text-body hover:bg-canvas"
                 >
-                  <span className={cx("grid size-4 place-items-center rounded border", hidden[c.key] ? "border-[#CBD5E1]" : "border-brand bg-brand text-white")}>
+                  <span
+                    className={cx(
+                      "grid size-4 place-items-center rounded border",
+                      hidden[c.key]
+                        ? "border-[#CBD5E1]"
+                        : "border-brand bg-brand text-white",
+                    )}
+                  >
                     {!hidden[c.key] && <Check size={11} />}
                   </span>
                   {c.header}
@@ -240,9 +263,16 @@ export default function DataTable({
       {/* Bulk action bar */}
       {bulkActions && selectedRows.length > 0 && (
         <div className="flex items-center gap-3 rounded-xl border border-[#DBE7FF] bg-brand-soft px-4 py-2.5">
-          <span className="text-[13px] font-semibold text-brand-hover">{selectedRows.length} selected</span>
-          <div className="flex items-center gap-2">{bulkActions(selectedRows, clearSelection)}</div>
-          <button onClick={clearSelection} className="ml-auto text-[13px] font-semibold text-sub hover:text-ink">
+          <span className="text-[13px] font-semibold text-brand-hover">
+            {selectedRows.length} selected
+          </span>
+          <div className="flex items-center gap-2">
+            {bulkActions(selectedRows, clearSelection)}
+          </div>
+          <button
+            onClick={clearSelection}
+            className="ml-auto text-[13px] font-semibold text-sub hover:text-ink"
+          >
             Clear
           </button>
         </div>
@@ -252,7 +282,9 @@ export default function DataTable({
       <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
         <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full border-collapse text-left">
-            <thead className={cx(stickyHeader && "sticky top-0 z-10", "bg-subtle")}>
+            <thead
+              className={cx(stickyHeader && "sticky top-0 z-10", "bg-subtle")}
+            >
               <tr className="border-b border-line">
                 {bulkActions && (
                   <th scope="col" className="w-10 px-4 py-3">
@@ -271,7 +303,10 @@ export default function DataTable({
                     scope="col"
                     onClick={() => toggleSort(col)}
                     onKeyDown={(e) => {
-                      if (col.sortable && (e.key === "Enter" || e.key === " ")) {
+                      if (
+                        col.sortable &&
+                        (e.key === "Enter" || e.key === " ")
+                      ) {
                         e.preventDefault();
                         toggleSort(col);
                       }
@@ -292,14 +327,17 @@ export default function DataTable({
                       "px-4 py-3 text-[11.5px] font-semibold uppercase tracking-[0.06em] text-sub",
                       col.sortable &&
                         "cursor-pointer select-none hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand/30",
-                      col.className
+                      col.className,
                     )}
                   >
                     <span className="inline-flex items-center gap-1.5">
                       {col.header}
                       {col.sortable &&
                         (sort.key !== col.key ? (
-                          <ChevronsUpDown size={13} className="text-[#CBD5E1]" />
+                          <ChevronsUpDown
+                            size={13}
+                            className="text-[#CBD5E1]"
+                          />
                         ) : sort.dir === "asc" ? (
                           <ArrowUp size={13} className="text-brand" />
                         ) : (
@@ -334,30 +372,49 @@ export default function DataTable({
                       "border-b border-hairline transition-colors last:border-0",
                       onRowClick &&
                         "cursor-pointer hover:bg-wash focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand/30",
-                      selected[key] && "bg-[#F5F9FF]"
+                      selected[key] && "bg-[#F5F9FF]",
                     )}
                   >
                     {bulkActions && (
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <td
+                        className="px-4 py-3"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <input
                           type="checkbox"
                           checked={!!selected[key]}
-                          onChange={() => setSelected((s) => ({ ...s, [key]: !s[key] }))}
+                          onChange={() =>
+                            setSelected((s) => ({ ...s, [key]: !s[key] }))
+                          }
                           aria-label="Select row"
                           className="size-4 cursor-pointer rounded border-[#CBD5E1] accent-brand focus-visible:ring-2 focus-visible:ring-brand/40"
                         />
                       </td>
                     )}
                     {visibleCols.map((col) => (
-                      <td key={col.key} className={cx("px-4 py-3 text-[13.5px] text-body", col.cellClassName)}>
-                        {col.render ? col.render(row) : String(accessor(col, row) ?? "—")}
+                      <td
+                        key={col.key}
+                        className={cx(
+                          "px-4 py-3 text-[13.5px] text-body",
+                          col.cellClassName,
+                        )}
+                      >
+                        {col.render
+                          ? col.render(row)
+                          : String(accessor(col, row) ?? "—")}
                       </td>
                     ))}
                     {rowActions && (
-                      <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                      <td
+                        className="px-4 py-3 text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Menu
                           button={
-                            <button aria-label="Row actions" className="grid size-8 place-items-center rounded-full text-faint hover:bg-hairline hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40">
+                            <button
+                              aria-label="Row actions"
+                              className="grid size-8 place-items-center rounded-full text-faint hover:bg-hairline hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+                            >
                               <MoreHorizontal size={17} />
                             </button>
                           }
@@ -374,13 +431,16 @@ export default function DataTable({
         </div>
 
         {/* Empty inside table frame */}
-        {pageRows.length === 0 && <div className="px-4 py-10">{emptyState}</div>}
+        {pageRows.length === 0 && (
+          <div className="px-4 py-10">{emptyState}</div>
+        )}
 
         {/* Pagination */}
         {filtered.length > pageSize && (
           <div className="flex items-center justify-between border-t border-line px-4 py-3">
             <p className="text-[12.5px] text-sub">
-              {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} of {filtered.length}
+              {(page - 1) * pageSize + 1}–
+              {Math.min(page * pageSize, filtered.length)} of {filtered.length}
             </p>
             <div className="flex items-center gap-1">
               <button

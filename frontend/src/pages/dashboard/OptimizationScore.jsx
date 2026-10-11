@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Gauge, Loader2, RefreshCw, AlertTriangle, CheckCircle2, ArrowRight } from "lucide-react";
+import {
+  Gauge,
+  Loader2,
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle2,
+  ArrowRight,
+} from "lucide-react";
 import {
   PageHeader,
   Card,
@@ -35,18 +42,39 @@ function ScoreRing({ value, grade }) {
   const off = c - (Math.max(0, Math.min(100, value)) / 100) * c;
   const col = scoreColor(value);
   return (
-    <div className="relative grid place-items-center" style={{ width: 200, height: 200 }}>
+    <div
+      className="relative grid place-items-center"
+      style={{ width: 200, height: 200 }}
+    >
       <svg width="200" height="200" className="-rotate-90">
-        <circle cx="100" cy="100" r={r} fill="none" stroke={LINE} strokeWidth="14" />
         <circle
-          cx="100" cy="100" r={r} fill="none" stroke={col} strokeWidth="14"
-          strokeLinecap="round" strokeDasharray={c} strokeDashoffset={off}
+          cx="100"
+          cy="100"
+          r={r}
+          fill="none"
+          stroke={LINE}
+          strokeWidth="14"
+        />
+        <circle
+          cx="100"
+          cy="100"
+          r={r}
+          fill="none"
+          stroke={col}
+          strokeWidth="14"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={off}
           style={{ transition: "stroke-dashoffset .8s ease" }}
         />
       </svg>
       <div className="absolute text-center">
-        <div className="text-5xl font-bold" style={{ color: INK }}>{Math.round(value)}</div>
-        <div className="mt-1 text-sm font-semibold" style={{ color: col }}>Grade {grade}</div>
+        <div className="text-5xl font-bold" style={{ color: INK }}>
+          {Math.round(value)}
+        </div>
+        <div className="mt-1 text-sm font-semibold" style={{ color: col }}>
+          Grade {grade}
+        </div>
       </div>
     </div>
   );
@@ -57,11 +85,25 @@ function CategoryBar({ label, score, weight }) {
   return (
     <div>
       <div className="flex items-center justify-between text-sm">
-        <span className="font-medium" style={{ color: INK }}>{label}</span>
-        <span style={{ color: SUB }}>{Math.round(score)} · {weight}%</span>
+        <span className="font-medium" style={{ color: INK }}>
+          {label}
+        </span>
+        <span style={{ color: SUB }}>
+          {Math.round(score)} · {weight}%
+        </span>
       </div>
-      <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full" style={{ background: LINE }}>
-        <div className="h-full rounded-full" style={{ width: `${score}%`, background: col, transition: "width .6s ease" }} />
+      <div
+        className="mt-1.5 h-2 w-full overflow-hidden rounded-full"
+        style={{ background: LINE }}
+      >
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${score}%`,
+            background: col,
+            transition: "width .6s ease",
+          }}
+        />
       </div>
     </div>
   );
@@ -78,7 +120,11 @@ export default function OptimizationScore() {
     workspaceIntelApi
       .optimizationScore()
       .then(setData)
-      .catch((e) => setError(formatApiError(e?.response?.data?.detail) || "Failed to load score"))
+      .catch((e) =>
+        setError(
+          formatApiError(e?.response?.data?.detail) || "Failed to load score",
+        ),
+      )
       .finally(() => setLoading(false));
   };
 
@@ -93,7 +139,8 @@ export default function OptimizationScore() {
         subtitle="A live health score for your workspace with one-click ways to improve."
         actions={
           <GhostButton onClick={load} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />{" "}
+            Refresh
           </GhostButton>
         }
       />
@@ -104,8 +151,12 @@ export default function OptimizationScore() {
         </div>
       ) : error ? (
         <Card className="p-8">
-          <EmptyState icon={AlertTriangle} title="Couldn't load your score" hint={error}
-            action={<PrimaryButton onClick={load}>Try again</PrimaryButton>} />
+          <EmptyState
+            icon={AlertTriangle}
+            title="Couldn't load your score"
+            hint={error}
+            action={<PrimaryButton onClick={load}>Try again</PrimaryButton>}
+          />
         </Card>
       ) : !data ? null : (
         <div className="space-y-6">
@@ -117,34 +168,59 @@ export default function OptimizationScore() {
               </p>
             </Card>
             <Card className="p-6">
-              <SectionTitle title="Category breakdown" subtitle="Each signal and its weight" />
+              <SectionTitle
+                title="Category breakdown"
+                subtitle="Each signal and its weight"
+              />
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 {(data.categories || []).map((c) => (
-                  <CategoryBar key={c.key} label={c.label} score={c.score} weight={c.weight} />
+                  <CategoryBar
+                    key={c.key}
+                    label={c.label}
+                    score={c.score}
+                    weight={c.weight}
+                  />
                 ))}
               </div>
             </Card>
           </div>
 
           <Card className="p-6">
-            <SectionTitle title="Recommendations" subtitle="Prioritized actions to raise your score" />
+            <SectionTitle
+              title="Recommendations"
+              subtitle="Prioritized actions to raise your score"
+            />
             <div className="mt-4 space-y-3">
               {(data.recommendations || []).map((r, i) => {
                 const sev = SEV[r.severity] || SEV.low;
                 const ok = r.area === "General";
                 return (
-                  <div key={i} className="flex items-start gap-3 rounded-xl border p-4" style={{ borderColor: LINE }}>
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 rounded-xl border p-4"
+                    style={{ borderColor: LINE }}
+                  >
                     {ok ? (
-                      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" style={{ color: "#16A34A" }} />
+                      <CheckCircle2
+                        className="mt-0.5 h-5 w-5 shrink-0"
+                        style={{ color: "#16A34A" }}
+                      />
                     ) : (
-                      <ArrowRight className="mt-0.5 h-5 w-5 shrink-0" style={{ color: BRAND }} />
+                      <ArrowRight
+                        className="mt-0.5 h-5 w-5 shrink-0"
+                        style={{ color: BRAND }}
+                      />
                     )}
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold" style={{ color: INK }}>{r.title}</span>
+                        <span className="font-semibold" style={{ color: INK }}>
+                          {r.title}
+                        </span>
                         <Badge tone={sev.tone}>{r.area}</Badge>
                       </div>
-                      <p className="mt-0.5 text-sm" style={{ color: SUB }}>{r.detail}</p>
+                      <p className="mt-0.5 text-sm" style={{ color: SUB }}>
+                        {r.detail}
+                      </p>
                     </div>
                   </div>
                 );

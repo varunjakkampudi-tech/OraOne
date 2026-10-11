@@ -5,10 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { useBranding } from "@/hooks/useBranding";
 import { useEntitlements } from "@/lib/entitlements";
 import ProjectSwitcher from "@/components/dashboard/ProjectSwitcher";
-import {
-  NAV_GROUPS,
-  filterByEntitlements,
-} from "@/constants/navigation";
+import { NAV_GROUPS, filterByEntitlements } from "@/constants/navigation";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Minimal, product-first navigation. The sidebar lists only the top-level
@@ -21,7 +18,8 @@ import {
 function BrandHeader() {
   const { branding } = useBranding();
   const { organizationName } = useAuth();
-  const workspace = organizationName || branding?.organization_name || "Workspace";
+  const workspace =
+    organizationName || branding?.organization_name || "Workspace";
 
   const mark = branding?.logo_url ? (
     <img
@@ -100,9 +98,13 @@ function NavItem({ item, onItemClick }) {
 function SidebarContent({ onItemClick, showClose, onClose }) {
   const { isProductEnabled, isFeatureEnabled } = useEntitlements();
 
-  const groups = NAV_GROUPS
-    .map((g) => ({ ...g, items: filterByEntitlements(g.items, { isProductEnabled, isFeatureEnabled }) }))
-    .filter((g) => g.items.length > 0);
+  const groups = NAV_GROUPS.map((g) => ({
+    ...g,
+    items: filterByEntitlements(g.items, {
+      isProductEnabled,
+      isFeatureEnabled,
+    }),
+  })).filter((g) => g.items.length > 0);
 
   return (
     <>
@@ -124,7 +126,10 @@ function SidebarContent({ onItemClick, showClose, onClose }) {
 
       <nav className="flex-1 overflow-y-auto p-3 space-y-1 scrollbar-thin">
         {groups.map((group, gi) => (
-          <div key={group.label || `g-${gi}`} className={gi > 0 ? "pt-1.5" : ""}>
+          <div
+            key={group.label || `g-${gi}`}
+            className={gi > 0 ? "pt-1.5" : ""}
+          >
             {group.label && (
               <p className="px-3 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-[0.09em] text-[#94A3B8]">
                 {group.label}
@@ -173,11 +178,7 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
           aria-label="Navigation menu"
           data-testid="mobile-sidebar"
         >
-          <SidebarContent
-            onItemClick={onClose}
-            showClose
-            onClose={onClose}
-          />
+          <SidebarContent onItemClick={onClose} showClose onClose={onClose} />
         </aside>
       </div>
     </>

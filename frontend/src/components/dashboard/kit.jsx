@@ -44,7 +44,9 @@ export function PageHeader({ eyebrow, title, subtitle, actions, icon: Icon }) {
         </div>
         {subtitle && <p className="mt-1.5 text-sm text-sub">{subtitle}</p>}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      {actions && (
+        <div className="flex flex-wrap items-center gap-2">{actions}</div>
+      )}
     </div>
   );
 }
@@ -56,7 +58,7 @@ export function Card({ className = "", children, hover = false, ...rest }) {
       className={cx(
         "rounded-2xl border border-line bg-white shadow-card",
         hover && "transition-all hover:-translate-y-0.5 hover:shadow-cardhover",
-        className
+        className,
       )}
       {...rest}
     >
@@ -70,7 +72,10 @@ export function Delta({ up, children }) {
   return (
     <span
       className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold"
-      style={{ color: up ? "#067647" : "#B42318", background: up ? "#ECFDF3" : "#FEF3F2" }}
+      style={{
+        color: up ? "#067647" : "#B42318",
+        background: up ? "#ECFDF3" : "#FEF3F2",
+      }}
     >
       <TrendingUp size={11} style={{ transform: up ? "none" : "scaleY(-1)" }} />
       {children}
@@ -79,38 +84,72 @@ export function Delta({ up, children }) {
 }
 
 /* KPI / stat card — reference style: icon chip + label on top, big value, delta + sub. */
-export function StatCard({ icon: Icon, label, value, sub, delta, up, tone = BRAND, bg = "#EFF4FF", to }) {
+export function StatCard({
+  icon: Icon,
+  label,
+  value,
+  sub,
+  delta,
+  up,
+  tone = BRAND,
+  bg = "#EFF4FF",
+  to,
+}) {
   const inner = (
     <Card hover className="h-full p-5">
       <div className="flex items-center gap-2.5">
-        <span className="grid size-9 place-items-center rounded-xl" style={{ background: bg }}>
+        <span
+          className="grid size-9 place-items-center rounded-xl"
+          style={{ background: bg }}
+        >
           {Icon && <Icon size={17} style={{ color: tone }} />}
         </span>
-        <span className="text-[13.5px] font-semibold text-[#475569]">{label}</span>
+        <span className="text-[13.5px] font-semibold text-[#475569]">
+          {label}
+        </span>
       </div>
-      <p className="mt-4 text-[28px] font-extrabold leading-none tracking-tight text-[#0F172A]">{value}</p>
+      <p className="mt-4 text-[28px] font-extrabold leading-none tracking-tight text-[#0F172A]">
+        {value}
+      </p>
       <div className="mt-3 flex items-center gap-2 text-[11.5px] text-[#94A3B8]">
         {delta && <Delta up={up}>{delta}</Delta>}
         {sub && <span>{sub}</span>}
       </div>
     </Card>
   );
-  return to ? <Link to={to} className="block">{inner}</Link> : inner;
+  return to ? (
+    <Link to={to} className="block">
+      {inner}
+    </Link>
+  ) : (
+    inner
+  );
 }
 
 /* Section heading with icon chip. */
-export function SectionTitle({ icon: Icon, title, subtitle, tone = BRAND, right }) {
+export function SectionTitle({
+  icon: Icon,
+  title,
+  subtitle,
+  tone = BRAND,
+  right,
+}) {
   return (
     <div className="mb-4 flex items-end justify-between gap-3">
       <div className="flex items-center gap-2.5">
         {Icon && (
-          <span className="grid size-7 place-items-center rounded-lg" style={{ background: `${tone}15` }}>
+          <span
+            className="grid size-7 place-items-center rounded-lg"
+            style={{ background: `${tone}15` }}
+          >
             <Icon size={14} style={{ color: tone }} />
           </span>
         )}
         <div>
           <h2 className="text-[15px] font-bold text-[#0F172A]">{title}</h2>
-          {subtitle && <p className="text-[11.5px] text-[#64748B]">{subtitle}</p>}
+          {subtitle && (
+            <p className="text-[11.5px] text-[#64748B]">{subtitle}</p>
+          )}
         </div>
       </div>
       {right}
@@ -133,12 +172,16 @@ export function Segmented({ value, onChange, options }) {
             aria-pressed={active}
             className={cx(
               "rounded-full px-4 py-1.5 text-sm font-semibold capitalize transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40",
-              active ? "bg-white text-[#0F172A] shadow-sm" : "text-[#64748B] hover:text-[#0F172A]"
+              active
+                ? "bg-white text-[#0F172A] shadow-sm"
+                : "text-[#64748B] hover:text-[#0F172A]",
             )}
           >
             {label}
             {typeof o !== "string" && o.badge && (
-              <span className="ml-1.5 text-[11px] font-semibold text-[#16A34A]">{o.badge}</span>
+              <span className="ml-1.5 text-[11px] font-semibold text-[#16A34A]">
+                {o.badge}
+              </span>
             )}
           </button>
         );
@@ -158,19 +201,30 @@ const TONES = {
 };
 export function Badge({ tone = "slate", children, className = "" }) {
   return (
-    <span className={cx("rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize", TONES[tone] || TONES.slate, className)}>
+    <span
+      className={cx(
+        "rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize",
+        TONES[tone] || TONES.slate,
+        className,
+      )}
+    >
       {children}
     </span>
   );
 }
 
 /* Ghost / outline button — pill. */
-export function GhostButton({ as: As = "button", className = "", children, ...rest }) {
+export function GhostButton({
+  as: As = "button",
+  className = "",
+  children,
+  ...rest
+}) {
   return (
     <As
       className={cx(
         "inline-flex items-center justify-center gap-2 rounded-full border border-stroke bg-white px-4 py-2 text-sm font-semibold text-body transition-colors hover:bg-wash focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2",
-        className
+        className,
       )}
       {...rest}
     >
@@ -180,12 +234,17 @@ export function GhostButton({ as: As = "button", className = "", children, ...re
 }
 
 /* Primary button — flat brand, pill. */
-export function PrimaryButton({ as: As = "button", className = "", children, ...rest }) {
+export function PrimaryButton({
+  as: As = "button",
+  className = "",
+  children,
+  ...rest
+}) {
   return (
     <As
       className={cx(
         "inline-flex items-center justify-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2",
-        className
+        className,
       )}
       {...rest}
     >

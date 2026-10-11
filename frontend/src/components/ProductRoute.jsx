@@ -13,14 +13,14 @@ import { useEntitlements, useRequestAccess } from "@/lib/entitlements";
 //
 // Fail-open while loading so entitled customers never see a flash of the
 // blocked screen.
-export default function ProductGate({ productKey, productName = "This product", children }) {
+export default function ProductGate({
+  productKey,
+  productName = "This product",
+  children,
+}) {
   const navigate = useNavigate();
-  const {
-    isProductEnabled,
-    isProductInMaintenance,
-    isComingSoon,
-    isLoading,
-  } = useEntitlements();
+  const { isProductEnabled, isProductInMaintenance, isComingSoon, isLoading } =
+    useEntitlements();
   const requestAccess = useRequestAccess();
 
   const backToDashboard = () => navigate("/app/dashboard");
@@ -77,7 +77,13 @@ export default function ProductGate({ productKey, productName = "This product", 
               ? "Thanks — your request has been sent to your administrator. You'll be notified once access is granted."
               : "Your organization doesn't currently have access to this product. Contact your administrator or request access below."
           }
-          actionLabel={requested ? "Request sent" : requestAccess.isPending ? "Requesting…" : "Request Access"}
+          actionLabel={
+            requested
+              ? "Request sent"
+              : requestAccess.isPending
+                ? "Requesting…"
+                : "Request Access"
+          }
           onAction={
             requested || requestAccess.isPending
               ? undefined

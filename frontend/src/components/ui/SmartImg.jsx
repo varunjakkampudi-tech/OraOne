@@ -21,7 +21,7 @@ const PLACEHOLDER_SVG =
         <path d='M60 130 l24-22 18 16 14-10 24 24'/>
       </g>
       <text x='100' y='168' text-anchor='middle' font-family='Inter, system-ui, sans-serif' font-size='10' fill='#64748B' font-weight='600' letter-spacing='1.5'>IMAGE UNAVAILABLE</text>
-    </svg>`
+    </svg>`,
   );
 
 /**

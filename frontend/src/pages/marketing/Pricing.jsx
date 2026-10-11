@@ -1,8 +1,17 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Sparkles, CheckCircle2, Check, Rocket, TrendingUp, Building2,
-  Shield, FileText, ArrowUpCircle, Headphones, ArrowRight,
+  Sparkles,
+  CheckCircle2,
+  Check,
+  Rocket,
+  TrendingUp,
+  Building2,
+  Shield,
+  FileText,
+  ArrowUpCircle,
+  Headphones,
+  ArrowRight,
 } from "lucide-react";
 import { useSEO } from "@/lib/seo";
 
@@ -31,7 +40,11 @@ const TIERS = [
       "Basic analytics",
       "Standard knowledge base",
     ],
-    cta: { label: "Start Free", to: "/signup", style: "bg-[#2563EB] hover:bg-[#1D4ED8] text-white" },
+    cta: {
+      label: "Start Free",
+      to: "/signup",
+      style: "bg-[#2563EB] hover:bg-[#1D4ED8] text-white",
+    },
     dark: false,
   },
   {
@@ -52,7 +65,11 @@ const TIERS = [
       "CRM integrations (Salesforce, HubSpot, Zoho)",
       "Custom knowledge base",
     ],
-    cta: { label: "Start Free", to: "/signup", style: "bg-white hover:bg-white/90 text-[#0F172A]" },
+    cta: {
+      label: "Start Free",
+      to: "/signup",
+      style: "bg-white hover:bg-white/90 text-[#0F172A]",
+    },
     dark: true,
     badge: "MOST POPULAR",
   },
@@ -74,16 +91,44 @@ const TIERS = [
       "SLA options (uptime + response)",
       "SSO + RBAC + Audit logs",
     ],
-    cta: { label: "Contact Sales", to: "/contact", style: "bg-[#7C3AED] hover:bg-[#6D28D9] text-white" },
+    cta: {
+      label: "Contact Sales",
+      to: "/contact",
+      style: "bg-[#7C3AED] hover:bg-[#6D28D9] text-white",
+    },
     dark: false,
   },
 ];
 
 const TRUST = [
-  { icon: Shield,        title: "Enterprise-Grade Security", desc: "AES-256, TLS 1.3, RBAC and audit logs — built for serious businesses.", color: "#2563EB", bg: "#EFF6FF" },
-  { icon: FileText,      title: "No Hidden Fees",             desc: "Transparent pricing — no setup fees, no surprise overages.",            color: "#22C55E", bg: "#ECFDF5" },
-  { icon: ArrowUpCircle, title: "Scale Anytime",              desc: "Upgrade, downgrade or pause as your business changes.",                 color: "#F59E0B", bg: "#FEF3C7" },
-  { icon: Headphones,    title: "Real Human Support",         desc: "Email + chat support on every plan. Dedicated CSM on Enterprise.",      color: "#8B5CF6", bg: "#F3E8FF" },
+  {
+    icon: Shield,
+    title: "Enterprise-Grade Security",
+    desc: "AES-256, TLS 1.3, RBAC and audit logs — built for serious businesses.",
+    color: "#2563EB",
+    bg: "#EFF6FF",
+  },
+  {
+    icon: FileText,
+    title: "No Hidden Fees",
+    desc: "Transparent pricing — no setup fees, no surprise overages.",
+    color: "#22C55E",
+    bg: "#ECFDF5",
+  },
+  {
+    icon: ArrowUpCircle,
+    title: "Scale Anytime",
+    desc: "Upgrade, downgrade or pause as your business changes.",
+    color: "#F59E0B",
+    bg: "#FEF3C7",
+  },
+  {
+    icon: Headphones,
+    title: "Real Human Support",
+    desc: "Email + chat support on every plan. Dedicated CSM on Enterprise.",
+    color: "#8B5CF6",
+    bg: "#F3E8FF",
+  },
 ];
 
 const FAQ_PRICING = [
@@ -124,20 +169,41 @@ export default function PricingPage() {
         <Sparkle top="55%" right="6%" color="#22C55E" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.span {...fadeUp} className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#2563EB]">
+          <motion.span
+            {...fadeUp}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#2563EB]"
+          >
             <Sparkles size={12} /> BETA ACCESS · FREE DURING BETA
           </motion.span>
-          <motion.h1 {...fadeUp} className="mt-6 text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter text-[#0F172A]">
+          <motion.h1
+            {...fadeUp}
+            className="mt-6 text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter text-[#0F172A]"
+          >
             Simple, transparent <span className="gradient-text">pricing</span>
           </motion.h1>
-          <motion.p {...fadeUp} className="mt-5 text-[#475569] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
-            OraOne is free for everyone during our Beta. After launch, pricing starts at{" "}
-            <span className="font-semibold text-[#0F172A]">$29/month</span> — with custom Enterprise plans available.
+          <motion.p
+            {...fadeUp}
+            className="mt-5 text-[#475569] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed"
+          >
+            OraOne is free for everyone during our Beta. After launch, pricing
+            starts at{" "}
+            <span className="font-semibold text-[#0F172A]">$29/month</span> —
+            with custom Enterprise plans available.
           </motion.p>
 
-          <motion.div {...fadeUp} className="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm">
-            {["Free during Beta", "No credit card required", "Cancel anytime"].map((t) => (
-              <span key={t} className="inline-flex items-center gap-1.5 text-[#475569]">
+          <motion.div
+            {...fadeUp}
+            className="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm"
+          >
+            {[
+              "Free during Beta",
+              "No credit card required",
+              "Cancel anytime",
+            ].map((t) => (
+              <span
+                key={t}
+                className="inline-flex items-center gap-1.5 text-[#475569]"
+              >
                 <CheckCircle2 size={16} className="text-[#22C55E]" /> {t}
               </span>
             ))}
@@ -159,7 +225,8 @@ export default function PricingPage() {
               <p className="text-[13.5px] text-[#0F172A]">
                 <span className="font-semibold">Free during Beta Access.</span>{" "}
                 <span className="text-[#475569]">
-                  Indicative post-beta pricing starts at $29/mo — Beta users get early-adopter pricing at launch.
+                  Indicative post-beta pricing starts at $29/mo — Beta users get
+                  early-adopter pricing at launch.
                 </span>
               </p>
             </div>
@@ -199,35 +266,72 @@ export default function PricingPage() {
 
                 {/* Header: icon + title */}
                 <div className="flex items-start gap-4">
-                  <div className="size-12 rounded-xl grid place-items-center flex-shrink-0" style={{ background: t.iconBg }}>
+                  <div
+                    className="size-12 rounded-xl grid place-items-center flex-shrink-0"
+                    style={{ background: t.iconBg }}
+                  >
                     <t.icon size={20} style={{ color: t.iconColor }} />
                   </div>
                   <div className="pt-0.5">
-                    <h3 className={`text-2xl font-bold tracking-tight ${t.dark ? "text-white" : "text-[#0F172A]"}`}>{t.name}</h3>
-                    <p className={`mt-1 text-sm ${t.dark ? "text-white/65" : "text-[#64748B]"}`}>{t.tagline}</p>
+                    <h3
+                      className={`text-2xl font-bold tracking-tight ${t.dark ? "text-white" : "text-[#0F172A]"}`}
+                    >
+                      {t.name}
+                    </h3>
+                    <p
+                      className={`mt-1 text-sm ${t.dark ? "text-white/65" : "text-[#64748B]"}`}
+                    >
+                      {t.tagline}
+                    </p>
                   </div>
                 </div>
 
                 {/* Price block — Beta hero + post-beta line */}
                 <div className="mt-7">
                   <div className="flex items-baseline gap-2">
-                    <span className={`text-6xl font-black tracking-tighter ${t.priceColor}`}>$0</span>
-                    <span className={`text-sm ${t.dark ? "text-white/65" : "text-[#64748B]"}`}>during Beta</span>
+                    <span
+                      className={`text-6xl font-black tracking-tighter ${t.priceColor}`}
+                    >
+                      $0
+                    </span>
+                    <span
+                      className={`text-sm ${t.dark ? "text-white/65" : "text-[#64748B]"}`}
+                    >
+                      during Beta
+                    </span>
                   </div>
-                  <p className={`mt-2 text-[12.5px] ${t.dark ? "text-white/60" : "text-[#64748B]"}`}>
-                    <span className={`font-semibold ${t.dark ? "text-white/85" : "text-[#0F172A]"}`}>{t.postPrice}</span>{" "}
+                  <p
+                    className={`mt-2 text-[12.5px] ${t.dark ? "text-white/60" : "text-[#64748B]"}`}
+                  >
+                    <span
+                      className={`font-semibold ${t.dark ? "text-white/85" : "text-[#0F172A]"}`}
+                    >
+                      {t.postPrice}
+                    </span>{" "}
                     {t.postPriceUnit}
                   </p>
                 </div>
 
                 {/* Divider */}
-                <div className={`my-6 border-t ${t.dark ? "border-white/15" : "border-[#E2E8F0]"}`} />
+                <div
+                  className={`my-6 border-t ${t.dark ? "border-white/15" : "border-[#E2E8F0]"}`}
+                />
 
                 {/* Features */}
                 <ul className="space-y-3 flex-1">
                   {t.features.map((f) => (
-                    <li key={f} className={`flex items-center gap-3 text-sm ${t.dark ? "text-white/90" : "text-[#0F172A]"}`}>
-                      <span className="size-5 rounded-full grid place-items-center flex-shrink-0" style={{ background: t.dark ? "rgba(37,99,235,0.9)" : "#2563EB" }}>
+                    <li
+                      key={f}
+                      className={`flex items-center gap-3 text-sm ${t.dark ? "text-white/90" : "text-[#0F172A]"}`}
+                    >
+                      <span
+                        className="size-5 rounded-full grid place-items-center flex-shrink-0"
+                        style={{
+                          background: t.dark
+                            ? "rgba(37,99,235,0.9)"
+                            : "#2563EB",
+                        }}
+                      >
                         <Check size={12} className="text-white" />
                       </span>
                       {f}
@@ -243,7 +347,9 @@ export default function PricingPage() {
                 >
                   {t.cta.label}
                 </Link>
-                <p className={`mt-3 text-center text-xs ${t.dark ? "text-white/55" : "text-[#94A3B8]"}`}>
+                <p
+                  className={`mt-3 text-center text-xs ${t.dark ? "text-white/55" : "text-[#94A3B8]"}`}
+                >
                   Free during Beta — no credit card
                 </p>
               </motion.div>
@@ -255,16 +361,26 @@ export default function PricingPage() {
       {/* ====== TRUST STRIP ====== */}
       <section className="pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeUp} className="rounded-3xl bg-[#F8FAFC] border border-[#E2E8F0] px-6 sm:px-8 py-7">
+          <motion.div
+            {...fadeUp}
+            className="rounded-3xl bg-[#F8FAFC] border border-[#E2E8F0] px-6 sm:px-8 py-7"
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {TRUST.map((t) => (
                 <div key={t.title} className="flex items-start gap-4">
-                  <div className="size-12 rounded-full grid place-items-center flex-shrink-0" style={{ background: t.bg }}>
+                  <div
+                    className="size-12 rounded-full grid place-items-center flex-shrink-0"
+                    style={{ background: t.bg }}
+                  >
                     <t.icon size={20} style={{ color: t.color }} />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-[#0F172A]">{t.title}</p>
-                    <p className="mt-1 text-xs text-[#64748B] leading-relaxed">{t.desc}</p>
+                    <p className="text-sm font-bold text-[#0F172A]">
+                      {t.title}
+                    </p>
+                    <p className="mt-1 text-xs text-[#64748B] leading-relaxed">
+                      {t.desc}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -280,7 +396,10 @@ export default function PricingPage() {
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tighter text-[#0F172A]">
               Pricing Questions, Answered
             </h2>
-            <p className="mt-3 text-[#64748B]">Everything you need to know about Beta Access and post-launch pricing.</p>
+            <p className="mt-3 text-[#64748B]">
+              Everything you need to know about Beta Access and post-launch
+              pricing.
+            </p>
           </motion.div>
           <div className="space-y-3">
             {FAQ_PRICING.map((f, i) => (
@@ -289,12 +408,16 @@ export default function PricingPage() {
                 className="group rounded-2xl bg-white border border-[#E2E8F0] hover:border-[#2563EB]/30 transition-colors"
               >
                 <summary className="list-none p-5 flex items-center justify-between cursor-pointer gap-3">
-                  <span className="text-[15px] font-semibold text-[#0F172A]">{f.q}</span>
+                  <span className="text-[15px] font-semibold text-[#0F172A]">
+                    {f.q}
+                  </span>
                   <span className="text-[#64748B] group-open:rotate-180 transition-transform shrink-0">
                     <ArrowRight size={16} className="rotate-90" />
                   </span>
                 </summary>
-                <div className="px-5 pb-5 text-[#475569] text-[14px] leading-relaxed">{f.a}</div>
+                <div className="px-5 pb-5 text-[#475569] text-[14px] leading-relaxed">
+                  {f.a}
+                </div>
               </details>
             ))}
           </div>
@@ -309,10 +432,17 @@ function Sparkle({ top, left, right, color }) {
     <svg
       className="absolute"
       style={{ top, left, right }}
-      width="14" height="14" viewBox="0 0 16 16" fill="none"
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
+      fill="none"
       aria-hidden="true"
     >
-      <path d="M8 0 L9.6 6.4 L16 8 L9.6 9.6 L8 16 L6.4 9.6 L0 8 L6.4 6.4 Z" fill={color} opacity="0.7" />
+      <path
+        d="M8 0 L9.6 6.4 L16 8 L9.6 9.6 L8 16 L6.4 9.6 L0 8 L6.4 6.4 Z"
+        fill={color}
+        opacity="0.7"
+      />
     </svg>
   );
 }

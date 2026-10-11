@@ -49,7 +49,7 @@ export default function Drawer({
       // Focus trap — keep Tab focus inside the drawer.
       if (e.key === "Tab" && panelRef.current) {
         const nodes = Array.from(
-          panelRef.current.querySelectorAll(FOCUSABLE)
+          panelRef.current.querySelectorAll(FOCUSABLE),
         ).filter((n) => n.offsetParent !== null);
         if (nodes.length === 0) return;
         const first = nodes[0];
@@ -63,7 +63,7 @@ export default function Drawer({
         }
       }
     },
-    [onClose]
+    [onClose],
   );
 
   useEffect(() => {
@@ -91,7 +91,12 @@ export default function Drawer({
   }, [open, handleKey]);
 
   const overlayMotion = reduceMotion
-    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.1 } }
+    ? {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        transition: { duration: 0.1 },
+      }
     : {
         initial: { opacity: 0 },
         animate: { opacity: 1 },
@@ -100,7 +105,12 @@ export default function Drawer({
       };
 
   const panelAnim = reduceMotion
-    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.12 } }
+    ? {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        transition: { duration: 0.12 },
+      }
     : {
         initial: { x: "100%" },
         animate: { x: 0 },
@@ -129,7 +139,7 @@ export default function Drawer({
             tabIndex={-1}
             className={cx(
               "absolute right-0 top-0 flex h-full w-full flex-col bg-white shadow-2xl outline-none",
-              WIDTHS[size] || WIDTHS.md
+              WIDTHS[size] || WIDTHS.md,
             )}
             {...panelAnim}
           >
@@ -142,7 +152,10 @@ export default function Drawer({
               )}
               <div className="min-w-0 flex-1">
                 {title && (
-                  <h2 id={titleId} className="truncate text-[16px] font-bold text-ink">
+                  <h2
+                    id={titleId}
+                    className="truncate text-[16px] font-bold text-ink"
+                  >
                     {title}
                   </h2>
                 )}
@@ -162,7 +175,9 @@ export default function Drawer({
             </div>
 
             {/* Body */}
-            <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin px-5 py-5">{children}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin px-5 py-5">
+              {children}
+            </div>
 
             {/* Footer */}
             {footer && (
@@ -174,6 +189,6 @@ export default function Drawer({
         </div>
       )}
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 }

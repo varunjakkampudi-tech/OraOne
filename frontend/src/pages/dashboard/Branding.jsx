@@ -36,7 +36,9 @@ const EMPTY = {
 function Field({ label, hint, children }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-[#334155]">{label}</label>
+      <label className="block text-sm font-medium text-[#334155]">
+        {label}
+      </label>
       {children}
       {hint && <p className="text-xs text-[#94A3B8]">{hint}</p>}
     </div>
@@ -52,7 +54,15 @@ function PremiumLock() {
 }
 
 // Drag-and-drop / click image uploader with an instant preview.
-function LogoUploader({ value, uploading, disabled, wide, onPick, onClear, testid }) {
+function LogoUploader({
+  value,
+  uploading,
+  disabled,
+  wide,
+  onPick,
+  onClear,
+  testid,
+}) {
   const inputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -84,7 +94,9 @@ function LogoUploader({ value, uploading, disabled, wide, onPick, onClear, testi
           pick(e.dataTransfer.files?.[0]);
         }}
         className={`relative flex ${wide ? "h-24" : "h-24"} cursor-pointer items-center justify-center gap-3 overflow-hidden rounded-xl border-2 border-dashed px-4 text-center transition-colors ${
-          dragOver ? "border-[#2563EB] bg-[#EFF6FF]" : "border-[#E2E8F0] bg-[#F8FAFC] hover:border-[#CBD5E1]"
+          dragOver
+            ? "border-[#2563EB] bg-[#EFF6FF]"
+            : "border-[#E2E8F0] bg-[#F8FAFC] hover:border-[#CBD5E1]"
         } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
       >
         {value ? (
@@ -217,7 +229,8 @@ export default function Branding() {
     }
   };
 
-  const previewName = form.brand_name || server?.organization_name || "Your Brand";
+  const previewName =
+    form.brand_name || server?.organization_name || "Your Brand";
 
   // Upload a logo/icon image. The backend stores it and returns the hosted URL,
   // which we fold straight into the form/server state for an instant preview.
@@ -287,7 +300,11 @@ export default function Branding() {
               data-testid="branding-save"
               className="inline-flex items-center gap-2 rounded-full bg-[#2563EB] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              {saving ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Save size={16} />
+              )}
               Save changes
             </button>
           )}
@@ -299,8 +316,9 @@ export default function Branding() {
           <div className="flex items-center gap-3 text-sm text-[#92400E]">
             <Sparkles size={18} />
             <span>
-              You're on the <b className="capitalize">{server?.plan_code}</b> plan. Custom domains
-              and hiding the “Powered by” mark require Business or higher.
+              You're on the <b className="capitalize">{server?.plan_code}</b>{" "}
+              plan. Custom domains and hiding the “Powered by” mark require
+              Business or higher.
             </span>
           </div>
           <Link
@@ -319,8 +337,14 @@ export default function Branding() {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-6 rounded-2xl border border-[#E2E8F0] bg-white p-6"
         >
-          <fieldset disabled={!canManage} className="space-y-6 disabled:opacity-70">
-            <Field label="Brand name" hint="Shown in the sidebar and customer-facing surfaces.">
+          <fieldset
+            disabled={!canManage}
+            className="space-y-6 disabled:opacity-70"
+          >
+            <Field
+              label="Brand name"
+              hint="Shown in the sidebar and customer-facing surfaces."
+            >
               <input
                 type="text"
                 value={form.brand_name}
@@ -333,7 +357,10 @@ export default function Branding() {
             </Field>
 
             <div className="grid gap-5 sm:grid-cols-2">
-              <Field label="Logo" hint="Wide logo for the sidebar header. PNG, SVG or WEBP, up to 2 MB.">
+              <Field
+                label="Logo"
+                hint="Wide logo for the sidebar header. PNG, SVG or WEBP, up to 2 MB."
+              >
                 <LogoUploader
                   value={form.logo_url}
                   uploading={uploading.logo}
@@ -344,7 +371,10 @@ export default function Branding() {
                   testid="branding-logo-upload"
                 />
               </Field>
-              <Field label="Icon" hint="Square mark / favicon. PNG or SVG, up to 2 MB.">
+              <Field
+                label="Icon"
+                hint="Square mark / favicon. PNG or SVG, up to 2 MB."
+              >
                 <LogoUploader
                   value={form.icon_url}
                   uploading={uploading.icon}
@@ -361,7 +391,9 @@ export default function Branding() {
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={primaryValid ? form.primary_color.slice(0, 7) : "#4F46E5"}
+                    value={
+                      primaryValid ? form.primary_color.slice(0, 7) : "#4F46E5"
+                    }
                     onChange={(e) => set("primary_color")(e.target.value)}
                     className="h-10 w-12 cursor-pointer rounded-lg border border-[#E2E8F0] bg-white p-1"
                   />
@@ -382,7 +414,9 @@ export default function Branding() {
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={accentValid ? form.accent_color.slice(0, 7) : "#06B6D4"}
+                    value={
+                      accentValid ? form.accent_color.slice(0, 7) : "#06B6D4"
+                    }
                     onChange={(e) => set("accent_color")(e.target.value)}
                     className="h-10 w-12 cursor-pointer rounded-lg border border-[#E2E8F0] bg-white p-1"
                   />
@@ -429,7 +463,8 @@ export default function Branding() {
               <Field
                 label={
                   <span className="flex items-center gap-2">
-                    <Globe size={14} /> Custom domain {!whiteLabel && <PremiumLock />}
+                    <Globe size={14} /> Custom domain{" "}
+                    {!whiteLabel && <PremiumLock />}
                   </span>
                 }
                 hint="Point a CNAME at your workspace, e.g. app.acme.com."
@@ -446,7 +481,9 @@ export default function Branding() {
               </Field>
               <label
                 className={`flex items-center gap-3 ${
-                  whiteLabel ? "cursor-pointer" : "cursor-not-allowed opacity-70"
+                  whiteLabel
+                    ? "cursor-pointer"
+                    : "cursor-not-allowed opacity-70"
                 }`}
               >
                 <input
@@ -467,7 +504,8 @@ export default function Branding() {
 
           {!canManage && (
             <p className="rounded-lg bg-[#F1F5F9] px-3 py-2 text-xs text-[#64748B]">
-              You have read-only access to branding. Ask an admin to make changes.
+              You have read-only access to branding. Ask an admin to make
+              changes.
             </p>
           )}
         </motion.div>
@@ -494,24 +532,38 @@ export default function Branding() {
                 ) : (
                   <span
                     className="grid h-full w-full place-items-center text-xl font-bold text-white"
-                    style={{ backgroundColor: primaryValid ? form.primary_color : "#4F46E5" }}
+                    style={{
+                      backgroundColor: primaryValid
+                        ? form.primary_color
+                        : "#4F46E5",
+                    }}
                   >
                     {previewName.slice(0, 1).toUpperCase()}
                   </span>
                 )}
               </div>
-              <p className="mt-3 text-base font-bold text-[#0F172A]">{previewName}</p>
+              <p className="mt-3 text-base font-bold text-[#0F172A]">
+                {previewName}
+              </p>
               <p className="text-xs text-[#64748B]">Live preview</p>
               <div className="mt-4 space-y-2">
                 <button
                   className="w-full rounded-xl py-2 text-sm font-semibold text-white"
-                  style={{ backgroundColor: primaryValid ? form.primary_color : "#4F46E5" }}
+                  style={{
+                    backgroundColor: primaryValid
+                      ? form.primary_color
+                      : "#4F46E5",
+                  }}
                 >
                   Primary action
                 </button>
                 <button
                   className="w-full rounded-xl py-2 text-sm font-semibold text-white"
-                  style={{ backgroundColor: accentValid ? form.accent_color : "#06B6D4" }}
+                  style={{
+                    backgroundColor: accentValid
+                      ? form.accent_color
+                      : "#06B6D4",
+                  }}
                 >
                   Accent action
                 </button>

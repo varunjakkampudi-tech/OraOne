@@ -108,7 +108,9 @@ export default function Billing() {
       if (data.portal_url && data.mode === "stripe") {
         window.location.href = data.portal_url;
       } else {
-        toast.info(data.message || "Customer portal not available in mock mode.");
+        toast.info(
+          data.message || "Customer portal not available in mock mode.",
+        );
       }
     } catch (e) {
       toast.error(formatApiError(e));
@@ -116,7 +118,8 @@ export default function Billing() {
   };
 
   const cancel = async () => {
-    if (!window.confirm("Cancel your subscription at the end of the period?")) return;
+    if (!window.confirm("Cancel your subscription at the end of the period?"))
+      return;
     try {
       const { data } = await api.post("/billing/cancel");
       setSubscription(data);
@@ -131,7 +134,9 @@ export default function Billing() {
     : "—";
 
   const statusTone =
-    { active: "green", trialing: "blue", past_due: "amber", canceled: "red" }[subscription?.status] || "slate";
+    { active: "green", trialing: "blue", past_due: "amber", canceled: "red" }[
+      subscription?.status
+    ] || "slate";
   const CurrentIcon = PLAN_ICONS[currentCode] || Sparkles;
 
   return (
@@ -167,7 +172,9 @@ export default function Billing() {
                 <span className="text-lg font-bold text-[#0F172A]">
                   {subscription?.plan?.name || "—"}
                 </span>
-                {subscription?.status && <Badge tone={statusTone}>{subscription.status}</Badge>}
+                {subscription?.status && (
+                  <Badge tone={statusTone}>{subscription.status}</Badge>
+                )}
               </div>
               <p className="mt-0.5 text-sm text-[#64748B]">
                 {subscription?.cancel_at_period_end
@@ -216,8 +223,10 @@ export default function Billing() {
             const Icon = PLAN_ICONS[plan.code] || Sparkles;
             const isCurrent = plan.code === currentCode;
             const isPopular = plan.code === POPULAR_CODE && !isCurrent;
-            const price = cycle === "yearly" ? plan.price_cents_yearly : plan.price_cents;
-            const isEnterprise = plan.code === "enterprise" && !plan.price_cents;
+            const price =
+              cycle === "yearly" ? plan.price_cents_yearly : plan.price_cents;
+            const isEnterprise =
+              plan.code === "enterprise" && !plan.price_cents;
             return (
               <motion.div
                 key={plan.id}
@@ -228,8 +237,8 @@ export default function Billing() {
                   isCurrent
                     ? "border-[#2563EB] ring-1 ring-[#2563EB] shadow-[0_16px_36px_-16px_rgba(37,99,235,0.30)]"
                     : isPopular
-                    ? "border-[#C7D2FE] shadow-[0_16px_36px_-16px_rgba(79,70,229,0.25)]"
-                    : "border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04)] hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-16px_rgba(16,24,40,0.18)]"
+                      ? "border-[#C7D2FE] shadow-[0_16px_36px_-16px_rgba(79,70,229,0.25)]"
+                      : "border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04)] hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-16px_rgba(16,24,40,0.18)]"
                 }`}
               >
                 {isPopular && (
@@ -249,11 +258,17 @@ export default function Billing() {
                   </div>
                   {isCurrent && <Badge tone="indigo">Current</Badge>}
                 </div>
-                <h3 className="mt-4 text-lg font-bold text-[#0F172A]">{plan.name}</h3>
-                <p className="min-h-[40px] text-sm text-[#64748B]">{plan.description}</p>
+                <h3 className="mt-4 text-lg font-bold text-[#0F172A]">
+                  {plan.name}
+                </h3>
+                <p className="min-h-[40px] text-sm text-[#64748B]">
+                  {plan.description}
+                </p>
                 <div className="mt-3">
                   {isEnterprise ? (
-                    <span className="text-2xl font-extrabold text-[#0F172A]">Custom</span>
+                    <span className="text-2xl font-extrabold text-[#0F172A]">
+                      Custom
+                    </span>
                   ) : (
                     <>
                       <span className="text-[32px] font-extrabold tracking-tight text-[#0F172A]">
@@ -269,7 +284,10 @@ export default function Billing() {
                 </div>
                 <ul className="mt-4 flex-1 space-y-2">
                   {(plan.features || []).map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-[#334155]">
+                    <li
+                      key={f}
+                      className="flex items-start gap-2 text-sm text-[#334155]"
+                    >
                       <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-[#ECFDF3]">
                         <Check className="h-3 w-3 text-[#067647]" />
                       </span>
@@ -284,16 +302,18 @@ export default function Billing() {
                     isCurrent || !canManage
                       ? "cursor-default bg-[#F1F5F9] text-[#94A3B8]"
                       : isPopular || isCurrent
-                      ? "bg-gradient-to-r from-[#2563EB] to-[#4F46E5] text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)] hover:opacity-95"
-                      : "bg-[#0F172A] text-white hover:bg-[#1E293B]"
+                        ? "bg-gradient-to-r from-[#2563EB] to-[#4F46E5] text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)] hover:opacity-95"
+                        : "bg-[#0F172A] text-white hover:bg-[#1E293B]"
                   }`}
                 >
-                  {busyCode === plan.code && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {busyCode === plan.code && (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  )}
                   {isCurrent
                     ? "Current plan"
                     : isEnterprise
-                    ? "Contact sales"
-                    : "Choose plan"}
+                      ? "Contact sales"
+                      : "Choose plan"}
                   {!isCurrent && !isEnterprise && busyCode !== plan.code && (
                     <ArrowUpRight className="h-4 w-4" />
                   )}
@@ -313,7 +333,9 @@ export default function Billing() {
             </span>
             <h2 className="font-bold text-[#0F172A]">Invoices</h2>
           </div>
-          <span className="text-sm text-[#64748B]">{invoices.length} total</span>
+          <span className="text-sm text-[#64748B]">
+            {invoices.length} total
+          </span>
         </div>
         {invoices.length === 0 ? (
           <div className="p-6">
@@ -326,7 +348,10 @@ export default function Billing() {
         ) : (
           <div className="divide-y divide-[#EEF2F7]">
             {invoices.map((inv) => (
-              <div key={inv.id} className="flex items-center justify-between p-4 transition-colors hover:bg-[#FAFBFE]">
+              <div
+                key={inv.id}
+                className="flex items-center justify-between p-4 transition-colors hover:bg-[#FAFBFE]"
+              >
                 <div className="flex items-center gap-3">
                   <span className="grid size-9 place-items-center rounded-xl bg-[#F5F7FB] text-[#64748B]">
                     <Receipt className="h-4 w-4" />
@@ -334,7 +359,8 @@ export default function Billing() {
                   <div>
                     <p className="font-semibold text-[#0F172A]">{inv.number}</p>
                     <p className="text-sm text-[#64748B]">
-                      {inv.description} · {new Date(inv.created_at).toLocaleDateString()}
+                      {inv.description} ·{" "}
+                      {new Date(inv.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>

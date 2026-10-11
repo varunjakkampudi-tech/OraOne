@@ -26,7 +26,9 @@ export default function InviteAccept() {
   const loadPreview = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await api.get("/team/invite/preview", { params: { token } });
+      const { data } = await api.get("/team/invite/preview", {
+        params: { token },
+      });
       setPreview(data);
     } catch (e) {
       setPreview({ valid: false, reason: formatApiError(e) });
@@ -77,9 +79,13 @@ export default function InviteAccept() {
         ) : done ? (
           <>
             <CheckCircle2 className="w-10 h-10 text-[#16A34A] mx-auto mt-4" />
-            <h1 className="text-xl font-bold text-[#0F172A] mt-3">Welcome aboard!</h1>
+            <h1 className="text-xl font-bold text-[#0F172A] mt-3">
+              Welcome aboard!
+            </h1>
             <p className="text-[#64748B] mt-1">{done.message}</p>
-            <p className="text-sm text-[#94A3B8] mt-4">Redirecting to your dashboard…</p>
+            <p className="text-sm text-[#94A3B8] mt-4">
+              Redirecting to your dashboard…
+            </p>
           </>
         ) : preview?.valid ? (
           <>
@@ -87,15 +93,18 @@ export default function InviteAccept() {
               Join {preview.organization_name}
             </h1>
             <p className="text-[#64748B] mt-1">
-              You've been invited as <span className="font-semibold capitalize">{preview.role}</span>.
+              You've been invited as{" "}
+              <span className="font-semibold capitalize">{preview.role}</span>.
             </p>
             <div className="mt-2 text-sm text-[#64748B]">
-              Invitation for <span className="font-medium">{preview.email}</span>
+              Invitation for{" "}
+              <span className="font-medium">{preview.email}</span>
             </div>
 
             {emailMismatch && (
               <div className="mt-4 text-sm text-[#B45309] bg-[#FEF3C7] rounded-lg px-3 py-2">
-                You're signed in as {myEmail}. Sign in with {preview.email} to accept this invite.
+                You're signed in as {myEmail}. Sign in with {preview.email} to
+                accept this invite.
               </div>
             )}
 
@@ -111,7 +120,9 @@ export default function InviteAccept() {
         ) : (
           <>
             <XCircle className="w-10 h-10 text-[#DC2626] mx-auto mt-4" />
-            <h1 className="text-xl font-bold text-[#0F172A] mt-3">Invitation unavailable</h1>
+            <h1 className="text-xl font-bold text-[#0F172A] mt-3">
+              Invitation unavailable
+            </h1>
             <p className="text-[#64748B] mt-1">
               {preview?.reason || "This invitation link is no longer valid."}
             </p>

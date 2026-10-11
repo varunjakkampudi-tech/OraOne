@@ -20,7 +20,15 @@ const LD_ID = "oraone-page-jsonld";
  *   jsonLd?: object | object[]
  * }} opts
  */
-export function useSEO({ title, description, ogImage, noindex, breadcrumbs, faq, jsonLd } = {}) {
+export function useSEO({
+  title,
+  description,
+  ogImage,
+  noindex,
+  breadcrumbs,
+  faq,
+  jsonLd,
+} = {}) {
   useEffect(() => {
     if (title) document.title = `${title} | ${SITE_NAME}`;
 
@@ -36,19 +44,29 @@ export function useSEO({ title, description, ogImage, noindex, breadcrumbs, faq,
 
     const setMeta = (name, content) => {
       if (!content) return;
-      upsert(`meta[name="${name}"]`, () => document.createElement("meta"), { name, content });
+      upsert(`meta[name="${name}"]`, () => document.createElement("meta"), {
+        name,
+        content,
+      });
     };
 
     const setOg = (property, content) => {
       if (!content) return;
-      upsert(`meta[property="${property}"]`, () => document.createElement("meta"), { property, content });
+      upsert(
+        `meta[property="${property}"]`,
+        () => document.createElement("meta"),
+        { property, content },
+      );
     };
 
     const image = ogImage || DEFAULT_OG_IMAGE;
     const canonicalUrl = `${SITE_BASE}${window.location.pathname}`;
 
     setMeta("description", description);
-    setMeta("robots", noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large");
+    setMeta(
+      "robots",
+      noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large",
+    );
 
     setOg("og:title", title ? `${title} | OraOne` : SITE_NAME);
     setOg("og:description", description);

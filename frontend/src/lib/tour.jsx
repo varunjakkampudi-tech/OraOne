@@ -1,4 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 const STORAGE_KEY = "oraone_tour_v1";
 // Persistent (survives sessions) — set once the user has seen/auto-run the
@@ -95,22 +102,32 @@ export function TourProvider({ children }) {
   }, []);
 
   const start = useCallback(() => {
-    try { localStorage.setItem(SEEN_KEY, "1"); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(SEEN_KEY, "1");
+    } catch {
+      /* ignore */
+    }
     setState(persist({ active: true, index: 0 }));
   }, [persist]);
-  const exit = useCallback(() => setState(persist({ active: false, index: 0 })), [persist]);
+  const exit = useCallback(
+    () => setState(persist({ active: false, index: 0 })),
+    [persist],
+  );
   const next = useCallback(
-    () => setState((s) => persist({ ...s, index: Math.min(s.index + 1, TOUR_STEPS.length - 1) })),
-    [persist]
+    () =>
+      setState((s) =>
+        persist({ ...s, index: Math.min(s.index + 1, TOUR_STEPS.length - 1) }),
+      ),
+    [persist],
   );
   const back = useCallback(
     () => setState((s) => persist({ ...s, index: Math.max(s.index - 1, 0) })),
-    [persist]
+    [persist],
   );
 
   const value = useMemo(
     () => ({ ...state, total: TOUR_STEPS.length, start, exit, next, back }),
-    [state, start, exit, next, back]
+    [state, start, exit, next, back],
   );
 
   // Auto-run the tour once for brand-new users on their first dashboard visit.
@@ -119,11 +136,19 @@ export function TourProvider({ children }) {
   useEffect(() => {
     if (_tourAutoStartScheduled) return;
     let seen = true;
-    try { seen = localStorage.getItem(SEEN_KEY) === "1"; } catch { /* ignore */ }
+    try {
+      seen = localStorage.getItem(SEEN_KEY) === "1";
+    } catch {
+      /* ignore */
+    }
     if (seen) return;
     _tourAutoStartScheduled = true;
     setTimeout(() => {
-      try { localStorage.setItem(SEEN_KEY, "1"); } catch { /* ignore */ }
+      try {
+        localStorage.setItem(SEEN_KEY, "1");
+      } catch {
+        /* ignore */
+      }
       setState((s) => (s.active ? s : persist({ active: true, index: 0 })));
     }, 900);
     // eslint-disable-next-line react-hooks/exhaustive-deps

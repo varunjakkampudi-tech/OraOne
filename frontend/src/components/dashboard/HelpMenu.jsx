@@ -82,7 +82,9 @@ export default function HelpMenu() {
               <Compass size={17} />
               <div className="min-w-0">
                 <p className="text-[13px] font-semibold">Take a tour</p>
-                <p className="text-[11px] text-[#64748B]">A quick guided walkthrough</p>
+                <p className="text-[11px] text-[#64748B]">
+                  A quick guided walkthrough
+                </p>
               </div>
             </button>
           </div>

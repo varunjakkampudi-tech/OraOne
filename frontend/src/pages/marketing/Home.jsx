@@ -36,15 +36,32 @@ import { useSEO } from "@/lib/seo";
 import { HOME } from "@/constants/testIds";
 
 const ChatAgentDemo = lazy(() =>
-  import("@/components/marketing/ProductLiveDemos").then((m) => ({ default: m.ChatAgentDemo }))
+  import("@/components/marketing/ProductLiveDemos").then((m) => ({
+    default: m.ChatAgentDemo,
+  })),
 );
 
 const FAQ = [
-  { q: "What is OraOne?", a: "OraOne is an AI Agent Platform that automates customer conversations on your website — so your business never misses a lead." },
-  { q: "Can I integrate OraOne with my existing CRM?", a: "Yes — OraOne ships with native integrations for Salesforce, HubSpot, Zoho, Pipedrive, plus webhooks and REST APIs for anything custom." },
-  { q: "What languages does OraOne support?", a: "OraOne supports 50+ languages. Your agents communicate naturally with customers worldwide." },
-  { q: "How much does OraOne cost?", a: "OraOne offers flexible pricing based on conversation volume. Start free during our beta, then scale as you grow." },
-  { q: "Is there setup required?", a: "Minimal. Deploy an AI agent in minutes with our template library, or customize from scratch. Technical and non-technical users both supported." },
+  {
+    q: "What is OraOne?",
+    a: "OraOne is an AI Agent Platform that automates customer conversations on your website — so your business never misses a lead.",
+  },
+  {
+    q: "Can I integrate OraOne with my existing CRM?",
+    a: "Yes — OraOne ships with native integrations for Salesforce, HubSpot, Zoho, Pipedrive, plus webhooks and REST APIs for anything custom.",
+  },
+  {
+    q: "What languages does OraOne support?",
+    a: "OraOne supports 50+ languages. Your agents communicate naturally with customers worldwide.",
+  },
+  {
+    q: "How much does OraOne cost?",
+    a: "OraOne offers flexible pricing based on conversation volume. Start free during our beta, then scale as you grow.",
+  },
+  {
+    q: "Is there setup required?",
+    a: "Minimal. Deploy an AI agent in minutes with our template library, or customize from scratch. Technical and non-technical users both supported.",
+  },
 ];
 
 const fadeUp = {
@@ -154,14 +171,46 @@ const BENEFITS = [
 ];
 
 const INDUSTRY_USE_CASES = [
-  { icon: Stethoscope, name: "Healthcare", desc: "Appointments, reminders & patient triage." },
-  { icon: HomeIcon, name: "Real Estate", desc: "Lead qualification & site-visit scheduling." },
-  { icon: GraduationCap, name: "Education", desc: "Admissions & student/parent support." },
-  { icon: ShieldCheck, name: "Insurance", desc: "Policy support, claims & renewals." },
-  { icon: Car, name: "Automotive", desc: "Service booking & test-drive scheduling." },
-  { icon: Wallet, name: "Finance & Lending", desc: "KYC, onboarding & customer support." },
-  { icon: ShoppingBag, name: "Retail & D2C", desc: "Order updates, returns & loyalty." },
-  { icon: Headphones, name: "Customer Support", desc: "Tier-1 deflection & escalation routing." },
+  {
+    icon: Stethoscope,
+    name: "Healthcare",
+    desc: "Appointments, reminders & patient triage.",
+  },
+  {
+    icon: HomeIcon,
+    name: "Real Estate",
+    desc: "Lead qualification & site-visit scheduling.",
+  },
+  {
+    icon: GraduationCap,
+    name: "Education",
+    desc: "Admissions & student/parent support.",
+  },
+  {
+    icon: ShieldCheck,
+    name: "Insurance",
+    desc: "Policy support, claims & renewals.",
+  },
+  {
+    icon: Car,
+    name: "Automotive",
+    desc: "Service booking & test-drive scheduling.",
+  },
+  {
+    icon: Wallet,
+    name: "Finance & Lending",
+    desc: "KYC, onboarding & customer support.",
+  },
+  {
+    icon: ShoppingBag,
+    name: "Retail & D2C",
+    desc: "Order updates, returns & loyalty.",
+  },
+  {
+    icon: Headphones,
+    name: "Customer Support",
+    desc: "Tier-1 deflection & escalation routing.",
+  },
 ];
 
 const PRICING_PEEK = [
@@ -218,7 +267,11 @@ function LiveDemoSection() {
 
       {/* Demo body */}
       <Suspense
-        fallback={<div className="py-24 text-center text-[#64748B] text-sm">Loading live demo...</div>}
+        fallback={
+          <div className="py-24 text-center text-[#64748B] text-sm">
+            Loading live demo...
+          </div>
+        }
       >
         <div className="mt-8">
           <ChatAgentDemo />
@@ -257,8 +310,8 @@ export default function HomePage() {
                 <span className="text-[#2563EB]">Never Miss A Sale.</span>
               </h1>
               <p className="mt-5 text-base sm:text-lg text-[#475569] leading-relaxed max-w-xl">
-                AI Chat Agents that answer, qualify and convert
-                customers 24/7 — so your business grows even when your team is offline.
+                AI Chat Agents that answer, qualify and convert customers 24/7 —
+                so your business grows even when your team is offline.
               </p>
 
               {/* Agent cards */}
@@ -288,13 +341,22 @@ export default function HomePage() {
                       style={{ background: p.iconBg }}
                     >
                       {p.brandSlug ? (
-                        <SimpleIcon slug={p.brandSlug} size={18} useBrandColor title={p.label} />
+                        <SimpleIcon
+                          slug={p.brandSlug}
+                          size={18}
+                          useBrandColor
+                          title={p.label}
+                        />
                       ) : (
                         <p.icon size={18} style={{ color: p.iconColor }} />
                       )}
                     </div>
-                    <p className="text-[13px] font-semibold text-[#0F172A]">{p.label}</p>
-                    <p className="text-[11px] text-[#64748B] mt-1 leading-snug">{p.sub}</p>
+                    <p className="text-[13px] font-semibold text-[#0F172A]">
+                      {p.label}
+                    </p>
+                    <p className="text-[11px] text-[#64748B] mt-1 leading-snug">
+                      {p.sub}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -316,7 +378,8 @@ export default function HomePage() {
                   Book Demo
                 </button>
                 <span className="text-xs text-[#64748B] inline-flex items-center gap-1">
-                  <CheckCircle2 size={14} className="text-[#10B981]" /> Free during Beta · No credit card
+                  <CheckCircle2 size={14} className="text-[#10B981]" /> Free
+                  during Beta · No credit card
                 </span>
               </div>
             </motion.div>
@@ -348,8 +411,8 @@ export default function HomePage() {
               Built for businesses that can&apos;t afford to miss a customer.
             </h2>
             <p className="mt-4 text-[#64748B] leading-relaxed">
-              OraOne is designed for reliability, scale and enterprise-grade trust —
-              from day one of your beta.
+              OraOne is designed for reliability, scale and enterprise-grade
+              trust — from day one of your beta.
             </p>
           </motion.div>
 
@@ -371,8 +434,12 @@ export default function HomePage() {
                 <p className="mt-3 text-4xl sm:text-5xl font-black tracking-tighter text-[#0F172A]">
                   {m.value}
                 </p>
-                <p className="mt-2 text-[15px] font-semibold text-[#0F172A]">{m.label}</p>
-                <p className="mt-1 text-[12.5px] text-[#64748B] leading-snug">{m.sub}</p>
+                <p className="mt-2 text-[15px] font-semibold text-[#0F172A]">
+                  {m.label}
+                </p>
+                <p className="mt-1 text-[12.5px] text-[#64748B] leading-snug">
+                  {m.sub}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -395,8 +462,12 @@ export default function HomePage() {
                 >
                   <p.icon size={20} style={{ color: p.color }} />
                 </div>
-                <p className="mt-4 text-[15px] font-semibold text-[#0F172A]">{p.title}</p>
-                <p className="mt-1.5 text-[12.5px] text-[#64748B] leading-snug">{p.desc}</p>
+                <p className="mt-4 text-[15px] font-semibold text-[#0F172A]">
+                  {p.title}
+                </p>
+                <p className="mt-1.5 text-[12.5px] text-[#64748B] leading-snug">
+                  {p.desc}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -429,7 +500,10 @@ export default function HomePage() {
       {/* ====================== HOW IT WORKS (conversion flow) ====================== */}
       <section className="py-10 sm:py-12 bg-[#F8FAFC] border-t border-[#E2E8F0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeUp} className="text-center max-w-2xl mx-auto mb-8">
+          <motion.div
+            {...fadeUp}
+            className="text-center max-w-2xl mx-auto mb-8"
+          >
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F1F5F9] text-[11px] font-bold tracking-[0.18em] text-[#475569] border border-[#E2E8F0] uppercase">
               <Workflow size={11} /> How It Works
             </span>
@@ -437,8 +511,8 @@ export default function HomePage() {
               One conversation. One qualified lead.
             </h2>
             <p className="mt-4 text-[#64748B] leading-relaxed">
-              No manual triage. Every conversation is answered, qualified and routed straight
-              into your pipeline — automatically.
+              No manual triage. Every conversation is answered, qualified and
+              routed straight into your pipeline — automatically.
             </p>
           </motion.div>
           <ConversionFlow />
@@ -459,7 +533,8 @@ export default function HomePage() {
               One platform. Every channel. Every conversation.
             </h2>
             <p className="mt-4 text-[#64748B] leading-relaxed">
-              Everything you need to launch enterprise-grade AI agents — in one platform.
+              Everything you need to launch enterprise-grade AI agents — in one
+              platform.
             </p>
           </motion.div>
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -479,8 +554,12 @@ export default function HomePage() {
                 >
                   <b.icon size={22} style={{ color: b.tone }} />
                 </div>
-                <h3 className="text-base font-semibold text-[#0F172A]">{b.title}</h3>
-                <p className="mt-2 text-[13.5px] leading-relaxed text-[#64748B]">{b.desc}</p>
+                <h3 className="text-base font-semibold text-[#0F172A]">
+                  {b.title}
+                </h3>
+                <p className="mt-2 text-[13.5px] leading-relaxed text-[#64748B]">
+                  {b.desc}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -490,13 +569,16 @@ export default function HomePage() {
       {/* ====================== INDUSTRY USE CASES ====================== */}
       <section className="py-10 sm:py-12 bg-white border-t border-[#E2E8F0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeUp} className="text-center max-w-2xl mx-auto mb-10">
+          <motion.div
+            {...fadeUp}
+            className="text-center max-w-2xl mx-auto mb-10"
+          >
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tighter text-[#0F172A]">
               Built for every industry.
             </h2>
             <p className="mt-4 text-[#64748B] leading-relaxed">
-              Pre-configured agents that understand your industry&apos;s vocabulary,
-              workflows and compliance needs.
+              Pre-configured agents that understand your industry&apos;s
+              vocabulary, workflows and compliance needs.
             </p>
           </motion.div>
 
@@ -511,8 +593,12 @@ export default function HomePage() {
                   <ind.icon size={20} className="text-[#2563EB]" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[#0F172A]">{ind.name}</p>
-                  <p className="text-[12.5px] text-[#64748B] mt-1 leading-snug">{ind.desc}</p>
+                  <p className="text-sm font-semibold text-[#0F172A]">
+                    {ind.name}
+                  </p>
+                  <p className="text-[12.5px] text-[#64748B] mt-1 leading-snug">
+                    {ind.desc}
+                  </p>
                 </div>
               </Link>
             ))}
@@ -535,7 +621,10 @@ export default function HomePage() {
         className="py-10 sm:py-12 bg-white border-t border-[#E2E8F0]"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeUp} className="text-center max-w-2xl mx-auto mb-10">
+          <motion.div
+            {...fadeUp}
+            className="text-center max-w-2xl mx-auto mb-10"
+          >
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFF6FF] text-[11px] font-bold tracking-[0.18em] text-[#2563EB] uppercase">
               <Sparkles size={11} /> Free During Beta
             </span>
@@ -543,7 +632,11 @@ export default function HomePage() {
               Simple, transparent pricing.
             </h2>
             <p className="mt-4 text-[#64748B] leading-relaxed">
-              Use OraOne free during Beta Access. From <span className="font-semibold text-[#0F172A]">$29/month after launch</span> — no hidden fees, cancel anytime.
+              Use OraOne free during Beta Access. From{" "}
+              <span className="font-semibold text-[#0F172A]">
+                $29/month after launch
+              </span>{" "}
+              — no hidden fees, cancel anytime.
             </p>
           </motion.div>
 
@@ -569,7 +662,9 @@ export default function HomePage() {
                     <p.icon size={18} style={{ color: p.color }} />
                   </div>
                   <div>
-                    <p className="text-[16px] font-semibold text-[#0F172A]">{p.name}</p>
+                    <p className="text-[16px] font-semibold text-[#0F172A]">
+                      {p.name}
+                    </p>
                     {p.featured && (
                       <p className="text-[10px] font-bold tracking-[0.18em] text-[#2563EB] uppercase mt-0.5">
                         Most Popular
@@ -577,11 +672,17 @@ export default function HomePage() {
                     )}
                   </div>
                 </div>
-                <p className="mt-4 text-[13px] text-[#475569] leading-relaxed">{p.line}</p>
+                <p className="mt-4 text-[13px] text-[#475569] leading-relaxed">
+                  {p.line}
+                </p>
                 <div className="mt-5 pt-5 border-t border-[#E2E8F0]">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black tracking-tighter text-[#0F172A]">$0</span>
-                    <span className="text-[12px] text-[#64748B]">/ during Beta</span>
+                    <span className="text-3xl font-black tracking-tighter text-[#0F172A]">
+                      $0
+                    </span>
+                    <span className="text-[12px] text-[#64748B]">
+                      / during Beta
+                    </span>
                   </div>
                   <p className="mt-1 text-[11.5px] text-[#64748B]">{p.post}</p>
                 </div>
@@ -622,10 +723,17 @@ export default function HomePage() {
                 className="group rounded-2xl bg-white border border-[#E2E8F0] hover:border-[#2563EB]/30 transition-colors"
               >
                 <summary className="list-none p-5 flex items-center justify-between cursor-pointer gap-3">
-                  <span className="text-[15px] font-semibold text-[#0F172A]">{f.q}</span>
-                  <ChevronDown size={18} className="text-[#64748B] group-open:rotate-180 transition-transform shrink-0" />
+                  <span className="text-[15px] font-semibold text-[#0F172A]">
+                    {f.q}
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className="text-[#64748B] group-open:rotate-180 transition-transform shrink-0"
+                  />
                 </summary>
-                <div className="px-5 pb-5 text-[#64748B] text-[14px] leading-relaxed">{f.a}</div>
+                <div className="px-5 pb-5 text-[#64748B] text-[14px] leading-relaxed">
+                  {f.a}
+                </div>
               </details>
             ))}
           </div>
@@ -638,7 +746,9 @@ export default function HomePage() {
           <motion.div
             {...fadeUp}
             className="relative rounded-3xl p-10 sm:p-14 overflow-hidden text-white shadow-premium-lg"
-            style={{ background: "linear-gradient(135deg, #0F172A 0%, #1E40AF 100%)" }}
+            style={{
+              background: "linear-gradient(135deg, #0F172A 0%, #1E40AF 100%)",
+            }}
           >
             <div className="absolute -top-20 -right-20 size-80 rounded-full bg-white/10" />
             <div className="absolute -bottom-32 -left-32 size-96 rounded-full bg-white/5" />
@@ -650,12 +760,19 @@ export default function HomePage() {
                   Start growing 24/7.
                 </h2>
                 <p className="mt-4 text-white/85 max-w-md leading-relaxed">
-                  Deploy your AI chat agents in days, not months —
-                  free during Beta Access.
+                  Deploy your AI chat agents in days, not months — free during
+                  Beta Access.
                 </p>
                 <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
-                  {["Free Beta Access", "No credit card required", "Cancel anytime"].map((b) => (
-                    <li key={b} className="flex items-center gap-2 text-white/90 text-sm">
+                  {[
+                    "Free Beta Access",
+                    "No credit card required",
+                    "Cancel anytime",
+                  ].map((b) => (
+                    <li
+                      key={b}
+                      className="flex items-center gap-2 text-white/90 text-sm"
+                    >
                       <CheckCircle2 size={16} /> {b}
                     </li>
                   ))}

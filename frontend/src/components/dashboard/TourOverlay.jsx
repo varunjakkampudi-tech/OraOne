@@ -95,7 +95,9 @@ export default function TourOverlay() {
           initial={{ opacity: 0, y: 10, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           className={`pointer-events-auto rounded-2xl bg-white p-5 shadow-2xl ${
-            showSpotlight ? "" : "fixed left-1/2 top-1/2 w-[92vw] max-w-md -translate-x-1/2 -translate-y-1/2"
+            showSpotlight
+              ? ""
+              : "fixed left-1/2 top-1/2 w-[92vw] max-w-md -translate-x-1/2 -translate-y-1/2"
           }`}
           style={showSpotlight ? cardStyle : undefined}
         >
@@ -103,13 +105,21 @@ export default function TourOverlay() {
             <p className="text-[11px] font-semibold uppercase tracking-wide text-[#2563EB]">
               Step {index + 1} of {total}
             </p>
-            <button onClick={exit} aria-label="Skip tour" className="text-[#94A3B8] hover:text-[#475569]">
+            <button
+              onClick={exit}
+              aria-label="Skip tour"
+              className="text-[#94A3B8] hover:text-[#475569]"
+            >
               <X size={16} />
             </button>
           </div>
 
-          <p className="mt-2 text-[16px] font-bold text-[#0F172A]">{step.title}</p>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-[#475569]">{step.body}</p>
+          <p className="mt-2 text-[16px] font-bold text-[#0F172A]">
+            {step.title}
+          </p>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-[#475569]">
+            {step.body}
+          </p>
 
           {/* Progress dots */}
           <div className="mt-4 flex items-center gap-1.5">
@@ -117,7 +127,11 @@ export default function TourOverlay() {
               <span
                 key={s.id}
                 className={`h-1.5 rounded-full transition-all ${
-                  i === index ? "w-5 bg-[#2563EB]" : i < index ? "w-1.5 bg-[#93C5FD]" : "w-1.5 bg-[#E2E8F0]"
+                  i === index
+                    ? "w-5 bg-[#2563EB]"
+                    : i < index
+                      ? "w-1.5 bg-[#93C5FD]"
+                      : "w-1.5 bg-[#E2E8F0]"
                 }`}
               />
             ))}

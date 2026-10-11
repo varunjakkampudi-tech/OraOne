@@ -15,13 +15,42 @@ import { toast } from "sonner";
 import { api, formatApiError } from "@/lib/api";
 
 const COLUMNS = [
-  { key: "open", label: "Open", icon: Circle, tint: "text-[#64748B]", accent: "bg-[#F1F5F9]" },
-  { key: "in_progress", label: "In Progress", icon: CircleDot, tint: "text-[#4F46E5]", accent: "bg-[#EEF2FF]" },
-  { key: "done", label: "Done", icon: CheckCircle2, tint: "text-[#16A34A]", accent: "bg-[#F0FDF4]" },
-  { key: "cancelled", label: "Cancelled", icon: XCircle, tint: "text-[#94A3B8]", accent: "bg-[#F8FAFC]" },
+  {
+    key: "open",
+    label: "Open",
+    icon: Circle,
+    tint: "text-[#64748B]",
+    accent: "bg-[#F1F5F9]",
+  },
+  {
+    key: "in_progress",
+    label: "In Progress",
+    icon: CircleDot,
+    tint: "text-[#4F46E5]",
+    accent: "bg-[#EEF2FF]",
+  },
+  {
+    key: "done",
+    label: "Done",
+    icon: CheckCircle2,
+    tint: "text-[#16A34A]",
+    accent: "bg-[#F0FDF4]",
+  },
+  {
+    key: "cancelled",
+    label: "Cancelled",
+    icon: XCircle,
+    tint: "text-[#94A3B8]",
+    accent: "bg-[#F8FAFC]",
+  },
 ];
 
-const NEXT_STATUS = { open: "in_progress", in_progress: "done", done: "open", cancelled: "open" };
+const NEXT_STATUS = {
+  open: "in_progress",
+  in_progress: "done",
+  done: "open",
+  cancelled: "open",
+};
 
 function initials(name = "") {
   return name
@@ -68,13 +97,18 @@ function CreateTaskModal({ members, onClose, onCreated }) {
       >
         <div className="flex items-start justify-between">
           <h2 className="text-lg font-bold text-[#0F172A]">New task</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]">
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="mt-5 space-y-4">
           <div>
-            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">Title</label>
+            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">
+              Title
+            </label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -83,7 +117,9 @@ function CreateTaskModal({ members, onClose, onCreated }) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">Description</label>
+            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">
+              Description
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -93,7 +129,9 @@ function CreateTaskModal({ members, onClose, onCreated }) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">Assignee</label>
+            <label className="mb-1 block text-[12px] font-semibold text-[#334155]">
+              Assignee
+            </label>
             <select
               value={assignee}
               onChange={(e) => setAssignee(e.target.value)}
@@ -109,7 +147,10 @@ function CreateTaskModal({ members, onClose, onCreated }) {
           </div>
         </div>
         <div className="mt-6 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-xl px-4 py-2 text-sm font-semibold text-[#475569] hover:bg-[#F1F5F9]">
+          <button
+            onClick={onClose}
+            className="rounded-xl px-4 py-2 text-sm font-semibold text-[#475569] hover:bg-[#F1F5F9]"
+          >
             Cancel
           </button>
           <button
@@ -206,7 +247,9 @@ export default function Tasks() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-[#0F172A]">Tasks</h1>
-            <p className="text-sm text-[#64748B]">Track and assign work across your workspace.</p>
+            <p className="text-sm text-[#64748B]">
+              Track and assign work across your workspace.
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -231,11 +274,16 @@ export default function Tasks() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {COLUMNS.map((col) => (
-          <div key={col.key} className="rounded-2xl border border-[#E2E8F0] bg-[#FBFCFE]">
+          <div
+            key={col.key}
+            className="rounded-2xl border border-[#E2E8F0] bg-[#FBFCFE]"
+          >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] px-4 py-3">
               <div className="flex items-center gap-2">
                 <col.icon className={`h-4 w-4 ${col.tint}`} />
-                <span className="text-sm font-bold text-[#0F172A]">{col.label}</span>
+                <span className="text-sm font-bold text-[#0F172A]">
+                  {col.label}
+                </span>
               </div>
               <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-[#64748B]">
                 {grouped[col.key].length}
@@ -243,13 +291,22 @@ export default function Tasks() {
             </div>
             <div className="space-y-2 p-3">
               {grouped[col.key].length === 0 ? (
-                <p className="py-6 text-center text-[12px] text-[#94A3B8]">No tasks</p>
+                <p className="py-6 text-center text-[12px] text-[#94A3B8]">
+                  No tasks
+                </p>
               ) : (
                 grouped[col.key].map((task) => (
-                  <div key={task.id} className="rounded-xl border border-[#E2E8F0] bg-white p-3 shadow-sm">
-                    <p className="text-sm font-semibold text-[#0F172A]">{task.title}</p>
+                  <div
+                    key={task.id}
+                    className="rounded-xl border border-[#E2E8F0] bg-white p-3 shadow-sm"
+                  >
+                    <p className="text-sm font-semibold text-[#0F172A]">
+                      {task.title}
+                    </p>
                     {task.description && (
-                      <p className="mt-1 line-clamp-2 text-[12px] text-[#64748B]">{task.description}</p>
+                      <p className="mt-1 line-clamp-2 text-[12px] text-[#64748B]">
+                        {task.description}
+                      </p>
                     )}
                     <div className="mt-3 flex items-center justify-between">
                       {task.assignee ? (
@@ -260,29 +317,34 @@ export default function Tasks() {
                           {task.assignee.name}
                         </span>
                       ) : (
-                        <span className="text-[11px] text-[#94A3B8]">Unassigned</span>
+                        <span className="text-[11px] text-[#94A3B8]">
+                          Unassigned
+                        </span>
                       )}
                       <div className="flex items-center gap-1">
-                        {task.status !== "done" && task.status !== "cancelled" && (
-                          <button
-                            onClick={() => advance(task)}
-                            disabled={busyId === task.id}
-                            className="rounded-lg bg-[#EEF2FF] px-2 py-1 text-[11px] font-semibold text-[#4F46E5] hover:bg-[#E0E7FF] disabled:opacity-50"
-                          >
-                            {task.status === "open" ? "Start" : "Complete"}
-                          </button>
-                        )}
-                        {task.status !== "cancelled" && task.status !== "done" && (
-                          <button
-                            onClick={() => setStatus(task, "cancelled")}
-                            disabled={busyId === task.id}
-                            className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9] hover:text-[#DC2626] disabled:opacity-50"
-                            aria-label="Cancel task"
-                          >
-                            <XCircle className="h-4 w-4" />
-                          </button>
-                        )}
-                        {(task.status === "done" || task.status === "cancelled") && (
+                        {task.status !== "done" &&
+                          task.status !== "cancelled" && (
+                            <button
+                              onClick={() => advance(task)}
+                              disabled={busyId === task.id}
+                              className="rounded-lg bg-[#EEF2FF] px-2 py-1 text-[11px] font-semibold text-[#4F46E5] hover:bg-[#E0E7FF] disabled:opacity-50"
+                            >
+                              {task.status === "open" ? "Start" : "Complete"}
+                            </button>
+                          )}
+                        {task.status !== "cancelled" &&
+                          task.status !== "done" && (
+                            <button
+                              onClick={() => setStatus(task, "cancelled")}
+                              disabled={busyId === task.id}
+                              className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9] hover:text-[#DC2626] disabled:opacity-50"
+                              aria-label="Cancel task"
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </button>
+                          )}
+                        {(task.status === "done" ||
+                          task.status === "cancelled") && (
                           <button
                             onClick={() => setStatus(task, "open")}
                             disabled={busyId === task.id}

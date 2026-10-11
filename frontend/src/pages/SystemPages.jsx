@@ -22,7 +22,9 @@ function Shell({ icon: Icon, title, desc, children, badge }) {
             {badge}
           </span>
         )}
-        <h1 className="mt-5 text-3xl sm:text-4xl font-black tracking-tight text-[#0F172A]">{title}</h1>
+        <h1 className="mt-5 text-3xl sm:text-4xl font-black tracking-tight text-[#0F172A]">
+          {title}
+        </h1>
         <p className="mt-3 text-[#64748B] leading-relaxed">{desc}</p>
         {children}
       </motion.div>
@@ -31,7 +33,11 @@ function Shell({ icon: Icon, title, desc, children, badge }) {
 }
 
 export function NetworkError() {
-  useSEO({ title: "You're offline", description: "Looks like you've lost your internet connection.", noindex: true });
+  useSEO({
+    title: "You're offline",
+    description: "Looks like you've lost your internet connection.",
+    noindex: true,
+  });
   return (
     <Shell
       icon={WifiOff}
@@ -60,7 +66,11 @@ export function NetworkError() {
 }
 
 export function Maintenance() {
-  useSEO({ title: "Scheduled maintenance", description: "OraOne is undergoing scheduled maintenance.", noindex: true });
+  useSEO({
+    title: "Scheduled maintenance",
+    description: "OraOne is undergoing scheduled maintenance.",
+    noindex: true,
+  });
   return (
     <Shell
       icon={Wrench}

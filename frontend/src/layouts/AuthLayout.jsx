@@ -19,11 +19,17 @@ export default function AuthLayout() {
       {/* Background accents */}
       <div
         className="pointer-events-none absolute -top-40 -left-32 h-[420px] w-[420px] rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(59,130,246,0.14), transparent 65%)" }}
+        style={{
+          background:
+            "radial-gradient(circle, rgba(59,130,246,0.14), transparent 65%)",
+        }}
       />
       <div
         className="pointer-events-none absolute -bottom-44 -right-32 h-[460px] w-[460px] rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(6,182,212,0.12), transparent 65%)" }}
+        style={{
+          background:
+            "radial-gradient(circle, rgba(6,182,212,0.12), transparent 65%)",
+        }}
       />
 
       <motion.div
@@ -44,11 +50,17 @@ export default function AuthLayout() {
 
         <p className="mt-6 text-center text-xs leading-relaxed text-[#94A3B8]">
           By continuing you agree to our{" "}
-          <Link to="/terms" className="font-medium text-[#64748B] hover:text-[#2563EB] hover:underline">
+          <Link
+            to="/terms"
+            className="font-medium text-[#64748B] hover:text-[#2563EB] hover:underline"
+          >
             Terms of Service
           </Link>{" "}
           and{" "}
-          <Link to="/privacy" className="font-medium text-[#64748B] hover:text-[#2563EB] hover:underline">
+          <Link
+            to="/privacy"
+            className="font-medium text-[#64748B] hover:text-[#2563EB] hover:underline"
+          >
             Privacy Policy
           </Link>
           .

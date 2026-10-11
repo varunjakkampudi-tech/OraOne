@@ -7,7 +7,7 @@ import { setConsent } from "@/lib/analytics";
 const STORAGE_KEY = "oraone_cookie_choice_v1";
 
 const DEFAULT = {
-  necessary: true,   // always on
+  necessary: true, // always on
   analytics: false,
   marketing: false,
   preferences: false,
@@ -47,7 +47,11 @@ function readChoice() {
 }
 
 function saveChoice(c) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...c, ts: Date.now() })); } catch { /* storage blocked */ }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...c, ts: Date.now() }));
+  } catch {
+    /* storage blocked */
+  }
   setConsent(c);
 }
 
@@ -68,7 +72,12 @@ export default function CookieConsent() {
   }, []);
 
   const acceptAll = () => {
-    const all = { necessary: true, analytics: true, marketing: true, preferences: true };
+    const all = {
+      necessary: true,
+      analytics: true,
+      marketing: true,
+      preferences: true,
+    };
     saveChoice(all);
     setOpen(false);
   };
@@ -106,14 +115,33 @@ export default function CookieConsent() {
                   <Cookie size={20} className="text-[#2563EB]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 id="cookie-consent-title" className="text-[15px] font-bold text-[#0F172A]">
+                  <h2
+                    id="cookie-consent-title"
+                    className="text-[15px] font-bold text-[#0F172A]"
+                  >
                     We value your privacy.
                   </h2>
-                  <p id="cookie-consent-desc" className="mt-1 text-[13px] text-[#475569] leading-relaxed">
-                    OraOne uses cookies to keep the site running, remember your preferences and (with your consent) understand how it&apos;s used. Read our{" "}
-                    <Link to="/cookie-policy" className="text-[#2563EB] hover:underline font-medium">Cookie Policy</Link>{" "}
+                  <p
+                    id="cookie-consent-desc"
+                    className="mt-1 text-[13px] text-[#475569] leading-relaxed"
+                  >
+                    OraOne uses cookies to keep the site running, remember your
+                    preferences and (with your consent) understand how it&apos;s
+                    used. Read our{" "}
+                    <Link
+                      to="/cookie-policy"
+                      className="text-[#2563EB] hover:underline font-medium"
+                    >
+                      Cookie Policy
+                    </Link>{" "}
                     or{" "}
-                    <Link to="/privacy" className="text-[#2563EB] hover:underline font-medium">Privacy Policy</Link>.
+                    <Link
+                      to="/privacy"
+                      className="text-[#2563EB] hover:underline font-medium"
+                    >
+                      Privacy Policy
+                    </Link>
+                    .
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
@@ -170,7 +198,11 @@ export function CookieSettingsTrigger() {
   return (
     <button
       onClick={() => {
-        try { localStorage.removeItem(STORAGE_KEY); } catch { /* storage blocked */ }
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch {
+          /* storage blocked */
+        }
         setReopen(true);
         window.location.reload();
       }}
@@ -184,7 +216,14 @@ export function CookieSettingsTrigger() {
   );
 }
 
-function ManagePanel({ choices, setChoices, onCancel, onSave, onReject, onAccept }) {
+function ManagePanel({
+  choices,
+  setChoices,
+  onCancel,
+  onSave,
+  onReject,
+  onAccept,
+}) {
   return (
     <div>
       <div className="px-5 py-4 sm:px-6 border-b border-[#E2E8F0] flex items-center justify-between">
@@ -193,8 +232,12 @@ function ManagePanel({ choices, setChoices, onCancel, onSave, onReject, onAccept
             <Shield size={16} className="text-[#2563EB]" />
           </div>
           <div>
-            <h2 className="text-[15px] font-bold text-[#0F172A]">Cookie Preferences</h2>
-            <p className="text-[11.5px] text-[#64748B]">Choose which cookies you&apos;d like to allow.</p>
+            <h2 className="text-[15px] font-bold text-[#0F172A]">
+              Cookie Preferences
+            </h2>
+            <p className="text-[11.5px] text-[#64748B]">
+              Choose which cookies you&apos;d like to allow.
+            </p>
           </div>
         </div>
         <button
@@ -218,20 +261,27 @@ function ManagePanel({ choices, setChoices, onCancel, onSave, onReject, onAccept
               type="checkbox"
               checked={c.locked ? true : !!choices[c.key]}
               disabled={c.locked}
-              onChange={(e) => !c.locked && setChoices((s) => ({ ...s, [c.key]: e.target.checked }))}
+              onChange={(e) =>
+                !c.locked &&
+                setChoices((s) => ({ ...s, [c.key]: e.target.checked }))
+              }
               data-testid={`cookie-cat-${c.key}`}
               className="mt-1 size-4 accent-[#2563EB] disabled:opacity-60"
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-[13.5px] font-semibold text-[#0F172A]">{c.title}</p>
+                <p className="text-[13.5px] font-semibold text-[#0F172A]">
+                  {c.title}
+                </p>
                 {c.locked && (
                   <span className="text-[10px] font-bold tracking-wider text-[#475569] bg-[#F1F5F9] px-1.5 py-0.5 rounded-full">
                     ALWAYS ON
                   </span>
                 )}
               </div>
-              <p className="text-[12.5px] text-[#64748B] mt-1 leading-snug">{c.desc}</p>
+              <p className="text-[12.5px] text-[#64748B] mt-1 leading-snug">
+                {c.desc}
+              </p>
             </div>
           </label>
         ))}

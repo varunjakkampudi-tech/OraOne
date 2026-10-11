@@ -15,7 +15,9 @@ export default function AuthCallback() {
     const state = params.get("state");
     if (!code) {
       clearCognitoTransaction();
-      setError(params.get("error_description") || "Cognito sign-in was cancelled.");
+      setError(
+        params.get("error_description") || "Cognito sign-in was cancelled.",
+      );
       return;
     }
     completeCognitoSession(code, state).then((result) => {
@@ -24,6 +26,13 @@ export default function AuthCallback() {
     });
   }, [search, completeCognitoSession, navigate]);
 
-  if (error) return <div className="p-8 text-center text-red-600">{error}<br /><a href="/login">Return to login</a></div>;
+  if (error)
+    return (
+      <div className="p-8 text-center text-red-600">
+        {error}
+        <br />
+        <a href="/login">Return to login</a>
+      </div>
+    );
   return <div className="p-8 text-center">Completing secure sign-in…</div>;
 }

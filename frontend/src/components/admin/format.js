@@ -2,15 +2,19 @@ export function fmtNum(n) {
   if (n === null || n === undefined) return "—";
   const v = Number(n);
   if (Number.isNaN(v)) return "—";
-  if (Math.abs(v) >= 1_000_000) return (v / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
-  if (Math.abs(v) >= 1_000) return (v / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
+  if (Math.abs(v) >= 1_000_000)
+    return (v / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  if (Math.abs(v) >= 1_000)
+    return (v / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
   return v.toLocaleString();
 }
 
 export function fmtMoney(n, currency = "usd") {
   if (n === null || n === undefined) return "—";
   const sym = currency === "usd" ? "$" : currency === "inr" ? "₹" : "";
-  return sym + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
+  return (
+    sym + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 })
+  );
 }
 
 export function fmtBytes(bytes) {
@@ -18,7 +22,10 @@ export function fmtBytes(bytes) {
   const u = ["B", "KB", "MB", "GB", "TB"];
   let i = 0;
   let v = Number(bytes);
-  while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
+  while (v >= 1024 && i < u.length - 1) {
+    v /= 1024;
+    i++;
+  }
   return `${v.toFixed(v >= 10 || i === 0 ? 0 : 1)} ${u[i]}`;
 }
 
@@ -41,5 +48,9 @@ export function fmtDate(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return d.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }

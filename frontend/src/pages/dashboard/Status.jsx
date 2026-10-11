@@ -61,11 +61,41 @@ async function probe(path, ms = 8000) {
 }
 
 const COMPONENTS = [
-  { key: "api", label: "API", icon: Server, desc: "Core REST API", probe: "/health" },
-  { key: "db", label: "Database", icon: Database, desc: "Postgres primary", probe: "/health/db" },
-  { key: "agents", label: "AI Agents", icon: Bot, desc: "Agent runtime", derive: "api" },
-  { key: "widgets", label: "Widgets & Chat", icon: MessageSquare, desc: "Embeddable widget runtime", derive: "api" },
-  { key: "crawler", label: "Website Crawler", icon: Globe, desc: "Distributed crawl workers", derive: "api" },
+  {
+    key: "api",
+    label: "API",
+    icon: Server,
+    desc: "Core REST API",
+    probe: "/health",
+  },
+  {
+    key: "db",
+    label: "Database",
+    icon: Database,
+    desc: "Postgres primary",
+    probe: "/health/db",
+  },
+  {
+    key: "agents",
+    label: "AI Agents",
+    icon: Bot,
+    desc: "Agent runtime",
+    derive: "api",
+  },
+  {
+    key: "widgets",
+    label: "Widgets & Chat",
+    icon: MessageSquare,
+    desc: "Embeddable widget runtime",
+    derive: "api",
+  },
+  {
+    key: "crawler",
+    label: "Website Crawler",
+    icon: Globe,
+    desc: "Distributed crawl workers",
+    derive: "api",
+  },
 ];
 
 export default function Status() {
@@ -75,7 +105,10 @@ export default function Status() {
 
   const run = useCallback(async () => {
     setLoading(true);
-    const [api, db] = await Promise.all([probe("/health"), probe("/health/db")]);
+    const [api, db] = await Promise.all([
+      probe("/health"),
+      probe("/health/db"),
+    ]);
     setChecks({ api, db });
     setUpdatedAt(new Date());
     setLoading(false);
@@ -95,7 +128,11 @@ export default function Status() {
     return r.ok ? "operational" : c.key === "db" ? "degraded" : "down";
   };
 
-  const components = COMPONENTS.map((c) => ({ ...c, status: statusFor(c), result: checks?.[c.derive || c.key] }));
+  const components = COMPONENTS.map((c) => ({
+    ...c,
+    status: statusFor(c),
+    result: checks?.[c.derive || c.key],
+  }));
   const anyDown = components.some((c) => c.status === "down");
   const anyDegraded = components.some((c) => c.status === "degraded");
   const overall = anyDown ? "down" : anyDegraded ? "degraded" : "operational";
@@ -117,7 +154,11 @@ export default function Status() {
             data-testid="status-refresh"
             className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-[13px] font-semibold text-[#334155] transition hover:border-[#BFD3F5] hover:bg-[#EFF6FF] disabled:opacity-60"
           >
-            {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+            {loading ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <RefreshCw size={14} />
+            )}
             Refresh
           </button>
         }
@@ -138,8 +179,8 @@ export default function Status() {
                 {overall === "operational"
                   ? "All Systems Operational"
                   : overall === "degraded"
-                  ? "Partial Degradation"
-                  : "Active Outage"}
+                    ? "Partial Degradation"
+                    : "Active Outage"}
               </h2>
               <p className="mt-0.5 text-[13px] text-[#64748B]">
                 {updatedAt
@@ -167,13 +208,17 @@ export default function Status() {
                   <c.icon size={16} />
                 </span>
                 <div>
-                  <p className="text-[14px] font-semibold text-[#0F172A]">{c.label}</p>
+                  <p className="text-[14px] font-semibold text-[#0F172A]">
+                    {c.label}
+                  </p>
                   <p className="text-[12px] text-[#94A3B8]">{c.desc}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 {c.result?.latency != null && c.status === "operational" && (
-                  <span className="text-[11.5px] font-medium text-[#94A3B8]">{c.result.latency} ms</span>
+                  <span className="text-[11.5px] font-medium text-[#94A3B8]">
+                    {c.result.latency} ms
+                  </span>
                 )}
                 <span
                   className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold"
