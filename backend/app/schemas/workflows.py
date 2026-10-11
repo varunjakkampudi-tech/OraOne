@@ -1,4 +1,5 @@
 """Pydantic schemas for the Workflow Automation API (Phase 11)."""
+
 from __future__ import annotations
 
 import uuid
@@ -9,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 # ──────────────── Steps ────────────────
+
 
 class StepCreate(BaseModel):
     type: str
@@ -31,6 +33,7 @@ class StepRead(BaseModel):
 
 
 # ──────────────── Workflows ────────────────
+
 
 class WorkflowCreate(BaseModel):
     name: str = Field(min_length=1, max_length=200)
@@ -79,6 +82,7 @@ class WorkflowListResponse(BaseModel):
 
 
 # ──────────────── Runs ────────────────
+
 
 class RunRequest(BaseModel):
     input: dict[str, Any] = Field(default_factory=dict)
@@ -133,12 +137,14 @@ class RunListResponse(BaseModel):
 
 # ──────────────── Human approval ────────────────
 
+
 class ApprovalDecision(BaseModel):
     decision: str = Field(description="'approve' or 'reject'")
     note: Optional[str] = Field(default=None, max_length=2000)
 
 
 # ──────────────── Versioning ────────────────
+
 
 class WorkflowVersionRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -157,6 +163,7 @@ class WorkflowVersionListResponse(BaseModel):
 
 
 # ──────────────── Analytics ────────────────
+
 
 class WorkflowAnalytics(BaseModel):
     total_workflows: int

@@ -10,6 +10,7 @@ show a live timeline and operators can debug failures.
 
 Tenant-safe: every row carries ``organization_id``.
 """
+
 from __future__ import annotations
 
 import enum
@@ -45,28 +46,28 @@ class WorkflowStatus(str, enum.Enum):
 
 
 class WorkflowTrigger(str, enum.Enum):
-    manual = "manual"        # run on demand / via API
-    schedule = "schedule"    # cron-like (config.cron)
-    event = "event"          # internal event (config.event)
+    manual = "manual"  # run on demand / via API
+    schedule = "schedule"  # cron-like (config.cron)
+    event = "event"  # internal event (config.event)
     integration = "integration"  # an integration sync finished
 
 
 class StepType(str, enum.Enum):
-    ai_prompt = "ai_prompt"          # call the LLM with a templated prompt
-    kb_query = "kb_query"            # RAG retrieval from knowledge base(s)
-    agent_run = "agent_run"          # run one of the org's agents
-    condition = "condition"          # branch / stop on a predicate
-    transform = "transform"          # map/join variables into a new variable
-    notification = "notification"    # emit a notification (email/slack/webhook)
-    delay = "delay"                  # wait N seconds (bounded)
-    webhook = "webhook"              # outbound HTTP POST
+    ai_prompt = "ai_prompt"  # call the LLM with a templated prompt
+    kb_query = "kb_query"  # RAG retrieval from knowledge base(s)
+    agent_run = "agent_run"  # run one of the org's agents
+    condition = "condition"  # branch / stop on a predicate
+    transform = "transform"  # map/join variables into a new variable
+    notification = "notification"  # emit a notification (email/slack/webhook)
+    delay = "delay"  # wait N seconds (bounded)
+    webhook = "webhook"  # outbound HTTP POST
     # AI decision nodes (Phase 11 expansion) — structured LLM reasoning.
-    ai_classify = "ai_classify"      # classify text into one of N categories
-    ai_extract = "ai_extract"        # extract structured fields → JSON
-    ai_summarize = "ai_summarize"    # summarise text
-    ai_sentiment = "ai_sentiment"    # positive / negative / neutral
-    ai_translate = "ai_translate"    # translate to a target language
-    approval = "approval"            # pause for a human decision
+    ai_classify = "ai_classify"  # classify text into one of N categories
+    ai_extract = "ai_extract"  # extract structured fields → JSON
+    ai_summarize = "ai_summarize"  # summarise text
+    ai_sentiment = "ai_sentiment"  # positive / negative / neutral
+    ai_translate = "ai_translate"  # translate to a target language
+    approval = "approval"  # pause for a human decision
 
 
 class RunStatus(str, enum.Enum):
@@ -136,9 +137,7 @@ class Workflow(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
 
 class WorkflowStep(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "workflow_steps"
-    __table_args__ = (
-        Index("ix_workflow_steps_workflow_id", "workflow_id"),
-    )
+    __table_args__ = (Index("ix_workflow_steps_workflow_id", "workflow_id"),)
 
     workflow_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -206,9 +205,7 @@ class WorkflowRun(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 class WorkflowRunStep(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "workflow_run_steps"
-    __table_args__ = (
-        Index("ix_workflow_run_steps_run_id", "run_id"),
-    )
+    __table_args__ = (Index("ix_workflow_run_steps_run_id", "run_id"),)
 
     run_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -250,9 +247,7 @@ class WorkflowVersion(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     """
 
     __tablename__ = "workflow_versions"
-    __table_args__ = (
-        Index("ix_workflow_versions_workflow_id", "workflow_id"),
-    )
+    __table_args__ = (Index("ix_workflow_versions_workflow_id", "workflow_id"),)
 
     workflow_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -265,5 +260,7 @@ class WorkflowVersion(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    snapshot: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+    snapshot: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict
+    )
     created_by: Mapped[Optional[uuid.UUID]] = mapped_column(PG_UUID(as_uuid=True))

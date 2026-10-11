@@ -8,6 +8,7 @@ Two surfaces:
 Public responses NEVER expose org internals beyond what the embedded
 experience needs (agent name, theme, suggested questions, …).
 """
+
 from __future__ import annotations
 
 import uuid
@@ -19,13 +20,14 @@ from pydantic import BaseModel, ConfigDict, Field
 
 # ──────────────── Theme / settings (shared shape) ────────────────
 
+
 class WidgetTheme(BaseModel):
     primary_color: str = "#2563EB"
     secondary_color: str = "#0EA5E9"
     background_color: str = "#FFFFFF"
     text_color: str = "#0F172A"
     bubble_color: str = "#2563EB"
-    mode: str = "light"          # light | dark | auto
+    mode: str = "light"  # light | dark | auto
     font_family: Optional[str] = None
     radius: str = "20px"
     logo_url: Optional[str] = None
@@ -39,7 +41,7 @@ class WidgetSettings(BaseModel):
     welcome_message: str = "Hi! 👋 How can I help you today?"
     input_placeholder: str = "Ask a question…"
     suggested_questions: list[str] = Field(default_factory=list)
-    show_branding: bool = True              # "Powered by OraOne"
+    show_branding: bool = True  # "Powered by OraOne"
     collect_leads: bool = True
     lead_fields: list[str] = Field(default_factory=lambda: ["name", "email"])
     allow_file_upload: bool = False
@@ -51,6 +53,7 @@ class WidgetSettings(BaseModel):
 
 
 # ──────────────── Admin: CRUD ────────────────
+
 
 class WidgetCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
@@ -108,6 +111,7 @@ class WidgetListResponse(BaseModel):
 
 # ──────────────── Public: loader config ────────────────
 
+
 class WidgetPublicConfig(BaseModel):
     """Sanitized config the loader fetches by public_key. No secrets."""
 
@@ -124,6 +128,7 @@ class WidgetPublicConfig(BaseModel):
 
 
 # ──────────────── Public: session + chat ────────────────
+
 
 class WidgetSessionStart(BaseModel):
     public_key: str
@@ -166,6 +171,7 @@ class WidgetChatResponse(BaseModel):
 
 
 # ──────────────── Public: escalate / lead / feedback / event ────────────────
+
 
 class WidgetLeadRequest(BaseModel):
     public_key: str
@@ -210,6 +216,7 @@ class WidgetOk(BaseModel):
 
 
 # ──────────────── Admin: analytics ────────────────
+
 
 class WidgetAnalytics(BaseModel):
     widget_id: uuid.UUID

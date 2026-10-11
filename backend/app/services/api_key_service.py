@@ -10,6 +10,7 @@ limit (``-1`` = unlimited, ``0`` = API disabled on this plan). This is
 sufficient for a single-worker deployment; a Redis-backed limiter would be
 the multi-worker upgrade path.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -133,9 +134,7 @@ async def authenticate(session: AsyncSession, full_key: str) -> ApiKey:
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Malformed API key."
         )
     row = await session.scalar(
-        select(ApiKey)
-        .where(ApiKey.prefix == prefix)
-        .where(ApiKey.deleted_at.is_(None))
+        select(ApiKey).where(ApiKey.prefix == prefix).where(ApiKey.deleted_at.is_(None))
     )
     if row is None or not secrets.compare_digest(row.key_hash, _hash(full_key)):
         raise HTTPException(
@@ -171,9 +170,7 @@ async def enforce_rate_limit(session: AsyncSession, key: ApiKey) -> dict:
 
     Returns ``{"limit", "remaining"}`` for response headers.
     """
-    sub = await billing_service.get_or_create_subscription(
-        session, key.organization_id
-    )
+    sub = await billing_service.get_or_create_subscription(session, key.organization_id)
     rpm = int((sub.plan.limits or {}).get("api_rpm", 0))
 
     if rpm == 0:

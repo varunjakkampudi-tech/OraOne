@@ -4,6 +4,7 @@ Adds new values to the workflow enum types (AI decision nodes + the
 ``approval`` step, plus ``awaiting_approval`` run/step statuses) and a
 ``workflow_versions`` table holding immutable definition snapshots.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -33,9 +34,7 @@ def upgrade() -> None:
     # New enum values must be added outside a transaction block.
     with op.get_context().autocommit_block():
         for val in _STEP_TYPE_VALUES:
-            op.execute(
-                f"ALTER TYPE workflow_step_type ADD VALUE IF NOT EXISTS '{val}'"
-            )
+            op.execute(f"ALTER TYPE workflow_step_type ADD VALUE IF NOT EXISTS '{val}'")
         op.execute(
             "ALTER TYPE workflow_run_status ADD VALUE IF NOT EXISTS 'awaiting_approval'"
         )

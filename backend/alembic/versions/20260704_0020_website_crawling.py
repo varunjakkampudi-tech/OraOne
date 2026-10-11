@@ -5,6 +5,7 @@ document_chunks so a chunk can belong to a crawled WebsitePage as well as
 an uploaded Document, with denormalised org/KB scoping and a full-text
 search index for hybrid retrieval.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -29,31 +30,76 @@ def upgrade() -> None:
         sa.Column("knowledge_base_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("name", sa.String(length=200), nullable=False),
         sa.Column("base_url", sa.String(length=2048), nullable=False),
-        sa.Column("status", sa.String(length=20), nullable=False, server_default="pending"),
-        sa.Column("crawl_mode", sa.String(length=20), nullable=False, server_default="entire"),
+        sa.Column(
+            "status", sa.String(length=20), nullable=False, server_default="pending"
+        ),
+        sa.Column(
+            "crawl_mode", sa.String(length=20), nullable=False, server_default="entire"
+        ),
         sa.Column("max_depth", sa.Integer(), nullable=False, server_default="3"),
         sa.Column("max_pages", sa.Integer(), nullable=False, server_default="200"),
-        sa.Column("crawl_frequency", sa.String(length=20), nullable=False, server_default="manual"),
-        sa.Column("respect_robots", sa.Boolean(), nullable=False, server_default="true"),
-        sa.Column("include_paths", postgresql.JSONB(), nullable=False, server_default="[]"),
-        sa.Column("exclude_paths", postgresql.JSONB(), nullable=False, server_default="[]"),
-        sa.Column("allowed_domains", postgresql.JSONB(), nullable=False, server_default="[]"),
-        sa.Column("auth_config", postgresql.JSONB(), nullable=False, server_default="{}"),
+        sa.Column(
+            "crawl_frequency",
+            sa.String(length=20),
+            nullable=False,
+            server_default="manual",
+        ),
+        sa.Column(
+            "respect_robots", sa.Boolean(), nullable=False, server_default="true"
+        ),
+        sa.Column(
+            "include_paths", postgresql.JSONB(), nullable=False, server_default="[]"
+        ),
+        sa.Column(
+            "exclude_paths", postgresql.JSONB(), nullable=False, server_default="[]"
+        ),
+        sa.Column(
+            "allowed_domains", postgresql.JSONB(), nullable=False, server_default="[]"
+        ),
+        sa.Column(
+            "auth_config", postgresql.JSONB(), nullable=False, server_default="{}"
+        ),
         sa.Column("pages_count", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("last_crawled_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("next_crawl_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("error", sa.String(length=1000), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(["organization_id"], ["organizations.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["knowledge_base_id"], ["knowledge_bases.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["organization_id"], ["organizations.id"], ondelete="CASCADE"
+        ),
+        sa.ForeignKeyConstraint(
+            ["knowledge_base_id"], ["knowledge_bases.id"], ondelete="CASCADE"
+        ),
         if_not_exists=True,
     )
-    op.create_index("ix_websites_organization_id", "websites", ["organization_id"], if_not_exists=True)
-    op.create_index("ix_websites_knowledge_base_id", "websites", ["knowledge_base_id"], if_not_exists=True)
+    op.create_index(
+        "ix_websites_organization_id",
+        "websites",
+        ["organization_id"],
+        if_not_exists=True,
+    )
+    op.create_index(
+        "ix_websites_knowledge_base_id",
+        "websites",
+        ["knowledge_base_id"],
+        if_not_exists=True,
+    )
     op.create_index("ix_websites_status", "websites", ["status"], if_not_exists=True)
-    op.create_index("ix_websites_next_crawl_at", "websites", ["next_crawl_at"], if_not_exists=True)
+    op.create_index(
+        "ix_websites_next_crawl_at", "websites", ["next_crawl_at"], if_not_exists=True
+    )
 
     # ── website_pages ──
     op.create_table(
@@ -68,7 +114,9 @@ def upgrade() -> None:
         sa.Column("content", sa.Text(), nullable=True),
         sa.Column("markdown", sa.Text(), nullable=True),
         sa.Column("checksum", sa.String(length=64), nullable=True),
-        sa.Column("status", sa.String(length=16), nullable=False, server_default="crawled"),
+        sa.Column(
+            "status", sa.String(length=16), nullable=False, server_default="crawled"
+        ),
         sa.Column("status_code", sa.Integer(), nullable=True),
         sa.Column("language", sa.String(length=16), nullable=True),
         sa.Column("content_type", sa.String(length=120), nullable=True),
@@ -79,19 +127,49 @@ def upgrade() -> None:
         sa.Column("version", sa.Integer(), nullable=False, server_default="1"),
         sa.Column("last_crawled_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("last_modified", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("page_metadata", postgresql.JSONB(), nullable=False, server_default="{}"),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "page_metadata", postgresql.JSONB(), nullable=False, server_default="{}"
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.ForeignKeyConstraint(["website_id"], ["websites.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["organization_id"], ["organizations.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["knowledge_base_id"], ["knowledge_bases.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["organization_id"], ["organizations.id"], ondelete="CASCADE"
+        ),
+        sa.ForeignKeyConstraint(
+            ["knowledge_base_id"], ["knowledge_bases.id"], ondelete="CASCADE"
+        ),
         sa.UniqueConstraint("website_id", "url", name="uq_website_pages_site_url"),
         if_not_exists=True,
     )
-    op.create_index("ix_website_pages_website_id", "website_pages", ["website_id"], if_not_exists=True)
-    op.create_index("ix_website_pages_organization_id", "website_pages", ["organization_id"], if_not_exists=True)
-    op.create_index("ix_website_pages_checksum", "website_pages", ["checksum"], if_not_exists=True)
-    op.create_index("ix_website_pages_status", "website_pages", ["status"], if_not_exists=True)
+    op.create_index(
+        "ix_website_pages_website_id",
+        "website_pages",
+        ["website_id"],
+        if_not_exists=True,
+    )
+    op.create_index(
+        "ix_website_pages_organization_id",
+        "website_pages",
+        ["organization_id"],
+        if_not_exists=True,
+    )
+    op.create_index(
+        "ix_website_pages_checksum", "website_pages", ["checksum"], if_not_exists=True
+    )
+    op.create_index(
+        "ix_website_pages_status", "website_pages", ["status"], if_not_exists=True
+    )
 
     # ── crawl_jobs ──
     op.create_table(
@@ -99,8 +177,12 @@ def upgrade() -> None:
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column("website_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("organization_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("status", sa.String(length=16), nullable=False, server_default="queued"),
-        sa.Column("trigger", sa.String(length=16), nullable=False, server_default="manual"),
+        sa.Column(
+            "status", sa.String(length=16), nullable=False, server_default="queued"
+        ),
+        sa.Column(
+            "trigger", sa.String(length=16), nullable=False, server_default="manual"
+        ),
         sa.Column("pages_total", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("pages_completed", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("pages_failed", sa.Integer(), nullable=False, server_default="0"),
@@ -109,15 +191,36 @@ def upgrade() -> None:
         sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("finished_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("error", sa.String(length=1000), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.ForeignKeyConstraint(["website_id"], ["websites.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["organization_id"], ["organizations.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["organization_id"], ["organizations.id"], ondelete="CASCADE"
+        ),
         if_not_exists=True,
     )
-    op.create_index("ix_crawl_jobs_website_id", "crawl_jobs", ["website_id"], if_not_exists=True)
-    op.create_index("ix_crawl_jobs_organization_id", "crawl_jobs", ["organization_id"], if_not_exists=True)
-    op.create_index("ix_crawl_jobs_status", "crawl_jobs", ["status"], if_not_exists=True)
+    op.create_index(
+        "ix_crawl_jobs_website_id", "crawl_jobs", ["website_id"], if_not_exists=True
+    )
+    op.create_index(
+        "ix_crawl_jobs_organization_id",
+        "crawl_jobs",
+        ["organization_id"],
+        if_not_exists=True,
+    )
+    op.create_index(
+        "ix_crawl_jobs_status", "crawl_jobs", ["status"], if_not_exists=True
+    )
 
     # ── crawl_logs ──
     op.create_table(
@@ -129,33 +232,73 @@ def upgrade() -> None:
         sa.Column("status", sa.String(length=40), nullable=True),
         sa.Column("level", sa.String(length=10), nullable=False, server_default="info"),
         sa.Column("message", sa.Text(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.ForeignKeyConstraint(["job_id"], ["crawl_jobs.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["website_id"], ["websites.id"], ondelete="CASCADE"),
         if_not_exists=True,
     )
-    op.create_index("ix_crawl_logs_job_id", "crawl_logs", ["job_id"], if_not_exists=True)
-    op.create_index("ix_crawl_logs_website_id", "crawl_logs", ["website_id"], if_not_exists=True)
+    op.create_index(
+        "ix_crawl_logs_job_id", "crawl_logs", ["job_id"], if_not_exists=True
+    )
+    op.create_index(
+        "ix_crawl_logs_website_id", "crawl_logs", ["website_id"], if_not_exists=True
+    )
 
     # ── document_chunks: multi-source + denormalised scope (R4) ──
-    op.add_column("document_chunks", sa.Column("website_page_id", postgresql.UUID(as_uuid=True), nullable=True))
-    op.add_column("document_chunks", sa.Column("organization_id", postgresql.UUID(as_uuid=True), nullable=True))
-    op.add_column("document_chunks", sa.Column("knowledge_base_id", postgresql.UUID(as_uuid=True), nullable=True))
-    op.create_foreign_key(
-        "fk_document_chunks_website_page", "document_chunks", "website_pages",
-        ["website_page_id"], ["id"], ondelete="CASCADE",
+    op.add_column(
+        "document_chunks",
+        sa.Column("website_page_id", postgresql.UUID(as_uuid=True), nullable=True),
+    )
+    op.add_column(
+        "document_chunks",
+        sa.Column("organization_id", postgresql.UUID(as_uuid=True), nullable=True),
+    )
+    op.add_column(
+        "document_chunks",
+        sa.Column("knowledge_base_id", postgresql.UUID(as_uuid=True), nullable=True),
     )
     op.create_foreign_key(
-        "fk_document_chunks_organization", "document_chunks", "organizations",
-        ["organization_id"], ["id"], ondelete="CASCADE",
+        "fk_document_chunks_website_page",
+        "document_chunks",
+        "website_pages",
+        ["website_page_id"],
+        ["id"],
+        ondelete="CASCADE",
     )
     op.create_foreign_key(
-        "fk_document_chunks_kb", "document_chunks", "knowledge_bases",
-        ["knowledge_base_id"], ["id"], ondelete="CASCADE",
+        "fk_document_chunks_organization",
+        "document_chunks",
+        "organizations",
+        ["organization_id"],
+        ["id"],
+        ondelete="CASCADE",
+    )
+    op.create_foreign_key(
+        "fk_document_chunks_kb",
+        "document_chunks",
+        "knowledge_bases",
+        ["knowledge_base_id"],
+        ["id"],
+        ondelete="CASCADE",
     )
     # document_id becomes nullable (website chunks have no document).
-    op.alter_column("document_chunks", "document_id", existing_type=postgresql.UUID(as_uuid=True), nullable=True)
+    op.alter_column(
+        "document_chunks",
+        "document_id",
+        existing_type=postgresql.UUID(as_uuid=True),
+        nullable=True,
+    )
 
     # Backfill org/KB onto existing document chunks from their document.
     op.execute(
@@ -169,9 +312,24 @@ def upgrade() -> None:
         """
     )
 
-    op.create_index("ix_document_chunks_website_page_id", "document_chunks", ["website_page_id"], if_not_exists=True)
-    op.create_index("ix_document_chunks_organization_id", "document_chunks", ["organization_id"], if_not_exists=True)
-    op.create_index("ix_document_chunks_knowledge_base_id", "document_chunks", ["knowledge_base_id"], if_not_exists=True)
+    op.create_index(
+        "ix_document_chunks_website_page_id",
+        "document_chunks",
+        ["website_page_id"],
+        if_not_exists=True,
+    )
+    op.create_index(
+        "ix_document_chunks_organization_id",
+        "document_chunks",
+        ["organization_id"],
+        if_not_exists=True,
+    )
+    op.create_index(
+        "ix_document_chunks_knowledge_base_id",
+        "document_chunks",
+        ["knowledge_base_id"],
+        if_not_exists=True,
+    )
 
     # Full-text search index for hybrid retrieval (R4).
     op.execute(
@@ -189,8 +347,12 @@ def downgrade() -> None:
     ):
         op.drop_index(ix, table_name="document_chunks", if_exists=True)
     op.drop_constraint("fk_document_chunks_kb", "document_chunks", type_="foreignkey")
-    op.drop_constraint("fk_document_chunks_organization", "document_chunks", type_="foreignkey")
-    op.drop_constraint("fk_document_chunks_website_page", "document_chunks", type_="foreignkey")
+    op.drop_constraint(
+        "fk_document_chunks_organization", "document_chunks", type_="foreignkey"
+    )
+    op.drop_constraint(
+        "fk_document_chunks_website_page", "document_chunks", type_="foreignkey"
+    )
     op.drop_column("document_chunks", "knowledge_base_id")
     op.drop_column("document_chunks", "organization_id")
     op.drop_column("document_chunks", "website_page_id")

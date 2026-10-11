@@ -1,4 +1,5 @@
 """OrganizationMember — N:M between Users and Organizations with a role."""
+
 from __future__ import annotations
 
 import enum
@@ -33,9 +34,7 @@ class MemberStatus(str, enum.Enum):
 class OrganizationMember(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "organization_members"
     __table_args__ = (
-        UniqueConstraint(
-            "organization_id", "user_id", name="uq_org_members_org_user"
-        ),
+        UniqueConstraint("organization_id", "user_id", name="uq_org_members_org_user"),
         Index("ix_org_members_user_id", "user_id"),
         Index("ix_org_members_organization_id", "organization_id"),
     )

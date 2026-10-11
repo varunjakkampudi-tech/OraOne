@@ -17,20 +17,33 @@ Cross-cutting concerns:
 * **Request logging** — handled centrally by the access-log middleware which
   reads ``request.state.api_ctx`` set here.
 """
+
 from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Query,
+    Request,
+    status,
+)
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.agent import Agent, AgentStatus
 from app.database.models.api_key import ApiKey
-from app.database.models.conversation import Conversation, ConversationChannel, ConversationStatus
+from app.database.models.conversation import (
+    Conversation,
+    ConversationChannel,
+    ConversationStatus,
+)
 from app.database.models.document import Document
 from app.database.models.integration import Integration
 from app.database.models.knowledge_base import KnowledgeBase
@@ -47,7 +60,12 @@ from app.database.models.workflow import (
     WorkflowTrigger,
 )
 from app.database.session import get_db
-from app.services import analytics_service, api_key_service, usage_service, webhook_service, webhook_outbox
+from app.services import (
+    analytics_service,
+    api_key_service,
+    usage_service,
+    webhook_outbox,
+)
 from app.services.rag_answer import answer_query
 from app.services.workflow_engine import execute_run
 from app.core.model_catalogue import cost_for
@@ -172,7 +190,11 @@ async def _resolve_agent(
 ) -> Optional[Agent]:
     if agent_id is not None:
         agent = await session.get(Agent, agent_id)
-        if agent and agent.organization_id == organization_id and agent.deleted_at is None:
+        if (
+            agent
+            and agent.organization_id == organization_id
+            and agent.deleted_at is None
+        ):
             return agent
         return None
     row = await session.scalars(
@@ -215,7 +237,10 @@ async def chat_v1(
         is_new = False
         if payload.conversation_id is not None:
             conversation = await session.get(Conversation, payload.conversation_id)
-            if conversation is not None and conversation.organization_id != key.organization_id:
+            if (
+                conversation is not None
+                and conversation.organization_id != key.organization_id
+            ):
                 conversation = None
         if conversation is None:
             conversation = Conversation(
@@ -242,7 +267,9 @@ async def chat_v1(
         # latency, and the citations the answer was grounded on.
         prompt_tokens = int(result.get("prompt_tokens") or 0)
         completion_tokens = int(result.get("completion_tokens") or 0)
-        total_tokens = int(result.get("total_tokens") or 0) or (prompt_tokens + completion_tokens)
+        total_tokens = int(result.get("total_tokens") or 0) or (
+            prompt_tokens + completion_tokens
+        )
         used_model = result.get("model")
         msg_cost = cost_for(used_model, prompt_tokens, completion_tokens)
         latency_ms = int(result.get("latency_ms") or 0)
@@ -269,15 +296,25 @@ async def chat_v1(
         session.add_all([user_msg, agent_msg])
         conversation.last_message_at = _now()
         # Roll observability up to the conversation so list views stay cheap.
-        usage_roll = dict(conversation.extra.get("usage", {})) if isinstance(conversation.extra, dict) else {}
+        usage_roll = (
+            dict(conversation.extra.get("usage", {}))
+            if isinstance(conversation.extra, dict)
+            else {}
+        )
         models_seen = list(usage_roll.get("models", []))
         if used_model and used_model not in models_seen:
             models_seen.append(used_model)
-        conv_extra = dict(conversation.extra) if isinstance(conversation.extra, dict) else {}
+        conv_extra = (
+            dict(conversation.extra) if isinstance(conversation.extra, dict) else {}
+        )
         conv_extra["usage"] = {
             "message_count": int(usage_roll.get("message_count", 0)) + 2,
-            "total_tokens": int(usage_roll.get("total_tokens", 0)) + (user_msg.token_count or 0) + total_tokens,
-            "total_cost_usd": round(float(usage_roll.get("total_cost_usd", 0.0)) + msg_cost, 6),
+            "total_tokens": int(usage_roll.get("total_tokens", 0))
+            + (user_msg.token_count or 0)
+            + total_tokens,
+            "total_cost_usd": round(
+                float(usage_roll.get("total_cost_usd", 0.0)) + msg_cost, 6
+            ),
             "last_latency_ms": latency_ms,
             "models": models_seen,
             "last_model": used_model,
@@ -294,7 +331,11 @@ async def chat_v1(
                 session,
                 organization_id=key.organization_id,
                 event=WebhookEventType.CONVERSATION_CREATED,
-                data={"conversation_id": conversation_id, "agent_id": str(agent.id), "channel": "chat"},
+                data={
+                    "conversation_id": conversation_id,
+                    "agent_id": str(agent.id),
+                    "channel": "chat",
+                },
             )
         webhook_outbox.enqueue(
             session,
@@ -336,7 +377,10 @@ async def list_conversations_v1(
 ) -> dict:
     rows = await session.scalars(
         select(Conversation)
-        .where(Conversation.organization_id == key.organization_id, Conversation.deleted_at.is_(None))
+        .where(
+            Conversation.organization_id == key.organization_id,
+            Conversation.deleted_at.is_(None),
+        )
         .order_by(Conversation.started_at.desc())
         .limit(limit)
     )
@@ -362,10 +406,18 @@ async def get_conversation_v1(
     session: AsyncSession = Depends(get_db),
 ) -> dict:
     conv = await session.get(Conversation, conversation_id)
-    if conv is None or conv.organization_id != key.organization_id or conv.deleted_at is not None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found.")
+    if (
+        conv is None
+        or conv.organization_id != key.organization_id
+        or conv.deleted_at is not None
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found."
+        )
     msgs = await session.scalars(
-        select(Message).where(Message.conversation_id == conv.id).order_by(Message.created_at.asc())
+        select(Message)
+        .where(Message.conversation_id == conv.id)
+        .order_by(Message.created_at.asc())
     )
     return {
         "id": str(conv.id),
@@ -396,7 +448,10 @@ async def list_kbs_v1(
 ) -> dict:
     rows = await session.scalars(
         select(KnowledgeBase)
-        .where(KnowledgeBase.organization_id == key.organization_id, KnowledgeBase.deleted_at.is_(None))
+        .where(
+            KnowledgeBase.organization_id == key.organization_id,
+            KnowledgeBase.deleted_at.is_(None),
+        )
         .order_by(KnowledgeBase.created_at.desc())
         .limit(limit)
     )
@@ -452,7 +507,9 @@ async def list_websites_v1(
 ) -> dict:
     rows = await session.scalars(
         select(Website)
-        .where(Website.organization_id == key.organization_id, Website.deleted_at.is_(None))
+        .where(
+            Website.organization_id == key.organization_id, Website.deleted_at.is_(None)
+        )
         .order_by(Website.created_at.desc())
         .limit(limit)
     )
@@ -508,7 +565,10 @@ async def list_workflows_v1(
 ) -> dict:
     rows = await session.scalars(
         select(Workflow)
-        .where(Workflow.organization_id == key.organization_id, Workflow.deleted_at.is_(None))
+        .where(
+            Workflow.organization_id == key.organization_id,
+            Workflow.deleted_at.is_(None),
+        )
         .order_by(Workflow.created_at.desc())
         .limit(limit)
     )
@@ -536,8 +596,14 @@ async def run_workflow_v1(
     session: AsyncSession = Depends(get_db),
 ) -> dict:
     workflow = await session.get(Workflow, workflow_id)
-    if workflow is None or workflow.organization_id != key.organization_id or workflow.deleted_at is not None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found.")
+    if (
+        workflow is None
+        or workflow.organization_id != key.organization_id
+        or workflow.deleted_at is not None
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found."
+        )
     steps = list(
         await session.scalars(
             select(WorkflowStep)
@@ -546,7 +612,9 @@ async def run_workflow_v1(
         )
     )
     if not steps:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Workflow has no steps.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Workflow has no steps."
+        )
 
     trigger = getattr(WorkflowTrigger, "api", WorkflowTrigger.manual)
     run = WorkflowRun(
@@ -587,7 +655,9 @@ async def list_widgets_v1(
 ) -> dict:
     rows = await session.scalars(
         select(Widget)
-        .where(Widget.organization_id == key.organization_id, Widget.deleted_at.is_(None))
+        .where(
+            Widget.organization_id == key.organization_id, Widget.deleted_at.is_(None)
+        )
         .order_by(Widget.created_at.desc())
         .limit(limit)
     )
@@ -615,7 +685,10 @@ async def list_integrations_v1(
 ) -> dict:
     rows = await session.scalars(
         select(Integration)
-        .where(Integration.organization_id == key.organization_id, Integration.deleted_at.is_(None))
+        .where(
+            Integration.organization_id == key.organization_id,
+            Integration.deleted_at.is_(None),
+        )
         .order_by(Integration.created_at.desc())
         .limit(limit)
     )

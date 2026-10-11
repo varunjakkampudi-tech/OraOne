@@ -5,6 +5,7 @@ The marketplace catalogue itself is curated in code
 a tenant has **installed** — one row per install, scoped to the org/project,
 optionally linked to the Agent it provisioned.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -49,9 +50,15 @@ class MarketplaceInstallation(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     listing_slug: Mapped[str] = mapped_column(String(120), nullable=False)
     listing_name: Mapped[str] = mapped_column(String(200), nullable=False)
-    category: Mapped[str] = mapped_column(String(40), nullable=False, default="agent_template")
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default=InstallStatus.installed)
-    meta: Mapped[dict[str, Any]] = mapped_column("metadata", JSONB, nullable=False, default=dict)
+    category: Mapped[str] = mapped_column(
+        String(40), nullable=False, default="agent_template"
+    )
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=InstallStatus.installed
+    )
+    meta: Mapped[dict[str, Any]] = mapped_column(
+        "metadata", JSONB, nullable=False, default=dict
+    )
 
     __table_args__ = (
         Index("ix_marketplace_installations_organization_id", "organization_id"),

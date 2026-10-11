@@ -4,6 +4,7 @@ Organization membership roles are deliberately separate from platform roles.
 This dependency resolves the authenticated Cognito ``sub`` to PostgreSQL and
 never trusts a role supplied by a browser or copied from an unvalidated token.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -30,10 +31,15 @@ async def get_current_platform_context(
 ) -> PlatformContext:
     cognito_sub = claims.get("sub")
     if not cognito_sub:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token claims.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token claims."
+        )
     user = await session.scalar(select(User).where(User.cognito_sub == cognito_sub))
     if user is None or user.status.value != "active":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform identity is not active.")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Platform identity is not active.",
+        )
     return PlatformContext(user=user, cognito_sub=cognito_sub, role=user.role)
 
 

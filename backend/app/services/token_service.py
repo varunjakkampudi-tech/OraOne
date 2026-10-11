@@ -16,6 +16,7 @@ again (replay of a stolen token after the legitimate client already
 rotated), the whole family is revoked, matching OWASP's refresh-token
 rotation-with-reuse-detection guidance.
 """
+
 from __future__ import annotations
 
 import logging
@@ -52,17 +53,23 @@ def _user_families_key(user_id: str) -> str:
     return f"userfam:{user_id}"
 
 
-def issue_token_pair(*, user_id: str, email: str, name: Optional[str] = None) -> TokenPair:
+def issue_token_pair(
+    *, user_id: str, email: str, name: Optional[str] = None
+) -> TokenPair:
     """Mint a fresh access+refresh pair for a brand-new session (login)."""
     family_id = str(uuid.uuid4())
     pair = _issue(user_id=user_id, email=email, name=name, family_id=family_id)
     families = _cache().get(_user_families_key(user_id)) or []
     families.append(family_id)
-    _cache().set(_user_families_key(user_id), families, ttl_seconds=_REFRESH_TTL_SECONDS())
+    _cache().set(
+        _user_families_key(user_id), families, ttl_seconds=_REFRESH_TTL_SECONDS()
+    )
     return pair
 
 
-def _issue(*, user_id: str, email: str, name: Optional[str], family_id: str) -> TokenPair:
+def _issue(
+    *, user_id: str, email: str, name: Optional[str], family_id: str
+) -> TokenPair:
     access_token, expires_in = create_access_token(sub=user_id, email=email, name=name)
     refresh_token = generate_refresh_token()
     _cache().set(
@@ -75,7 +82,9 @@ def _issue(*, user_id: str, email: str, name: Optional[str], family_id: str) -> 
     family = _cache().get(_family_key(family_id)) or []
     family.append(refresh_token)
     _cache().set(_family_key(family_id), family, ttl_seconds=_REFRESH_TTL_SECONDS())
-    return TokenPair(access_token=access_token, refresh_token=refresh_token, expires_in=expires_in)
+    return TokenPair(
+        access_token=access_token, refresh_token=refresh_token, expires_in=expires_in
+    )
 
 
 def rotate(refresh_token: str) -> TokenPair:

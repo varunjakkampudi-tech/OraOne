@@ -1,4 +1,5 @@
 """Pydantic schemas for the Team API (Phase 12, Module 3)."""
+
 from __future__ import annotations
 
 import uuid

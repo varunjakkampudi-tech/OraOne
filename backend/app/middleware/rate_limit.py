@@ -18,6 +18,7 @@ Unauthenticated callers are keyed by client IP; authenticated callers are
 keyed by their JWT subject so one noisy IP (NAT, office network) can't
 throttle everyone behind it.
 """
+
 from __future__ import annotations
 
 import logging
@@ -37,7 +38,9 @@ def _cache():
     return get_shared_cache("ratelimit")
 
 
-def _trusted_proxy_networks() -> tuple[ipaddress.IPv4Network | ipaddress.IPv6Network, ...]:
+def _trusted_proxy_networks() -> tuple[
+    ipaddress.IPv4Network | ipaddress.IPv6Network, ...
+]:
     networks = []
     for raw in os.environ.get("TRUSTED_PROXY_IPS", "").split(","):
         value = raw.strip()
@@ -87,7 +90,9 @@ def _caller_id(request: Request) -> str:
 class RateLimitTier:
     __slots__ = ("name", "prefixes", "limit", "window_seconds")
 
-    def __init__(self, name: str, prefixes: tuple[str, ...], limit: int, window_seconds: int):
+    def __init__(
+        self, name: str, prefixes: tuple[str, ...], limit: int, window_seconds: int
+    ):
         self.name = name
         self.prefixes = prefixes
         self.limit = limit
@@ -115,8 +120,11 @@ TIERS: list[RateLimitTier] = [
     RateLimitTier(
         "auth",
         (
-            "/api/auth/login", "/api/auth/signup", "/api/auth/refresh",
-            "/api/auth/resend", "/api/auth/verify",
+            "/api/auth/login",
+            "/api/auth/signup",
+            "/api/auth/refresh",
+            "/api/auth/resend",
+            "/api/auth/verify",
         ),
         _int_env("RATE_LIMIT_AUTH_PER_MINUTE", 10),
         60,
@@ -124,7 +132,9 @@ TIERS: list[RateLimitTier] = [
     RateLimitTier(
         "ai",
         (
-            "/api/conversations", "/api/documents/upload", "/api/websites",
+            "/api/conversations",
+            "/api/documents/upload",
+            "/api/websites",
             "/api/rag/",
         ),
         _int_env("RATE_LIMIT_AI_PER_MINUTE", 20),

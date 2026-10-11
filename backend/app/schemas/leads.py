@@ -1,4 +1,5 @@
 """Pydantic schemas for the Leads (CRM) API."""
+
 from __future__ import annotations
 
 import uuid
@@ -28,7 +29,9 @@ class LeadCreate(BaseModel):
     intent: Optional[str] = Field(default=None, max_length=255)
     message: Optional[str] = Field(default=None, max_length=4000)
     source: str = Field(default="manual", max_length=40)
-    status: Optional[str] = Field(default=None, description="new|contacted|qualified|won|lost")
+    status: Optional[str] = Field(
+        default=None, description="new|contacted|qualified|won|lost"
+    )
     temperature: Optional[str] = Field(default=None, description="hot|warm|cold")
     score: Optional[int] = Field(default=None, ge=0, le=100)
 
@@ -41,7 +44,9 @@ class LeadUpdate(BaseModel):
     phone: Optional[str] = Field(default=None, max_length=40)
     company: Optional[str] = Field(default=None, max_length=200)
     intent: Optional[str] = Field(default=None, max_length=255)
-    status: Optional[str] = Field(default=None, description="new|contacted|qualified|won|lost")
+    status: Optional[str] = Field(
+        default=None, description="new|contacted|qualified|won|lost"
+    )
     temperature: Optional[str] = Field(default=None, description="hot|warm|cold")
     score: Optional[int] = Field(default=None, ge=0, le=100)
     assigned_to: Optional[uuid.UUID] = None

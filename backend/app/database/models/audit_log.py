@@ -5,6 +5,7 @@ Backing store for the structured records emitted by
 to this table after each request, giving an org-scoped, queryable audit
 history for compliance and security review.
 """
+
 from __future__ import annotations
 
 import uuid

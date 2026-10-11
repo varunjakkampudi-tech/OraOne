@@ -20,6 +20,7 @@ Design goals
   ``knowledge_base_id`` so website knowledge is isolated and retrievable
   through the same RAG path as uploaded documents.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -57,16 +58,16 @@ log = logging.getLogger("app.crawler")
 
 USER_AGENT = "OraOneBot/1.0 (+https://oraone.in/bot)"
 FETCH_TIMEOUT = 15.0
-MAX_BYTES = 5 * 1024 * 1024   # 5 MB cap per page
-HARD_PAGE_CAP = 100_000       # absolute ceiling regardless of user setting
-MAX_WORKERS = 6               # hard ceiling on parallel workers (DB-pool aware)
-DEFAULT_TARGET = 5            # initial adaptive concurrency (all workers pre-open a
-                             # DB session regardless, so a high start target is a
-                             # pure speed win — the controller still backs off on
-                             # error/latency spikes and per-host politeness applies)
-CLAIM_BATCH = 4               # URLs a worker leases from the frontier at once
-HEARTBEAT_EVERY = 2.0         # seconds between adaptive-controller ticks
-STALE_LEASE_SECONDS = 120     # reclaim URLs leased by a dead worker after this
+MAX_BYTES = 5 * 1024 * 1024  # 5 MB cap per page
+HARD_PAGE_CAP = 100_000  # absolute ceiling regardless of user setting
+MAX_WORKERS = 6  # hard ceiling on parallel workers (DB-pool aware)
+DEFAULT_TARGET = 5  # initial adaptive concurrency (all workers pre-open a
+# DB session regardless, so a high start target is a
+# pure speed win — the controller still backs off on
+# error/latency spikes and per-host politeness applies)
+CLAIM_BATCH = 4  # URLs a worker leases from the frontier at once
+HEARTBEAT_EVERY = 2.0  # seconds between adaptive-controller ticks
+STALE_LEASE_SECONDS = 120  # reclaim URLs leased by a dead worker after this
 # Some sites publish an enormous robots.txt Crawl-delay (e.g. ford.com asks for
 # 10s). Honouring it verbatim serialises a whole-site crawl to one page every N
 # seconds and looks broken. Googlebot ignores Crawl-delay outright; we honour it
@@ -75,6 +76,7 @@ MAX_ROBOTS_CRAWL_DELAY = 2.0  # seconds
 
 
 # ────────────────────────── URL validation (SSRF) ──────────────────────────
+
 
 class URLValidationError(ValueError):
     """Raised when a URL fails safety/format validation."""
@@ -142,11 +144,32 @@ def validate_url(raw: str, *, require_safe_host: bool = True) -> str:
 # ────────────────────────── HTML → markdown ──────────────────────────
 
 _SKIP_TAGS = {
-    "script", "style", "nav", "header", "footer", "aside", "form", "noscript",
-    "svg", "iframe", "button", "input", "select", "option", "template", "head",
+    "script",
+    "style",
+    "nav",
+    "header",
+    "footer",
+    "aside",
+    "form",
+    "noscript",
+    "svg",
+    "iframe",
+    "button",
+    "input",
+    "select",
+    "option",
+    "template",
+    "head",
 }
 _BLOCK_TAGS = {"p", "div", "section", "article", "br", "tr", "blockquote"}
-_HEADINGS = {"h1": "# ", "h2": "## ", "h3": "### ", "h4": "#### ", "h5": "##### ", "h6": "###### "}
+_HEADINGS = {
+    "h1": "# ",
+    "h2": "## ",
+    "h3": "### ",
+    "h4": "#### ",
+    "h5": "##### ",
+    "h6": "###### ",
+}
 _WS_RE = re.compile(r"[ \t\u00A0]+")
 _NL_RE = re.compile(r"\n{3,}")
 
@@ -221,7 +244,9 @@ class _HTMLExtractor(HTMLParser):
             return
         if tag == "li":
             self._flush()
-            marker = "- " if (self._list_stack and self._list_stack[-1] == "ul") else "1. "
+            marker = (
+                "- " if (self._list_stack and self._list_stack[-1] == "ul") else "1. "
+            )
             self._buf.append(marker)
             return
         if tag in ("strong", "b"):
@@ -318,7 +343,10 @@ def html_to_markdown(html: str, base_url: str) -> dict:
 # ────────────────────────── classification ──────────────────────────
 
 _CLASS_RULES = [
-    ("documentation", ("/docs", "/documentation", "/api", "/reference", "/guide", "/sdk")),
+    (
+        "documentation",
+        ("/docs", "/documentation", "/api", "/reference", "/guide", "/sdk"),
+    ),
     ("faq", ("/faq", "/faqs", "/help", "/support")),
     ("blog", ("/blog", "/news", "/article", "/post")),
     ("pricing", ("/pricing", "/plans")),
@@ -337,6 +365,7 @@ def classify_url(url: str) -> Optional[str]:
 
 
 # ────────────────────────── robots + sitemap ──────────────────────────
+
 
 async def _fetch(client, url: str) -> tuple[int, str, str]:
     """GET a URL with SSRF validation on every redirect hop.
@@ -440,6 +469,7 @@ async def discover_sitemap_urls(
 
 # ────────────────────────── scope rules ──────────────────────────
 
+
 def _same_site(url: str, base: str, allowed_domains: list[str]) -> bool:
     h = urlparse(url).hostname or ""
     bh = urlparse(base).hostname or ""
@@ -463,9 +493,32 @@ def _path_allowed(url: str, include: list[str], exclude: list[str]) -> bool:
 
 
 _NON_PAGE_EXT = (
-    ".pdf", ".zip", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".mp4",
-    ".mp3", ".css", ".js", ".ico", ".woff", ".woff2", ".ttf", ".xml", ".json",
-    ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".dmg", ".exe",
+    ".pdf",
+    ".zip",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".svg",
+    ".webp",
+    ".mp4",
+    ".mp3",
+    ".css",
+    ".js",
+    ".ico",
+    ".woff",
+    ".woff2",
+    ".ttf",
+    ".xml",
+    ".json",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".ppt",
+    ".pptx",
+    ".dmg",
+    ".exe",
 )
 
 
@@ -475,6 +528,7 @@ def _looks_like_page(url: str) -> bool:
 
 
 # ────────────────────────── orchestration ──────────────────────────
+
 
 def _auth_headers(auth: dict) -> tuple[dict, Optional[tuple]]:
     """Build (headers, basic_auth) from a website auth_config dict."""
@@ -494,7 +548,14 @@ def _auth_headers(auth: dict) -> tuple[dict, Optional[tuple]]:
     return headers, basic
 
 
-async def _add_log(session: AsyncSession, job: CrawlJob, url: Optional[str], status: str, level: str, message: str) -> None:
+async def _add_log(
+    session: AsyncSession,
+    job: CrawlJob,
+    url: Optional[str],
+    status: str,
+    level: str,
+    message: str,
+) -> None:
     session.add(
         CrawlLog(
             job_id=job.id,
@@ -530,9 +591,25 @@ class _Engine:
     frontier table is the only coordination point.
     """
 
-    def __init__(self, *, website, job_id, mode, base, base_path, include,
-                 exclude, allowed, max_pages, max_depth, robots, robots_delay,
-                 politeness, render_js, max_workers):
+    def __init__(
+        self,
+        *,
+        website,
+        job_id,
+        mode,
+        base,
+        base_path,
+        include,
+        exclude,
+        allowed,
+        max_pages,
+        max_depth,
+        robots,
+        robots_delay,
+        politeness,
+        render_js,
+        max_workers,
+    ):
         self.website = website
         self.job_id = job_id
         self.website_id = website.id
@@ -546,18 +623,18 @@ class _Engine:
         self.max_pages = max_pages
         self.max_depth = max_depth
         self.robots = robots
-        self.robots_delay = robots_delay        # seconds (robots Crawl-delay)
-        self.politeness = politeness             # seconds (user crawl_delay_ms)
+        self.robots_delay = robots_delay  # seconds (robots Crawl-delay)
+        self.politeness = politeness  # seconds (user crawl_delay_ms)
         self.render_js = render_js
         self.max_workers = max_workers
         # live, adaptive state
         self.target = min(DEFAULT_TARGET, max_workers)
-        self.processed = 0                       # pages fetched (counts to cap)
+        self.processed = 0  # pages fetched (counts to cap)
         self.inflight = 0
         self.chunks_total = 0
-        self.recent: deque = deque(maxlen=40)    # (ok: bool, latency: float)
+        self.recent: deque = deque(maxlen=40)  # (ok: bool, latency: float)
         self.host_last: dict[str, float] = {}
-        self.control = CrawlJobStatus.crawling   # crawling | paused | cancelled
+        self.control = CrawlJobStatus.crawling  # crawling | paused | cancelled
         self.stop = asyncio.Event()
         self.render_warned = False
         # Buffered counter deltas, flushed to the shared crawl_jobs row in a
@@ -631,13 +708,15 @@ async def _flush_counts(engine: "_Engine") -> None:
         try:
             async with Maker() as session:  # type: ignore[misc]
                 await session.execute(
-                    update(CrawlJob).where(CrawlJob.id == engine.job_id).values(**values)
+                    update(CrawlJob)
+                    .where(CrawlJob.id == engine.job_id)
+                    .values(**values)
                 )
                 await session.commit()
             return
         except DBAPIError as e:
             if _is_deadlock(e) and attempt < 4:
-                await asyncio.sleep(0.05 * (2 ** attempt))
+                await asyncio.sleep(0.05 * (2**attempt))
                 continue
             # Give the increments back so the next flush retries them, then bail
             # — counter telemetry must never abort the crawl.
@@ -686,7 +765,9 @@ async def _seed_and_run(session: AsyncSession, job_id) -> None:
 
     headers, basic = _auth_headers(website.auth_config or {})
     # robots.txt is blocking network I/O — load it off the event loop.
-    robots = await asyncio.to_thread(_load_robots, base) if website.respect_robots else None
+    robots = (
+        await asyncio.to_thread(_load_robots, base) if website.respect_robots else None
+    )
     robots_delay = 0.0
     if robots is not None:
         try:
@@ -695,7 +776,11 @@ async def _seed_and_run(session: AsyncSession, job_id) -> None:
             robots_delay = min(requested, MAX_ROBOTS_CRAWL_DELAY)
             if requested > MAX_ROBOTS_CRAWL_DELAY:
                 await _add_log(
-                    session, job, None, "robots", "info",
+                    session,
+                    job,
+                    None,
+                    "robots",
+                    "info",
                     f"robots.txt requested Crawl-delay {requested:g}s — capped to "
                     f"{MAX_ROBOTS_CRAWL_DELAY:g}s to keep the crawl responsive.",
                 )
@@ -705,7 +790,9 @@ async def _seed_and_run(session: AsyncSession, job_id) -> None:
 
     # ── resume detection: a paused job keeps its frontier, so just continue ──
     already = await session.scalar(
-        select(func.count()).select_from(CrawlFrontier).where(CrawlFrontier.job_id == job_id)
+        select(func.count())
+        .select_from(CrawlFrontier)
+        .where(CrawlFrontier.job_id == job_id)
     )
     resuming = bool(already)
 
@@ -720,7 +807,9 @@ async def _seed_and_run(session: AsyncSession, job_id) -> None:
     try:
         if resuming:
             # return any rows leased by the previous (now-stopped) run.
-            await crawler_queue.requeue_stale(session, job_id=job_id, older_than_seconds=0)
+            await crawler_queue.requeue_stale(
+                session, job_id=job_id, older_than_seconds=0
+            )
             await session.commit()
         else:
             async with httpx.AsyncClient(
@@ -737,12 +826,16 @@ async def _seed_and_run(session: AsyncSession, job_id) -> None:
                     except Exception:  # noqa: BLE001
                         robots_sitemaps = []
                 if mode == CrawlMode.sitemap:
-                    urls = await discover_sitemap_urls(client, base, max_pages, extra_roots=robots_sitemaps)
+                    urls = await discover_sitemap_urls(
+                        client, base, max_pages, extra_roots=robots_sitemaps
+                    )
                     seeds = [(u, 0) for u in (urls or [base])]
                 elif mode == CrawlMode.single:
                     seeds = [(base, 0)]
                 else:
-                    sm = await discover_sitemap_urls(client, base, max_pages, extra_roots=robots_sitemaps)
+                    sm = await discover_sitemap_urls(
+                        client, base, max_pages, extra_roots=robots_sitemaps
+                    )
                     seeds = [(base, 0)] + [(u, 1) for u in sm]
                 await crawler_queue.enqueue(
                     session,
@@ -754,10 +847,21 @@ async def _seed_and_run(session: AsyncSession, job_id) -> None:
                 await session.commit()
 
         engine = _Engine(
-            website=website, job_id=job_id, mode=mode, base=base, base_path=base_path,
-            include=include, exclude=exclude, allowed=allowed, max_pages=max_pages,
-            max_depth=max_depth, robots=robots, robots_delay=robots_delay,
-            politeness=politeness, render_js=bool(website.render_js), max_workers=max_workers,
+            website=website,
+            job_id=job_id,
+            mode=mode,
+            base=base,
+            base_path=base_path,
+            include=include,
+            exclude=exclude,
+            allowed=allowed,
+            max_pages=max_pages,
+            max_depth=max_depth,
+            robots=robots,
+            robots_delay=robots_delay,
+            politeness=politeness,
+            render_js=bool(website.render_js),
+            max_workers=max_workers,
         )
 
         controller = asyncio.create_task(_controller(engine, headers, basic))
@@ -808,11 +912,15 @@ async def _controller(engine: "_Engine", headers, basic) -> None:
                 )
                 if jstatus == CrawlJobStatus.cancelled:
                     engine.control = CrawlJobStatus.cancelled
-                elif jstatus == CrawlJobStatus.paused or wstatus == WebsiteStatus.paused:
+                elif (
+                    jstatus == CrawlJobStatus.paused or wstatus == WebsiteStatus.paused
+                ):
                     engine.control = CrawlJobStatus.paused
                 # (2) recover stale leases
                 await crawler_queue.requeue_stale(
-                    session, job_id=engine.job_id, older_than_seconds=STALE_LEASE_SECONDS
+                    session,
+                    job_id=engine.job_id,
+                    older_than_seconds=STALE_LEASE_SECONDS,
                 )
                 # flush buffered page counters so the UI sees live progress
                 await _flush_counts(engine)
@@ -871,7 +979,10 @@ async def _worker(index: int, engine: "_Engine", headers, basic) -> None:
                     continue
 
                 claimed = await crawler_queue.claim_batch(
-                    session, job_id=engine.job_id, worker_id=worker_id, limit=CLAIM_BATCH
+                    session,
+                    job_id=engine.job_id,
+                    worker_id=worker_id,
+                    limit=CLAIM_BATCH,
                 )
                 await session.commit()
                 if not claimed:
@@ -883,7 +994,10 @@ async def _worker(index: int, engine: "_Engine", headers, basic) -> None:
                     continue
 
                 for fid, url, depth in claimed:
-                    if engine.control in (CrawlJobStatus.paused, CrawlJobStatus.cancelled):
+                    if engine.control in (
+                        CrawlJobStatus.paused,
+                        CrawlJobStatus.cancelled,
+                    ):
                         # hand the URL back so a resume can pick it up.
                         await crawler_queue.mark(
                             session, frontier_id=fid, status=FrontierStatus.pending
@@ -894,12 +1008,20 @@ async def _worker(index: int, engine: "_Engine", headers, basic) -> None:
                     except Exception as e:  # noqa: BLE001 — one bad URL must not kill the worker
                         await session.rollback()
                         await crawler_queue.mark(
-                            session, frontier_id=fid, status=FrontierStatus.error, error=str(e)
+                            session,
+                            frontier_id=fid,
+                            status=FrontierStatus.error,
+                            error=str(e),
                         )
                         _bump(engine, failed=1)
                         await _log(
-                            session, job_id=engine.job_id, website_id=engine.website_id,
-                            url=url, status="error", level="error", message=str(e)[:500],
+                            session,
+                            job_id=engine.job_id,
+                            website_id=engine.website_id,
+                            url=url,
+                            status="error",
+                            level="error",
+                            message=str(e)[:500],
                         )
                 await session.commit()
                 await _flush_counts(engine)
@@ -942,7 +1064,8 @@ async def _render_html(engine: "_Engine", url: str) -> Optional[str]:
         if not engine.render_warned:
             log.warning(
                 "js_render_unavailable site=%s — install Playwright to enable JS "
-                "rendering; falling back to static HTML.", engine.website_id
+                "rendering; falling back to static HTML.",
+                engine.website_id,
             )
             engine.render_warned = True
         return None
@@ -951,6 +1074,7 @@ async def _render_html(engine: "_Engine", url: str) -> Optional[str]:
             browser = await p.chromium.launch(headless=True)
             try:
                 page = await browser.new_page(user_agent=USER_AGENT)
+
                 async def guard_request(route, request) -> None:
                     # Playwright follows redirects independently of httpx. Keep
                     # every navigation/resource request behind the same SSRF
@@ -961,7 +1085,9 @@ async def _render_html(engine: "_Engine", url: str) -> Optional[str]:
                     await route.abort("blockedbyclient")
 
                 await page.route("**/*", guard_request)
-                await page.goto(url, wait_until="networkidle", timeout=int(FETCH_TIMEOUT * 1000))
+                await page.goto(
+                    url, wait_until="networkidle", timeout=int(FETCH_TIMEOUT * 1000)
+                )
                 return await page.content()
             finally:
                 await browser.close()
@@ -986,34 +1112,69 @@ def is_safe_render_request(url: str) -> bool:
     return True
 
 
-async def _process_one(engine: "_Engine", session, client, fid, url: str, depth: int) -> None:
+async def _process_one(
+    engine: "_Engine", session, client, fid, url: str, depth: int
+) -> None:
     """Validate scope → fetch → extract → persist → enqueue links for one URL."""
     url, _ = urldefrag(url)
     base, mode = engine.base, engine.mode
 
     # ── scope / safety filters ──
     if not _looks_like_page(url) or not _same_site(url, base, engine.allowed):
-        await crawler_queue.mark(session, frontier_id=fid, status=FrontierStatus.skipped)
+        await crawler_queue.mark(
+            session, frontier_id=fid, status=FrontierStatus.skipped
+        )
         return
-    if mode == CrawlMode.folder and not (urlparse(url).path or "/").startswith(engine.base_path):
-        await crawler_queue.mark(session, frontier_id=fid, status=FrontierStatus.skipped)
+    if mode == CrawlMode.folder and not (urlparse(url).path or "/").startswith(
+        engine.base_path
+    ):
+        await crawler_queue.mark(
+            session, frontier_id=fid, status=FrontierStatus.skipped
+        )
         return
     if not _path_allowed(url, engine.include, engine.exclude):
-        await crawler_queue.mark(session, frontier_id=fid, status=FrontierStatus.skipped)
-        await _log(session, job_id=engine.job_id, website_id=engine.website_id, url=url,
-                   status="excluded", level="info", message="Skipped by include/exclude rules.")
+        await crawler_queue.mark(
+            session, frontier_id=fid, status=FrontierStatus.skipped
+        )
+        await _log(
+            session,
+            job_id=engine.job_id,
+            website_id=engine.website_id,
+            url=url,
+            status="excluded",
+            level="info",
+            message="Skipped by include/exclude rules.",
+        )
         return
     if engine.robots is not None and not engine.robots.can_fetch(USER_AGENT, url):
-        await crawler_queue.mark(session, frontier_id=fid, status=FrontierStatus.skipped)
-        await _log(session, job_id=engine.job_id, website_id=engine.website_id, url=url,
-                   status="robots", level="info", message="Disallowed by robots.txt.")
+        await crawler_queue.mark(
+            session, frontier_id=fid, status=FrontierStatus.skipped
+        )
+        await _log(
+            session,
+            job_id=engine.job_id,
+            website_id=engine.website_id,
+            url=url,
+            status="robots",
+            level="info",
+            message="Disallowed by robots.txt.",
+        )
         return
     try:
         validate_url(url)
     except URLValidationError as e:
-        await crawler_queue.mark(session, frontier_id=fid, status=FrontierStatus.skipped)
-        await _log(session, job_id=engine.job_id, website_id=engine.website_id, url=url,
-                   status="unsafe", level="warn", message=str(e))
+        await crawler_queue.mark(
+            session, frontier_id=fid, status=FrontierStatus.skipped
+        )
+        await _log(
+            session,
+            job_id=engine.job_id,
+            website_id=engine.website_id,
+            url=url,
+            status="unsafe",
+            level="warn",
+            message=str(e),
+        )
         return
 
     # ── fetch (with politeness) ──
@@ -1031,10 +1192,19 @@ async def _process_one(engine: "_Engine", session, client, fid, url: str, depth:
 
     if not fetch_ok:
         engine.recent.append((False, latency))
-        await crawler_queue.mark(session, frontier_id=fid, status=FrontierStatus.error, error=str(payload))
+        await crawler_queue.mark(
+            session, frontier_id=fid, status=FrontierStatus.error, error=str(payload)
+        )
         _bump(engine, failed=1)
-        await _log(session, job_id=engine.job_id, website_id=engine.website_id, url=url,
-                   status="fetch_error", level="error", message=str(payload)[:500])
+        await _log(
+            session,
+            job_id=engine.job_id,
+            website_id=engine.website_id,
+            url=url,
+            status="fetch_error",
+            level="error",
+            message=str(payload)[:500],
+        )
         return
 
     status_code, ctype, text = payload  # type: ignore[misc]
@@ -1042,9 +1212,15 @@ async def _process_one(engine: "_Engine", session, client, fid, url: str, depth:
         engine.recent.append((False, latency))
         await crawler_queue.mark(session, frontier_id=fid, status=FrontierStatus.error)
         _bump(engine, failed=1)
-        await _log(session, job_id=engine.job_id, website_id=engine.website_id, url=url,
-                   status=str(status_code), level="warn",
-                   message=f"Skipped (status={status_code}, type={ctype[:60]}).")
+        await _log(
+            session,
+            job_id=engine.job_id,
+            website_id=engine.website_id,
+            url=url,
+            status=str(status_code),
+            level="warn",
+            message=f"Skipped (status={status_code}, type={ctype[:60]}).",
+        )
         return
 
     engine.recent.append((True, latency))
@@ -1062,30 +1238,56 @@ async def _process_one(engine: "_Engine", session, client, fid, url: str, depth:
                 links.append((link, depth + 1))
         if links:
             await crawler_queue.enqueue(
-                session, job_id=engine.job_id, website_id=engine.website_id,
-                organization_id=engine.org_id, items=links,
+                session,
+                job_id=engine.job_id,
+                website_id=engine.website_id,
+                organization_id=engine.org_id,
+                items=links,
             )
 
     markdown = extracted["markdown"]
     if not markdown or len(markdown) < 40:
         await crawler_queue.mark(session, frontier_id=fid, status=FrontierStatus.done)
         _bump(engine, skipped=1)
-        await _log(session, job_id=engine.job_id, website_id=engine.website_id, url=url,
-                   status="empty", level="info", message="No meaningful content extracted.")
+        await _log(
+            session,
+            job_id=engine.job_id,
+            website_id=engine.website_id,
+            url=url,
+            status="empty",
+            level="info",
+            message="No meaningful content extracted.",
+        )
         return
 
     checksum = compute_checksum(markdown.encode("utf-8"))
-    n_chunks = await _persist_page(session, engine.website, url, depth, extracted, checksum)
+    n_chunks = await _persist_page(
+        session, engine.website, url, depth, extracted, checksum
+    )
     await crawler_queue.mark(session, frontier_id=fid, status=FrontierStatus.done)
     if n_chunks < 0:
         _bump(engine, skipped=1)
-        await _log(session, job_id=engine.job_id, website_id=engine.website_id, url=url,
-                   status="unchanged", level="info", message="Content unchanged; embeddings reused.")
+        await _log(
+            session,
+            job_id=engine.job_id,
+            website_id=engine.website_id,
+            url=url,
+            status="unchanged",
+            level="info",
+            message="Content unchanged; embeddings reused.",
+        )
     else:
         engine.chunks_total += n_chunks
         _bump(engine, completed=1, chunks=n_chunks)
-        await _log(session, job_id=engine.job_id, website_id=engine.website_id, url=url,
-                   status="crawled", level="info", message=f"Indexed ({n_chunks} chunks).")
+        await _log(
+            session,
+            job_id=engine.job_id,
+            website_id=engine.website_id,
+            url=url,
+            status="crawled",
+            level="info",
+            message=f"Indexed ({n_chunks} chunks).",
+        )
 
 
 async def _finalize(session: AsyncSession, job_id, engine: "_Engine") -> None:
@@ -1104,7 +1306,9 @@ async def _finalize(session: AsyncSession, job_id, engine: "_Engine") -> None:
     job_values: dict = {"concurrency": 0}
 
     if engine.control == CrawlJobStatus.cancelled:
-        website.status = WebsiteStatus.ready if website.pages_count else WebsiteStatus.pending
+        website.status = (
+            WebsiteStatus.ready if website.pages_count else WebsiteStatus.pending
+        )
         job_values["status"] = CrawlJobStatus.cancelled
         job_values["finished_at"] = now
     elif engine.control == CrawlJobStatus.paused:
@@ -1142,7 +1346,10 @@ async def _finalize(session: AsyncSession, job_id, engine: "_Engine") -> None:
     await session.commit()
     log.info(
         "crawl_finalized site=%s status=%s pages=%d chunks=%d",
-        website.id, job_values["status"], website.pages_count, engine.chunks_total,
+        website.id,
+        job_values["status"],
+        website.pages_count,
+        engine.chunks_total,
     )
 
 
@@ -1162,7 +1369,11 @@ async def _persist_page(
         .where(WebsitePage.url == url)
     )
 
-    if existing is not None and existing.checksum == checksum and existing.status != PageStatus.deleted:
+    if (
+        existing is not None
+        and existing.checksum == checksum
+        and existing.status != PageStatus.deleted
+    ):
         existing.last_crawled_at = datetime.now(timezone.utc)
         existing.status = PageStatus.crawled
         return -1
@@ -1188,7 +1399,7 @@ async def _persist_page(
         page.version = (page.version or 1) + 1
 
     page.title = title[:512]
-    page.description = (extracted.get("description") or None)
+    page.description = extracted.get("description") or None
     page.content = plain
     page.markdown = markdown
     page.checksum = checksum
@@ -1215,12 +1426,14 @@ async def _persist_page(
     )
     for c, emb in zip(chunks, embeddings):
         meta = dict(c.metadata)
-        meta.update({
-            "url": url,
-            "title": title,
-            "source_type": "website",
-            "classification": classification,
-        })
+        meta.update(
+            {
+                "url": url,
+                "title": title,
+                "source_type": "website",
+                "classification": classification,
+            }
+        )
         session.add(
             DocumentChunk(
                 website_page_id=page.id,
@@ -1237,7 +1450,9 @@ async def _persist_page(
     return len(chunks)
 
 
-async def _mark_deleted_pages(session: AsyncSession, website: Website, seen: set[str]) -> None:
+async def _mark_deleted_pages(
+    session: AsyncSession, website: Website, seen: set[str]
+) -> None:
     """Pages that exist in the DB but weren't seen this crawl are marked
     deleted and their chunks removed from search."""
     rows = (

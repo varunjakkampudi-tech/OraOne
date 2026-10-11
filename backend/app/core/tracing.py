@@ -14,6 +14,7 @@ Grafana Tempo) to start exporting real traces.
 a trace and a structured log line for the same request can be correlated
 by that id even without a full OTLP pipeline.
 """
+
 from __future__ import annotations
 
 import logging
@@ -44,20 +45,26 @@ def configure_tracing(app=None) -> bool:
 
     try:
         from opentelemetry import trace
-        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
+            OTLPSpanExporter,
+        )
         from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
         from opentelemetry.sdk.resources import SERVICE_NAME, Resource
         from opentelemetry.sdk.trace import TracerProvider
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
     except ImportError as e:
-        log.warning("tracing: opentelemetry packages not installed (%s); tracing disabled", e)
+        log.warning(
+            "tracing: opentelemetry packages not installed (%s); tracing disabled", e
+        )
         _configured = True
         return False
 
     try:
         resource = Resource.create({SERVICE_NAME: service_name})
         provider = TracerProvider(resource=resource)
-        provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint=endpoint, insecure=True)))
+        provider.add_span_processor(
+            BatchSpanProcessor(OTLPSpanExporter(endpoint=endpoint, insecure=True))
+        )
         trace.set_tracer_provider(provider)
 
         if app is not None:
@@ -65,11 +72,16 @@ def configure_tracing(app=None) -> bool:
 
         try:
             from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+
             HTTPXClientInstrumentor().instrument()
         except Exception:  # noqa: BLE001 — optional instrumentation
             pass
 
-        log.info("tracing: OpenTelemetry active, exporting to %s (service=%s)", endpoint, service_name)
+        log.info(
+            "tracing: OpenTelemetry active, exporting to %s (service=%s)",
+            endpoint,
+            service_name,
+        )
         _configured = True
         return True
     except Exception as e:  # noqa: BLE001 — never let tracing setup crash the app

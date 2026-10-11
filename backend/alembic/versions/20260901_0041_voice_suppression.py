@@ -4,6 +4,7 @@ Adds ``voice_suppression_entries`` — one org-scoped record per suppressed
 phone number. The outbound dialer consults this list before placing a call so
 numbers that opted out (or sit on a DND registry) are never contacted again.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -59,7 +60,8 @@ def upgrade() -> None:
             server_default=sa.func.now(),
         ),
         sa.UniqueConstraint(
-            "organization_id", "phone_number",
+            "organization_id",
+            "phone_number",
             name="uq_voice_suppression_org_phone",
         ),
     )
@@ -81,9 +83,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_index(
-        "ix_voice_suppression_reason", table_name="voice_suppression_entries"
-    )
+    op.drop_index("ix_voice_suppression_reason", table_name="voice_suppression_entries")
     op.drop_index(
         "ix_voice_suppression_phone_number", table_name="voice_suppression_entries"
     )

@@ -1,4 +1,5 @@
 """Phase 6 — Knowledge Base Foundation tests."""
+
 from __future__ import annotations
 
 import asyncio
@@ -14,7 +15,9 @@ from httpx import ASGITransport, AsyncClient
 from app.middleware.org_context import OrgContext
 
 
-def _ctx(org_id: uuid.UUID, *, user_id: uuid.UUID | None = None, role: str = "owner") -> OrgContext:
+def _ctx(
+    org_id: uuid.UUID, *, user_id: uuid.UUID | None = None, role: str = "owner"
+) -> OrgContext:
     return OrgContext(
         user_id=user_id or uuid.uuid4(),
         cognito_sub="sub-" + str(org_id),
@@ -29,9 +32,8 @@ def _postgres_reachable() -> bool:
     url = os.environ.get("DATABASE_URL", "")
     if not url:
         return False
-    dsn = (
-        url.replace("postgresql+asyncpg://", "postgresql://")
-        .replace("postgresql+psycopg2://", "postgresql://")
+    dsn = url.replace("postgresql+asyncpg://", "postgresql://").replace(
+        "postgresql+psycopg2://", "postgresql://"
     )
 
     async def _probe() -> bool:
@@ -55,6 +57,7 @@ REQUIRES_DB = pytest.mark.skipif(
 
 
 # ─────────────────── Unit (no DB) ───────────────────
+
 
 def test_storage_build_key_is_safe():
     from app.services.storage import build_key
@@ -130,6 +133,7 @@ def test_schemas_validate_required_fields():
 
 # ─────────────────── DB-backed integration ───────────────────
 
+
 @pytest_asyncio.fixture
 async def db_session() -> AsyncIterator:
     from app.database import session as db_session_module
@@ -152,7 +156,9 @@ async def _seed_org(session, *, email: str, slug_hint: str):
 
     from app.database.models.organization import Organization, OrgPlan
     from app.database.models.organization_member import (
-        MemberRole, MemberStatus, OrganizationMember,
+        MemberRole,
+        MemberStatus,
+        OrganizationMember,
     )
     from app.database.models.project import Project
     from app.database.models.user import User
@@ -203,7 +209,9 @@ async def test_kb_crud_and_upload(db_session, tmp_path, monkeypatch):
     from app.middleware.org_context import get_current_organization
     from server import app
 
-    user, org = await _seed_org(db_session, email=f"kb-{uuid.uuid4()}@x.com", slug_hint="kb")
+    user, org = await _seed_org(
+        db_session, email=f"kb-{uuid.uuid4()}@x.com", slug_hint="kb"
+    )
     await db_session.commit()
 
     async def _override() -> OrgContext:
@@ -224,7 +232,11 @@ async def test_kb_crud_and_upload(db_session, tmp_path, monkeypatch):
             # Create a KB
             r = await client.post(
                 "/api/knowledge-bases",
-                json={"name": "Product Docs", "description": "Public-facing docs", "status": "active"},
+                json={
+                    "name": "Product Docs",
+                    "description": "Public-facing docs",
+                    "status": "active",
+                },
             )
             assert r.status_code == 201, r.text
             kb = r.json()
@@ -287,8 +299,12 @@ async def test_kb_org_isolation(db_session, tmp_path, monkeypatch):
     from app.middleware.org_context import get_current_organization
     from server import app
 
-    user_a, org_a = await _seed_org(db_session, email=f"a-{uuid.uuid4()}@x.com", slug_hint="a")
-    user_b, org_b = await _seed_org(db_session, email=f"b-{uuid.uuid4()}@x.com", slug_hint="b")
+    user_a, org_a = await _seed_org(
+        db_session, email=f"a-{uuid.uuid4()}@x.com", slug_hint="a"
+    )
+    user_b, org_b = await _seed_org(
+        db_session, email=f"b-{uuid.uuid4()}@x.com", slug_hint="b"
+    )
 
     # Seed a KB directly into Org A
     kb_a = KnowledgeBase(

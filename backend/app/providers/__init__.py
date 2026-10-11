@@ -4,6 +4,7 @@ Exposes the provider contract plus a tiny factory that selects the right
 backend from environment configuration. Importing this package is cheap
 and side-effect free.
 """
+
 from __future__ import annotations
 
 import logging
@@ -38,10 +39,13 @@ def get_provider() -> AIProvider:
     """
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
     environment = os.environ.get("ENVIRONMENT", "development").strip().lower()
-    if environment in {"production", "prod", "staging"} and os.environ.get(
-        "AI_ALLOW_MOCK", "false"
-    ).strip().lower() == "true":
-        raise RuntimeError("AI_ALLOW_MOCK is forbidden in production-like environments.")
+    if (
+        environment in {"production", "prod", "staging"}
+        and os.environ.get("AI_ALLOW_MOCK", "false").strip().lower() == "true"
+    ):
+        raise RuntimeError(
+            "AI_ALLOW_MOCK is forbidden in production-like environments."
+        )
     if api_key:
         try:
             from app.providers.openai_provider import OpenAIProvider
@@ -57,6 +61,7 @@ def get_provider() -> AIProvider:
             raise RuntimeError("OpenRouter provider initialization failed") from e
     if os.environ.get("AI_ALLOW_MOCK", "false").strip().lower() == "true":
         from app.providers.mock_provider import MockProvider
+
         log.warning("AI provider: explicit mock mode enabled")
         return MockProvider()
     raise RuntimeError(

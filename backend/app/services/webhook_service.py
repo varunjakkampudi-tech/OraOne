@@ -11,6 +11,7 @@ delivery and records every result in ``WebhookDelivery``. The compatibility
 ``dispatch`` entry point remains synchronous and never launches an untracked
 background task.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -26,7 +27,7 @@ from datetime import datetime, timezone
 from typing import Any, Iterable, Optional
 
 import httpx
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.webhook import (
@@ -52,7 +53,9 @@ def generate_secret() -> str:
     return "whsec_" + secrets.token_urlsafe(32)[:48]
 
 
-def sign_payload(secret: str, body: bytes, timestamp: Optional[int] = None) -> tuple[int, str]:
+def sign_payload(
+    secret: str, body: bytes, timestamp: Optional[int] = None
+) -> tuple[int, str]:
     """Return ``(timestamp, signature)`` for the given raw body."""
     ts = timestamp or int(time.time())
     signed = f"{ts}.".encode("utf-8") + body
@@ -174,7 +177,9 @@ async def update_endpoint(
     return endpoint
 
 
-async def rotate_secret(session: AsyncSession, endpoint: WebhookEndpoint) -> WebhookEndpoint:
+async def rotate_secret(
+    session: AsyncSession, endpoint: WebhookEndpoint
+) -> WebhookEndpoint:
     endpoint.secret = generate_secret()
     await session.flush()
     return endpoint
@@ -192,7 +197,9 @@ async def list_deliveries(
     endpoint_id: Optional[uuid.UUID] = None,
     limit: int = 50,
 ) -> list[WebhookDelivery]:
-    stmt = select(WebhookDelivery).where(WebhookDelivery.organization_id == organization_id)
+    stmt = select(WebhookDelivery).where(
+        WebhookDelivery.organization_id == organization_id
+    )
     if endpoint_id is not None:
         stmt = stmt.where(WebhookDelivery.endpoint_id == endpoint_id)
     stmt = stmt.order_by(WebhookDelivery.created_at.desc()).limit(min(limit, 200))
@@ -202,7 +209,11 @@ async def list_deliveries(
 
 # ── delivery ────────────────────────────────────────────────────────────────
 async def _deliver_once(
-    endpoint: WebhookEndpoint, body: bytes, event: str, *, delivery_id: str | None = None
+    endpoint: WebhookEndpoint,
+    body: bytes,
+    event: str,
+    *,
+    delivery_id: str | None = None,
 ) -> tuple[bool, Optional[int], Optional[str]]:
     headers = {
         "Content-Type": "application/json",
@@ -212,7 +223,9 @@ async def _deliver_once(
         "X-OraOne-Delivery": delivery_id or str(uuid.uuid4()),
     }
     try:
-        async with httpx.AsyncClient(timeout=_TIMEOUT, follow_redirects=False) as client:
+        async with httpx.AsyncClient(
+            timeout=_TIMEOUT, follow_redirects=False
+        ) as client:
             # Re-resolve and reject unsafe destinations immediately before the
             # request. Registration-time validation alone is vulnerable to DNS
             # rebinding. Redirects are deliberately disabled so each hop must
@@ -276,7 +289,11 @@ async def _deliver_endpoint(
 
 
 def _envelope(
-    event: str, organization_id: uuid.UUID, data: dict[str, Any], *, event_id: str | None = None
+    event: str,
+    organization_id: uuid.UUID,
+    data: dict[str, Any],
+    *,
+    event_id: str | None = None,
 ) -> dict[str, Any]:
     return {
         "id": event_id or f"evt_{uuid.uuid4().hex}",
@@ -337,7 +354,9 @@ async def deliver_event(
             if already_succeeded is not None:
                 continue
             attempted += 1
-            if await _deliver_endpoint(session, endpoint, organization_id, event, payload):
+            if await _deliver_endpoint(
+                session, endpoint, organization_id, event, payload
+            ):
                 succeeded += 1
             else:
                 failed += 1
@@ -361,13 +380,19 @@ async def dispatch(
             )
             return result.succeeded
     except Exception:  # noqa: BLE001
-        logger.exception("webhook dispatch failed org=%s event=%s", organization_id, event)
+        logger.exception(
+            "webhook dispatch failed org=%s event=%s", organization_id, event
+        )
         return 0
 
 
-async def send_test(session: AsyncSession, endpoint: WebhookEndpoint) -> WebhookDelivery:
+async def send_test(
+    session: AsyncSession, endpoint: WebhookEndpoint
+) -> WebhookDelivery:
     """Synchronous single-shot test delivery used by the dashboard 'Send test'."""
-    payload = _envelope("ping.test", endpoint.organization_id, {"message": "OraOne webhook test event"})
+    payload = _envelope(
+        "ping.test", endpoint.organization_id, {"message": "OraOne webhook test event"}
+    )
     body = json.dumps(payload, default=str, separators=(",", ":")).encode("utf-8")
     success, status_code, error = await _deliver_once(endpoint, body, "ping.test")
     delivery = WebhookDelivery(

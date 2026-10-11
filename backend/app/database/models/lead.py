@@ -10,11 +10,11 @@ Previously leads only existed as append-only ``widget_events`` of type
 ``lead`` — good for analytics counts, useless for a CRM workflow. This model
 gives leads identity, status, scoring and assignment.
 """
+
 from __future__ import annotations
 
 import enum
 import uuid
-from datetime import datetime
 from typing import Any, Optional
 
 from sqlalchemy import ForeignKey, Index, Integer, String, Text, Enum

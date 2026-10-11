@@ -8,6 +8,7 @@ conversation/message surfaces from Phases 5–7 keep working unchanged.
 * ``conversations.last_message_at`` — sort key for the chat sidebar
 * ``messages.token_count``          — total tokens billed to the message
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -42,13 +43,9 @@ def upgrade() -> None:
         ["id"],
         ondelete="SET NULL",
     )
-    op.create_index(
-        "ix_conversations_user_id", "conversations", ["user_id"]
-    )
+    op.create_index("ix_conversations_user_id", "conversations", ["user_id"])
 
-    op.add_column(
-        "messages", sa.Column("token_count", sa.Integer(), nullable=True)
-    )
+    op.add_column("messages", sa.Column("token_count", sa.Integer(), nullable=True))
 
 
 def downgrade() -> None:

@@ -4,6 +4,7 @@ Persisted (in addition to the stdlib audit logger) so the integration
 details page can render a human-readable timeline:
 ``Connected → Download → Chunk → Embedding → Completed`` with levels.
 """
+
 from __future__ import annotations
 
 import enum

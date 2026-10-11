@@ -4,6 +4,7 @@ Adds ``marketplace_reviews`` — one rating/review per (organization, user,
 listing_slug). Powers star ratings, review counts and the review feed on
 each marketplace listing.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -52,7 +53,9 @@ def upgrade() -> None:
             server_default=sa.func.now(),
         ),
         sa.UniqueConstraint(
-            "organization_id", "user_id", "listing_slug",
+            "organization_id",
+            "user_id",
+            "listing_slug",
             name="uq_marketplace_review_org_user_slug",
         ),
     )

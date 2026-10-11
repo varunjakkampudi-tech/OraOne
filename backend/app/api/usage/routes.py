@@ -10,6 +10,7 @@ Reads only require org membership. Recording requires ``billing.read``
 authenticated org context and rely on the metric registry to ignore
 unknown metrics).
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query

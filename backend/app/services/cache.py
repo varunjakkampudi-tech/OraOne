@@ -20,6 +20,7 @@ falls back to in-process so nothing breaks.
 ``False`` (the caller wraps values with its own clock), distributed backends
 return ``True`` (the store expires keys itself).
 """
+
 from __future__ import annotations
 
 import json
@@ -42,22 +43,22 @@ class CacheBackend(ABC):
     name: str = "cache"
 
     @abstractmethod
-    def get(self, key: str) -> Optional[Any]:
-        ...
+    def get(self, key: str) -> Optional[Any]: ...
 
     @abstractmethod
-    def set(self, key: str, value: Any, ttl_seconds: Optional[float] = None) -> None:
-        ...
+    def set(
+        self, key: str, value: Any, ttl_seconds: Optional[float] = None
+    ) -> None: ...
 
     @abstractmethod
-    def delete(self, key: str) -> None:
-        ...
+    def delete(self, key: str) -> None: ...
 
     @abstractmethod
-    def clear(self) -> None:
-        ...
+    def clear(self) -> None: ...
 
-    def set_if_not_exists(self, key: str, value: Any, ttl_seconds: Optional[float] = None) -> bool:
+    def set_if_not_exists(
+        self, key: str, value: Any, ttl_seconds: Optional[float] = None
+    ) -> bool:
         """Atomically set ``key`` only if absent. Returns True if this call set it.
 
         Used for idempotency-key locking and refresh-token issuance. The base
@@ -141,7 +142,9 @@ class RedisCacheBackend(CacheBackend):
         raw = self._redis.get(self._k(key))
         return json.loads(raw) if raw is not None else None
 
-    def set(self, key: str, value: Any, ttl_seconds: Optional[float] = None) -> None:  # pragma: no cover
+    def set(
+        self, key: str, value: Any, ttl_seconds: Optional[float] = None
+    ) -> None:  # pragma: no cover
         payload = json.dumps(value, default=str)
         if ttl_seconds and ttl_seconds > 0:
             self._redis.set(self._k(key), payload, ex=int(ttl_seconds))
@@ -155,13 +158,22 @@ class RedisCacheBackend(CacheBackend):
         for k in self._redis.scan_iter(f"{self._prefix}*"):
             self._redis.delete(k)
 
-    def set_if_not_exists(self, key: str, value: Any, ttl_seconds: Optional[float] = None) -> bool:  # pragma: no cover
+    def set_if_not_exists(
+        self, key: str, value: Any, ttl_seconds: Optional[float] = None
+    ) -> bool:  # pragma: no cover
         payload = json.dumps(value, default=str)
         return bool(
-            self._redis.set(self._k(key), payload, nx=True, ex=int(ttl_seconds) if ttl_seconds else None)
+            self._redis.set(
+                self._k(key),
+                payload,
+                nx=True,
+                ex=int(ttl_seconds) if ttl_seconds else None,
+            )
         )
 
-    def increment(self, key: str, ttl_seconds: Optional[float] = None) -> int:  # pragma: no cover
+    def increment(
+        self, key: str, ttl_seconds: Optional[float] = None
+    ) -> int:  # pragma: no cover
         value = int(self._redis.incr(self._k(key)))
         if value == 1 and ttl_seconds:
             self._redis.expire(self._k(key), int(ttl_seconds))
@@ -183,15 +195,19 @@ def get_cache_backend() -> CacheBackend:
     if choice in {"redis", "distributed"}:
         url = os.getenv("REDIS_URL", "").strip()
         if not url:
-            log.warning("ENTITLEMENTS_CACHE_BACKEND=redis but REDIS_URL is unset; "
-                        "falling back to in-process cache.")
+            log.warning(
+                "ENTITLEMENTS_CACHE_BACKEND=redis but REDIS_URL is unset; "
+                "falling back to in-process cache."
+            )
             return InProcessCacheBackend()
         try:
             backend = RedisCacheBackend(url)
             log.info("entitlement cache backend: redis (%s)", url)
             return backend
         except Exception as e:  # pragma: no cover — optional dependency
-            log.warning("Redis cache backend unavailable (%s); falling back to in-process.", e)
+            log.warning(
+                "Redis cache backend unavailable (%s); falling back to in-process.", e
+            )
             return InProcessCacheBackend()
     return InProcessCacheBackend()
 
@@ -220,7 +236,11 @@ def get_shared_cache(namespace: str) -> CacheBackend:
             backend = RedisCacheBackend(url, prefix=f"oraone:{namespace}:")
             log.info("shared cache [%s]: redis", namespace)
         except Exception as e:  # pragma: no cover — optional dependency
-            log.warning("Redis unavailable for shared cache [%s] (%s); using in-process.", namespace, e)
+            log.warning(
+                "Redis unavailable for shared cache [%s] (%s); using in-process.",
+                namespace,
+                e,
+            )
             backend = InProcessCacheBackend()
     else:
         backend = InProcessCacheBackend()

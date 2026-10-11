@@ -14,6 +14,7 @@ single-process scheduler — fine for self-hosted / single-node deployments.
 It is intentionally tolerant: any error in a tick is logged and the loop
 keeps going.
 """
+
 from __future__ import annotations
 
 import asyncio

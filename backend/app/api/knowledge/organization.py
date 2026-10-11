@@ -1,6 +1,7 @@
 """R2 Enterprise Knowledge: folders, document organization, search, preview,
 versions, and bulk actions. Mounted alongside the Phase 6 knowledge router.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -50,7 +51,9 @@ def _norm_tags(tags: list[str]) -> list[str]:
 async def _doc_chunk_count(session: AsyncSession, doc_id: uuid.UUID) -> int:
     return int(
         await session.scalar(
-            select(func.count(DocumentChunk.id)).where(DocumentChunk.document_id == doc_id)
+            select(func.count(DocumentChunk.id)).where(
+                DocumentChunk.document_id == doc_id
+            )
         )
         or 0
     )
@@ -60,14 +63,17 @@ def _doc_to_read(doc: Document, *, chunk_count: int) -> DocumentRead:
     elapsed_ms = None
     if doc.processing_started_at and doc.processing_completed_at:
         elapsed_ms = int(
-            (doc.processing_completed_at - doc.processing_started_at).total_seconds() * 1000
+            (doc.processing_completed_at - doc.processing_started_at).total_seconds()
+            * 1000
         )
     return DocumentRead.model_validate(
         {**doc.__dict__, "chunk_count": chunk_count, "processing_time_ms": elapsed_ms}
     )
 
 
-async def _load_doc(session: AsyncSession, ctx: OrgContext, doc_id: uuid.UUID) -> Optional[Document]:
+async def _load_doc(
+    session: AsyncSession, ctx: OrgContext, doc_id: uuid.UUID
+) -> Optional[Document]:
     return await session.scalar(
         select(Document)
         .where(Document.id == doc_id)
@@ -77,6 +83,7 @@ async def _load_doc(session: AsyncSession, ctx: OrgContext, doc_id: uuid.UUID) -
 
 
 # ─────────────────────── Knowledge folders ───────────────────────
+
 
 async def _folder_doc_count(session: AsyncSession, folder_id: uuid.UUID) -> int:
     return int(
@@ -121,7 +128,11 @@ async def list_knowledge_folders(
     return [await _folder_out(session, f) for f in rows]
 
 
-@router.post("/api/knowledge-folders", response_model=KnowledgeFolderOut, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/api/knowledge-folders",
+    response_model=KnowledgeFolderOut,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_knowledge_folder(
     payload: KnowledgeFolderCreate,
     ctx: OrgContext = Depends(get_current_organization),
@@ -190,7 +201,9 @@ async def update_knowledge_folder(
     return await _folder_out(session, folder)
 
 
-@router.delete("/api/knowledge-folders/{folder_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/api/knowledge-folders/{folder_id}", status_code=status.HTTP_204_NO_CONTENT
+)
 async def delete_knowledge_folder(
     folder_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),
@@ -225,6 +238,7 @@ async def delete_knowledge_folder(
 
 
 # ─────────────────────── Document organization ───────────────────────
+
 
 @router.patch("/api/documents/{document_id}", response_model=DocumentRead)
 async def patch_document(
@@ -305,7 +319,9 @@ async def bulk_documents(
             if target is None:
                 raise HTTPException(status.HTTP_404_NOT_FOUND, "Folder not found.")
         for d in docs:
-            d.folder_id = None if payload.clear_folder else (target.id if target else None)
+            d.folder_id = (
+                None if payload.clear_folder else (target.id if target else None)
+            )
     elif action == "tag":
         tags = _norm_tags(payload.tags or [])
         for d in docs:
@@ -368,7 +384,9 @@ async def preview_document(
     )
 
 
-@router.get("/api/documents/{document_id}/versions", response_model=list[DocumentVersionOut])
+@router.get(
+    "/api/documents/{document_id}/versions", response_model=list[DocumentVersionOut]
+)
 async def list_document_versions(
     document_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),
@@ -392,6 +410,7 @@ async def list_document_versions(
 
 # ─────────────────────── Knowledge search ───────────────────────
 
+
 @router.post("/api/knowledge/search", response_model=KnowledgeSearchResponse)
 async def knowledge_search(
     payload: KnowledgeSearchRequest,
@@ -410,7 +429,9 @@ async def knowledge_search(
     audit(
         "search",
         resource="knowledge",
-        resource_id=str(payload.knowledge_base_id) if payload.knowledge_base_id else None,
+        resource_id=str(payload.knowledge_base_id)
+        if payload.knowledge_base_id
+        else None,
         organization_id=str(ctx.organization_id),
         user_id=str(ctx.user_id),
         meta={"query": payload.query[:120], "hits": len(chunks)},

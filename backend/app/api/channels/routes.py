@@ -9,6 +9,7 @@ One agent, every channel. These endpoints let the dashboard:
 All routes are organization-scoped and reuse the existing AgentChannel /
 Widget / widget_service infrastructure — no AI logic is duplicated here.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -39,7 +40,9 @@ from app.services.audit import audit
 router = APIRouter(prefix="/api/agents", tags=["channels"])
 
 
-async def _load_agent(session: AsyncSession, *, agent_id: uuid.UUID, organization_id: uuid.UUID) -> Agent:
+async def _load_agent(
+    session: AsyncSession, *, agent_id: uuid.UUID, organization_id: uuid.UUID
+) -> Agent:
     agent = await session.scalar(
         select(Agent)
         .where(Agent.id == agent_id)
@@ -69,13 +72,16 @@ def _channel_read(row, defn: dict) -> ChannelRead:
 
 # ─────────────────────────── channels ───────────────────────────
 
+
 @router.get("/{agent_id}/channels", response_model=ChannelsResponse)
 async def list_channels(
     agent_id: uuid.UUID,
     org: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ):
-    agent = await _load_agent(session, agent_id=agent_id, organization_id=org.organization_id)
+    agent = await _load_agent(
+        session, agent_id=agent_id, organization_id=org.organization_id
+    )
     rows = await channels_service.ensure_channels(session, agent)
     await session.commit()
     by_key = {d["channel"]: d for d in channels_service.CHANNEL_DEFS}
@@ -93,7 +99,9 @@ async def update_channel(
 ):
     if not channels_service.is_valid_channel(channel):
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Unknown channel")
-    agent = await _load_agent(session, agent_id=agent_id, organization_id=org.organization_id)
+    agent = await _load_agent(
+        session, agent_id=agent_id, organization_id=org.organization_id
+    )
     row = await channels_service.update_channel(
         session,
         agent,
@@ -119,13 +127,16 @@ async def update_channel(
 
 # ─────────────────────────── deploy ───────────────────────────
 
+
 @router.get("/{agent_id}/deploy", response_model=DeployInfo)
 async def get_deploy(
     agent_id: uuid.UUID,
     org: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ):
-    agent = await _load_agent(session, agent_id=agent_id, organization_id=org.organization_id)
+    agent = await _load_agent(
+        session, agent_id=agent_id, organization_id=org.organization_id
+    )
     info = await channels_service.build_deploy_info(session, agent)
     await session.commit()
     return DeployInfo(**info)
@@ -138,7 +149,9 @@ async def update_domains(
     org: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ):
-    agent = await _load_agent(session, agent_id=agent_id, organization_id=org.organization_id)
+    agent = await _load_agent(
+        session, agent_id=agent_id, organization_id=org.organization_id
+    )
     widget = await channels_service.ensure_widget(session, agent)
     domains = await channels_service.set_domains(session, widget, payload.domains)
     audit(
@@ -160,7 +173,9 @@ async def publish_deploy(
     org: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ):
-    agent = await _load_agent(session, agent_id=agent_id, organization_id=org.organization_id)
+    agent = await _load_agent(
+        session, agent_id=agent_id, organization_id=org.organization_id
+    )
     widget = await channels_service.ensure_widget(session, agent)
     if payload.publish:
         widget.status = WidgetStatus.published
@@ -189,7 +204,9 @@ async def verify_deploy(
     org: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ):
-    agent = await _load_agent(session, agent_id=agent_id, organization_id=org.organization_id)
+    agent = await _load_agent(
+        session, agent_id=agent_id, organization_id=org.organization_id
+    )
     widget = await channels_service.ensure_widget(session, agent)
     result = await channels_service.verify_installation(session, widget)
     await session.commit()

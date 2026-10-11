@@ -1,4 +1,5 @@
 """Request/response schemas for the AI chat surface (Phase 8)."""
+
 from __future__ import annotations
 
 import uuid
@@ -9,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 # ──────────────── Conversations ────────────────
+
 
 class ConversationCreate(BaseModel):
     agent_id: uuid.UUID
@@ -42,6 +44,7 @@ class ChatConversationOut(BaseModel):
 
 class ConversationPatch(BaseModel):
     """Flexible partial update for organization flags & metadata."""
+
     title: Optional[str] = Field(default=None, min_length=1, max_length=255)
     is_pinned: Optional[bool] = None
     is_archived: Optional[bool] = None
@@ -53,6 +56,7 @@ class ConversationPatch(BaseModel):
 
 
 # ──────────────── Folders ────────────────
+
 
 class FolderCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=120)
@@ -80,6 +84,7 @@ class FolderOut(BaseModel):
 
 # ──────────────── Sharing & suggestions ────────────────
 
+
 class ShareResult(BaseModel):
     share_token: Optional[str] = None
     shared_at: Optional[datetime] = None
@@ -105,6 +110,7 @@ class PublicConversation(BaseModel):
 
 
 # ──────────────── Messages ────────────────
+
 
 class MessageSend(BaseModel):
     content: str = Field(..., min_length=1)

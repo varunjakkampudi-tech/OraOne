@@ -24,6 +24,7 @@ The default provider is ``heuristic`` so the feature works offline and
 with zero extra infra; setting ``RERANKER_PROVIDER`` or the org policy to
 ``cohere`` / ``jina`` / ``local`` swaps in a true neural cross-encoder.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -45,10 +46,44 @@ _LOCAL_MODEL = os.getenv("BGE_RERANK_MODEL", "BAAI/bge-reranker-base")
 _HTTP_TIMEOUT = float(os.getenv("RERANK_HTTP_TIMEOUT", "8.0"))
 
 _STOPWORDS = {
-    "the", "and", "for", "with", "that", "this", "what", "how", "why",
-    "are", "was", "you", "your", "from", "have", "has", "can", "will",
-    "about", "into", "does", "did", "who", "when", "where", "which", "a",
-    "an", "of", "to", "in", "on", "is", "it", "as", "by", "or", "be",
+    "the",
+    "and",
+    "for",
+    "with",
+    "that",
+    "this",
+    "what",
+    "how",
+    "why",
+    "are",
+    "was",
+    "you",
+    "your",
+    "from",
+    "have",
+    "has",
+    "can",
+    "will",
+    "about",
+    "into",
+    "does",
+    "did",
+    "who",
+    "when",
+    "where",
+    "which",
+    "a",
+    "an",
+    "of",
+    "to",
+    "in",
+    "on",
+    "is",
+    "it",
+    "as",
+    "by",
+    "or",
+    "be",
 }
 
 # Lazily-instantiated local cross-encoder (heavy; only when provider="local").
@@ -63,7 +98,10 @@ def _tokenize(text: str) -> list[str]:
 
 # ───────────────────────────── BM25 ─────────────────────────────
 
-def bm25_scores(query: str, docs: list[str], *, k1: float = 1.5, b: float = 0.75) -> list[float]:
+
+def bm25_scores(
+    query: str, docs: list[str], *, k1: float = 1.5, b: float = 0.75
+) -> list[float]:
     """Okapi BM25 score per doc against ``query``, normalised to ``[0, 1]``.
 
     Computed over the *candidate pool only* (typically ≤60 passages), which
@@ -115,6 +153,7 @@ def bm25_scores(query: str, docs: list[str], *, k1: float = 1.5, b: float = 0.75
 
 # ─────────────────────── heuristic cross-encoder ───────────────────────
 
+
 def _heuristic_scores(query: str, docs: list[str]) -> list[float]:
     """A deterministic cross-encoder approximation.
 
@@ -127,8 +166,16 @@ def _heuristic_scores(query: str, docs: list[str]) -> list[float]:
     out: list[float] = []
     for doc, bm_s in zip(docs, bm):
         d_terms = set(_tokenize(doc))
-        jacc = (len(q_terms & d_terms) / len(q_terms | d_terms)) if (q_terms or d_terms) else 0.0
-        phrase = 1.0 if q_lower and len(q_lower) >= 6 and q_lower in (doc or "").lower() else 0.0
+        jacc = (
+            (len(q_terms & d_terms) / len(q_terms | d_terms))
+            if (q_terms or d_terms)
+            else 0.0
+        )
+        phrase = (
+            1.0
+            if q_lower and len(q_lower) >= 6 and q_lower in (doc or "").lower()
+            else 0.0
+        )
         score = 0.6 * bm_s + 0.3 * jacc + 0.1 * phrase
         out.append(round(max(0.0, min(1.0, score)), 6))
     return out
@@ -136,18 +183,27 @@ def _heuristic_scores(query: str, docs: list[str]) -> list[float]:
 
 # ───────────────────────── remote providers ─────────────────────────
 
+
 async def _cohere_scores(query: str, docs: list[str]) -> Optional[list[float]]:
     key = os.getenv("COHERE_API_KEY")
     if not key:
         return None
     import httpx
 
-    payload = {"model": _COHERE_MODEL, "query": query, "documents": docs, "top_n": len(docs)}
+    payload = {
+        "model": _COHERE_MODEL,
+        "query": query,
+        "documents": docs,
+        "top_n": len(docs),
+    }
     try:
         async with httpx.AsyncClient(timeout=_HTTP_TIMEOUT) as client:
             r = await client.post(
                 "https://api.cohere.com/v2/rerank",
-                headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                headers={
+                    "Authorization": f"Bearer {key}",
+                    "Content-Type": "application/json",
+                },
                 json=payload,
             )
             r.raise_for_status()
@@ -169,12 +225,20 @@ async def _jina_scores(query: str, docs: list[str]) -> Optional[list[float]]:
         return None
     import httpx
 
-    payload = {"model": _JINA_MODEL, "query": query, "documents": docs, "top_n": len(docs)}
+    payload = {
+        "model": _JINA_MODEL,
+        "query": query,
+        "documents": docs,
+        "top_n": len(docs),
+    }
     try:
         async with httpx.AsyncClient(timeout=_HTTP_TIMEOUT) as client:
             r = await client.post(
                 "https://api.jina.ai/v1/rerank",
-                headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                headers={
+                    "Authorization": f"Bearer {key}",
+                    "Content-Type": "application/json",
+                },
                 json=payload,
             )
             r.raise_for_status()
@@ -217,6 +281,7 @@ def _local_scores_sync(query: str, docs: list[str]) -> Optional[list[float]]:
 
 
 # ───────────────────────────── public ─────────────────────────────
+
 
 async def rerank(
     query: str,

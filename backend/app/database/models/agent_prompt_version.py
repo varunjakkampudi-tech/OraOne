@@ -5,6 +5,7 @@ prompt, temperature, model knobs, tone, …) the previous state is frozen
 as a numbered version row. This powers the version history timeline, the
 prompt diff viewer (#8) and one-click rollback (#7).
 """
+
 from __future__ import annotations
 
 import uuid

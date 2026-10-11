@@ -14,6 +14,7 @@ queue:
 All functions take an :class:`AsyncSession` and never commit — the caller owns
 the transaction boundary so claims + updates stay atomic.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -109,8 +110,9 @@ async def claim_batch(
     )
     rows = (
         await session.execute(
-            select(CrawlFrontier.id, CrawlFrontier.url, CrawlFrontier.depth)
-            .where(CrawlFrontier.id.in_(ids))
+            select(CrawlFrontier.id, CrawlFrontier.url, CrawlFrontier.depth).where(
+                CrawlFrontier.id.in_(ids)
+            )
         )
     ).all()
     return [(r.id, r.url, r.depth) for r in rows]
@@ -152,7 +154,9 @@ async def pending_count(session: AsyncSession, job_id: uuid.UUID) -> int:
         select(func.count())
         .select_from(CrawlFrontier)
         .where(CrawlFrontier.job_id == job_id)
-        .where(CrawlFrontier.status.in_((FrontierStatus.pending, FrontierStatus.claimed)))
+        .where(
+            CrawlFrontier.status.in_((FrontierStatus.pending, FrontierStatus.claimed))
+        )
     )
     return int(n or 0)
 

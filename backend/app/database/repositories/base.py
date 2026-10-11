@@ -1,4 +1,5 @@
 """Base async repository with common CRUD helpers."""
+
 from __future__ import annotations
 
 import uuid

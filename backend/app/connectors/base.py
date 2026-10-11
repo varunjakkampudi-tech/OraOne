@@ -20,6 +20,7 @@ Lifecycle (called by the sync service / API):
     list()           # browse remote resources (folders/channels/repos)
     disconnect()     # best-effort token revocation
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -146,7 +147,9 @@ class BaseConnector:
     def search(self, query: str, *, limit: int = 5) -> list[RemoteDocument]:
         """Provider-side search (optional). Default: filter mock docs."""
         q = (query or "").lower()
-        return [d for d in self._mock_documents() if q in (d.text or "").lower()][:limit]
+        return [d for d in self._mock_documents() if q in (d.text or "").lower()][
+            :limit
+        ]
 
     def list(self) -> list[dict[str, Any]]:
         """Browse remote containers (folders/channels/repos). Optional."""
@@ -179,25 +182,43 @@ class BaseConnector:
 
         def folder(fid: str, name: str) -> dict[str, Any]:
             return {
-                "external_id": fid, "name": name, "mime_type": "folder",
-                "is_folder": True, "modified_at": modified, "size": None,
+                "external_id": fid,
+                "name": name,
+                "mime_type": "folder",
+                "is_folder": True,
+                "modified_at": modified,
+                "size": None,
                 "path": name,
             }
 
         def file(fid: str, name: str, mime: str, size: int) -> dict[str, Any]:
             return {
-                "external_id": fid, "name": name, "mime_type": mime,
-                "is_folder": False, "modified_at": modified, "size": size,
+                "external_id": fid,
+                "name": name,
+                "mime_type": mime,
+                "is_folder": False,
+                "modified_at": modified,
+                "size": size,
                 "path": name,
             }
 
         recent_files = [
-            file("mock-file-handbook", "Employee Handbook.pdf", "application/pdf", 248000),
-            file("mock-file-leave", "Leave Policy.docx",
-                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 38000),
+            file(
+                "mock-file-handbook", "Employee Handbook.pdf", "application/pdf", 248000
+            ),
+            file(
+                "mock-file-leave",
+                "Leave Policy.docx",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                38000,
+            ),
             file("mock-file-arch", "Architecture.pdf", "application/pdf", 512000),
-            file("mock-file-sprint", "Sprint Notes.docx",
-                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 21000),
+            file(
+                "mock-file-sprint",
+                "Sprint Notes.docx",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                21000,
+            ),
             file("mock-file-roadmap", "Roadmap.pdf", "application/pdf", 410000),
         ]
         top_folders = [
@@ -213,7 +234,10 @@ class BaseConnector:
         if query:
             ql = query.lower()
             pool = top_folders + recent_files
-            return {"parent_id": None, "items": [i for i in pool if ql in i["name"].lower()]}
+            return {
+                "parent_id": None,
+                "items": [i for i in pool if ql in i["name"].lower()],
+            }
         if parent_id:  # inside a folder → a couple of demo files
             return {"parent_id": parent_id, "items": recent_files[:2]}
         return {"parent_id": None, "items": top_folders + recent_files}

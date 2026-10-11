@@ -12,6 +12,7 @@ Every conversation here is an *owned* AI chat thread: it carries both an
 and writes require BOTH to match the caller, so there is no cross-tenant
 *and* no cross-user leakage.
 """
+
 from __future__ import annotations
 
 import json
@@ -43,9 +44,6 @@ from app.schemas.chat import (
     ConversationCreate,
     ConversationPatch,
     ConversationRename,
-    FolderCreate,
-    FolderOut,
-    FolderUpdate,
     MessageSend,
     SendMessageResult,
     ShareResult,
@@ -62,6 +60,7 @@ router = APIRouter(prefix="/api/conversations", tags=["chat"])
 
 
 # ─────────────────────────── helpers ───────────────────────────
+
 
 def _msg_out(m: Message) -> ChatMessageOut:
     return ChatMessageOut(
@@ -89,7 +88,9 @@ async def _load_thread(
     return await session.scalar(q)
 
 
-def _audit(action: str, ctx: OrgContext, *, resource_id: str, meta: Optional[dict] = None) -> None:
+def _audit(
+    action: str, ctx: OrgContext, *, resource_id: str, meta: Optional[dict] = None
+) -> None:
     audit(
         action,
         resource="conversation",
@@ -102,7 +103,10 @@ def _audit(action: str, ctx: OrgContext, *, resource_id: str, meta: Optional[dic
 
 # ─────────────────────── conversation CRUD ─────────────────────
 
-@router.post("", response_model=ChatConversationOut, status_code=status.HTTP_201_CREATED)
+
+@router.post(
+    "", response_model=ChatConversationOut, status_code=status.HTTP_201_CREATED
+)
 async def create_conversation(
     payload: ConversationCreate,
     ctx: OrgContext = Depends(get_current_organization),
@@ -111,7 +115,9 @@ async def create_conversation(
     runtime = AgentRuntime(session, ctx)
     agent = await runtime.load_agent(payload.agent_id)
     if agent is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Agent not found in your organization.")
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, "Agent not found in your organization."
+        )
 
     conv = Conversation(
         organization_id=ctx.organization_id,
@@ -125,7 +131,12 @@ async def create_conversation(
     session.add(conv)
     await session.commit()
     await session.refresh(conv)
-    _audit("create", ctx, resource_id=str(conv.id), meta={"agent_id": str(payload.agent_id)})
+    _audit(
+        "create",
+        ctx,
+        resource_id=str(conv.id),
+        meta={"agent_id": str(payload.agent_id)},
+    )
     return conv
 
 
@@ -133,8 +144,12 @@ async def create_conversation(
 async def list_conversations(
     agent_id: Optional[uuid.UUID] = Query(default=None),
     folder_id: Optional[uuid.UUID] = Query(default=None),
-    q: Optional[str] = Query(default=None, max_length=200, description="Search title + message content."),
-    archived: Optional[bool] = Query(default=None, description="Filter by archived flag; omit for all."),
+    q: Optional[str] = Query(
+        default=None, max_length=200, description="Search title + message content."
+    ),
+    archived: Optional[bool] = Query(
+        default=None, description="Filter by archived flag; omit for all."
+    ),
     favorite: Optional[bool] = Query(default=None),
     pinned: Optional[bool] = Query(default=None),
     sort: str = Query(default="recent", pattern="^(recent|created|title)$"),
@@ -168,9 +183,13 @@ async def list_conversations(
         q_stmt = q_stmt.where(or_(Conversation.title.ilike(term), msg_match))
 
     if sort == "created":
-        q_stmt = q_stmt.order_by(Conversation.is_pinned.desc(), Conversation.created_at.desc())
+        q_stmt = q_stmt.order_by(
+            Conversation.is_pinned.desc(), Conversation.created_at.desc()
+        )
     elif sort == "title":
-        q_stmt = q_stmt.order_by(Conversation.is_pinned.desc(), Conversation.title.asc())
+        q_stmt = q_stmt.order_by(
+            Conversation.is_pinned.desc(), Conversation.title.asc()
+        )
     else:  # recent — last activity first, falling back to created_at
         q_stmt = q_stmt.order_by(
             Conversation.is_pinned.desc(),
@@ -210,7 +229,11 @@ async def rename_conversation(
     return conv
 
 
-@router.delete("/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
+@router.delete(
+    "/{conversation_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
 async def delete_conversation(
     conversation_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),
@@ -265,7 +288,9 @@ async def patch_conversation(
             conv.status = ConversationStatus(payload.status)
             changed["status"] = payload.status
         except ValueError as e:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Invalid status: {payload.status}") from e
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, f"Invalid status: {payload.status}"
+            ) from e
     if payload.clear_folder:
         conv.folder_id = None
         changed["folder_id"] = None
@@ -288,6 +313,7 @@ async def patch_conversation(
 
 
 # ───────────────────────── export ──────────────────────────────
+
 
 @router.get("/{conversation_id}/export")
 async def export_conversation(
@@ -328,13 +354,17 @@ async def export_conversation(
         return Response(
             content=json.dumps(body, indent=2, default=str),
             media_type="application/json",
-            headers={"Content-Disposition": f'attachment; filename="conversation-{conversation_id}.json"'},
+            headers={
+                "Content-Disposition": f'attachment; filename="conversation-{conversation_id}.json"'
+            },
         )
 
     lines = [f"# {title}", ""]
     for m in rows:
         role = sender_to_role(m.sender)
-        who = {"user": "You", "assistant": "Assistant", "system": "System"}.get(role, role.title())
+        who = {"user": "You", "assistant": "Assistant", "system": "System"}.get(
+            role, role.title()
+        )
         ts = m.created_at.strftime("%Y-%m-%d %H:%M") if m.created_at else ""
         lines.append(f"### {who}  \n*{ts}*\n")
         lines.append(m.message or "")
@@ -343,11 +373,14 @@ async def export_conversation(
     return PlainTextResponse(
         content=md,
         media_type="text/markdown",
-        headers={"Content-Disposition": f'attachment; filename="conversation-{conversation_id}.md"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="conversation-{conversation_id}.md"'
+        },
     )
 
 
 # ───────────────────────── sharing ─────────────────────────────
+
 
 def _share_url(token: str) -> str:
     return f"/share/{token}"
@@ -451,6 +484,7 @@ async def suggested_questions(
 
 # ─────────────────────────── regenerate ────────────────────────
 
+
 @router.post("/{conversation_id}/regenerate", response_model=SendMessageResult)
 async def regenerate_last(
     conversation_id: uuid.UUID,
@@ -477,7 +511,9 @@ async def regenerate_last(
     runtime = AgentRuntime(session, ctx)
     agent = await runtime.load_agent(conv.agent_id)
     if agent is None:
-        raise HTTPException(status.HTTP_409_CONFLICT, "The agent for this conversation is unavailable.")
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "The agent for this conversation is unavailable."
+        )
 
     # Drop the trailing assistant message(s) that followed the last user turn.
     later_assistants = list(
@@ -539,6 +575,7 @@ async def regenerate_last(
 
 
 # ───────────────────────── messages ────────────────────────────
+
 
 @router.get("/{conversation_id}/messages", response_model=list[ChatMessageOut])
 async def list_messages(
@@ -607,13 +644,17 @@ async def send_message(
     runtime = AgentRuntime(session, ctx)
     agent = await runtime.load_agent(conv.agent_id)
     if agent is None:
-        raise HTTPException(status.HTTP_409_CONFLICT, "The agent for this conversation is unavailable.")
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "The agent for this conversation is unavailable."
+        )
 
     # Build the model payload from history BEFORE persisting the new user
     # turn, so the current message isn't duplicated in the prompt.
     is_first = (
         await session.scalar(
-            select(func.count(Message.id)).where(Message.conversation_id == conversation_id)
+            select(func.count(Message.id)).where(
+                Message.conversation_id == conversation_id
+            )
         )
     ) == 0
 
@@ -626,7 +667,12 @@ async def send_message(
     )
     sources = rag_service.dedupe_sources(retrieved)
 
-    _audit("message_sent", ctx, resource_id=str(conversation_id), meta={"chars": len(payload.content)})
+    _audit(
+        "message_sent",
+        ctx,
+        resource_id=str(conversation_id),
+        meta={"chars": len(payload.content)},
+    )
 
     # Phase 12 Module 2: enforce the plan's daily AI-message quota.
     await usage_service.enforce_quota(session, ctx.organization_id, "ai_messages")
@@ -689,6 +735,7 @@ async def send_message(
 
 # ───────────────────────── streaming (SSE) ─────────────────────
 
+
 def _sse(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {json.dumps(data, default=str)}\n\n"
 
@@ -707,11 +754,15 @@ async def stream_message(
     runtime = AgentRuntime(session, ctx)
     agent = await runtime.load_agent(conv.agent_id)
     if agent is None:
-        raise HTTPException(status.HTTP_409_CONFLICT, "The agent for this conversation is unavailable.")
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "The agent for this conversation is unavailable."
+        )
 
     is_first = (
         await session.scalar(
-            select(func.count(Message.id)).where(Message.conversation_id == conversation_id)
+            select(func.count(Message.id)).where(
+                Message.conversation_id == conversation_id
+            )
         )
     ) == 0
 
@@ -730,7 +781,9 @@ async def stream_message(
 
         # Persist the user turn up-front so it survives a mid-stream
         # disconnect (reconnect-safe).
-        user_msg = await _persist_user_message(session, conversation_id, payload.content)
+        user_msg = await _persist_user_message(
+            session, conversation_id, payload.content
+        )
         await session.commit()
         yield _sse("user_saved", {"id": str(user_msg.id)})
 
@@ -742,7 +795,7 @@ async def stream_message(
         except AIProviderError as e:
             log.warning("stream provider error code=%s: %s", e.code, e)
             yield _sse("error", {"error": e.code, "message": str(e)})
-        except Exception as e:  # noqa: BLE001 — never crash the stream
+        except Exception:  # noqa: BLE001 — never crash the stream
             log.exception("unexpected stream failure")
             yield _sse("error", {"error": "unknown", "message": "Streaming failed."})
         finally:
@@ -792,7 +845,10 @@ async def stream_message(
                     },
                 )
             else:
-                yield _sse("done", {"content": "", "usage": {}, "context_used": 0, "sources": []})
+                yield _sse(
+                    "done",
+                    {"content": "", "usage": {}, "context_used": 0, "sources": []},
+                )
 
     return StreamingResponse(
         event_stream(),

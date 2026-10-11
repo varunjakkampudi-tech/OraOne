@@ -7,6 +7,7 @@ crawled content lands as DocumentChunks under that KB — and because an agent
 with no explicit KB link falls back to *all* active org KBs at answer time
 (see ``agent_runtime._linked_kb_ids``), the agent immediately answers from it.
 """
+
 from __future__ import annotations
 
 import logging
@@ -26,7 +27,9 @@ from app.services.website_crawler import URLValidationError, run_crawl, validate
 log = logging.getLogger("app.agent_website")
 
 
-async def _existing_website(session: AsyncSession, *, organization_id, base_url: str) -> Optional[Website]:
+async def _existing_website(
+    session: AsyncSession, *, organization_id, base_url: str
+) -> Optional[Website]:
     return await session.scalar(
         select(Website)
         .where(Website.organization_id == organization_id)
@@ -53,11 +56,15 @@ async def provision_website_crawl(
     try:
         base_url = validate_url(url)
     except URLValidationError as e:
-        log.warning("agent %s website crawl skipped — invalid URL %r: %s", agent.id, url, e)
+        log.warning(
+            "agent %s website crawl skipped — invalid URL %r: %s", agent.id, url, e
+        )
         return None
 
     # Don't re-register/re-crawl the same site for this org on every re-deploy.
-    if await _existing_website(session, organization_id=agent.organization_id, base_url=base_url):
+    if await _existing_website(
+        session, organization_id=agent.organization_id, base_url=base_url
+    ):
         return None
 
     host = urlparse(base_url).hostname or base_url
@@ -93,5 +100,7 @@ async def provision_website_crawl(
     await session.refresh(job)
 
     background.add_task(run_crawl, job.id)
-    log.info("agent %s deploy triggered crawl job %s for %s", agent.id, job.id, base_url)
+    log.info(
+        "agent %s deploy triggered crawl job %s for %s", agent.id, job.id, base_url
+    )
     return website

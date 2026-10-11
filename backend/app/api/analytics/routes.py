@@ -6,6 +6,7 @@ integrations, cost, users, executive). Read access requires the
 ``analytics.read`` permission. Everything is computed live and strictly
 scoped by ``organization_id``.
 """
+
 from __future__ import annotations
 
 import csv
@@ -58,7 +59,9 @@ async def analytics_export(
         analytics_service.org_overview if module == "overview" else None
     )
     if fn is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Unknown module '{module}'.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Unknown module '{module}'."
+        )
     data = await fn(session, ctx.organization_id, days)
     if format == "json":
         return data
@@ -75,7 +78,9 @@ async def analytics_export(
     return StreamingResponse(
         iter([buf.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename=oraone_{module}_{days}d.csv"},
+        headers={
+            "Content-Disposition": f"attachment; filename=oraone_{module}_{days}d.csv"
+        },
     )
 
 
@@ -89,6 +94,7 @@ async def analytics_module(
     fn = analytics_service.MODULE_FUNCTIONS.get(module)
     if fn is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Unknown analytics module '{module}'."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Unknown analytics module '{module}'.",
         )
     return await fn(session, ctx.organization_id, days)

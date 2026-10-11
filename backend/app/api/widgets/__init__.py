@@ -5,6 +5,7 @@ Exposes two routers:
 * ``public_router`` — the loader config + visitor chat endpoints
                       (unauthenticated, domain-restricted)
 """
+
 from app.api.widgets.routes import router
 from app.api.widgets.public import public_router
 

@@ -14,6 +14,7 @@ Two layers:
    over HTTP. Skipped when Postgres is unreachable so the suite still
    passes in the Emergent preview pod where the RDS instance is private.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -24,12 +25,12 @@ from typing import AsyncIterator
 
 import pytest
 import pytest_asyncio
-from fastapi.testclient import TestClient
 
 from app.middleware.org_context import OrgContext
 
 
 # ───────────────────── 1) Unit tests (no DB) ─────────────────────
+
 
 def _ctx(org_id: uuid.UUID, *, role: str = "owner") -> OrgContext:
     return OrgContext(
@@ -95,7 +96,9 @@ def test_org_scoped_repo_stamps_org_when_unset():
     session = FakeSession()
     repo = OrgScopedAgentRepository(session=session, ctx=_ctx(my_org))  # type: ignore[arg-type]
 
-    a = Agent(name="Sales", type=AgentType.chat, status=AgentStatus.draft, model="gpt-4o-mini")
+    a = Agent(
+        name="Sales", type=AgentType.chat, status=AgentStatus.draft, model="gpt-4o-mini"
+    )
     assert getattr(a, "organization_id", None) is None
     asyncio.run(repo.add_for_org(a))
     assert a.organization_id == my_org
@@ -103,6 +106,7 @@ def test_org_scoped_repo_stamps_org_when_unset():
 
 
 # ───────────────────── 2) Integration (live Postgres) ─────────────────────
+
 
 def _postgres_reachable() -> bool:
     """Best-effort probe so the suite skips when RDS is in a private VPC."""
@@ -114,9 +118,8 @@ def _postgres_reachable() -> bool:
     if not url:
         return False
     # Convert SQLAlchemy URL to plain asyncpg DSN.
-    dsn = (
-        url.replace("postgresql+asyncpg://", "postgresql://")
-        .replace("postgresql+psycopg2://", "postgresql://")
+    dsn = url.replace("postgresql+asyncpg://", "postgresql://").replace(
+        "postgresql+psycopg2://", "postgresql://"
     )
 
     async def _probe() -> bool:
@@ -167,7 +170,11 @@ async def db_session() -> AsyncIterator:
 async def _seed_org_with_user(session, *, email: str, slug_hint: str):
     """Insert a (user, organization, owner-membership, default-project) set."""
     from app.database.models.organization import Organization, OrgPlan
-    from app.database.models.organization_member import MemberRole, MemberStatus, OrganizationMember
+    from app.database.models.organization_member import (
+        MemberRole,
+        MemberStatus,
+        OrganizationMember,
+    )
     from app.database.models.project import Project
     from app.database.models.user import User
 
@@ -217,8 +224,12 @@ async def test_org_isolation_repo_layer(db_session):
     from app.database.models.agent import Agent, AgentStatus, AgentType
     from app.database.repositories.agent_repository import OrgScopedAgentRepository
 
-    _, org_a = await _seed_org_with_user(db_session, email=f"a-{uuid.uuid4()}@x.com", slug_hint="alpha")
-    _, org_b = await _seed_org_with_user(db_session, email=f"b-{uuid.uuid4()}@x.com", slug_hint="beta")
+    _, org_a = await _seed_org_with_user(
+        db_session, email=f"a-{uuid.uuid4()}@x.com", slug_hint="alpha"
+    )
+    _, org_b = await _seed_org_with_user(
+        db_session, email=f"b-{uuid.uuid4()}@x.com", slug_hint="beta"
+    )
 
     ctx_a = _ctx(org_a.id)
     ctx_b = _ctx(org_b.id)
@@ -226,9 +237,19 @@ async def test_org_isolation_repo_layer(db_session):
     repo_a = OrgScopedAgentRepository(db_session, ctx_a)
     repo_b = OrgScopedAgentRepository(db_session, ctx_b)
 
-    agent_a = Agent(name="A-agent", type=AgentType.chat, status=AgentStatus.draft, model="gpt-4o-mini")
+    agent_a = Agent(
+        name="A-agent",
+        type=AgentType.chat,
+        status=AgentStatus.draft,
+        model="gpt-4o-mini",
+    )
     await repo_a.add_for_org(agent_a)
-    agent_b = Agent(name="B-agent", type=AgentType.chat, status=AgentStatus.draft, model="gpt-4o-mini")
+    agent_b = Agent(
+        name="B-agent",
+        type=AgentType.chat,
+        status=AgentStatus.draft,
+        model="gpt-4o-mini",
+    )
     await repo_b.add_for_org(agent_b)
     await db_session.flush()
 
@@ -255,8 +276,12 @@ async def test_org_isolation_http_layer(db_session):
     from app.middleware.org_context import OrgContext, get_current_organization
     from server import app
 
-    user_a, org_a = await _seed_org_with_user(db_session, email=f"alice-{uuid.uuid4()}@x.com", slug_hint="alice")
-    user_b, org_b = await _seed_org_with_user(db_session, email=f"bob-{uuid.uuid4()}@x.com", slug_hint="bob")
+    user_a, org_a = await _seed_org_with_user(
+        db_session, email=f"alice-{uuid.uuid4()}@x.com", slug_hint="alice"
+    )
+    user_b, org_b = await _seed_org_with_user(
+        db_session, email=f"bob-{uuid.uuid4()}@x.com", slug_hint="bob"
+    )
 
     alices_agent = Agent(
         organization_id=org_a.id,
@@ -269,9 +294,14 @@ async def test_org_isolation_http_layer(db_session):
     await db_session.commit()
 
     # Override the auth dependency so we can flip identities cheaply.
-    current_ctx = {"v": OrgContext(
-        user_id=user_b.id, cognito_sub="b", organization_id=org_b.id, membership_role="owner"
-    )}
+    current_ctx = {
+        "v": OrgContext(
+            user_id=user_b.id,
+            cognito_sub="b",
+            organization_id=org_b.id,
+            membership_role="owner",
+        )
+    }
 
     async def _override() -> OrgContext:
         return current_ctx["v"]
@@ -295,7 +325,10 @@ async def test_org_isolation_http_layer(db_session):
 
             # Flip to Alice — she sees her agent
             current_ctx["v"] = OrgContext(
-                user_id=user_a.id, cognito_sub="a", organization_id=org_a.id, membership_role="owner",
+                user_id=user_a.id,
+                cognito_sub="a",
+                organization_id=org_a.id,
+                membership_role="owner",
             )
             r = await client.get(f"/api/agents/{alices_agent.id}")
             assert r.status_code == 200, r.text

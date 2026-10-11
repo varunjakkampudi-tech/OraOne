@@ -26,6 +26,7 @@ Security
 isolation) using the denormalised ``document_chunks.organization_id``
 column. An optional ``knowledge_base_ids`` filter narrows further.
 """
+
 from __future__ import annotations
 
 import logging
@@ -48,16 +49,39 @@ from app.services import reranker as rerank_mod
 log = logging.getLogger("app.rag")
 
 DEFAULT_TOP_K = 5
-CANDIDATE_K = 40          # per-strategy candidate pool before fusion
-MAX_CANDIDATES = 60       # keyword fallback ceiling
-RRF_K = 60                # Reciprocal-Rank-Fusion constant
-RERANK_TOP_N = 24         # candidates re-scored by the cross-encoder
+CANDIDATE_K = 40  # per-strategy candidate pool before fusion
+MAX_CANDIDATES = 60  # keyword fallback ceiling
+RRF_K = 60  # Reciprocal-Rank-Fusion constant
+RERANK_TOP_N = 24  # candidates re-scored by the cross-encoder
 DEFAULT_RERANK_ENABLED = True
 
 _STOPWORDS = {
-    "the", "and", "for", "with", "that", "this", "what", "how", "why",
-    "are", "was", "you", "your", "from", "have", "has", "can", "will",
-    "about", "into", "does", "did", "who", "when", "where", "which",
+    "the",
+    "and",
+    "for",
+    "with",
+    "that",
+    "this",
+    "what",
+    "how",
+    "why",
+    "are",
+    "was",
+    "you",
+    "your",
+    "from",
+    "have",
+    "has",
+    "can",
+    "will",
+    "about",
+    "into",
+    "does",
+    "did",
+    "who",
+    "when",
+    "where",
+    "which",
 }
 
 
@@ -88,7 +112,9 @@ class RetrievedChunk:
         return {
             "type": self.source_type,
             "document_id": str(self.document_id) if self.document_id else None,
-            "website_page_id": str(self.website_page_id) if self.website_page_id else None,
+            "website_page_id": str(self.website_page_id)
+            if self.website_page_id
+            else None,
             "document": self.title,  # legacy key still consumed by the chat UI
             "title": self.title,
             "url": self.url,
@@ -138,7 +164,10 @@ def _base_query(
         .where(
             or_(
                 Document.id.is_(None),
-                and_(Document.deleted_at.is_(None), Document.status == DocumentStatus.processed),
+                and_(
+                    Document.deleted_at.is_(None),
+                    Document.status == DocumentStatus.processed,
+                ),
             )
         )
         .where(or_(WebsitePage.id.is_(None), WebsitePage.status != PageStatus.deleted))
@@ -150,7 +179,9 @@ def _base_query(
     return q
 
 
-def _row_to_chunk(row, score: Optional[float] = None, components: Optional[dict] = None) -> RetrievedChunk:
+def _row_to_chunk(
+    row, score: Optional[float] = None, components: Optional[dict] = None
+) -> RetrievedChunk:
     meta = row.chunk_metadata if isinstance(row.chunk_metadata, dict) else {}
     is_web = row.website_page_id is not None
     return RetrievedChunk(
@@ -169,6 +200,7 @@ def _row_to_chunk(row, score: Optional[float] = None, components: Optional[dict]
 
 
 # ────────────────────────── hybrid retrieval ──────────────────────────
+
 
 async def hybrid_search(
     session: AsyncSession,
@@ -216,7 +248,9 @@ async def hybrid_search(
         vector_rank.append(row.chunk_id)
     fts_rank: list = []
     for row, frank in fts_rows:
-        entry = by_id.setdefault(row.chunk_id, {"row": row, "vector_sim": None, "fts_rank": None})
+        entry = by_id.setdefault(
+            row.chunk_id, {"row": row, "vector_sim": None, "fts_rank": None}
+        )
         entry["fts_rank"] = frank
         fts_rank.append(row.chunk_id)
 
@@ -224,7 +258,9 @@ async def hybrid_search(
 
     # Real BM25 leg over the fused candidate pool (query-relative lexical).
     cand_ids = list(fused.keys())
-    bm25_vals = rerank_mod.bm25_scores(query, [by_id[c]["row"].content or "" for c in cand_ids])
+    bm25_vals = rerank_mod.bm25_scores(
+        query, [by_id[c]["row"].content or "" for c in cand_ids]
+    )
     bm25_by_id = {c: s for c, s in zip(cand_ids, bm25_vals)}
 
     kws = set(_keywords(query))
@@ -243,8 +279,17 @@ async def hybrid_search(
             + 0.10 * lexical
         )
         base_scored.append(
-            (blended, {"cid": cid, "entry": entry, "lexical": lexical,
-                       "vsim": vsim, "rrf": rrf, "bm25": bm})
+            (
+                blended,
+                {
+                    "cid": cid,
+                    "entry": entry,
+                    "lexical": lexical,
+                    "vsim": vsim,
+                    "rrf": rrf,
+                    "bm25": bm,
+                },
+            )
         )
 
     base_scored.sort(key=lambda t: t[0], reverse=True)
@@ -287,11 +332,15 @@ async def hybrid_search(
                 row,
                 score=round(max(0.0, min(1.0, score)), 4),
                 components={
-                    "vector": round(info["vsim"], 4) if info["vsim"] is not None else None,
+                    "vector": round(info["vsim"], 4)
+                    if info["vsim"] is not None
+                    else None,
                     "bm25": round(info["bm25"], 4),
                     "lexical": round(info["lexical"], 4),
                     "rrf": round(info["rrf"], 6),
-                    "rerank": round(info["rerank"], 4) if info.get("rerank") is not None else None,
+                    "rerank": round(info["rerank"], 4)
+                    if info.get("rerank") is not None
+                    else None,
                 },
             )
         )
@@ -364,11 +413,17 @@ async def _keyword_search(session, base, query, top_k) -> list[RetrievedChunk]:
     if not rows:
         return []
     kset = set(kw)
-    ranked = sorted(rows, key=lambda r: _lexical_overlap(r.content, kset), reverse=True)[:top_k]
-    return [_row_to_chunk(r, score=round(_lexical_overlap(r.content, kset), 4)) for r in ranked]
+    ranked = sorted(
+        rows, key=lambda r: _lexical_overlap(r.content, kset), reverse=True
+    )[:top_k]
+    return [
+        _row_to_chunk(r, score=round(_lexical_overlap(r.content, kset), 4))
+        for r in ranked
+    ]
 
 
 # ────────────────────────── public API ──────────────────────────
+
 
 async def search_chunks(
     session: AsyncSession,

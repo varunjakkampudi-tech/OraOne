@@ -8,6 +8,7 @@ notifications, an org-wide activity feed, task assignment, and resource follows.
 Every table is strictly org-scoped; repositories MUST filter by
 ``organization_id``.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -122,9 +123,7 @@ class Team(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     """A department / squad inside an organization."""
 
     __tablename__ = "teams"
-    __table_args__ = (
-        Index("ix_teams_organization_id", "organization_id"),
-    )
+    __table_args__ = (Index("ix_teams_organization_id", "organization_id"),)
 
     organization_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -136,7 +135,9 @@ class Team(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     color: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     icon: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
     created_by_user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
     )
 
     members: Mapped[list["TeamMember"]] = relationship(
@@ -153,13 +154,20 @@ class TeamMember(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     team_id: Mapped[uuid.UUID] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("teams.id", ondelete="CASCADE"), nullable=False
+        PG_UUID(as_uuid=True),
+        ForeignKey("teams.id", ondelete="CASCADE"),
+        nullable=False,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
     )
     role: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=TeamRole.CONTRIBUTOR, server_default=TeamRole.CONTRIBUTOR
+        String(20),
+        nullable=False,
+        default=TeamRole.CONTRIBUTOR,
+        server_default=TeamRole.CONTRIBUTOR,
     )
     joined_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
@@ -195,10 +203,15 @@ class ResourcePermission(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     # NULL principal_id == the whole organization (PrincipalType.ORGANIZATION)
     principal_id: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
     permission: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=PermissionLevel.VIEWER, server_default=PermissionLevel.VIEWER
+        String(20),
+        nullable=False,
+        default=PermissionLevel.VIEWER,
+        server_default=PermissionLevel.VIEWER,
     )
     granted_by_user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
     )
 
 
@@ -219,15 +232,23 @@ class Comment(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     resource_type: Mapped[str] = mapped_column(String(40), nullable=False)
     resource_id: Mapped[str] = mapped_column(String(80), nullable=False)
     parent_comment_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("comments.id", ondelete="CASCADE"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("comments.id", ondelete="CASCADE"),
+        nullable=True,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
     )
     body: Mapped[str] = mapped_column(Text, nullable=False)
-    resolved: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
+    resolved: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
     # Denormalised list of mentioned user-ids (also expanded into mentions table).
-    mentions: Mapped[list[Any]] = mapped_column(JSONB, nullable=False, default=list, server_default="[]")
+    mentions: Mapped[list[Any]] = mapped_column(
+        JSONB, nullable=False, default=list, server_default="[]"
+    )
 
 
 class Mention(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -238,13 +259,19 @@ class Mention(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     comment_id: Mapped[uuid.UUID] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("comments.id", ondelete="CASCADE"), nullable=False
+        PG_UUID(as_uuid=True),
+        ForeignKey("comments.id", ondelete="CASCADE"),
+        nullable=False,
     )
     organization_id: Mapped[uuid.UUID] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False
+        PG_UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
     )
     mentioned_user_id: Mapped[uuid.UUID] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
     )
 
 
@@ -254,7 +281,10 @@ class Reaction(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "reactions"
     __table_args__ = (
         UniqueConstraint(
-            "resource_type", "resource_id", "user_id", "emoji",
+            "resource_type",
+            "resource_id",
+            "user_id",
+            "emoji",
             name="uq_reactions_unique",
         ),
         Index("ix_reactions_org", "organization_id"),
@@ -269,7 +299,9 @@ class Reaction(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     resource_type: Mapped[str] = mapped_column(String(40), nullable=False)
     resource_id: Mapped[str] = mapped_column(String(80), nullable=False)
     user_id: Mapped[uuid.UUID] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
     )
     emoji: Mapped[str] = mapped_column(String(16), nullable=False)
 
@@ -289,14 +321,18 @@ class Notification(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
     )
     type: Mapped[str] = mapped_column(String(40), nullable=False)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     body: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     link: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     actor_user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
     )
     resource_type: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
     resource_id: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
@@ -318,13 +354,17 @@ class ActivityEvent(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
     )
     action: Mapped[str] = mapped_column(String(60), nullable=False)
     resource_type: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
     resource_id: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
     summary: Mapped[str] = mapped_column(String(500), nullable=False)
-    meta: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict, server_default="{}")
+    meta: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default="{}"
+    )
 
 
 # ─────────────────────────── tasks ───────────────────────────
@@ -344,16 +384,25 @@ class Task(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=TaskStatus.OPEN, server_default=TaskStatus.OPEN
+        String(20),
+        nullable=False,
+        default=TaskStatus.OPEN,
+        server_default=TaskStatus.OPEN,
     )
     assignee_user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
     )
     created_by_user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
     )
     comment_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("comments.id", ondelete="SET NULL"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("comments.id", ondelete="SET NULL"),
+        nullable=True,
     )
     resource_type: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
     resource_id: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
@@ -368,7 +417,9 @@ class ResourceFollow(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "resource_follows"
     __table_args__ = (
         UniqueConstraint(
-            "user_id", "resource_type", "resource_id",
+            "user_id",
+            "resource_type",
+            "resource_id",
             name="uq_resource_follows_unique",
         ),
         Index("ix_resource_follows_org", "organization_id"),
@@ -381,7 +432,9 @@ class ResourceFollow(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
     )
     resource_type: Mapped[str] = mapped_column(String(40), nullable=False)
     resource_id: Mapped[str] = mapped_column(String(80), nullable=False)

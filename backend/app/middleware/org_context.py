@@ -16,6 +16,7 @@ Phase 6: the `apply_rls_on_session()` helper sets `app.org_id` /
 `app.user_id` as session variables so RLS policies can read them. It is
 called automatically by `get_current_organization()` for every request.
 """
+
 from __future__ import annotations
 
 import logging
@@ -60,9 +61,7 @@ class OrgContext:
     platform_role: str = "user"
 
 
-async def apply_rls_on_session(
-    session: AsyncSession, ctx: OrgContext
-) -> None:
+async def apply_rls_on_session(session: AsyncSession, ctx: OrgContext) -> None:
     """Stamp the SQL session with the active tenant.
 
     Sets two ``SET LOCAL`` variables that future Row-Level Security
@@ -86,7 +85,10 @@ async def apply_rls_on_session(
     except Exception as e:  # pragma: no cover — non-fatal in Phase 5
         log.warning(
             "rls_session_stamp_failed org=%s user=%s err=%s: %s",
-            ctx.organization_id, ctx.user_id, type(e).__name__, e,
+            ctx.organization_id,
+            ctx.user_id,
+            type(e).__name__,
+            e,
         )
 
 
@@ -99,9 +101,7 @@ async def _resolve_org_from_db(
     Returns ``None`` if the user has no Postgres row yet, or no active
     membership.
     """
-    user = await session.scalar(
-        select(User).where(User.cognito_sub == cognito_sub)
-    )
+    user = await session.scalar(select(User).where(User.cognito_sub == cognito_sub))
     if user is None:
         return None
 
@@ -178,7 +178,9 @@ async def get_current_organization(
 
     log.info(
         "org_context user=%s org=%s role=%s path=%s",
-        ctx.user_id, ctx.organization_id, ctx.membership_role,
+        ctx.user_id,
+        ctx.organization_id,
+        ctx.membership_role,
         request.url.path,
     )
     return ctx
@@ -214,6 +216,8 @@ def require_role(*allowed: str):
         return ctx
 
     return _checker
+
+
 def require_permission(*needed: str):
     """Dependency factory: 403 unless the caller's role grants every
     permission in ``needed`` (Phase 12 RBAC).
@@ -246,4 +250,3 @@ def require_permission(*needed: str):
         return ctx
 
     return _checker
-

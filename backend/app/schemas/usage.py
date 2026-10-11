@@ -1,4 +1,5 @@
 """Pydantic schemas for the usage metering API (Phase 12, Module 2)."""
+
 from __future__ import annotations
 
 from datetime import datetime

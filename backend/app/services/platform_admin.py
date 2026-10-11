@@ -9,6 +9,7 @@ Where a metric can be derived from real data (counts, recent-window rates) it
 is. Host-level metrics (CPU/RAM/disk) use ``psutil`` when installed and are
 otherwise reported as ``None`` so the UI can show "—" instead of a fake value.
 """
+
 from __future__ import annotations
 
 import logging
@@ -17,7 +18,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
-from sqlalchemy import String, and_, cast, func, or_, select
+from sqlalchemy import String, cast, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.agent import Agent
@@ -84,12 +85,14 @@ async def overview(session: AsyncSession) -> dict[str, Any]:
     h24 = now - timedelta(hours=24)
 
     total_customers = await _count(
-        session, select(func.count(Organization.id)).where(Organization.deleted_at.is_(None))
+        session,
+        select(func.count(Organization.id)).where(Organization.deleted_at.is_(None)),
     )
     enterprise = await _count(
         session,
         select(func.count(Organization.id)).where(
-            Organization.deleted_at.is_(None), cast(Organization.plan, String) == "enterprise"
+            Organization.deleted_at.is_(None),
+            cast(Organization.plan, String) == "enterprise",
         ),
     )
     new_signups = await _count(
@@ -119,16 +122,20 @@ async def overview(session: AsyncSession) -> dict[str, Any]:
         session,
         select(func.count(Conversation.id)).where(
             cast(Conversation.status, String) == "active",
-            cast(Conversation.channel, String).in_(["chat", "whatsapp", "sms", "messenger", "instagram", "telegram"]),
+            cast(Conversation.channel, String).in_(
+                ["chat", "whatsapp", "sms", "messenger", "instagram", "telegram"]
+            ),
         ),
     )
 
     # Real recent-window rates.
     api_last_min = await _count(
-        session, select(func.count(ApiRequestLog.id)).where(ApiRequestLog.created_at >= s60)
+        session,
+        select(func.count(ApiRequestLog.id)).where(ApiRequestLog.created_at >= s60),
     )
     api_24h = await _count(
-        session, select(func.count(ApiRequestLog.id)).where(ApiRequestLog.created_at >= h24)
+        session,
+        select(func.count(ApiRequestLog.id)).where(ApiRequestLog.created_at >= h24),
     )
     api_errors_24h = await _count(
         session,
@@ -138,7 +145,9 @@ async def overview(session: AsyncSession) -> dict[str, Any]:
     )
     llm_tokens_24h = await _count(
         session,
-        select(func.coalesce(func.sum(Message.token_count), 0)).where(Message.created_at >= h24),
+        select(func.coalesce(func.sum(Message.token_count), 0)).where(
+            Message.created_at >= h24
+        ),
     )
 
     error_rate = round((api_errors_24h / api_24h) * 100, 2) if api_24h else 0.0
@@ -150,20 +159,42 @@ async def overview(session: AsyncSession) -> dict[str, Any]:
     arr = round(mrr * 12, 2)
 
     counts = {
-        "agents": await _count(session, select(func.count(Agent.id)).where(Agent.deleted_at.is_(None))),
+        "agents": await _count(
+            session, select(func.count(Agent.id)).where(Agent.deleted_at.is_(None))
+        ),
         "conversations": await _count(session, select(func.count(Conversation.id))),
-        "leads": await _count(session, select(func.count(Lead.id)).where(Lead.deleted_at.is_(None))),
-        "knowledge_bases": await _count(session, select(func.count(KnowledgeBase.id)).where(KnowledgeBase.deleted_at.is_(None))),
-        "documents": await _count(session, select(func.count(Document.id)).where(Document.deleted_at.is_(None))),
-        "workflows": await _count(session, select(func.count(Workflow.id)).where(Workflow.deleted_at.is_(None))),
-        "widgets": await _count(session, select(func.count(Widget.id)).where(Widget.deleted_at.is_(None))),
+        "leads": await _count(
+            session, select(func.count(Lead.id)).where(Lead.deleted_at.is_(None))
+        ),
+        "knowledge_bases": await _count(
+            session,
+            select(func.count(KnowledgeBase.id)).where(
+                KnowledgeBase.deleted_at.is_(None)
+            ),
+        ),
+        "documents": await _count(
+            session,
+            select(func.count(Document.id)).where(Document.deleted_at.is_(None)),
+        ),
+        "workflows": await _count(
+            session,
+            select(func.count(Workflow.id)).where(Workflow.deleted_at.is_(None)),
+        ),
+        "widgets": await _count(
+            session, select(func.count(Widget.id)).where(Widget.deleted_at.is_(None))
+        ),
         "integrations": await _count(session, select(func.count(Integration.id))),
         "users": await _count(session, select(func.count(User.id))),
-        "projects": await _count(session, select(func.count(Project.id)).where(Project.deleted_at.is_(None))),
+        "projects": await _count(
+            session, select(func.count(Project.id)).where(Project.deleted_at.is_(None))
+        ),
     }
 
     storage_bytes = await _count(
-        session, select(func.coalesce(func.sum(Document.file_size), 0)).where(Document.deleted_at.is_(None))
+        session,
+        select(func.coalesce(func.sum(Document.file_size), 0)).where(
+            Document.deleted_at.is_(None)
+        ),
     )
 
     health = _platform_health(error_rate)
@@ -190,7 +221,10 @@ async def overview(session: AsyncSession) -> dict[str, Any]:
             "api_requests_24h": api_24h,
         },
         "counts": counts,
-        "storage": {"bytes": int(storage_bytes), "gb": round(int(storage_bytes) / 1_073_741_824, 3)},
+        "storage": {
+            "bytes": int(storage_bytes),
+            "gb": round(int(storage_bytes) / 1_073_741_824, 3),
+        },
         "system": _host_metrics(),
         "health": health,
         "generated_at": now.isoformat(),
@@ -202,7 +236,11 @@ async def _mrr_cents(session: AsyncSession) -> int:
     try:
         rows = (
             await session.execute(
-                select(Plan.price_cents, Plan.price_cents_yearly, Subscription.billing_cycle)
+                select(
+                    Plan.price_cents,
+                    Plan.price_cents_yearly,
+                    Subscription.billing_cycle,
+                )
                 .join(Plan, Plan.id == Subscription.plan_id)
                 .where(cast(Subscription.status, String).in_(["active", "past_due"]))
             )
@@ -266,7 +304,10 @@ _ACTIVITY_LABELS = {
 
 
 def _label_for(action: str, resource: str) -> str:
-    return _ACTIVITY_LABELS.get((action, resource)) or f"{action.title()} {resource.replace('_', ' ')}"
+    return (
+        _ACTIVITY_LABELS.get((action, resource))
+        or f"{action.title()} {resource.replace('_', ' ')}"
+    )
 
 
 async def activity(session: AsyncSession, limit: int = 40) -> list[dict[str, Any]]:
@@ -274,9 +315,14 @@ async def activity(session: AsyncSession, limit: int = 40) -> list[dict[str, Any
         rows = (
             await session.execute(
                 select(
-                    AuditLog.id, AuditLog.action, AuditLog.resource, AuditLog.resource_id,
-                    AuditLog.created_at, AuditLog.organization_id,
-                    Organization.name, User.email,
+                    AuditLog.id,
+                    AuditLog.action,
+                    AuditLog.resource,
+                    AuditLog.resource_id,
+                    AuditLog.created_at,
+                    AuditLog.organization_id,
+                    Organization.name,
+                    User.email,
                 )
                 .outerjoin(Organization, Organization.id == AuditLog.organization_id)
                 .outerjoin(User, User.id == AuditLog.user_id)
@@ -289,17 +335,19 @@ async def activity(session: AsyncSession, limit: int = 40) -> list[dict[str, Any
         return []
     out = []
     for r in rows:
-        out.append({
-            "id": str(r[0]),
-            "action": r[1],
-            "resource": r[2],
-            "resource_id": r[3],
-            "label": _label_for(r[1] or "", r[2] or ""),
-            "created_at": r[4].isoformat() if r[4] else None,
-            "organization_id": str(r[5]) if r[5] else None,
-            "organization_name": r[6],
-            "actor_email": r[7],
-        })
+        out.append(
+            {
+                "id": str(r[0]),
+                "action": r[1],
+                "resource": r[2],
+                "resource_id": r[3],
+                "label": _label_for(r[1] or "", r[2] or ""),
+                "created_at": r[4].isoformat() if r[4] else None,
+                "organization_id": str(r[5]) if r[5] else None,
+                "organization_name": r[6],
+                "actor_email": r[7],
+            }
+        )
     return out
 
 
@@ -312,11 +360,15 @@ async def customers(
     base = select(Organization).where(Organization.deleted_at.is_(None))
     if q:
         like = f"%{q.strip()}%"
-        base = base.where(or_(Organization.name.ilike(like), Organization.slug.ilike(like)))
+        base = base.where(
+            or_(Organization.name.ilike(like), Organization.slug.ilike(like))
+        )
     total = await _count(session, select(func.count()).select_from(base.subquery()))
     orgs = (
         await session.scalars(
-            base.order_by(Organization.created_at.desc()).limit(min(limit, 200)).offset(offset)
+            base.order_by(Organization.created_at.desc())
+            .limit(min(limit, 200))
+            .offset(offset)
         )
     ).all()
 
@@ -326,34 +378,49 @@ async def customers(
             select(User.email).where(User.id == org.owner_user_id)
         )
         members = await _count(
-            session, select(func.count(OrganizationMember.id)).where(OrganizationMember.organization_id == org.id)
+            session,
+            select(func.count(OrganizationMember.id)).where(
+                OrganizationMember.organization_id == org.id
+            ),
         )
         agents = await _count(
-            session, select(func.count(Agent.id)).where(Agent.organization_id == org.id, Agent.deleted_at.is_(None))
+            session,
+            select(func.count(Agent.id)).where(
+                Agent.organization_id == org.id, Agent.deleted_at.is_(None)
+            ),
         )
         convos = await _count(
-            session, select(func.count(Conversation.id)).where(Conversation.organization_id == org.id)
+            session,
+            select(func.count(Conversation.id)).where(
+                Conversation.organization_id == org.id
+            ),
         )
         sub_status = await session.scalar(
-            select(cast(Subscription.status, String)).where(Subscription.organization_id == org.id)
+            select(cast(Subscription.status, String)).where(
+                Subscription.organization_id == org.id
+            )
         )
-        items.append({
-            "id": str(org.id),
-            "name": org.name,
-            "slug": org.slug,
-            "plan": _enum_val(org.plan),
-            "owner_email": owner_email,
-            "members": members,
-            "agents": agents,
-            "conversations": convos,
-            "subscription_status": sub_status,
-            "logo_url": org.logo_url,
-            "created_at": org.created_at.isoformat() if org.created_at else None,
-        })
+        items.append(
+            {
+                "id": str(org.id),
+                "name": org.name,
+                "slug": org.slug,
+                "plan": _enum_val(org.plan),
+                "owner_email": owner_email,
+                "members": members,
+                "agents": agents,
+                "conversations": convos,
+                "subscription_status": sub_status,
+                "logo_url": org.logo_url,
+                "created_at": org.created_at.isoformat() if org.created_at else None,
+            }
+        )
     return {"items": items, "total": total, "limit": limit, "offset": offset}
 
 
-async def customer_detail(session: AsyncSession, org_id: str) -> Optional[dict[str, Any]]:
+async def customer_detail(
+    session: AsyncSession, org_id: str
+) -> Optional[dict[str, Any]]:
     try:
         oid = uuid.UUID(str(org_id))
     except Exception:
@@ -365,7 +432,12 @@ async def customer_detail(session: AsyncSession, org_id: str) -> Optional[dict[s
     owner = await session.scalar(select(User).where(User.id == org.owner_user_id))
     members_rows = (
         await session.execute(
-            select(User.email, User.full_name, cast(OrganizationMember.role, String), cast(OrganizationMember.status, String))
+            select(
+                User.email,
+                User.full_name,
+                cast(OrganizationMember.role, String),
+                cast(OrganizationMember.status, String),
+            )
             .join(OrganizationMember, OrganizationMember.user_id == User.id)
             .where(OrganizationMember.organization_id == oid)
             .limit(100)
@@ -375,8 +447,11 @@ async def customer_detail(session: AsyncSession, org_id: str) -> Optional[dict[s
     recent_convos = (
         await session.execute(
             select(
-                Conversation.id, cast(Conversation.channel, String), cast(Conversation.status, String),
-                Conversation.customer_name, Conversation.started_at,
+                Conversation.id,
+                cast(Conversation.channel, String),
+                cast(Conversation.status, String),
+                Conversation.customer_name,
+                Conversation.started_at,
             )
             .where(Conversation.organization_id == oid)
             .order_by(Conversation.started_at.desc())
@@ -393,12 +468,42 @@ async def customer_detail(session: AsyncSession, org_id: str) -> Optional[dict[s
     ).all()
 
     counts = {
-        "agents": await _count(session, select(func.count(Agent.id)).where(Agent.organization_id == oid, Agent.deleted_at.is_(None))),
-        "conversations": await _count(session, select(func.count(Conversation.id)).where(Conversation.organization_id == oid)),
-        "leads": await _count(session, select(func.count(Lead.id)).where(Lead.organization_id == oid, Lead.deleted_at.is_(None))),
-        "documents": await _count(session, select(func.count(Document.id)).where(Document.organization_id == oid, Document.deleted_at.is_(None))),
-        "api_keys": await _count(session, select(func.count(ApiKey.id)).where(ApiKey.organization_id == oid, ApiKey.deleted_at.is_(None))),
-        "integrations": await _count(session, select(func.count(Integration.id)).where(Integration.organization_id == oid)),
+        "agents": await _count(
+            session,
+            select(func.count(Agent.id)).where(
+                Agent.organization_id == oid, Agent.deleted_at.is_(None)
+            ),
+        ),
+        "conversations": await _count(
+            session,
+            select(func.count(Conversation.id)).where(
+                Conversation.organization_id == oid
+            ),
+        ),
+        "leads": await _count(
+            session,
+            select(func.count(Lead.id)).where(
+                Lead.organization_id == oid, Lead.deleted_at.is_(None)
+            ),
+        ),
+        "documents": await _count(
+            session,
+            select(func.count(Document.id)).where(
+                Document.organization_id == oid, Document.deleted_at.is_(None)
+            ),
+        ),
+        "api_keys": await _count(
+            session,
+            select(func.count(ApiKey.id)).where(
+                ApiKey.organization_id == oid, ApiKey.deleted_at.is_(None)
+            ),
+        ),
+        "integrations": await _count(
+            session,
+            select(func.count(Integration.id)).where(
+                Integration.organization_id == oid
+            ),
+        ),
     }
 
     return {
@@ -407,13 +512,28 @@ async def customer_detail(session: AsyncSession, org_id: str) -> Optional[dict[s
         "slug": org.slug,
         "plan": _enum_val(org.plan),
         "created_at": org.created_at.isoformat() if org.created_at else None,
-        "owner": {"email": owner.email, "full_name": owner.full_name, "last_login_at": owner.last_login_at.isoformat() if owner and owner.last_login_at else None} if owner else None,
+        "owner": {
+            "email": owner.email,
+            "full_name": owner.full_name,
+            "last_login_at": owner.last_login_at.isoformat()
+            if owner and owner.last_login_at
+            else None,
+        }
+        if owner
+        else None,
         "counts": counts,
         "members": [
-            {"email": m[0], "full_name": m[1], "role": m[2], "status": m[3]} for m in members_rows
+            {"email": m[0], "full_name": m[1], "role": m[2], "status": m[3]}
+            for m in members_rows
         ],
         "recent_conversations": [
-            {"id": str(c[0]), "channel": c[1], "status": c[2], "customer_name": c[3], "started_at": c[4].isoformat() if c[4] else None}
+            {
+                "id": str(c[0]),
+                "channel": c[1],
+                "status": c[2],
+                "customer_name": c[3],
+                "started_at": c[4].isoformat() if c[4] else None,
+            }
             for c in recent_convos
         ],
         "usage": [{"metric": u[0], "value": int(u[1] or 0)} for u in usage_rows],
@@ -424,14 +544,23 @@ async def customer_detail(session: AsyncSession, org_id: str) -> Optional[dict[s
 # Conversations (cross-tenant)                                                 #
 # --------------------------------------------------------------------------- #
 async def conversations(
-    session: AsyncSession, q: Optional[str] = None, channel: Optional[str] = None, limit: int = 50
+    session: AsyncSession,
+    q: Optional[str] = None,
+    channel: Optional[str] = None,
+    limit: int = 50,
 ) -> list[dict[str, Any]]:
     stmt = (
         select(
-            Conversation.id, cast(Conversation.channel, String), cast(Conversation.status, String),
-            Conversation.customer_name, Conversation.customer_email, Conversation.customer_phone,
-            Conversation.started_at, Conversation.duration_seconds,
-            Organization.name, Agent.name,
+            Conversation.id,
+            cast(Conversation.channel, String),
+            cast(Conversation.status, String),
+            Conversation.customer_name,
+            Conversation.customer_email,
+            Conversation.customer_phone,
+            Conversation.started_at,
+            Conversation.duration_seconds,
+            Organization.name,
+            Agent.name,
         )
         .outerjoin(Organization, Organization.id == Conversation.organization_id)
         .outerjoin(Agent, Agent.id == Conversation.agent_id)
@@ -442,11 +571,13 @@ async def conversations(
         stmt = stmt.where(cast(Conversation.channel, String) == channel)
     if q:
         like = f"%{q.strip()}%"
-        stmt = stmt.where(or_(
-            Conversation.customer_name.ilike(like),
-            Conversation.customer_email.ilike(like),
-            Conversation.customer_phone.ilike(like),
-        ))
+        stmt = stmt.where(
+            or_(
+                Conversation.customer_name.ilike(like),
+                Conversation.customer_email.ilike(like),
+                Conversation.customer_phone.ilike(like),
+            )
+        )
     try:
         rows = (await session.execute(stmt)).all()
     except Exception as e:
@@ -454,10 +585,16 @@ async def conversations(
         return []
     return [
         {
-            "id": str(r[0]), "channel": r[1], "status": r[2],
-            "customer_name": r[3], "customer_email": r[4], "customer_phone": r[5],
+            "id": str(r[0]),
+            "channel": r[1],
+            "status": r[2],
+            "customer_name": r[3],
+            "customer_email": r[4],
+            "customer_phone": r[5],
             "started_at": r[6].isoformat() if r[6] else None,
-            "duration_seconds": r[7], "organization_name": r[8], "agent_name": r[9],
+            "duration_seconds": r[7],
+            "organization_name": r[8],
+            "agent_name": r[9],
         }
         for r in rows
     ]
@@ -467,13 +604,21 @@ async def conversations(
 # Audit logs (cross-tenant)                                                    #
 # --------------------------------------------------------------------------- #
 async def audit_logs(
-    session: AsyncSession, q: Optional[str] = None, action: Optional[str] = None,
-    resource: Optional[str] = None, limit: int = 100
+    session: AsyncSession,
+    q: Optional[str] = None,
+    action: Optional[str] = None,
+    resource: Optional[str] = None,
+    limit: int = 100,
 ) -> list[dict[str, Any]]:
     stmt = (
         select(
-            AuditLog.id, AuditLog.action, AuditLog.resource, AuditLog.resource_id,
-            AuditLog.created_at, Organization.name, User.email,
+            AuditLog.id,
+            AuditLog.action,
+            AuditLog.resource,
+            AuditLog.resource_id,
+            AuditLog.created_at,
+            Organization.name,
+            User.email,
         )
         .outerjoin(Organization, Organization.id == AuditLog.organization_id)
         .outerjoin(User, User.id == AuditLog.user_id)
@@ -486,7 +631,9 @@ async def audit_logs(
         stmt = stmt.where(AuditLog.resource == resource)
     if q:
         like = f"%{q.strip()}%"
-        stmt = stmt.where(or_(AuditLog.resource.ilike(like), AuditLog.action.ilike(like)))
+        stmt = stmt.where(
+            or_(AuditLog.resource.ilike(like), AuditLog.action.ilike(like))
+        )
     try:
         rows = (await session.execute(stmt)).all()
     except Exception as e:
@@ -494,9 +641,13 @@ async def audit_logs(
         return []
     return [
         {
-            "id": str(r[0]), "action": r[1], "resource": r[2], "resource_id": r[3],
+            "id": str(r[0]),
+            "action": r[1],
+            "resource": r[2],
+            "resource_id": r[3],
             "created_at": r[4].isoformat() if r[4] else None,
-            "organization_name": r[5], "actor_email": r[6],
+            "organization_name": r[5],
+            "actor_email": r[6],
         }
         for r in rows
     ]
@@ -509,8 +660,9 @@ async def billing(session: AsyncSession) -> dict[str, Any]:
     mrr = round(await _mrr_cents(session) / 100, 2)
     statuses = (
         await session.execute(
-            select(cast(Subscription.status, String), func.count(Subscription.id))
-            .group_by(cast(Subscription.status, String))
+            select(
+                cast(Subscription.status, String), func.count(Subscription.id)
+            ).group_by(cast(Subscription.status, String))
         )
     ).all()
     plan_dist = (
@@ -520,8 +672,18 @@ async def billing(session: AsyncSession) -> dict[str, Any]:
             .group_by(Plan.name)
         )
     ).all()
-    active = await _count(session, select(func.count(Subscription.id)).where(cast(Subscription.status, String) == "active"))
-    canceled = await _count(session, select(func.count(Subscription.id)).where(cast(Subscription.status, String) == "canceled"))
+    active = await _count(
+        session,
+        select(func.count(Subscription.id)).where(
+            cast(Subscription.status, String) == "active"
+        ),
+    )
+    canceled = await _count(
+        session,
+        select(func.count(Subscription.id)).where(
+            cast(Subscription.status, String) == "canceled"
+        ),
+    )
     total_subs = await _count(session, select(func.count(Subscription.id)))
     churn = round((canceled / total_subs) * 100, 2) if total_subs else 0.0
     return {
@@ -557,7 +719,9 @@ async def usage(session: AsyncSession, limit: int = 50) -> dict[str, Any]:
     ).all()
     return {
         "totals": [{"metric": t[0], "value": int(t[1] or 0)} for t in totals],
-        "top_organizations": [{"name": o[0], "value": int(o[1] or 0)} for o in top_orgs],
+        "top_organizations": [
+            {"name": o[0], "value": int(o[1] or 0)} for o in top_orgs
+        ],
     }
 
 
@@ -567,7 +731,9 @@ async def usage(session: AsyncSession, limit: int = 50) -> dict[str, Any]:
 async def security(session: AsyncSession, limit: int = 50) -> dict[str, Any]:
     by_sev = (
         await session.execute(
-            select(SecurityEvent.severity, func.count(SecurityEvent.id)).group_by(SecurityEvent.severity)
+            select(SecurityEvent.severity, func.count(SecurityEvent.id)).group_by(
+                SecurityEvent.severity
+            )
         )
     ).all()
     by_type = (
@@ -581,8 +747,12 @@ async def security(session: AsyncSession, limit: int = 50) -> dict[str, Any]:
     recent = (
         await session.execute(
             select(
-                SecurityEvent.id, SecurityEvent.severity, SecurityEvent.event_type,
-                SecurityEvent.title, SecurityEvent.ip_address, SecurityEvent.created_at,
+                SecurityEvent.id,
+                SecurityEvent.severity,
+                SecurityEvent.event_type,
+                SecurityEvent.title,
+                SecurityEvent.ip_address,
+                SecurityEvent.created_at,
                 Organization.name,
             )
             .outerjoin(Organization, Organization.id == SecurityEvent.organization_id)
@@ -591,17 +761,25 @@ async def security(session: AsyncSession, limit: int = 50) -> dict[str, Any]:
         )
     ).all()
     sev_counts = {s[0]: int(s[1]) for s in by_sev}
-    critical = sev_counts.get(SecuritySeverity.CRITICAL, 0) + sev_counts.get(SecuritySeverity.HIGH, 0)
+    critical = sev_counts.get(SecuritySeverity.CRITICAL, 0) + sev_counts.get(
+        SecuritySeverity.HIGH, 0
+    )
     total = sum(sev_counts.values())
-    score = 100 if total == 0 else max(0, 100 - min(100, critical * 8 + (total - critical)))
+    score = (
+        100 if total == 0 else max(0, 100 - min(100, critical * 8 + (total - critical)))
+    )
     return {
         "security_score": score,
         "by_severity": [{"severity": s[0], "count": int(s[1])} for s in by_sev],
         "by_type": [{"type": t[0], "count": int(t[1])} for t in by_type],
         "recent": [
             {
-                "id": str(r[0]), "severity": r[1], "event_type": r[2], "title": r[3],
-                "ip_address": r[4], "created_at": r[5].isoformat() if r[5] else None,
+                "id": str(r[0]),
+                "severity": r[1],
+                "event_type": r[2],
+                "title": r[3],
+                "ip_address": r[4],
+                "created_at": r[5].isoformat() if r[5] else None,
                 "organization_name": r[6],
             }
             for r in recent
@@ -620,8 +798,18 @@ async def infrastructure(session: AsyncSession) -> dict[str, Any]:
     except Exception:
         db_ok = False
 
-    def svc(name: str, category: str, status_: str = "operational", latency: Optional[int] = None) -> dict[str, Any]:
-        return {"name": name, "category": category, "status": status_, "latency_ms": latency}
+    def svc(
+        name: str,
+        category: str,
+        status_: str = "operational",
+        latency: Optional[int] = None,
+    ) -> dict[str, Any]:
+        return {
+            "name": name,
+            "category": category,
+            "status": status_,
+            "latency_ms": latency,
+        }
 
     services = [
         svc("Frontend (CDN)", "edge"),
@@ -642,7 +830,11 @@ async def infrastructure(session: AsyncSession) -> dict[str, Any]:
     healthy = sum(1 for s in services if s["status"] == "operational")
     return {
         "services": services,
-        "summary": {"total": len(services), "operational": healthy, "down": len(services) - healthy},
+        "summary": {
+            "total": len(services),
+            "operational": healthy,
+            "down": len(services) - healthy,
+        },
         "host": _host_metrics(),
         "note": "Service states are representative; wire live probes per provider for production telemetry.",
     }
@@ -683,8 +875,12 @@ async def list_feature_flags(session: AsyncSession) -> list[dict[str, Any]]:
     for name, label, desc in _DEFAULT_FLAGS:
         if name not in by_name:
             flag = FeatureFlag(
-                organization_id=None, name=name, description=f"{label} — {desc}",
-                enabled=True, environment="production", rollout_percentage=100,
+                organization_id=None,
+                name=name,
+                description=f"{label} — {desc}",
+                enabled=True,
+                environment="production",
+                rollout_percentage=100,
             )
             session.add(flag)
             by_name[name] = flag
@@ -698,38 +894,60 @@ async def list_feature_flags(session: AsyncSession) -> list[dict[str, Any]]:
     out = []
     for name, label, desc in _DEFAULT_FLAGS:
         f = by_name.get(name)
-        out.append({
-            "id": str(f.id) if f is not None and getattr(f, "id", None) else None,
-            "key": name,
-            "label": label,
-            "description": desc,
-            "enabled": bool(f.enabled) if f is not None else True,
-            "rollout_percentage": int(f.rollout_percentage) if f is not None else 100,
-            "environment": f.environment if f is not None else "production",
-        })
+        out.append(
+            {
+                "id": str(f.id) if f is not None and getattr(f, "id", None) else None,
+                "key": name,
+                "label": label,
+                "description": desc,
+                "enabled": bool(f.enabled) if f is not None else True,
+                "rollout_percentage": int(f.rollout_percentage)
+                if f is not None
+                else 100,
+                "environment": f.environment if f is not None else "production",
+            }
+        )
     # Append any non-default custom global flags too.
     for f in existing:
         if f.name not in {d[0] for d in _DEFAULT_FLAGS}:
-            out.append({
-                "id": str(f.id), "key": f.name, "label": f.name.replace("_", " ").title(),
-                "description": f.description or "", "enabled": bool(f.enabled),
-                "rollout_percentage": int(f.rollout_percentage), "environment": f.environment,
-            })
+            out.append(
+                {
+                    "id": str(f.id),
+                    "key": f.name,
+                    "label": f.name.replace("_", " ").title(),
+                    "description": f.description or "",
+                    "enabled": bool(f.enabled),
+                    "rollout_percentage": int(f.rollout_percentage),
+                    "environment": f.environment,
+                }
+            )
     return out
 
 
 async def set_feature_flag(
-    session: AsyncSession, key: str, *, enabled: Optional[bool] = None,
-    rollout_percentage: Optional[int] = None, admin_user_id: Optional[uuid.UUID] = None,
+    session: AsyncSession,
+    key: str,
+    *,
+    enabled: Optional[bool] = None,
+    rollout_percentage: Optional[int] = None,
+    admin_user_id: Optional[uuid.UUID] = None,
 ) -> Optional[dict[str, Any]]:
     flag = await session.scalar(
-        select(FeatureFlag).where(FeatureFlag.organization_id.is_(None), FeatureFlag.name == key)
+        select(FeatureFlag).where(
+            FeatureFlag.organization_id.is_(None), FeatureFlag.name == key
+        )
     )
     if flag is None:
-        label = next((l for k, l, _ in _DEFAULT_FLAGS if k == key), key.replace("_", " ").title())
+        label = next(
+            (l for k, l, _ in _DEFAULT_FLAGS if k == key), key.replace("_", " ").title()
+        )
         flag = FeatureFlag(
-            organization_id=None, name=key, description=label,
-            enabled=True, environment="production", rollout_percentage=100,
+            organization_id=None,
+            name=key,
+            description=label,
+            enabled=True,
+            environment="production",
+            rollout_percentage=100,
         )
         session.add(flag)
     if enabled is not None:
@@ -742,10 +960,14 @@ async def set_feature_flag(
     await session.refresh(flag)
     # A global feature-flag change alters every org's resolved features.
     from app.services import entitlements as _ent
+
     _ent.invalidate_all()
     return {
-        "id": str(flag.id), "key": flag.name, "enabled": bool(flag.enabled),
-        "rollout_percentage": int(flag.rollout_percentage), "environment": flag.environment,
+        "id": str(flag.id),
+        "key": flag.name,
+        "enabled": bool(flag.enabled),
+        "rollout_percentage": int(flag.rollout_percentage),
+        "environment": flag.environment,
     }
 
 
@@ -756,7 +978,9 @@ async def releases(session: AsyncSession, limit: int = 30) -> list[dict[str, Any
     try:
         rows = (
             await session.scalars(
-                select(DeploymentRecord).order_by(DeploymentRecord.created_at.desc()).limit(min(limit, 100))
+                select(DeploymentRecord)
+                .order_by(DeploymentRecord.created_at.desc())
+                .limit(min(limit, 100))
             )
         ).all()
     except Exception as e:
@@ -764,8 +988,11 @@ async def releases(session: AsyncSession, limit: int = 30) -> list[dict[str, Any
         return []
     return [
         {
-            "id": str(r.id), "version": r.version, "environment": r.environment,
-            "status": r.status, "notes": r.notes,
+            "id": str(r.id),
+            "version": r.version,
+            "environment": r.environment,
+            "status": r.status,
+            "notes": r.notes,
             "created_at": r.created_at.isoformat() if r.created_at else None,
         }
         for r in rows
@@ -813,14 +1040,16 @@ def secrets_inventory() -> dict[str, Any]:
     items = []
     for key, category, label in _SECRET_CATALOG:
         raw = os.environ.get(key, "")
-        items.append({
-            "key": key,
-            "label": label,
-            "category": category,
-            "is_set": bool(raw),
-            "masked": _mask(raw) if raw else None,
-            "length": len(raw) if raw else 0,
-        })
+        items.append(
+            {
+                "key": key,
+                "label": label,
+                "category": category,
+                "is_set": bool(raw),
+                "masked": _mask(raw) if raw else None,
+                "length": len(raw) if raw else 0,
+            }
+        )
     return {
         "items": items,
         "editable": False,
@@ -847,108 +1076,266 @@ async def list_resource(
 
     if kind == "agents":
         stmt = (
-            select(Agent.id, Agent.name, cast(Agent.type, String), cast(Agent.status, String), Agent.created_at, Organization.name)
+            select(
+                Agent.id,
+                Agent.name,
+                cast(Agent.type, String),
+                cast(Agent.status, String),
+                Agent.created_at,
+                Organization.name,
+            )
             .outerjoin(Organization, Organization.id == Agent.organization_id)
             .where(Agent.deleted_at.is_(None))
-            .order_by(Agent.created_at.desc()).limit(limit)
+            .order_by(Agent.created_at.desc())
+            .limit(limit)
         )
         if like:
             stmt = stmt.where(Agent.name.ilike(like))
         rows = await _rows(stmt)
-        items = [{"id": str(r[0]), "name": r[1], "type": r[2], "status": r[3], "created_at": r[4].isoformat() if r[4] else None, "organization_name": r[5]} for r in rows]
+        items = [
+            {
+                "id": str(r[0]),
+                "name": r[1],
+                "type": r[2],
+                "status": r[3],
+                "created_at": r[4].isoformat() if r[4] else None,
+                "organization_name": r[5],
+            }
+            for r in rows
+        ]
 
     elif kind == "workspaces":
         stmt = (
-            select(Project.id, Project.name, cast(Project.status, String), Project.created_at, Organization.name)
+            select(
+                Project.id,
+                Project.name,
+                cast(Project.status, String),
+                Project.created_at,
+                Organization.name,
+            )
             .outerjoin(Organization, Organization.id == Project.organization_id)
             .where(Project.deleted_at.is_(None))
-            .order_by(Project.created_at.desc()).limit(limit)
+            .order_by(Project.created_at.desc())
+            .limit(limit)
         )
         if like:
             stmt = stmt.where(Project.name.ilike(like))
         rows = await _rows(stmt)
-        items = [{"id": str(r[0]), "name": r[1], "status": r[2], "created_at": r[3].isoformat() if r[3] else None, "organization_name": r[4]} for r in rows]
+        items = [
+            {
+                "id": str(r[0]),
+                "name": r[1],
+                "status": r[2],
+                "created_at": r[3].isoformat() if r[3] else None,
+                "organization_name": r[4],
+            }
+            for r in rows
+        ]
 
     elif kind == "leads":
         stmt = (
-            select(Lead.id, Lead.name, Lead.email, cast(Lead.status, String), Lead.score, Lead.created_at, Organization.name)
+            select(
+                Lead.id,
+                Lead.name,
+                Lead.email,
+                cast(Lead.status, String),
+                Lead.score,
+                Lead.created_at,
+                Organization.name,
+            )
             .outerjoin(Organization, Organization.id == Lead.organization_id)
             .where(Lead.deleted_at.is_(None))
-            .order_by(Lead.created_at.desc()).limit(limit)
+            .order_by(Lead.created_at.desc())
+            .limit(limit)
         )
         if like:
             stmt = stmt.where(or_(Lead.name.ilike(like), Lead.email.ilike(like)))
         rows = await _rows(stmt)
-        items = [{"id": str(r[0]), "name": r[1], "email": r[2], "status": r[3], "score": r[4], "created_at": r[5].isoformat() if r[5] else None, "organization_name": r[6]} for r in rows]
+        items = [
+            {
+                "id": str(r[0]),
+                "name": r[1],
+                "email": r[2],
+                "status": r[3],
+                "score": r[4],
+                "created_at": r[5].isoformat() if r[5] else None,
+                "organization_name": r[6],
+            }
+            for r in rows
+        ]
 
     elif kind == "knowledge":
         stmt = (
-            select(KnowledgeBase.id, KnowledgeBase.name, cast(KnowledgeBase.status, String), KnowledgeBase.created_at, Organization.name)
+            select(
+                KnowledgeBase.id,
+                KnowledgeBase.name,
+                cast(KnowledgeBase.status, String),
+                KnowledgeBase.created_at,
+                Organization.name,
+            )
             .outerjoin(Organization, Organization.id == KnowledgeBase.organization_id)
             .where(KnowledgeBase.deleted_at.is_(None))
-            .order_by(KnowledgeBase.created_at.desc()).limit(limit)
+            .order_by(KnowledgeBase.created_at.desc())
+            .limit(limit)
         )
         if like:
             stmt = stmt.where(KnowledgeBase.name.ilike(like))
         rows = await _rows(stmt)
-        items = [{"id": str(r[0]), "name": r[1], "status": r[2], "created_at": r[3].isoformat() if r[3] else None, "organization_name": r[4]} for r in rows]
+        items = [
+            {
+                "id": str(r[0]),
+                "name": r[1],
+                "status": r[2],
+                "created_at": r[3].isoformat() if r[3] else None,
+                "organization_name": r[4],
+            }
+            for r in rows
+        ]
 
     elif kind == "workflows":
         stmt = (
-            select(Workflow.id, Workflow.name, cast(Workflow.status, String), Workflow.created_at, Organization.name)
+            select(
+                Workflow.id,
+                Workflow.name,
+                cast(Workflow.status, String),
+                Workflow.created_at,
+                Organization.name,
+            )
             .outerjoin(Organization, Organization.id == Workflow.organization_id)
             .where(Workflow.deleted_at.is_(None))
-            .order_by(Workflow.created_at.desc()).limit(limit)
+            .order_by(Workflow.created_at.desc())
+            .limit(limit)
         )
         if like:
             stmt = stmt.where(Workflow.name.ilike(like))
         rows = await _rows(stmt)
-        items = [{"id": str(r[0]), "name": r[1], "status": r[2], "created_at": r[3].isoformat() if r[3] else None, "organization_name": r[4]} for r in rows]
+        items = [
+            {
+                "id": str(r[0]),
+                "name": r[1],
+                "status": r[2],
+                "created_at": r[3].isoformat() if r[3] else None,
+                "organization_name": r[4],
+            }
+            for r in rows
+        ]
 
     elif kind == "integrations":
         stmt = (
-            select(Integration.id, Integration.provider, cast(Integration.type, String), cast(Integration.status, String), Integration.created_at, Organization.name)
+            select(
+                Integration.id,
+                Integration.provider,
+                cast(Integration.type, String),
+                cast(Integration.status, String),
+                Integration.created_at,
+                Organization.name,
+            )
             .outerjoin(Organization, Organization.id == Integration.organization_id)
-            .order_by(Integration.created_at.desc()).limit(limit)
+            .order_by(Integration.created_at.desc())
+            .limit(limit)
         )
         if like:
             stmt = stmt.where(Integration.provider.ilike(like))
         rows = await _rows(stmt)
-        items = [{"id": str(r[0]), "name": r[1], "type": r[2], "status": r[3], "created_at": r[4].isoformat() if r[4] else None, "organization_name": r[5]} for r in rows]
+        items = [
+            {
+                "id": str(r[0]),
+                "name": r[1],
+                "type": r[2],
+                "status": r[3],
+                "created_at": r[4].isoformat() if r[4] else None,
+                "organization_name": r[5],
+            }
+            for r in rows
+        ]
 
     elif kind == "api_keys":
         stmt = (
-            select(ApiKey.id, ApiKey.name, ApiKey.prefix, ApiKey.last_used_at, ApiKey.created_at, Organization.name)
+            select(
+                ApiKey.id,
+                ApiKey.name,
+                ApiKey.prefix,
+                ApiKey.last_used_at,
+                ApiKey.created_at,
+                Organization.name,
+            )
             .outerjoin(Organization, Organization.id == ApiKey.organization_id)
             .where(ApiKey.deleted_at.is_(None))
-            .order_by(ApiKey.created_at.desc()).limit(limit)
+            .order_by(ApiKey.created_at.desc())
+            .limit(limit)
         )
         if like:
             stmt = stmt.where(ApiKey.name.ilike(like))
         rows = await _rows(stmt)
-        items = [{"id": str(r[0]), "name": r[1], "prefix": r[2], "last_used_at": r[3].isoformat() if r[3] else None, "created_at": r[4].isoformat() if r[4] else None, "organization_name": r[5]} for r in rows]
+        items = [
+            {
+                "id": str(r[0]),
+                "name": r[1],
+                "prefix": r[2],
+                "last_used_at": r[3].isoformat() if r[3] else None,
+                "created_at": r[4].isoformat() if r[4] else None,
+                "organization_name": r[5],
+            }
+            for r in rows
+        ]
 
     elif kind == "channels":
         stmt = (
-            select(Widget.id, Widget.name, Widget.widget_type, Widget.status, Widget.created_at, Organization.name)
+            select(
+                Widget.id,
+                Widget.name,
+                Widget.widget_type,
+                Widget.status,
+                Widget.created_at,
+                Organization.name,
+            )
             .outerjoin(Organization, Organization.id == Widget.organization_id)
             .where(Widget.deleted_at.is_(None))
-            .order_by(Widget.created_at.desc()).limit(limit)
+            .order_by(Widget.created_at.desc())
+            .limit(limit)
         )
         if like:
             stmt = stmt.where(Widget.name.ilike(like))
         rows = await _rows(stmt)
-        items = [{"id": str(r[0]), "name": r[1], "type": r[2], "status": r[3], "created_at": r[4].isoformat() if r[4] else None, "organization_name": r[5]} for r in rows]
+        items = [
+            {
+                "id": str(r[0]),
+                "name": r[1],
+                "type": r[2],
+                "status": r[3],
+                "created_at": r[4].isoformat() if r[4] else None,
+                "organization_name": r[5],
+            }
+            for r in rows
+        ]
 
     elif kind == "users":
         stmt = (
-            select(User.id, User.email, User.full_name, cast(User.status, String), User.last_login_at, User.created_at)
-            .order_by(User.created_at.desc()).limit(limit)
+            select(
+                User.id,
+                User.email,
+                User.full_name,
+                cast(User.status, String),
+                User.last_login_at,
+                User.created_at,
+            )
+            .order_by(User.created_at.desc())
+            .limit(limit)
         )
         if like:
             stmt = stmt.where(or_(User.email.ilike(like), User.full_name.ilike(like)))
         rows = await _rows(stmt)
-        items = [{"id": str(r[0]), "name": r[2] or r[1], "email": r[1], "status": r[3], "last_login_at": r[4].isoformat() if r[4] else None, "created_at": r[5].isoformat() if r[5] else None} for r in rows]
+        items = [
+            {
+                "id": str(r[0]),
+                "name": r[2] or r[1],
+                "email": r[1],
+                "status": r[3],
+                "last_login_at": r[4].isoformat() if r[4] else None,
+                "created_at": r[5].isoformat() if r[5] else None,
+            }
+            for r in rows
+        ]
 
     else:
         return {"items": [], "kind": kind, "supported": False}

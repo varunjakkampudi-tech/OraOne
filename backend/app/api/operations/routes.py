@@ -6,6 +6,7 @@ flags, and deployment history. Read endpoints require ``settings.read``;
 mutating endpoints require ``settings.manage``. The ``/scan`` helper is open to
 any authenticated member so client-side flows can pre-flight text.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -18,7 +19,11 @@ from app.core.permissions import Permission
 from app.database.models.audit_log import AuditLog
 from app.database.models.operations import SecurityEventType, SecuritySeverity
 from app.database.session import get_db
-from app.middleware.org_context import OrgContext, get_current_organization, require_permission
+from app.middleware.org_context import (
+    OrgContext,
+    get_current_organization,
+    require_permission,
+)
 from app.schemas.operations import (
     DeploymentRecordRequest,
     FeatureFlagToggleRequest,
@@ -41,7 +46,11 @@ async def security_events(
     session: AsyncSession = Depends(get_db),
 ) -> dict:
     return await ops_service.list_security_events(
-        session, ctx.organization_id, severity=severity, event_type=event_type, limit=limit
+        session,
+        ctx.organization_id,
+        severity=severity,
+        event_type=event_type,
+        limit=limit,
     )
 
 
@@ -98,10 +107,18 @@ async def security_scan(
     # persist an event when the scan flags something noteworthy
     if not result["safe"]:
         if result["prompt_injection"]["injection"]:
-            etype, title = SecurityEventType.PROMPT_INJECTION, "Prompt injection attempt detected"
+            etype, title = (
+                SecurityEventType.PROMPT_INJECTION,
+                "Prompt injection attempt detected",
+            )
         elif result["moderation"]["flagged"]:
-            etype, title = SecurityEventType.CONTENT_BLOCKED, "Content moderation flagged text"
-        elif payload.direction == "output" and not result.get("output_validation", {}).get("safe", True):
+            etype, title = (
+                SecurityEventType.CONTENT_BLOCKED,
+                "Content moderation flagged text",
+            )
+        elif payload.direction == "output" and not result.get(
+            "output_validation", {}
+        ).get("safe", True):
             etype, title = SecurityEventType.OUTPUT_REDACTED, "Sensitive data in output"
         else:
             etype, title = SecurityEventType.PII_DETECTED, "PII detected in text"
@@ -157,7 +174,10 @@ async def rotate_keys(
         organization_id=str(ctx.organization_id),
         user_id=str(ctx.user_id),
     )
-    return {"status": "recorded", "message": "Rotation review recorded. Rotate individual keys/webhooks from their screens."}
+    return {
+        "status": "recorded",
+        "message": "Rotation review recorded. Rotate individual keys/webhooks from their screens.",
+    }
 
 
 # ═══════════════════════════ SYSTEM ═══════════════════════════
@@ -199,7 +219,11 @@ async def list_features(
     ctx: OrgContext = Depends(require_permission(Permission.SETTINGS_READ)),
     session: AsyncSession = Depends(get_db),
 ) -> dict:
-    return {"features": await ops_service.list_feature_flags(session, ctx.organization_id, environment)}
+    return {
+        "features": await ops_service.list_feature_flags(
+            session, ctx.organization_id, environment
+        )
+    }
 
 
 @router.post("/api/system/features", status_code=status.HTTP_201_CREATED)
@@ -250,7 +274,11 @@ async def list_deployments(
     ctx: OrgContext = Depends(require_permission(Permission.SETTINGS_READ)),
     session: AsyncSession = Depends(get_db),
 ) -> dict:
-    return {"deployments": await ops_service.list_deployments(session, ctx.organization_id, limit)}
+    return {
+        "deployments": await ops_service.list_deployments(
+            session, ctx.organization_id, limit
+        )
+    }
 
 
 @router.post("/api/system/deployments", status_code=status.HTTP_201_CREATED)

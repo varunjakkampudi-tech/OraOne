@@ -4,6 +4,7 @@ Every website conversation now materialises a lead (deduped on the
 conversation), so lookups by ``conversation_id`` happen on the chat hot path
 and as the ``leads`` table grows. Add the supporting index.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union

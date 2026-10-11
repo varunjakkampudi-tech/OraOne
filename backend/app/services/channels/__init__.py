@@ -1,4 +1,5 @@
 """Channel adapters package — provider glue for the omnichannel pipeline."""
+
 from app.services.channels.adapters import (
     ChannelAdapter,
     ParsedInbound,

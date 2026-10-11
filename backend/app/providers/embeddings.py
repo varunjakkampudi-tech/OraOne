@@ -27,6 +27,7 @@ Selection (``get_embedding_provider``)::
 The result is cached for the process; tests can clear it via
 ``get_embedding_provider.cache_clear()``.
 """
+
 from __future__ import annotations
 
 import abc
@@ -106,6 +107,7 @@ class HashingEmbeddings(EmbeddingProvider):
 
 # ────────────────────────── Bedrock Titan ──────────────────────────
 
+
 class BedrockTitanEmbeddings(EmbeddingProvider):
     """Amazon Titan Text Embeddings v2 via boto3 ``bedrock-runtime``.
 
@@ -116,10 +118,21 @@ class BedrockTitanEmbeddings(EmbeddingProvider):
 
     name = "bedrock-titan"
 
-    def __init__(self, *, model_id: str = TITAN_MODEL, dim: int = EMBED_DIM, region: str | None = None) -> None:
+    def __init__(
+        self,
+        *,
+        model_id: str = TITAN_MODEL,
+        dim: int = EMBED_DIM,
+        region: str | None = None,
+    ) -> None:
         self.model_id = model_id
         self.dim = dim
-        self._region = region or os.environ.get("BEDROCK_REGION") or os.environ.get("AWS_REGION") or "us-east-1"
+        self._region = (
+            region
+            or os.environ.get("BEDROCK_REGION")
+            or os.environ.get("AWS_REGION")
+            or "us-east-1"
+        )
         self._client = None  # lazy
 
     def _get_client(self):
@@ -158,6 +171,7 @@ class BedrockTitanEmbeddings(EmbeddingProvider):
 
 # ────────────────────────── factory ──────────────────────────
 
+
 def _looks_like_aws_configured() -> bool:
     return bool(
         os.environ.get("AWS_ACCESS_KEY_ID")
@@ -175,7 +189,9 @@ def get_embedding_provider() -> EmbeddingProvider:
         log.info("Embedding provider: hashing (dim=%d)", EMBED_DIM)
         return HashingEmbeddings()
 
-    if choice in ("bedrock", "titan", "aws") or (not choice and _looks_like_aws_configured()):
+    if choice in ("bedrock", "titan", "aws") or (
+        not choice and _looks_like_aws_configured()
+    ):
         try:
             provider = BedrockTitanEmbeddings()
             log.info(
@@ -186,7 +202,9 @@ def get_embedding_provider() -> EmbeddingProvider:
             )
             return provider
         except Exception as e:  # pragma: no cover - defensive
-            log.warning("Titan embeddings init failed (%s); falling back to hashing.", e)
+            log.warning(
+                "Titan embeddings init failed (%s); falling back to hashing.", e
+            )
 
     log.info("Embedding provider: hashing (dim=%d)", EMBED_DIM)
     return HashingEmbeddings()

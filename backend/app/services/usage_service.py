@@ -14,6 +14,7 @@ Two kinds of metrics:
 Plan limits live on ``Plan.limits`` (a JSON dict; ``-1`` / missing means
 unlimited). The active plan is resolved via the org's subscription.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -38,19 +39,43 @@ UNLIMITED = -1
 # ── metric registry ─────────────────────────────────────────────────────
 # Resource metrics: live counts. ``limit_key`` maps onto Plan.limits.
 RESOURCE_METRICS: dict[str, dict] = {
-    "users": {"label": "Team Members", "limit_key": "users", "model": OrganizationMember},
+    "users": {
+        "label": "Team Members",
+        "limit_key": "users",
+        "model": OrganizationMember,
+    },
     "agents": {"label": "Agents", "limit_key": "agents", "model": Agent},
-    "knowledge_bases": {"label": "Knowledge Bases", "limit_key": "knowledge_bases", "model": KnowledgeBase},
+    "knowledge_bases": {
+        "label": "Knowledge Bases",
+        "limit_key": "knowledge_bases",
+        "model": KnowledgeBase,
+    },
     "workflows": {"label": "Workflows", "limit_key": "workflows", "model": Workflow},
-    "integrations": {"label": "Integrations", "limit_key": "integrations", "model": Integration},
+    "integrations": {
+        "label": "Integrations",
+        "limit_key": "integrations",
+        "model": Integration,
+    },
 }
 
 # Metered metrics: accumulating counters. ``granularity`` decides the bucket.
 METERED_METRICS: dict[str, dict] = {
-    "ai_messages": {"label": "AI Messages / day", "limit_key": "ai_messages_per_day", "granularity": "day"},
-    "workflow_runs": {"label": "Workflow Runs / mo", "limit_key": None, "granularity": "month"},
+    "ai_messages": {
+        "label": "AI Messages / day",
+        "limit_key": "ai_messages_per_day",
+        "granularity": "day",
+    },
+    "workflow_runs": {
+        "label": "Workflow Runs / mo",
+        "limit_key": None,
+        "granularity": "month",
+    },
     "api_calls": {"label": "API Calls / mo", "limit_key": None, "granularity": "month"},
-    "documents_processed": {"label": "Documents Processed / mo", "limit_key": None, "granularity": "month"},
+    "documents_processed": {
+        "label": "Documents Processed / mo",
+        "limit_key": None,
+        "granularity": "month",
+    },
 }
 
 
@@ -141,8 +166,10 @@ async def _resource_count(
 ) -> int:
     spec = RESOURCE_METRICS[metric]
     model = spec["model"]
-    stmt = select(func.count()).select_from(model).where(
-        model.organization_id == organization_id
+    stmt = (
+        select(func.count())
+        .select_from(model)
+        .where(model.organization_id == organization_id)
     )
     # Exclude soft-deleted rows where the column exists.
     if hasattr(model, "deleted_at"):
@@ -155,7 +182,9 @@ async def _resource_count(
 
 
 # ── snapshot ──────────────────────────────────────────────────────────────
-def _entry(metric: str, label: str, category: str, used: int, limit: int, period: Optional[str]) -> dict:
+def _entry(
+    metric: str, label: str, category: str, used: int, limit: int, period: Optional[str]
+) -> dict:
     unlimited = limit == UNLIMITED
     percent = 0
     if not unlimited and limit > 0:
@@ -172,9 +201,7 @@ def _entry(metric: str, label: str, category: str, used: int, limit: int, period
     }
 
 
-async def usage_snapshot(
-    session: AsyncSession, organization_id: uuid.UUID
-) -> dict:
+async def usage_snapshot(session: AsyncSession, organization_id: uuid.UUID) -> dict:
     """Build the full usage-vs-limits view for an organization."""
     plan = await _plan_for(session, organization_id)
     limits = plan.limits or {}
@@ -221,12 +248,24 @@ async def check_quota(
         limit = _limit_for(limits, METERED_METRICS[metric]["limit_key"])
         used = await _metered_value(session, organization_id, metric)
     else:
-        return {"metric": metric, "allowed": True, "used": 0, "limit": UNLIMITED,
-                "remaining": None, "unlimited": True}
+        return {
+            "metric": metric,
+            "allowed": True,
+            "used": 0,
+            "limit": UNLIMITED,
+            "remaining": None,
+            "unlimited": True,
+        }
 
     if limit == UNLIMITED:
-        return {"metric": metric, "allowed": True, "used": used, "limit": UNLIMITED,
-                "remaining": None, "unlimited": True}
+        return {
+            "metric": metric,
+            "allowed": True,
+            "used": used,
+            "limit": UNLIMITED,
+            "remaining": None,
+            "unlimited": True,
+        }
 
     remaining = max(0, limit - used)
     return {
@@ -248,9 +287,9 @@ async def enforce_quota(
     """Raise HTTP 402 if granting ``amount`` more of ``metric`` exceeds quota."""
     check = await check_quota(session, organization_id, metric, amount)
     if not check["allowed"]:
-        label = (
-            RESOURCE_METRICS.get(metric) or METERED_METRICS.get(metric) or {}
-        ).get("label", metric)
+        label = (RESOURCE_METRICS.get(metric) or METERED_METRICS.get(metric) or {}).get(
+            "label", metric
+        )
         raise HTTPException(
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail=(

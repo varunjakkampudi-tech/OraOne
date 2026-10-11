@@ -5,6 +5,7 @@ totals, daily time-series and categorical breakdowns. Everything is
 computed live (no materialised table) and scoped strictly by
 ``organization_id``.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -21,14 +22,14 @@ from app.database.models.conversation import (
     ConversationChannel,
     ConversationStatus,
 )
-from app.database.models.document import Document, DocumentStatus
+from app.database.models.document import Document
 from app.database.models.document_chunk import DocumentChunk
-from app.database.models.integration import Integration, IntegrationStatus
+from app.database.models.integration import Integration
 from app.database.models.knowledge_base import KnowledgeBase
 from app.database.models.message import Message, MessageSender
 from app.database.models.organization_member import MemberStatus, OrganizationMember
 from app.database.models.project import Project
-from app.database.models.sync_job import SyncJob, SyncJobStatus
+from app.database.models.sync_job import SyncJob
 from app.database.models.website import Website
 from app.database.models.widget import Widget
 from app.database.models.widget_event import WidgetEvent
@@ -187,21 +188,35 @@ async def org_overview(
         Conversation.status == ConversationStatus.qualified,
         *conv_proj,
     )
-    conversion_rate = round((qualified / conversations) * 100, 1) if conversations else 0.0
+    conversion_rate = (
+        round((qualified / conversations) * 100, 1) if conversations else 0.0
+    )
 
     # ── time series (zero-filled) ──
     conv_rows = await _daily_counts(
-        session, org_id, table=Conversation, date_col=Conversation.created_at,
-        since=since, org_col=Conversation.organization_id,
+        session,
+        org_id,
+        table=Conversation,
+        date_col=Conversation.created_at,
+        since=since,
+        org_col=Conversation.organization_id,
         extra_condition=conv_proj_cond,
     )
     run_rows = await _daily_counts(
-        session, org_id, table=WorkflowRun, date_col=WorkflowRun.created_at,
-        since=since, org_col=WorkflowRun.organization_id,
+        session,
+        org_id,
+        table=WorkflowRun,
+        date_col=WorkflowRun.created_at,
+        since=since,
+        org_col=WorkflowRun.organization_id,
         extra_condition=wfrun_proj_cond,
     )
     msg_rows = await _daily_counts(
-        session, org_id, table=Message, date_col=Message.created_at, since=since,
+        session,
+        org_id,
+        table=Message,
+        date_col=Message.created_at,
+        since=since,
         extra_join=(Conversation, Message.conversation_id == Conversation.id),
         org_col=Conversation.organization_id,
         extra_condition=conv_proj_cond,
@@ -233,7 +248,9 @@ async def org_overview(
     )
     if proj:
         aa_stmt = aa_stmt.where(Conversation.project_id == project_id)
-    active_agent_rows = [(r[0], int(r[1])) for r in (await session.execute(aa_stmt)).all()]
+    active_agent_rows = [
+        (r[0], int(r[1])) for r in (await session.execute(aa_stmt)).all()
+    ]
 
     # dense daily resolution-rate series (qualified / total, per day)
     conv_have = {r[0]: int(r[1]) for r in conv_rows}
@@ -244,25 +261,31 @@ async def org_overview(
         _tot = conv_have.get(_cursor, 0)
         _q = qual_have.get(_cursor, 0)
         resolution_series.append(
-            {"date": _cursor.isoformat(), "count": round((_q / _tot) * 100, 1) if _tot else 0.0}
+            {
+                "date": _cursor.isoformat(),
+                "count": round((_q / _tot) * 100, 1) if _tot else 0.0,
+            }
         )
         _cursor += timedelta(days=1)
 
     # ── breakdowns ──
     by_channel = await _grouped(
-        session, Conversation.channel,
+        session,
+        Conversation.channel,
         Conversation.organization_id == org_id,
         Conversation.deleted_at.is_(None),
         *conv_proj,
     )
     by_status = await _grouped(
-        session, Conversation.status,
+        session,
+        Conversation.status,
         Conversation.organization_id == org_id,
         Conversation.deleted_at.is_(None),
         *conv_proj,
     )
     runs_by_status = await _grouped(
-        session, WorkflowRun.status,
+        session,
+        WorkflowRun.status,
         WorkflowRun.organization_id == org_id,
         *wfrun_proj,
     )
@@ -350,7 +373,9 @@ def _window(days: int) -> tuple[datetime, date, date]:
     return since, since.date(), now.date()
 
 
-async def _token_sum(session: AsyncSession, org_id: uuid.UUID, *, since: datetime | None = None) -> int:
+async def _token_sum(
+    session: AsyncSession, org_id: uuid.UUID, *, since: datetime | None = None
+) -> int:
     stmt = (
         select(func.coalesce(func.sum(Message.token_count), 0))
         .select_from(Message)
@@ -362,7 +387,9 @@ async def _token_sum(session: AsyncSession, org_id: uuid.UUID, *, since: datetim
     return int(await session.scalar(stmt) or 0)
 
 
-async def _daily_token_sum(session: AsyncSession, org_id: uuid.UUID, since: datetime) -> list[tuple[date, int]]:
+async def _daily_token_sum(
+    session: AsyncSession, org_id: uuid.UUID, since: datetime
+) -> list[tuple[date, int]]:
     day = cast(Message.created_at, Date).label("day")
     stmt = (
         select(day, func.coalesce(func.sum(Message.token_count), 0))
@@ -376,8 +403,18 @@ async def _daily_token_sum(session: AsyncSession, org_id: uuid.UUID, since: date
 
 
 async def _feedback_counts(session: AsyncSession, org_id: uuid.UUID) -> dict[str, int]:
-    up = await _count(session, AnswerFeedback, AnswerFeedback.organization_id == org_id, AnswerFeedback.rating > 0)
-    down = await _count(session, AnswerFeedback, AnswerFeedback.organization_id == org_id, AnswerFeedback.rating < 0)
+    up = await _count(
+        session,
+        AnswerFeedback,
+        AnswerFeedback.organization_id == org_id,
+        AnswerFeedback.rating > 0,
+    )
+    down = await _count(
+        session,
+        AnswerFeedback,
+        AnswerFeedback.organization_id == org_id,
+        AnswerFeedback.rating < 0,
+    )
     total = up + down
     return {
         "positive": up,
@@ -387,11 +424,15 @@ async def _feedback_counts(session: AsyncSession, org_id: uuid.UUID) -> dict[str
     }
 
 
-async def chat_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS) -> dict:
+async def chat_analytics(
+    session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS
+) -> dict:
     days = _clamp_days(days)
     since, start_day, end_day = _window(days)
 
-    conversations = await _count(session, Conversation, Conversation.organization_id == org_id)
+    conversations = await _count(
+        session, Conversation, Conversation.organization_id == org_id
+    )
     messages = int(
         await session.scalar(
             select(func.count())
@@ -402,19 +443,31 @@ async def chat_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = D
         or 0
     )
     by_channel = await _grouped(
-        session, Conversation.channel,
-        Conversation.organization_id == org_id, Conversation.deleted_at.is_(None),
+        session,
+        Conversation.channel,
+        Conversation.organization_id == org_id,
+        Conversation.deleted_at.is_(None),
     )
     by_status = await _grouped(
-        session, Conversation.status,
-        Conversation.organization_id == org_id, Conversation.deleted_at.is_(None),
+        session,
+        Conversation.status,
+        Conversation.organization_id == org_id,
+        Conversation.deleted_at.is_(None),
     )
     conv_rows = await _daily_counts(
-        session, org_id, table=Conversation, date_col=Conversation.created_at,
-        since=since, org_col=Conversation.organization_id,
+        session,
+        org_id,
+        table=Conversation,
+        date_col=Conversation.created_at,
+        since=since,
+        org_col=Conversation.organization_id,
     )
     msg_rows = await _daily_counts(
-        session, org_id, table=Message, date_col=Message.created_at, since=since,
+        session,
+        org_id,
+        table=Message,
+        date_col=Message.created_at,
+        since=since,
         extra_join=(Conversation, Message.conversation_id == Conversation.id),
         org_col=Conversation.organization_id,
     )
@@ -425,25 +478,34 @@ async def chat_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = D
         "totals": {
             "conversations": conversations,
             "messages": messages,
-            "avg_messages_per_conversation": round(messages / conversations, 1) if conversations else 0.0,
+            "avg_messages_per_conversation": round(messages / conversations, 1)
+            if conversations
+            else 0.0,
         },
         "series": {
             "conversations": _fill_series(conv_rows, start_day, end_day),
             "messages": _fill_series(msg_rows, start_day, end_day),
         },
         "breakdowns": {
-            "by_channel": {c.value: by_channel.get(c.value, 0) for c in ConversationChannel},
+            "by_channel": {
+                c.value: by_channel.get(c.value, 0) for c in ConversationChannel
+            },
             "by_status": by_status,
         },
         "feedback": feedback,
     }
 
 
-async def agent_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS) -> dict:
+async def agent_analytics(
+    session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS
+) -> dict:
     days = _clamp_days(days)
     total_agents = await _count(session, Agent, Agent.organization_id == org_id)
     by_status = await _grouped(
-        session, Agent.status, Agent.organization_id == org_id, Agent.deleted_at.is_(None)
+        session,
+        Agent.status,
+        Agent.organization_id == org_id,
+        Agent.deleted_at.is_(None),
     )
     stmt = (
         select(
@@ -452,10 +514,19 @@ async def agent_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = 
             Agent.status,
             func.count(Conversation.id).label("convos"),
             func.coalesce(
-                func.sum(case((Conversation.status == ConversationStatus.qualified, 1), else_=0)), 0
+                func.sum(
+                    case(
+                        (Conversation.status == ConversationStatus.qualified, 1),
+                        else_=0,
+                    )
+                ),
+                0,
             ).label("qualified"),
         )
-        .outerjoin(Conversation, (Conversation.agent_id == Agent.id) & (Conversation.deleted_at.is_(None)))
+        .outerjoin(
+            Conversation,
+            (Conversation.agent_id == Agent.id) & (Conversation.deleted_at.is_(None)),
+        )
         .where(Agent.organization_id == org_id, Agent.deleted_at.is_(None))
         .group_by(Agent.id, Agent.name, Agent.status)
         .order_by(func.count(Conversation.id).desc())
@@ -469,7 +540,9 @@ async def agent_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = 
             "status": r[2].value if hasattr(r[2], "value") else str(r[2]),
             "conversations": int(r[3]),
             "qualified": int(r[4]),
-            "conversion_rate": round((int(r[4]) / int(r[3])) * 100, 1) if int(r[3]) else 0.0,
+            "conversion_rate": round((int(r[4]) / int(r[3])) * 100, 1)
+            if int(r[3])
+            else 0.0,
         }
         for r in rows
     ]
@@ -482,14 +555,23 @@ async def agent_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = 
     }
 
 
-async def knowledge_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS) -> dict:
+async def knowledge_analytics(
+    session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS
+) -> dict:
     days = _clamp_days(days)
-    knowledge_bases = await _count(session, KnowledgeBase, KnowledgeBase.organization_id == org_id)
+    knowledge_bases = await _count(
+        session, KnowledgeBase, KnowledgeBase.organization_id == org_id
+    )
     documents = await _count(session, Document, Document.organization_id == org_id)
     docs_by_status = await _grouped(
-        session, Document.status, Document.organization_id == org_id, Document.deleted_at.is_(None)
+        session,
+        Document.status,
+        Document.organization_id == org_id,
+        Document.deleted_at.is_(None),
     )
-    chunks = await _count(session, DocumentChunk, DocumentChunk.organization_id == org_id)
+    chunks = await _count(
+        session, DocumentChunk, DocumentChunk.organization_id == org_id
+    )
     websites = await _count(session, Website, Website.organization_id == org_id)
     pages = int(
         await session.scalar(
@@ -513,17 +595,23 @@ async def knowledge_analytics(session: AsyncSession, org_id: uuid.UUID, days: in
     }
 
 
-async def rag_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS) -> dict:
+async def rag_analytics(
+    session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS
+) -> dict:
     days = _clamp_days(days)
     base = (
         select(func.count())
         .select_from(Message)
         .join(Conversation, Message.conversation_id == Conversation.id)
-        .where(Conversation.organization_id == org_id, Message.sender == MessageSender.agent)
+        .where(
+            Conversation.organization_id == org_id,
+            Message.sender == MessageSender.agent,
+        )
     )
     answers = int(await session.scalar(base) or 0)
     grounded = int(
-        await session.scalar(base.where(Message.metadata_["grounded"].astext == "true")) or 0
+        await session.scalar(base.where(Message.metadata_["grounded"].astext == "true"))
+        or 0
     )
     feedback = await _feedback_counts(session, org_id)
     return {
@@ -539,13 +627,20 @@ async def rag_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = DE
     }
 
 
-async def widget_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS) -> dict:
+async def widget_analytics(
+    session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS
+) -> dict:
     days = _clamp_days(days)
     since, start_day, end_day = _window(days)
     widgets = await _count(session, Widget, Widget.organization_id == org_id)
-    sessions = await _count(session, WidgetSession, WidgetSession.organization_id == org_id)
+    sessions = await _count(
+        session, WidgetSession, WidgetSession.organization_id == org_id
+    )
     escalations = await _count(
-        session, WidgetSession, WidgetSession.organization_id == org_id, WidgetSession.escalated.is_(True)
+        session,
+        WidgetSession,
+        WidgetSession.organization_id == org_id,
+        WidgetSession.escalated.is_(True),
     )
     messages = int(
         await session.scalar(
@@ -555,10 +650,16 @@ async def widget_analytics(session: AsyncSession, org_id: uuid.UUID, days: int =
         )
         or 0
     )
-    by_event = await _grouped(session, WidgetEvent.event, WidgetEvent.organization_id == org_id)
+    by_event = await _grouped(
+        session, WidgetEvent.event, WidgetEvent.organization_id == org_id
+    )
     sess_rows = await _daily_counts(
-        session, org_id, table=WidgetSession, date_col=WidgetSession.created_at,
-        since=since, org_col=WidgetSession.organization_id,
+        session,
+        org_id,
+        table=WidgetSession,
+        date_col=WidgetSession.created_at,
+        since=since,
+        org_col=WidgetSession.organization_id,
     )
     leads = int(by_event.get("lead", 0))
     return {
@@ -570,25 +671,38 @@ async def widget_analytics(session: AsyncSession, org_id: uuid.UUID, days: int =
             "messages": messages,
             "escalations": escalations,
             "leads": leads,
-            "escalation_rate": round((escalations / sessions) * 100, 1) if sessions else 0.0,
+            "escalation_rate": round((escalations / sessions) * 100, 1)
+            if sessions
+            else 0.0,
         },
         "series": {"sessions": _fill_series(sess_rows, start_day, end_day)},
         "breakdowns": {"by_event": by_event},
     }
 
 
-async def workflow_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS) -> dict:
+async def workflow_analytics(
+    session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS
+) -> dict:
     days = _clamp_days(days)
     since, start_day, end_day = _window(days)
     workflows = await _count(session, Workflow, Workflow.organization_id == org_id)
     runs = await _count(session, WorkflowRun, WorkflowRun.organization_id == org_id)
     succeeded = await _count(
-        session, WorkflowRun, WorkflowRun.organization_id == org_id, WorkflowRun.status == RunStatus.completed
+        session,
+        WorkflowRun,
+        WorkflowRun.organization_id == org_id,
+        WorkflowRun.status == RunStatus.completed,
     )
-    by_status = await _grouped(session, WorkflowRun.status, WorkflowRun.organization_id == org_id)
+    by_status = await _grouped(
+        session, WorkflowRun.status, WorkflowRun.organization_id == org_id
+    )
     run_rows = await _daily_counts(
-        session, org_id, table=WorkflowRun, date_col=WorkflowRun.created_at,
-        since=since, org_col=WorkflowRun.organization_id,
+        session,
+        org_id,
+        table=WorkflowRun,
+        date_col=WorkflowRun.created_at,
+        since=since,
+        org_col=WorkflowRun.organization_id,
     )
     top_stmt = (
         select(Workflow.id, Workflow.name, Workflow.run_count, Workflow.success_count)
@@ -615,19 +729,30 @@ async def workflow_analytics(session: AsyncSession, org_id: uuid.UUID, days: int
             "success_rate": round((succeeded / runs) * 100, 1) if runs else 0.0,
         },
         "series": {"runs": _fill_series(run_rows, start_day, end_day)},
-        "breakdowns": {"runs_by_status": {s.value: by_status.get(s.value, 0) for s in RunStatus}},
+        "breakdowns": {
+            "runs_by_status": {s.value: by_status.get(s.value, 0) for s in RunStatus}
+        },
         "top_workflows": top,
     }
 
 
-async def integration_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS) -> dict:
+async def integration_analytics(
+    session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS
+) -> dict:
     days = _clamp_days(days)
-    integrations = await _count(session, Integration, Integration.organization_id == org_id)
+    integrations = await _count(
+        session, Integration, Integration.organization_id == org_id
+    )
     by_status = await _grouped(
-        session, Integration.status, Integration.organization_id == org_id, Integration.deleted_at.is_(None)
+        session,
+        Integration.status,
+        Integration.organization_id == org_id,
+        Integration.deleted_at.is_(None),
     )
     sync_jobs = await _count(session, SyncJob, SyncJob.organization_id == org_id)
-    jobs_by_status = await _grouped(session, SyncJob.status, SyncJob.organization_id == org_id)
+    jobs_by_status = await _grouped(
+        session, SyncJob.status, SyncJob.organization_id == org_id
+    )
     docs_synced = int(
         await session.scalar(
             select(func.coalesce(func.sum(SyncJob.documents_synced), 0)).where(
@@ -651,7 +776,9 @@ async def integration_analytics(session: AsyncSession, org_id: uuid.UUID, days: 
     }
 
 
-async def cost_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS) -> dict:
+async def cost_analytics(
+    session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS
+) -> dict:
     days = _clamp_days(days)
     since, start_day, end_day = _window(days)
 
@@ -672,7 +799,10 @@ async def cost_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = D
         )
         .select_from(Message)
         .join(Conversation, Message.conversation_id == Conversation.id)
-        .where(Conversation.organization_id == org_id, Message.sender == MessageSender.agent)
+        .where(
+            Conversation.organization_id == org_id,
+            Message.sender == MessageSender.agent,
+        )
         .group_by(text("1"))
     )
     by_model: list[dict] = []
@@ -696,16 +826,26 @@ async def cost_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = D
         .select_from(Message)
         .join(Conversation, Message.conversation_id == Conversation.id)
         .join(Agent, Conversation.agent_id == Agent.id)
-        .where(Conversation.organization_id == org_id, Message.sender == MessageSender.agent)
+        .where(
+            Conversation.organization_id == org_id,
+            Message.sender == MessageSender.agent,
+        )
         .group_by(Agent.id, Agent.name)
     )
     by_agent: list[dict] = []
     for name, tokens, stored, convos in (await session.execute(agent_stmt)).all():
         tokens = int(tokens or 0)
         stored = float(stored or 0.0)
-        cost = round(stored if stored > 0 else (tokens / 1000.0) * MODEL_PRICING["default"], 4)
+        cost = round(
+            stored if stored > 0 else (tokens / 1000.0) * MODEL_PRICING["default"], 4
+        )
         by_agent.append(
-            {"agent": name or "Unnamed agent", "tokens": tokens, "cost": cost, "conversations": int(convos or 0)}
+            {
+                "agent": name or "Unnamed agent",
+                "tokens": tokens,
+                "cost": cost,
+                "conversations": int(convos or 0),
+            }
         )
     by_agent.sort(key=lambda r: r["cost"], reverse=True)
 
@@ -720,16 +860,26 @@ async def cost_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = D
         .select_from(Message)
         .join(Conversation, Message.conversation_id == Conversation.id)
         .outerjoin(Project, Conversation.project_id == Project.id)
-        .where(Conversation.organization_id == org_id, Message.sender == MessageSender.agent)
+        .where(
+            Conversation.organization_id == org_id,
+            Message.sender == MessageSender.agent,
+        )
         .group_by(text("1"))
     )
     by_project: list[dict] = []
     for name, tokens, stored, convos in (await session.execute(project_stmt)).all():
         tokens = int(tokens or 0)
         stored = float(stored or 0.0)
-        cost = round(stored if stored > 0 else (tokens / 1000.0) * MODEL_PRICING["default"], 4)
+        cost = round(
+            stored if stored > 0 else (tokens / 1000.0) * MODEL_PRICING["default"], 4
+        )
         by_project.append(
-            {"project": name, "tokens": tokens, "cost": cost, "conversations": int(convos or 0)}
+            {
+                "project": name,
+                "tokens": tokens,
+                "cost": cost,
+                "conversations": int(convos or 0),
+            }
         )
     by_project.sort(key=lambda r: r["cost"], reverse=True)
 
@@ -748,7 +898,8 @@ async def cost_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = D
     )
     blended = MODEL_PRICING["default"]
     daily = {
-        d: (int(t or 0), float(c or 0.0)) for d, t, c in (await session.execute(daily_stmt)).all()
+        d: (int(t or 0), float(c or 0.0))
+        for d, t, c in (await session.execute(daily_stmt)).all()
     }
     cost_series: list[dict] = []
     cursor = start_day
@@ -758,8 +909,12 @@ async def cost_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = D
         cost_series.append({"date": cursor.isoformat(), "tokens": toks, "cost": cost})
         cursor += timedelta(days=1)
 
-    conversations = await _count(session, Conversation, Conversation.organization_id == org_id)
-    cost_per_conversation = round(total_cost / conversations, 4) if conversations else 0.0
+    conversations = await _count(
+        session, Conversation, Conversation.organization_id == org_id
+    )
+    cost_per_conversation = (
+        round(total_cost / conversations, 4) if conversations else 0.0
+    )
     window_cost = round(sum(p["cost"] for p in cost_series), 4)
     projected_monthly = round(window_cost / max(days, 1) * 30, 2)
 
@@ -782,7 +937,9 @@ async def cost_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = D
     }
 
 
-async def insights_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS) -> dict:
+async def insights_analytics(
+    session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS
+) -> dict:
     """Question-level insights: top questions, unanswered rate and the
     knowledge gaps (questions asked in conversations the AI could not
     confidently ground in the knowledge base)."""
@@ -809,7 +966,8 @@ async def insights_analytics(session: AsyncSession, org_id: uuid.UUID, days: int
         .limit(15)
     )
     top_questions = [
-        {"question": q, "count": int(n)} for q, n in (await session.execute(q_stmt)).all()
+        {"question": q, "count": int(n)}
+        for q, n in (await session.execute(q_stmt)).all()
     ]
 
     # ── Answer health (agent messages in the window) ─────────────────
@@ -855,7 +1013,8 @@ async def insights_analytics(session: AsyncSession, org_id: uuid.UUID, days: int
         .limit(10)
     )
     knowledge_gaps = [
-        {"question": q, "count": int(n)} for q, n in (await session.execute(gaps_stmt)).all()
+        {"question": q, "count": int(n)}
+        for q, n in (await session.execute(gaps_stmt)).all()
     ]
 
     feedback = await _feedback_counts(session, org_id)
@@ -868,7 +1027,9 @@ async def insights_analytics(session: AsyncSession, org_id: uuid.UUID, days: int
             "unanswered": ungrounded,
             "low_confidence": low_conf,
             "grounded_rate": round((grounded / answers) * 100, 1) if answers else 0.0,
-            "unanswered_rate": round((ungrounded / answers) * 100, 1) if answers else 0.0,
+            "unanswered_rate": round((ungrounded / answers) * 100, 1)
+            if answers
+            else 0.0,
         },
         "top_questions": top_questions,
         "knowledge_gaps": knowledge_gaps,
@@ -876,15 +1037,19 @@ async def insights_analytics(session: AsyncSession, org_id: uuid.UUID, days: int
     }
 
 
-async def user_team_analytics(session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS) -> dict:
+async def user_team_analytics(
+    session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS
+) -> dict:
     days = _clamp_days(days)
     members = await _count(
-        session, OrganizationMember,
+        session,
+        OrganizationMember,
         OrganizationMember.organization_id == org_id,
         OrganizationMember.status == MemberStatus.active,
     )
     by_role = await _grouped(
-        session, OrganizationMember.role,
+        session,
+        OrganizationMember.role,
         OrganizationMember.organization_id == org_id,
         OrganizationMember.status == MemberStatus.active,
     )
@@ -904,7 +1069,9 @@ async def user_team_analytics(session: AsyncSession, org_id: uuid.UUID, days: in
     }
 
 
-async def executive_summary(session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS) -> dict:
+async def executive_summary(
+    session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS
+) -> dict:
     days = _clamp_days(days)
     overview = await org_overview(session, org_id, days)
     cost = await cost_analytics(session, org_id, days)
@@ -938,7 +1105,9 @@ async def executive_summary(session: AsyncSession, org_id: uuid.UUID, days: int 
             "cost": cost["series"]["cost"],
         },
         "breakdowns": {
-            "conversations_by_channel": overview["breakdowns"]["conversations_by_channel"],
+            "conversations_by_channel": overview["breakdowns"][
+                "conversations_by_channel"
+            ],
             "cost_by_model": cost["breakdowns"]["by_model"],
         },
         "top_agents": overview["top_agents"],

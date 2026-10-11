@@ -12,6 +12,7 @@ Runs in its own ``AsyncSession`` so it's safe to call from FastAPI
 integration's ``organization_id``; it only ever touches documents that
 belong to *this* integration.
 """
+
 from __future__ import annotations
 
 import io
@@ -160,8 +161,13 @@ async def _run(
     integration.status = IntegrationStatus.syncing
     await session.commit()
 
-    await _log(session, job, integration, "sync_started",
-               message=f"Sync triggered ({trigger.value}).")
+    await _log(
+        session,
+        job,
+        integration,
+        "sync_started",
+        message=f"Sync triggered ({trigger.value}).",
+    )
     await session.commit()
 
     try:
@@ -170,11 +176,21 @@ async def _run(
         await session.commit()
 
         connector = get_connector(integration)
-        await _log(session, job, integration, "connector_health",
-                   message="Checking connector health.")
+        await _log(
+            session,
+            job,
+            integration,
+            "connector_health",
+            message="Checking connector health.",
+        )
         remote_docs = connector.sync()
-        await _log(session, job, integration, "fetched",
-                   message=f"Fetched {len(remote_docs)} document(s) from provider.")
+        await _log(
+            session,
+            job,
+            integration,
+            "fetched",
+            message=f"Fetched {len(remote_docs)} document(s) from provider.",
+        )
         await session.commit()
 
         synced, to_process = await _upsert_documents(
@@ -186,8 +202,13 @@ async def _run(
         for doc_id in to_process:
             await process_document(doc_id)
         if to_process:
-            await _log(session, job, integration, "indexed",
-                       message=f"Chunked + embedded {len(to_process)} document(s).")
+            await _log(
+                session,
+                job,
+                integration,
+                "indexed",
+                message=f"Chunked + embedded {len(to_process)} document(s).",
+            )
 
         deleted = await _prune_deleted(session, integration, kb, synced, job)
         await session.commit()
@@ -202,8 +223,13 @@ async def _run(
         integration.status = IntegrationStatus.connected
         integration.last_synced_at = datetime.now(timezone.utc)
         integration.last_error = None
-        await _log(session, job, integration, "sync_completed",
-                   message=f"Synced {len(to_process)}, removed {deleted}.")
+        await _log(
+            session,
+            job,
+            integration,
+            "sync_completed",
+            message=f"Synced {len(to_process)}, removed {deleted}.",
+        )
         await session.commit()
 
         audit(
@@ -221,7 +247,10 @@ async def _run(
         )
         log.info(
             "sync_ok integration=%s provider=%s synced=%d deleted=%d",
-            integration.id, integration.provider, len(to_process), deleted,
+            integration.id,
+            integration.provider,
+            len(to_process),
+            deleted,
         )
     except (NotConnectedError, ConnectorError) as e:
         await _fail(session, job.id, integration.id, str(e))
@@ -328,8 +357,13 @@ async def _prune_deleted(
         doc.deleted_at = datetime.now(timezone.utc)
         deleted += 1
     if deleted:
-        await _log(session, job, integration, "pruned",
-                   message=f"Removed {deleted} document(s) deleted upstream.")
+        await _log(
+            session,
+            job,
+            integration,
+            "pruned",
+            message=f"Removed {deleted} document(s) deleted upstream.",
+        )
     return deleted
 
 
@@ -391,7 +425,9 @@ async def _record_manifest(
                     status=IntegrationDocStatus.synced,
                     checksum=rd.content_hash(),
                     size_bytes=size,
-                    external_modified_at=_aware(rd.modified_at) if rd.modified_at else None,
+                    external_modified_at=_aware(rd.modified_at)
+                    if rd.modified_at
+                    else None,
                     last_synced=now,
                     document_id=doc.id if doc is not None else None,
                 )
@@ -422,7 +458,9 @@ async def _record_manifest(
     await session.flush()
 
 
-async def _fail(session, job_id: uuid.UUID, integration_id: uuid.UUID, message: str) -> None:
+async def _fail(
+    session, job_id: uuid.UUID, integration_id: uuid.UUID, message: str
+) -> None:
     # Roll back any partial work, then re-fetch by id (objects are expired
     # after rollback — never touch the stale instances directly).
     await session.rollback()

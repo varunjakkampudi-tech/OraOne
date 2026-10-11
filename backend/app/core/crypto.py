@@ -15,6 +15,7 @@ Rotate by setting ``INTEGRATIONS_ENCRYPTION_KEY`` to a fresh
 ``Fernet.generate_key()`` value (old ciphertext becomes undecryptable —
 re-connect the integration to mint new tokens).
 """
+
 from __future__ import annotations
 
 import base64
@@ -39,9 +40,13 @@ def _fernet() -> Fernet:
     explicit = os.environ.get("INTEGRATIONS_ENCRYPTION_KEY")
     if explicit:
         try:
-            return Fernet(explicit.encode("utf-8") if isinstance(explicit, str) else explicit)
+            return Fernet(
+                explicit.encode("utf-8") if isinstance(explicit, str) else explicit
+            )
         except (ValueError, TypeError) as e:  # malformed key
-            log.warning("INTEGRATIONS_ENCRYPTION_KEY invalid (%s); deriving instead.", e)
+            log.warning(
+                "INTEGRATIONS_ENCRYPTION_KEY invalid (%s); deriving instead.", e
+            )
 
     seed = os.environ.get("SECRET_KEY") or os.environ.get("JWT_SECRET_KEY")
     if not seed:

@@ -9,6 +9,7 @@ Returns product access, feature flags and maintenance state for the caller's
 org. This endpoint is **read-only** — customers can never grant themselves
 entitlements; that is done exclusively by platform admins.
 """
+
 from __future__ import annotations
 
 from typing import Any, Optional
@@ -55,7 +56,10 @@ async def request_access(
     confirmation payload for the UI.
     """
     result = await ent.record_access_request(
-        db, ctx, body.product_key, reason=body.reason,
+        db,
+        ctx,
+        body.product_key,
+        reason=body.reason,
     )
     client_ip = request.client.host if request.client else None
     audit(

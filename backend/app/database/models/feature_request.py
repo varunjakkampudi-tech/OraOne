@@ -3,6 +3,7 @@
 Powers the in-product "Feedback" board where customers submit ideas, report
 bugs and upvote what matters to them.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -62,15 +63,21 @@ class FeatureRequest(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     author_name: Mapped[Optional[str]] = mapped_column(String(160), nullable=True)
     type: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=FeatureRequestType.FEATURE,
+        String(20),
+        nullable=False,
+        default=FeatureRequestType.FEATURE,
         server_default=FeatureRequestType.FEATURE,
     )
     priority: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=FeatureRequestPriority.MEDIUM,
+        String(20),
+        nullable=False,
+        default=FeatureRequestPriority.MEDIUM,
         server_default=FeatureRequestPriority.MEDIUM,
     )
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=FeatureRequestStatus.OPEN,
+        String(20),
+        nullable=False,
+        default=FeatureRequestStatus.OPEN,
         server_default=FeatureRequestStatus.OPEN,
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False)

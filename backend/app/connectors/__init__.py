@@ -5,6 +5,7 @@ implements the same :class:`BaseConnector` interface so the sync service,
 API, and UI stay provider-agnostic. Adding a new integration = adding one
 connector class + one registry entry.
 """
+
 from app.connectors.base import (
     BaseConnector,
     ConnectorError,

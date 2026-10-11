@@ -4,6 +4,7 @@ Org-scoped + audit-logged. Lets users publish immutable snapshots of an
 agent's prompt/config, browse the version history, diff any two versions
 (prompt diff viewer) and roll back to a prior version.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -50,16 +51,24 @@ async def publish_version(
     session: AsyncSession = Depends(get_db),
 ) -> dict:
     data = await av.publish_version(
-        session, ctx.organization_id, agent_id, ctx.user_id,
-        label=payload.label, note=payload.note,
+        session,
+        ctx.organization_id,
+        agent_id,
+        ctx.user_id,
+        label=payload.label,
+        note=payload.note,
     )
     if not data.get("found"):
         raise HTTPException(status_code=404, detail="Agent not found")
     await session.commit()
-    audit("create", resource="agent_prompt_version",
-          organization_id=str(ctx.organization_id), user_id=str(ctx.user_id),
-          resource_id=str(agent_id),
-          meta={"version": data.get("version", {}).get("version")})
+    audit(
+        "create",
+        resource="agent_prompt_version",
+        organization_id=str(ctx.organization_id),
+        user_id=str(ctx.user_id),
+        resource_id=str(agent_id),
+        meta={"version": data.get("version", {}).get("version")},
+    )
     return data
 
 
@@ -92,8 +101,12 @@ async def restore_version(
     if not data.get("found"):
         raise HTTPException(status_code=404, detail="Agent or version not found")
     await session.commit()
-    audit("update", resource="agent_prompt_version",
-          organization_id=str(ctx.organization_id), user_id=str(ctx.user_id),
-          resource_id=str(agent_id),
-          meta={"restored_from": data.get("restored_from")})
+    audit(
+        "update",
+        resource="agent_prompt_version",
+        organization_id=str(ctx.organization_id),
+        user_id=str(ctx.user_id),
+        resource_id=str(agent_id),
+        meta={"restored_from": data.get("restored_from")},
+    )
     return data

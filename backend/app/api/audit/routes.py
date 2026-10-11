@@ -6,6 +6,7 @@
 Requires ``settings.read`` (owners/admins). Audit records themselves are
 written by ``app.services.audit`` and flushed by middleware.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -63,9 +64,7 @@ async def list_audit_logs(
             await session.scalars(select(User).where(User.id.in_(actor_ids)))
         ).all()
         for u in users:
-            actors[str(u.id)] = AuditLogActor(
-                id=u.id, name=u.full_name, email=u.email
-            )
+            actors[str(u.id)] = AuditLogActor(id=u.id, name=u.full_name, email=u.email)
 
     return AuditLogListResponse(
         logs=[AuditLogOut.model_validate(l) for l in logs],

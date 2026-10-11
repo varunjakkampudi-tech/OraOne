@@ -17,6 +17,7 @@ Unlike :func:`get_current_organization`, this dependency does **not** stamp the
 session with ``app.org_id`` — platform admins read across tenants, so no RLS
 tenant pin is applied.
 """
+
 from __future__ import annotations
 
 import logging
@@ -57,9 +58,7 @@ async def get_platform_admin(
             detail="Invalid token claims.",
         )
 
-    user = await session.scalar(
-        select(User).where(User.cognito_sub == cognito_sub)
-    )
+    user = await session.scalar(select(User).where(User.cognito_sub == cognito_sub))
     if user is None or user.role not in {UserRole.super_admin, UserRole.admin}:
         # Same opaque message whether the user is unknown or simply not an
         # administrator — never reveal role policy details.

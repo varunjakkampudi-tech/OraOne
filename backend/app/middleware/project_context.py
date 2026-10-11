@@ -14,6 +14,7 @@ Resolution order:
 Downstream endpoints depend on :func:`get_current_project` to get a
 ``ProjectContext`` carrying both the verified org and project ids.
 """
+
 from __future__ import annotations
 
 import logging
@@ -129,7 +130,9 @@ async def get_current_project(
     request.state.project_context = pctx
     log.info(
         "project_context org=%s project=%s default=%s path=%s",
-        pctx.organization_id, pctx.project_id, pctx.is_default_project,
+        pctx.organization_id,
+        pctx.project_id,
+        pctx.is_default_project,
         request.url.path,
     )
     return pctx

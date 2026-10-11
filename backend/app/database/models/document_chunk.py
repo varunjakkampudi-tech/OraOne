@@ -5,6 +5,7 @@ chunk can be retrieved by cosine similarity. The column is nullable:
 chunks created before embeddings existed are back-filled when their
 document is re-processed.
 """
+
 from __future__ import annotations
 
 import uuid

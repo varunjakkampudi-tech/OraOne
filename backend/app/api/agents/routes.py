@@ -10,12 +10,21 @@ with the Postgres system-of-record. All endpoints are:
 * Filterable (``type``, ``status``, ``model``).
 * Audit-logged (one record per write).
 """
+
 from __future__ import annotations
 
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Query,
+    Response,
+    status,
+)
 from sqlalchemy import asc, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -71,7 +80,11 @@ def _to_read_model(agent: Agent) -> AgentRead:
         language=cfg.language if cfg else _DEFAULT_LANGUAGE,
         greeting=cfg.greeting if cfg else None,
         max_tokens=cfg.max_tokens if cfg else 1024,
-        website_url=(cfg.config.get("website_url") if cfg and isinstance(cfg.config, dict) else None),
+        website_url=(
+            cfg.config.get("website_url")
+            if cfg and isinstance(cfg.config, dict)
+            else None
+        ),
         is_ready=agent_lifecycle.is_ready(agent),
         created_at=agent.created_at,
         updated_at=agent.updated_at,
@@ -120,6 +133,7 @@ async def _load_for_org(
 
 # ─────────────────────────── routes ────────────────────────────
 
+
 @router.get(
     "",
     response_model=AgentListResponse,
@@ -137,9 +151,15 @@ async def list_agents(
         max_length=200,
         description="Search by name or description (case-insensitive, substring).",
     ),
-    type_: Optional[str] = Query(default=None, alias="type", description="Filter by AgentType."),
-    status_: Optional[str] = Query(default=None, alias="status", description="Filter by AgentStatus."),
-    model: Optional[str] = Query(default=None, description="Filter by LLM model (exact match)."),
+    type_: Optional[str] = Query(
+        default=None, alias="type", description="Filter by AgentType."
+    ),
+    status_: Optional[str] = Query(
+        default=None, alias="status", description="Filter by AgentStatus."
+    ),
+    model: Optional[str] = Query(
+        default=None, description="Filter by LLM model (exact match)."
+    ),
     limit: int = Query(default=20, ge=1, le=100, description="Page size (1-100)."),
     offset: int = Query(default=0, ge=0, description="Page offset."),
     sort: str = Query(
@@ -168,9 +188,7 @@ async def list_agents(
         like = f"%{q.strip()}%"
         base_filters.append(or_(Agent.name.ilike(like), Agent.description.ilike(like)))
 
-    total = await session.scalar(
-        select(func.count(Agent.id)).where(*base_filters)
-    ) or 0
+    total = await session.scalar(select(func.count(Agent.id)).where(*base_filters)) or 0
 
     # Sort
     sort_field = sort.lstrip("-")
@@ -198,8 +216,14 @@ async def list_agents(
         organization_id=str(ctx.organization_id),
         user_id=str(ctx.user_id),
         meta={
-            "q": q, "type": type_, "status": status_, "model": model,
-            "limit": limit, "offset": offset, "sort": sort, "returned": len(rows),
+            "q": q,
+            "type": type_,
+            "status": status_,
+            "model": model,
+            "limit": limit,
+            "offset": offset,
+            "sort": sort,
+            "returned": len(rows),
             "total": total,
         },
     )
@@ -229,7 +253,8 @@ async def create_agent(
     agent_type = _parse_enum(AgentType, payload.type, field="type")
     agent_status = (
         _parse_enum(AgentStatus, payload.status, field="status")
-        if payload.status else AgentStatus.draft
+        if payload.status
+        else AgentStatus.draft
     )
 
     # Phase 12 Module 2: enforce the plan's agent quota before creating.
@@ -252,12 +277,16 @@ async def create_agent(
     cfg = AgentConfig(
         agent_id=agent.id,
         system_prompt=payload.system_prompt,
-        temperature=payload.temperature if payload.temperature is not None else _DEFAULT_TEMPERATURE,
+        temperature=payload.temperature
+        if payload.temperature is not None
+        else _DEFAULT_TEMPERATURE,
         voice=payload.voice,
         language=payload.language or _DEFAULT_LANGUAGE,
         greeting=payload.greeting,
         max_tokens=payload.max_tokens if payload.max_tokens is not None else 1024,
-        config={"website_url": payload.website_url.strip()} if payload.website_url else {},
+        config={"website_url": payload.website_url.strip()}
+        if payload.website_url
+        else {},
     )
     session.add(cfg)
     await session.flush()
@@ -266,7 +295,9 @@ async def create_agent(
 
     await session.commit()
     # Re-load to get DB-side defaults (created_at, updated_at).
-    agent = await _load_for_org(session, agent_id=agent.id, organization_id=ctx.organization_id)
+    agent = await _load_for_org(
+        session, agent_id=agent.id, organization_id=ctx.organization_id
+    )
     assert agent is not None
 
     # If a website was supplied at creation, start crawling it into a knowledge
@@ -285,7 +316,9 @@ async def create_agent(
             logging.getLogger("app.agents").warning(
                 "website crawl provisioning failed for new agent %s: %s", agent.id, exc
             )
-        agent = await _load_for_org(session, agent_id=agent.id, organization_id=ctx.organization_id)
+        agent = await _load_for_org(
+            session, agent_id=agent.id, organization_id=ctx.organization_id
+        )
         assert agent is not None
 
     audit(
@@ -340,9 +373,13 @@ async def get_agent(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> AgentRead:
-    agent = await _load_for_org(session, agent_id=agent_id, organization_id=ctx.organization_id)
+    agent = await _load_for_org(
+        session, agent_id=agent_id, organization_id=ctx.organization_id
+    )
     if agent is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found."
+        )
     return _to_read_model(agent)
 
 
@@ -363,9 +400,13 @@ async def update_agent(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> AgentRead:
-    agent = await _load_for_org(session, agent_id=agent_id, organization_id=ctx.organization_id)
+    agent = await _load_for_org(
+        session, agent_id=agent_id, organization_id=ctx.organization_id
+    )
     if agent is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found."
+        )
 
     before = _snapshot(agent)
     previous_status = agent.status
@@ -421,12 +462,17 @@ async def update_agent(
             cfg.max_tokens = payload.max_tokens
         if payload.website_url is not None:
             # Reassign (not mutate) so SQLAlchemy flags the JSONB dirty.
-            cfg.config = {**(cfg.config or {}), "website_url": payload.website_url.strip()}
+            cfg.config = {
+                **(cfg.config or {}),
+                "website_url": payload.website_url.strip(),
+            }
 
     # Apply the requested status now that config reflects this update.
     # An agent can only become Active once it meets the minimum requirements.
     if requested_status is not None:
-        if requested_status == AgentStatus.active and not agent_lifecycle.is_ready(agent):
+        if requested_status == AgentStatus.active and not agent_lifecycle.is_ready(
+            agent
+        ):
             missing = agent_lifecycle.missing_requirements(agent)
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -439,7 +485,9 @@ async def update_agent(
         agent.status = requested_status
 
     await session.commit()
-    agent = await _load_for_org(session, agent_id=agent.id, organization_id=ctx.organization_id)
+    agent = await _load_for_org(
+        session, agent_id=agent.id, organization_id=ctx.organization_id
+    )
     assert agent is not None
 
     # On the draft/paused → active transition, auto-crawl the agent's website
@@ -460,7 +508,9 @@ async def update_agent(
                 logging.getLogger("app.agents").warning(
                     "website crawl provisioning failed for agent %s: %s", agent.id, exc
                 )
-            agent = await _load_for_org(session, agent_id=agent.id, organization_id=ctx.organization_id)
+            agent = await _load_for_org(
+                session, agent_id=agent.id, organization_id=ctx.organization_id
+            )
             assert agent is not None
 
     audit(
@@ -488,11 +538,16 @@ async def delete_agent(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> Response:
-    agent = await _load_for_org(session, agent_id=agent_id, organization_id=ctx.organization_id)
+    agent = await _load_for_org(
+        session, agent_id=agent_id, organization_id=ctx.organization_id
+    )
     if agent is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found."
+        )
 
     from datetime import datetime, timezone
+
     before = _snapshot(agent)
     agent.deleted_at = datetime.now(timezone.utc)
     await session.commit()

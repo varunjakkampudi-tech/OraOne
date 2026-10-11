@@ -16,6 +16,7 @@ project is created per existing org and all existing resources are
 back-filled onto it (``is_default = True``). The default project cannot be
 deleted.
 """
+
 from __future__ import annotations
 
 import enum

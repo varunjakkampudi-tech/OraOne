@@ -4,6 +4,7 @@ Folders are flat (one level) and scoped to both organization and the
 owning user, mirroring the isolation model of AI chat threads. A
 conversation references at most one folder via ``conversations.folder_id``.
 """
+
 from __future__ import annotations
 
 import uuid

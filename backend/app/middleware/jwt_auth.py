@@ -3,6 +3,7 @@
 Every 401 from this module is logged with a precise reason at WARNING
 level under the logger `app.auth.jwt`. Tail uvicorn output to see them.
 """
+
 import logging
 import json
 import time
@@ -39,7 +40,11 @@ def verify_access_token(token: str, request: Request | None = None) -> Dict[str,
     except JWTError as e:
         raise _unauthorized(f"invalid_token: {type(e).__name__}: {e}", request=request)
 
-    log.info("AUTH OK sub=%s path=%s", claims.get("sub"), request.url.path if request else "?")
+    log.info(
+        "AUTH OK sub=%s path=%s",
+        claims.get("sub"),
+        request.url.path if request else "?",
+    )
     return claims
 
 
@@ -70,13 +75,17 @@ async def verify_cognito_access_token(
                 raise JWTError("Cognito JWKS contained no keys")
             _jwks_cache.update({"keys": keys, "expires_at": now + 3600})
 
-        key = next((item for item in _jwks_cache["keys"] if item.get("kid") == kid), None)
+        key = next(
+            (item for item in _jwks_cache["keys"] if item.get("kid") == kid), None
+        )
         if key is None:
             # A rotation may have happened; refresh once before rejecting.
             _jwks_cache["expires_at"] = 0
             if _refreshed:
                 raise JWTError("Cognito JWKS does not contain token key")
-            return await verify_cognito_access_token(token, request=request, _refreshed=True)
+            return await verify_cognito_access_token(
+                token, request=request, _refreshed=True
+            )
 
         verification_key = (
             RSAAlgorithm.from_jwk(json.dumps(key))
@@ -96,14 +105,22 @@ async def verify_cognito_access_token(
         if claims.get("client_id") != settings.cognito_client_id:
             raise JWTError("Cognito client_id mismatch")
     except (JWTError, httpx.HTTPError, ValueError, KeyError) as exc:
-        raise _unauthorized(f"invalid_cognito_token: {type(exc).__name__}", request=request)
+        raise _unauthorized(
+            f"invalid_cognito_token: {type(exc).__name__}", request=request
+        )
 
-    log.info("AUTH OK provider=cognito sub=%s path=%s", claims.get("sub"), request.url.path if request else "?")
+    log.info(
+        "AUTH OK provider=cognito sub=%s path=%s",
+        claims.get("sub"),
+        request.url.path if request else "?",
+    )
     return claims
 
 
 def _extract_bearer_token(request: Request) -> str:
-    auth_header = request.headers.get("Authorization") or request.headers.get("authorization")
+    auth_header = request.headers.get("Authorization") or request.headers.get(
+        "authorization"
+    )
     if not auth_header:
         # Browser sessions may rely on the httpOnly access-token cookie instead
         # of an Authorization header (see app/core/cookies.py).
@@ -116,7 +133,8 @@ def _extract_bearer_token(request: Request) -> str:
         # we can spot proxies that strip "Authorization".
         names = sorted(request.headers.keys())
         raise _unauthorized(
-            f"no_authorization_header_or_cookie (received headers: {names})", request=request
+            f"no_authorization_header_or_cookie (received headers: {names})",
+            request=request,
         )
     if not auth_header.lower().startswith("bearer "):
         raise _unauthorized(

@@ -11,6 +11,7 @@ The *active* project for resource endpoints is resolved separately by
 ``app.middleware.project_context.get_current_project`` from the
 ``X-Project-Id`` header.
 """
+
 from __future__ import annotations
 
 import re
@@ -89,9 +90,7 @@ def _to_read(p: Project, counts: dict[str, int] | None = None) -> ProjectRead:
     return read
 
 
-async def _unique_slug(
-    session: AsyncSession, org_id: uuid.UUID, desired: str
-) -> str:
+async def _unique_slug(session: AsyncSession, org_id: uuid.UUID, desired: str) -> str:
     """Return ``desired`` or ``desired-2`` / ``-3`` … if it collides."""
     base = _slugify(desired)
     candidate = base
@@ -136,7 +135,9 @@ async def create_project(
     ctx: OrgContext = Depends(require_role("owner", "admin")),
     session: AsyncSession = Depends(get_db),
 ) -> ProjectRead:
-    slug = await _unique_slug(session, ctx.organization_id, payload.slug or payload.name)
+    slug = await _unique_slug(
+        session, ctx.organization_id, payload.slug or payload.name
+    )
     proj = Project(
         organization_id=ctx.organization_id,
         name=payload.name.strip(),
@@ -176,7 +177,9 @@ async def get_project(
         .where(Project.deleted_at.is_(None))
     )
     if proj is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Project not found."
+        )
     return _to_read(proj, await _resource_counts(session, proj.id))
 
 
@@ -194,7 +197,9 @@ async def update_project(
         .where(Project.deleted_at.is_(None))
     )
     if proj is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Project not found."
+        )
 
     if payload.name is not None:
         proj.name = payload.name.strip()
@@ -240,7 +245,9 @@ async def delete_project(
         .where(Project.deleted_at.is_(None))
     )
     if proj is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Project not found."
+        )
     if proj.is_default:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,

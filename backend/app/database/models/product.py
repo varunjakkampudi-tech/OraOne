@@ -16,6 +16,7 @@ models) rather than native PG enums, so new states can be introduced without a
 schema migration. Use the ``ProductStatus`` / ``ProductVisibility`` constant
 classes as the single source of truth for valid values.
 """
+
 from __future__ import annotations
 
 from typing import Any, Optional
@@ -55,8 +56,15 @@ class ProductStatus:
     DISABLED = "disabled"
 
     ALL = (
-        COMING_SOON, PREVIEW, BETA, GA, ACTIVE, DEPRECATED,
-        MAINTENANCE, INTERNAL, DISABLED,
+        COMING_SOON,
+        PREVIEW,
+        BETA,
+        GA,
+        ACTIVE,
+        DEPRECATED,
+        MAINTENANCE,
+        INTERNAL,
+        DISABLED,
     )
     #: States in which an entitled org may use the product.
     USABLE = (PREVIEW, BETA, GA, ACTIVE, DEPRECATED)
@@ -103,29 +111,45 @@ class Product(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     documentation_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False,
-        default=ProductStatus.GA, server_default=ProductStatus.GA,
+        String(20),
+        nullable=False,
+        default=ProductStatus.GA,
+        server_default=ProductStatus.GA,
     )
     visibility: Mapped[str] = mapped_column(
-        String(20), nullable=False,
-        default=ProductVisibility.VISIBLE, server_default=ProductVisibility.VISIBLE,
+        String(20),
+        nullable=False,
+        default=ProductVisibility.VISIBLE,
+        server_default=ProductVisibility.VISIBLE,
     )
     version: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="1.0.0", server_default="1.0.0",
+        String(40),
+        nullable=False,
+        default="1.0.0",
+        server_default="1.0.0",
     )
     release_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     #: Feature keys enabled by default for this product (Product → Feature map).
     default_features: Mapped[list[Any]] = mapped_column(
-        JSONB, nullable=False, default=list, server_default="[]",
+        JSONB,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     #: Default entitlement for organizations without an explicit override row.
     default_enabled: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="true",
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="true",
     )
     #: Ordering hint for admin/nav rendering (a.k.a. display order).
     sort_order: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
 
     def __repr__(self) -> str:  # pragma: no cover

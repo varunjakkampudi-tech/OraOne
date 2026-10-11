@@ -12,6 +12,7 @@ Entitlements are written only by platform administrators (Super Admin Control
 Center). Customers can read their own effective entitlements via
 ``GET /api/entitlements/me`` but can never grant themselves access.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -28,7 +29,8 @@ class OrganizationEntitlement(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "organization_entitlements"
     __table_args__ = (
         UniqueConstraint(
-            "organization_id", "product_key",
+            "organization_id",
+            "product_key",
             name="uq_org_entitlements_org_product",
         ),
         Index("ix_org_entitlements_organization_id", "organization_id"),

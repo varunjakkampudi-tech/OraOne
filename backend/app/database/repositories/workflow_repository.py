@@ -1,4 +1,5 @@
 """Workflow repository (Phase 11). Tenant-scoped helpers for workflows + runs."""
+
 from __future__ import annotations
 
 import uuid
@@ -33,7 +34,11 @@ class WorkflowRepository:
     # ── workflows ──
     async def get(self, workflow_id: uuid.UUID) -> Optional[Workflow]:
         row = await self.session.get(Workflow, workflow_id)
-        if row is None or row.organization_id != self.organization_id or row.deleted_at is not None:
+        if (
+            row is None
+            or row.organization_id != self.organization_id
+            or row.deleted_at is not None
+        ):
             return None
         return row
 
@@ -77,7 +82,11 @@ class WorkflowRepository:
         return row
 
     async def list_runs(
-        self, *, workflow_id: Optional[uuid.UUID] = None, limit: int = 50, offset: int = 0
+        self,
+        *,
+        workflow_id: Optional[uuid.UUID] = None,
+        limit: int = 50,
+        offset: int = 0,
     ) -> list[WorkflowRun]:
         q = (
             select(WorkflowRun)
@@ -91,9 +100,8 @@ class WorkflowRepository:
         return list((await self.session.scalars(q)).all())
 
     async def count_runs(self, *, workflow_id: Optional[uuid.UUID] = None) -> int:
-        q = (
-            select(func.count(WorkflowRun.id))
-            .where(WorkflowRun.organization_id == self.organization_id)
+        q = select(func.count(WorkflowRun.id)).where(
+            WorkflowRun.organization_id == self.organization_id
         )
         if workflow_id is not None:
             q = q.where(WorkflowRun.workflow_id == workflow_id)

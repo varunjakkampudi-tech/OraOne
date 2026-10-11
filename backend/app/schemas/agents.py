@@ -1,4 +1,5 @@
 """Agent request/response schemas (Phase 6)."""
+
 from __future__ import annotations
 
 import uuid
@@ -13,9 +14,15 @@ class AgentCreate(BaseModel):
     type: str = Field(..., description="Agent type: chat, whatsapp, sales, support.")
     description: Optional[str] = None
     model: Optional[str] = Field(default=None, max_length=80)
-    status: Optional[str] = Field(default=None, description="Initial status; defaults to 'draft'.")
+    status: Optional[str] = Field(
+        default=None, description="Initial status; defaults to 'draft'."
+    )
     avatar_url: Optional[str] = Field(default=None, max_length=500)
-    website_url: Optional[str] = Field(default=None, max_length=500, description="Site to auto-crawl into the knowledge base on deploy.")
+    website_url: Optional[str] = Field(
+        default=None,
+        max_length=500,
+        description="Site to auto-crawl into the knowledge base on deploy.",
+    )
 
     # AgentConfig fields (1:1 sidecar — created in the same transaction)
     system_prompt: Optional[str] = None

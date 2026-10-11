@@ -4,6 +4,7 @@ The full pipeline is exercised without a database by stubbing the two DB-backed
 stages (``_subscription_state`` and the entitlement snapshot), so every policy
 branch is covered deterministically and fast.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -45,9 +46,16 @@ def _snapshot(**over):
 @pytest.fixture(autouse=True)
 def _stub_stages(monkeypatch):
     """Stub the two DB-backed stages with in-memory defaults; tests override."""
+
     async def _ok_sub(session, org_id):
-        return {"status": "active", "plan_code": "business", "plan_limits": None,
-                "blocked": False, "outcome": AuthzOutcome.ALLOW, "reason": None}
+        return {
+            "status": "active",
+            "plan_code": "business",
+            "plan_limits": None,
+            "blocked": False,
+            "outcome": AuthzOutcome.ALLOW,
+            "reason": None,
+        }
 
     async def _snap(session, org_id):
         return _snapshot()
@@ -103,6 +111,7 @@ async def test_product_allowed():
 async def test_product_denied_when_not_entitled(monkeypatch):
     async def _snap(session, org_id):
         return _snapshot(products={"ai_platform": True, "voice_platform": False})
+
     monkeypatch.setattr(azm.ent, "get_cached_snapshot", _snap)
     d = await authorize(None, _ctx(), product="voice_platform")
     assert d.allowed is False
@@ -116,6 +125,7 @@ async def test_product_maintenance(monkeypatch):
             products={"voice_platform": False},
             maintenance={"voice_platform": True},
         )
+
     monkeypatch.setattr(azm.ent, "get_cached_snapshot", _snap)
     d = await authorize(None, _ctx(), product="voice_platform")
     assert d.outcome == AuthzOutcome.MAINTENANCE
@@ -128,6 +138,7 @@ async def test_product_coming_soon(monkeypatch):
             products={"voice_platform": False},
             statuses={"voice_platform": "coming_soon"},
         )
+
     monkeypatch.setattr(azm.ent, "get_cached_snapshot", _snap)
     d = await authorize(None, _ctx(), product="voice_platform")
     assert d.outcome == AuthzOutcome.COMING_SOON
@@ -167,9 +178,15 @@ async def test_permission_denied_for_viewer():
 # --------------------------------------------------------------------------- #
 async def test_subscription_blocked_not_enforced_by_default(monkeypatch):
     async def _blocked_sub(session, org_id):
-        return {"status": "canceled", "plan_code": "free", "plan_limits": None,
-                "blocked": True, "outcome": AuthzOutcome.SUBSCRIPTION_EXPIRED,
-                "reason": "inactive"}
+        return {
+            "status": "canceled",
+            "plan_code": "free",
+            "plan_limits": None,
+            "blocked": True,
+            "outcome": AuthzOutcome.SUBSCRIPTION_EXPIRED,
+            "reason": "inactive",
+        }
+
     monkeypatch.setattr(azm, "_subscription_state", _blocked_sub)
     # Default: enforcement OFF -> still allowed.
     d = await authorize(None, _ctx(), product="voice_platform")
@@ -178,9 +195,15 @@ async def test_subscription_blocked_not_enforced_by_default(monkeypatch):
 
 async def test_subscription_blocked_denies_when_enforced(monkeypatch):
     async def _blocked_sub(session, org_id):
-        return {"status": "canceled", "plan_code": "free", "plan_limits": None,
-                "blocked": True, "outcome": AuthzOutcome.SUBSCRIPTION_EXPIRED,
-                "reason": "inactive"}
+        return {
+            "status": "canceled",
+            "plan_code": "free",
+            "plan_limits": None,
+            "blocked": True,
+            "outcome": AuthzOutcome.SUBSCRIPTION_EXPIRED,
+            "reason": "inactive",
+        }
+
     monkeypatch.setattr(azm, "_subscription_state", _blocked_sub)
     monkeypatch.setattr(azm, "ENFORCE_SUBSCRIPTION", True)
     d = await authorize(None, _ctx(), product="voice_platform")
@@ -195,6 +218,7 @@ async def test_subscription_blocked_denies_when_enforced(monkeypatch):
 async def test_quota_exceeded_not_enforced_by_default(monkeypatch):
     async def _exceeded(session, org_id, key, **kw):
         return q.QuotaDecision(False, key, 10, 10, 0, "exceeded")
+
     monkeypatch.setattr(azm.quotas, "check_quota", _exceeded)
     d = await authorize(None, _ctx(), quota="ai_requests")
     assert d.allowed is True  # designed, not enforced
@@ -203,6 +227,7 @@ async def test_quota_exceeded_not_enforced_by_default(monkeypatch):
 async def test_quota_exceeded_denies_when_enforced(monkeypatch):
     async def _exceeded(session, org_id, key, **kw):
         return q.QuotaDecision(False, key, 10, 10, 0, "exceeded")
+
     monkeypatch.setattr(azm.quotas, "check_quota", _exceeded)
     monkeypatch.setattr(azm, "ENFORCE_QUOTAS", True)
     d = await authorize(None, _ctx(), quota="ai_requests")
@@ -235,15 +260,22 @@ async def test_denied_increments_denied_counter():
 # --------------------------------------------------------------------------- #
 def test_resolve_limit_uses_plan_default():
     assert q.resolve_limit(q.QuotaKey.USERS, plan_code="free") == 2
-    assert q.resolve_limit(q.QuotaKey.AI_REQUESTS, plan_code="enterprise") == q.UNLIMITED
+    assert (
+        q.resolve_limit(q.QuotaKey.AI_REQUESTS, plan_code="enterprise") == q.UNLIMITED
+    )
 
 
 def test_resolve_limit_override_wins():
-    assert q.resolve_limit(q.QuotaKey.USERS, plan_code="free", plan_limits={"users": 50}) == 50
+    assert (
+        q.resolve_limit(q.QuotaKey.USERS, plan_code="free", plan_limits={"users": 50})
+        == 50
+    )
 
 
 async def test_check_quota_unlimited_allows():
-    d = await q.check_quota(None, uuid.uuid4(), q.QuotaKey.USERS, plan_code="enterprise")
+    d = await q.check_quota(
+        None, uuid.uuid4(), q.QuotaKey.USERS, plan_code="enterprise"
+    )
     assert d.allowed is True
     assert d.limit == q.UNLIMITED
 
@@ -284,7 +316,9 @@ def test_metrics_histogram_and_prometheus_text():
 # Policy engine + DecisionTrace                                               #
 # --------------------------------------------------------------------------- #
 async def test_decision_carries_full_trace():
-    d = await authorize(None, _ctx(), product="voice_platform", permission="agents.write")
+    d = await authorize(
+        None, _ctx(), product="voice_platform", permission="agents.write"
+    )
     assert d.allowed is True
     names = [t["policy"] for t in d.trace]
     assert names[0] == "authentication"
@@ -296,8 +330,11 @@ async def test_decision_carries_full_trace():
 async def test_trace_stops_at_first_denial(monkeypatch):
     async def _snap(session, org_id):
         return _snapshot(products={"ai_platform": True, "voice_platform": False})
+
     monkeypatch.setattr(azm.ent, "get_cached_snapshot", _snap)
-    d = await authorize(None, _ctx(), product="voice_platform", permission="agents.write")
+    d = await authorize(
+        None, _ctx(), product="voice_platform", permission="agents.write"
+    )
     assert d.allowed is False
     last = d.trace[-1]
     assert last["policy"] == "entitlement"
@@ -322,7 +359,9 @@ async def test_custom_policy_chain_is_pluggable():
         async def evaluate(self, actx):
             return azm.PolicyEval(azm.PolicyResult.ALLOW)
 
-    d = await authorize(None, None, product="voice_platform", policies=(_AlwaysAllow(),))
+    d = await authorize(
+        None, None, product="voice_platform", policies=(_AlwaysAllow(),)
+    )
     assert d.allowed is True
     assert d.trace == [{"policy": "always_allow", "result": "allow"}]
 
@@ -353,7 +392,9 @@ async def test_context_memoizes_snapshot(monkeypatch):
         return _snapshot()
 
     monkeypatch.setattr(azm.ent, "get_cached_snapshot", _snap)
-    actx = azm.build_context(None, _ctx(), product="voice_platform", feature="voice_agents")
+    actx = azm.build_context(
+        None, _ctx(), product="voice_platform", feature="voice_agents"
+    )
     await actx.snapshot()
     await actx.snapshot()
     assert calls["n"] == 1  # resolved once, then memoised
@@ -412,6 +453,7 @@ def test_metrics_use_backend_swaps_target():
 def test_prometheus_backend_optional_dependency():
     try:
         import prometheus_client  # noqa: F401
+
         assert m.PrometheusBackend().name == "prometheus"
     except ImportError:
         with pytest.raises(RuntimeError):
@@ -421,6 +463,7 @@ def test_prometheus_backend_optional_dependency():
 def test_otel_backend_optional_dependency():
     try:
         from opentelemetry import metrics as _otel  # noqa: F401
+
         assert m.OpenTelemetryBackend().name == "otel"
     except ImportError:
         with pytest.raises(RuntimeError):

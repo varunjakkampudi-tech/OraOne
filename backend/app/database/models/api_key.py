@@ -6,6 +6,7 @@ we persist only a SHA-256 hash plus a non-secret ``prefix`` used for lookup
 and display. Keys carry a list of ``scopes`` that gate which external
 endpoints they may call.
 """
+
 from __future__ import annotations
 
 import uuid

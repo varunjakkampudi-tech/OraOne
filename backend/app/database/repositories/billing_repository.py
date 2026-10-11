@@ -3,6 +3,7 @@
 Plans are global; subscriptions and invoices are tenant-scoped. The
 subscription helpers are pinned to ``organization_id``.
 """
+
 from __future__ import annotations
 
 import uuid

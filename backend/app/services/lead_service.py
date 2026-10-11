@@ -4,6 +4,7 @@ Shared by the dashboard ``/api/leads`` router and the public widget lead
 endpoint so a captured contact always produces a first-class ``leads`` row
 with a sensible score/temperature.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -17,13 +18,36 @@ from app.database.models.lead import Lead, LeadStatus, LeadTemperature
 
 # Intent keywords that signal buying interest → boost the score.
 _HOT_KEYWORDS = (
-    "quote", "quotation", "pricing", "price", "buy", "purchase", "demo",
-    "trial", "book", "appointment", "schedule", "contract", "invoice",
-    "subscribe", "upgrade", "enterprise", "sales", "talk to",
+    "quote",
+    "quotation",
+    "pricing",
+    "price",
+    "buy",
+    "purchase",
+    "demo",
+    "trial",
+    "book",
+    "appointment",
+    "schedule",
+    "contract",
+    "invoice",
+    "subscribe",
+    "upgrade",
+    "enterprise",
+    "sales",
+    "talk to",
 )
 _WARM_KEYWORDS = (
-    "interested", "info", "information", "details", "learn", "how much",
-    "compare", "feature", "support", "help",
+    "interested",
+    "info",
+    "information",
+    "details",
+    "learn",
+    "how much",
+    "compare",
+    "feature",
+    "support",
+    "help",
 )
 
 

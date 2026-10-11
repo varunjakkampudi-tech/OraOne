@@ -10,6 +10,7 @@ Adds two tables:
 
 Seeds the two launch products: ``ai_platform`` and ``voice_platform``.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -39,19 +40,29 @@ def upgrade() -> None:
         sa.Column("route_prefix", sa.String(120), nullable=True),
         sa.Column("documentation_url", sa.String(500), nullable=True),
         sa.Column("status", sa.String(20), nullable=False, server_default="ga"),
-        sa.Column("visibility", sa.String(20), nullable=False, server_default="visible"),
+        sa.Column(
+            "visibility", sa.String(20), nullable=False, server_default="visible"
+        ),
         sa.Column("version", sa.String(40), nullable=False, server_default="1.0.0"),
         sa.Column("release_notes", sa.Text(), nullable=True),
-        sa.Column("default_features", postgresql.JSONB(), nullable=False, server_default="[]"),
-        sa.Column("default_enabled", sa.Boolean(), nullable=False, server_default="true"),
-        sa.Column("sort_order", sa.Integer(), nullable=False, server_default="0"),
         sa.Column(
-            "created_at", sa.DateTime(timezone=True),
-            nullable=False, server_default=sa.func.now(),
+            "default_features", postgresql.JSONB(), nullable=False, server_default="[]"
         ),
         sa.Column(
-            "updated_at", sa.DateTime(timezone=True),
-            nullable=False, server_default=sa.func.now(),
+            "default_enabled", sa.Boolean(), nullable=False, server_default="true"
+        ),
+        sa.Column("sort_order", sa.Integer(), nullable=False, server_default="0"),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.func.now(),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.func.now(),
         ),
         sa.UniqueConstraint("key", name="uq_products_key"),
         sa.UniqueConstraint("slug", name="uq_products_slug"),
@@ -62,35 +73,46 @@ def upgrade() -> None:
         "organization_entitlements",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column(
-            "organization_id", postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False,
+            "organization_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("organizations.id", ondelete="CASCADE"),
+            nullable=False,
         ),
         sa.Column("product_key", sa.String(60), nullable=False),
         sa.Column("enabled", sa.Boolean(), nullable=False),
         sa.Column(
-            "updated_by_user_id", postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True,
+            "updated_by_user_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("users.id", ondelete="SET NULL"),
+            nullable=True,
         ),
         sa.Column(
-            "created_at", sa.DateTime(timezone=True),
-            nullable=False, server_default=sa.func.now(),
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.func.now(),
         ),
         sa.Column(
-            "updated_at", sa.DateTime(timezone=True),
-            nullable=False, server_default=sa.func.now(),
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.func.now(),
         ),
         sa.UniqueConstraint(
-            "organization_id", "product_key",
+            "organization_id",
+            "product_key",
             name="uq_org_entitlements_org_product",
         ),
     )
     op.create_index(
         "ix_org_entitlements_organization_id",
-        "organization_entitlements", ["organization_id"],
+        "organization_entitlements",
+        ["organization_id"],
     )
     op.create_index(
         "ix_org_entitlements_product_key",
-        "organization_entitlements", ["product_key"],
+        "organization_entitlements",
+        ["product_key"],
     )
 
     # Seed the two launch products (idempotent-safe: table is freshly created).

@@ -12,6 +12,7 @@ Answers are produced by the Enterprise RAG engine (R4), grounded in the
 widget's knowledge base, and degrade to extractive answers when the AI
 provider is offline.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -56,10 +57,20 @@ from app.services.rag_answer import answer_query
 
 public_router = APIRouter(prefix="/api/widget", tags=["widget-public"])
 
-_MAX_CONTEXT_KEYS = {"name", "email", "company", "plan", "language", "url", "page_title", "userId"}
+_MAX_CONTEXT_KEYS = {
+    "name",
+    "email",
+    "company",
+    "plan",
+    "language",
+    "url",
+    "page_title",
+    "userId",
+}
 
 
 # ─────────────────── guards ───────────────────
+
 
 async def _load_live_widget(
     session: AsyncSession,
@@ -107,6 +118,7 @@ def _sanitize_context(ctx: dict) -> dict:
 
 # ─────────────────── config ───────────────────
 
+
 @public_router.get(
     "/config",
     response_model=WidgetPublicConfig,
@@ -136,6 +148,7 @@ async def widget_config(
 
 
 # ─────────────────── session ───────────────────
+
 
 async def _get_or_create_session(
     session: AsyncSession,
@@ -167,7 +180,10 @@ async def _get_or_create_session(
         await session.flush()
     else:
         if user_context:
-            ws.user_context = {**(ws.user_context or {}), **_sanitize_context(user_context)}
+            ws.user_context = {
+                **(ws.user_context or {}),
+                **_sanitize_context(user_context),
+            }
         ws.last_active_at = widget_service.now_utc()
     return ws
 
@@ -255,7 +271,9 @@ async def _persist_and_answer(
     agent_model: Optional[str] = None
     if agent_id is not None:
         agent_row = await session.scalar(
-            select(Agent).options(selectinload(Agent.config)).where(Agent.id == agent_id)
+            select(Agent)
+            .options(selectinload(Agent.config))
+            .where(Agent.id == agent_id)
         )
         if agent_row is not None:
             if agent_row.status != AgentStatus.active:
@@ -510,7 +528,9 @@ async def widget_stream(
             "confidence": out["confidence"],
             "related_questions": out["related_questions"],
             "grounded": out["grounded"],
-            "conversation_id": str(out["conversation_id"]) if out["conversation_id"] else None,
+            "conversation_id": str(out["conversation_id"])
+            if out["conversation_id"]
+            else None,
             "message_id": str(out["message_id"]) if out["message_id"] else None,
         }
         yield f"data: {json.dumps(done)}\n\n"
@@ -523,6 +543,7 @@ async def widget_stream(
 
 
 # ─────────────────── lead / escalate / feedback / event ───────────────────
+
 
 @public_router.post("/lead", response_model=WidgetOk, summary="Capture a lead")
 async def widget_lead(
@@ -585,9 +606,7 @@ async def widget_lead(
     return WidgetOk(detail="Lead captured.")
 
 
-@public_router.post(
-    "/escalate", response_model=WidgetOk, summary="Escalate to a human"
-)
+@public_router.post("/escalate", response_model=WidgetOk, summary="Escalate to a human")
 async def widget_escalate(
     payload: WidgetEscalateRequest,
     origin: Optional[str] = Header(default=None),
@@ -672,7 +691,11 @@ async def widget_event(
         referer=referer,
         require_published=False,
     )
-    event = payload.event if payload.event in WidgetEventType.ALL else WidgetEventType.opened
+    event = (
+        payload.event
+        if payload.event in WidgetEventType.ALL
+        else WidgetEventType.opened
+    )
     ws = None
     if payload.session_id is not None:
         ws = await session.scalar(

@@ -5,6 +5,7 @@ which key called which endpoint, the HTTP status, and the latency. Powers
 the developer dashboard's usage / error views and feeds cost/observability
 without depending on external log aggregation.
 """
+
 from __future__ import annotations
 
 import uuid

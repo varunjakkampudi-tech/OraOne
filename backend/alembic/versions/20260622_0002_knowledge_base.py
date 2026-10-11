@@ -9,6 +9,7 @@ Adds three new tables and two enums:
 No vector / embedding columns yet — those land in a follow-up migration
 when pgvector is introduced.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -125,9 +126,7 @@ def upgrade() -> None:
     op.create_index(
         "ix_documents_knowledge_base_id", "documents", ["knowledge_base_id"]
     )
-    op.create_index(
-        "ix_documents_organization_id", "documents", ["organization_id"]
-    )
+    op.create_index("ix_documents_organization_id", "documents", ["organization_id"])
     op.create_index("ix_documents_status", "documents", ["status"])
 
     # ── document_chunks ───────────────────────────────────
@@ -180,9 +179,7 @@ def downgrade() -> None:
     op.drop_index("ix_documents_knowledge_base_id", table_name="documents")
     op.drop_table("documents")
 
-    op.drop_index(
-        "ix_knowledge_bases_organization_id", table_name="knowledge_bases"
-    )
+    op.drop_index("ix_knowledge_bases_organization_id", table_name="knowledge_bases")
     op.drop_table("knowledge_bases")
 
     op.execute("DROP TYPE IF EXISTS document_status")

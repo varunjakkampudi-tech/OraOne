@@ -10,6 +10,7 @@ Resource counts (users, agents, knowledge bases, ...) are *not* stored here;
 they are counted live from their own tables at read time. Only cumulative
 metered events live in this table.
 """
+
 from __future__ import annotations
 
 import uuid

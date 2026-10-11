@@ -1,4 +1,5 @@
 """Webhook schemas (R7 developer platform)."""
+
 from __future__ import annotations
 
 import uuid
@@ -33,7 +34,9 @@ def validate_public_webhook_url(value: str) -> str:
     if parsed.username or parsed.password or parsed.fragment:
         raise ValueError("URL credentials and fragments are not allowed")
     host = parsed.hostname.rstrip(".").lower()
-    if host in {"localhost", "localhost.localdomain"} or host.endswith((".local", ".internal")):
+    if host in {"localhost", "localhost.localdomain"} or host.endswith(
+        (".local", ".internal")
+    ):
         raise ValueError("Private and internal hosts are not allowed")
     try:
         ipaddress.ip_address(host)
@@ -55,7 +58,9 @@ def validate_public_webhook_url(value: str) -> str:
             or ip.is_multicast
             or ip.is_unspecified
         ):
-            raise ValueError("Private, loopback, reserved, or link-local destinations are not allowed")
+            raise ValueError(
+                "Private, loopback, reserved, or link-local destinations are not allowed"
+            )
     return value
 
 

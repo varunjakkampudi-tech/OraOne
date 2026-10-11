@@ -5,6 +5,7 @@ token flow, and protected routes must accept either.
 DB-backed (needs a real user row + password hash for a real login), auto-skips
 when Postgres isn't reachable — same pattern as test_phase6_agents_crud.py.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -24,9 +25,8 @@ def _postgres_reachable() -> bool:
     url = os.environ.get("DATABASE_URL", "")
     if not url:
         return False
-    dsn = (
-        url.replace("postgresql+asyncpg://", "postgresql://")
-        .replace("postgresql+psycopg2://", "postgresql://")
+    dsn = url.replace("postgresql+asyncpg://", "postgresql://").replace(
+        "postgresql+psycopg2://", "postgresql://"
     )
 
     async def _probe() -> bool:
@@ -90,14 +90,18 @@ async def _login_via_otp(client, *, email: str, password: str):
     /login/verify-otp exchanges it for tokens + cookies."""
     from app.services import auth_service
 
-    login_resp = await client.post("/api/auth/login", json={"email": email, "password": password})
+    login_resp = await client.post(
+        "/api/auth/login", json={"email": email, "password": password}
+    )
     assert login_resp.status_code == 200, login_resp.text
     assert login_resp.json()["otp_required"] is True
 
     code = auth_service._cache().get(auth_service._login_otp_key(email))
     assert code, "login OTP was not stored in cache"
 
-    return await client.post("/api/auth/login/verify-otp", json={"email": email, "code": code})
+    return await client.post(
+        "/api/auth/login/verify-otp", json={"email": email, "code": code}
+    )
 
 
 @REQUIRES_DB
@@ -112,14 +116,24 @@ async def test_login_sets_httponly_samesite_cookies(db_session):
     await _seed_user(db_session, email=email, password=password)
 
     transport = ASGITransport(app=app)
-    headers = {"X-Forwarded-For": f"10.0.{uuid.uuid4().int % 255}.{uuid.uuid4().int % 255}"}
-    async with AsyncClient(transport=transport, base_url="http://test", headers=headers) as client:
+    headers = {
+        "X-Forwarded-For": f"10.0.{uuid.uuid4().int % 255}.{uuid.uuid4().int % 255}"
+    }
+    async with AsyncClient(
+        transport=transport, base_url="http://test", headers=headers
+    ) as client:
         resp = await _login_via_otp(client, email=email, password=password)
         assert resp.status_code == 200, resp.text
 
         set_cookie_headers = resp.headers.get_list("set-cookie")
-        access_cookie = next((h for h in set_cookie_headers if h.startswith("oraone_access_token=")), None)
-        refresh_cookie = next((h for h in set_cookie_headers if h.startswith("oraone_refresh_token=")), None)
+        access_cookie = next(
+            (h for h in set_cookie_headers if h.startswith("oraone_access_token=")),
+            None,
+        )
+        refresh_cookie = next(
+            (h for h in set_cookie_headers if h.startswith("oraone_refresh_token=")),
+            None,
+        )
         assert access_cookie is not None, set_cookie_headers
         assert refresh_cookie is not None, set_cookie_headers
 
@@ -145,8 +159,12 @@ async def test_protected_route_accepts_cookie_without_authorization_header(db_se
     await _seed_user(db_session, email=email, password=password)
 
     transport = ASGITransport(app=app)
-    headers = {"X-Forwarded-For": f"10.0.{uuid.uuid4().int % 255}.{uuid.uuid4().int % 255}"}
-    async with AsyncClient(transport=transport, base_url="http://test", headers=headers) as client:
+    headers = {
+        "X-Forwarded-For": f"10.0.{uuid.uuid4().int % 255}.{uuid.uuid4().int % 255}"
+    }
+    async with AsyncClient(
+        transport=transport, base_url="http://test", headers=headers
+    ) as client:
         login_resp = await _login_via_otp(client, email=email, password=password)
         assert login_resp.status_code == 200
 
@@ -169,8 +187,12 @@ async def test_refresh_works_from_cookie_alone_with_no_body(db_session):
     await _seed_user(db_session, email=email, password=password)
 
     transport = ASGITransport(app=app)
-    headers = {"X-Forwarded-For": f"10.0.{uuid.uuid4().int % 255}.{uuid.uuid4().int % 255}"}
-    async with AsyncClient(transport=transport, base_url="http://test", headers=headers) as client:
+    headers = {
+        "X-Forwarded-For": f"10.0.{uuid.uuid4().int % 255}.{uuid.uuid4().int % 255}"
+    }
+    async with AsyncClient(
+        transport=transport, base_url="http://test", headers=headers
+    ) as client:
         login_resp = await _login_via_otp(client, email=email, password=password)
         assert login_resp.status_code == 200
         old_access_token = login_resp.json()["access_token"]
@@ -193,8 +215,12 @@ async def test_logout_clears_cookies_and_revokes_refresh(db_session):
     await _seed_user(db_session, email=email, password=password)
 
     transport = ASGITransport(app=app)
-    headers = {"X-Forwarded-For": f"10.0.{uuid.uuid4().int % 255}.{uuid.uuid4().int % 255}"}
-    async with AsyncClient(transport=transport, base_url="http://test", headers=headers) as client:
+    headers = {
+        "X-Forwarded-For": f"10.0.{uuid.uuid4().int % 255}.{uuid.uuid4().int % 255}"
+    }
+    async with AsyncClient(
+        transport=transport, base_url="http://test", headers=headers
+    ) as client:
         login_resp = await _login_via_otp(client, email=email, password=password)
         assert login_resp.status_code == 200
 
@@ -203,10 +229,20 @@ async def test_logout_clears_cookies_and_revokes_refresh(db_session):
 
         set_cookie_headers = logout_resp.headers.get_list("set-cookie")
         # Cleared cookies are re-set with Max-Age=0 / an expiry in the past.
-        access_clear = next((h for h in set_cookie_headers if h.startswith("oraone_access_token=")), None)
-        refresh_clear = next((h for h in set_cookie_headers if h.startswith("oraone_refresh_token=")), None)
-        assert access_clear and ("Max-Age=0" in access_clear or "01 Jan 1970" in access_clear)
-        assert refresh_clear and ("Max-Age=0" in refresh_clear or "01 Jan 1970" in refresh_clear)
+        access_clear = next(
+            (h for h in set_cookie_headers if h.startswith("oraone_access_token=")),
+            None,
+        )
+        refresh_clear = next(
+            (h for h in set_cookie_headers if h.startswith("oraone_refresh_token=")),
+            None,
+        )
+        assert access_clear and (
+            "Max-Age=0" in access_clear or "01 Jan 1970" in access_clear
+        )
+        assert refresh_clear and (
+            "Max-Age=0" in refresh_clear or "01 Jan 1970" in refresh_clear
+        )
 
         # The revoked refresh token must no longer work even if replayed.
         refresh_resp = await client.post("/api/auth/refresh")

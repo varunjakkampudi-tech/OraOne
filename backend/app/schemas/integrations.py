@@ -3,6 +3,7 @@
 IMPORTANT: response models NEVER expose ``access_token`` /
 ``refresh_token`` — secrets stay encrypted at rest and server-side.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -13,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 # ──────────────── Catalog ────────────────
+
 
 class ProviderCatalogItem(BaseModel):
     """A provider as shown in the integrations grid."""
@@ -29,6 +31,7 @@ class ProviderCatalogItem(BaseModel):
 
 
 # ──────────────── Integrations ────────────────
+
 
 class IntegrationRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -122,6 +125,7 @@ class SyncLogListResponse(BaseModel):
 
 # ──────────────── Browse & selection (selective sync) ────────────────
 
+
 class BrowseItem(BaseModel):
     """A folder or file in the provider, shown in the file-picker."""
 
@@ -194,6 +198,7 @@ class SyncedItemsResponse(BaseModel):
 
 
 # ──────────────── Health & analytics (R5) ────────────────
+
 
 class IntegrationHealth(BaseModel):
     """A cheap connectivity/credential probe result for one integration."""

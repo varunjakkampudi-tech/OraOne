@@ -7,6 +7,7 @@ whole platform (connect → sync → chunk → embed → RAG → chat) works for
 every provider in *mock* mode today. Each class is the single seam where
 a real API implementation drops in later — no other layer changes.
 """
+
 from __future__ import annotations
 
 from app.connectors.base import BaseConnector

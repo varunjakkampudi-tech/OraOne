@@ -1,5 +1,6 @@
 """Integration — third-party connections owned by an organization
 (e.g. Meta WhatsApp Business, SendGrid, Salesforce…)."""
+
 from __future__ import annotations
 
 import enum

@@ -5,6 +5,7 @@ frontend can gate UI and so integrators can introspect their role's
 capabilities. Authorisation enforcement happens at each guarded endpoint
 via ``require_permission`` — these routes only *describe* access.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -54,7 +55,9 @@ async def permission_matrix(
     )
 
 
-@router.patch("/api/rbac/platform/users/{user_id}/role", response_model=PlatformUserRoleResponse)
+@router.patch(
+    "/api/rbac/platform/users/{user_id}/role", response_model=PlatformUserRoleResponse
+)
 async def change_user_platform_role(
     user_id: uuid.UUID,
     payload: PlatformRoleUpdateRequest,

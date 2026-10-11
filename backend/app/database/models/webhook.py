@@ -5,13 +5,14 @@ Outbound, org-scoped webhooks let third-party systems react to OraOne events
 polling. Each endpoint has its own signing ``secret``; deliveries are signed
 with an HMAC-SHA256 signature so receivers can verify authenticity.
 """
+
 from __future__ import annotations
 
 import uuid
 from datetime import datetime
 from typing import Any, Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -77,17 +78,26 @@ class WebhookEndpoint(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base
     description: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     secret: Mapped[str] = mapped_column(String(80), nullable=False)
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=WebhookStatus.ACTIVE, server_default=WebhookStatus.ACTIVE
+        String(20),
+        nullable=False,
+        default=WebhookStatus.ACTIVE,
+        server_default=WebhookStatus.ACTIVE,
     )
     # Subscribed event types; empty list = all events.
     events: Mapped[list[Any]] = mapped_column(
         JSONB, nullable=False, default=list, server_default="[]"
     )
-    failure_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    failure_count: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
     last_status: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
-    last_delivery_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    last_delivery_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True)
+    )
     created_by_user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
     )
 
     deliveries: Mapped[list["WebhookDelivery"]] = relationship(
@@ -114,9 +124,13 @@ class WebhookDelivery(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     event: Mapped[str] = mapped_column(String(60), nullable=False)
-    success: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
+    success: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
     status_code: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    attempts: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
     error: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     payload: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, default=dict, server_default="{}"
@@ -165,8 +179,13 @@ class WebhookOutbox(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         JSONB, nullable=False, default=dict, server_default="{}"
     )
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=OutboxStatus.PENDING, server_default=OutboxStatus.PENDING
+        String(20),
+        nullable=False,
+        default=OutboxStatus.PENDING,
+        server_default=OutboxStatus.PENDING,
     )
-    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    attempts: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
     last_error: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     processed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))

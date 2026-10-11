@@ -8,6 +8,7 @@ The dashboard derives processing time from the two timestamps.
 * ``processing_completed_at``
 * ``processing_error``
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -24,9 +25,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     with op.batch_alter_table("documents") as batch:
-        batch.add_column(
-            sa.Column("processing_started_at", sa.DateTime(timezone=True))
-        )
+        batch.add_column(sa.Column("processing_started_at", sa.DateTime(timezone=True)))
         batch.add_column(
             sa.Column("processing_completed_at", sa.DateTime(timezone=True))
         )

@@ -17,6 +17,7 @@ Foundation only — chunking, embeddings, and vector search are out of
 scope here. The ``document_chunks`` table is created by the migration
 but is not populated yet.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -66,7 +67,9 @@ from app.services.audit import audit
 from app.services.document_processing import compute_checksum, process_document
 
 
-def _doc_to_read(doc: Document, *, chunk_count: int, embedded_count: int = 0) -> DocumentRead:
+def _doc_to_read(
+    doc: Document, *, chunk_count: int, embedded_count: int = 0
+) -> DocumentRead:
     """Compose the DocumentRead payload, deriving ``processing_time_ms``."""
     elapsed_ms = None
     if doc.processing_started_at and doc.processing_completed_at:
@@ -88,6 +91,7 @@ router = APIRouter(tags=["knowledge"])
 
 
 # ─────────────────── helpers ───────────────────
+
 
 def _parse_enum(enum_cls, value, *, field: str):
     try:
@@ -144,7 +148,9 @@ async def _chunk_count_for_doc(session: AsyncSession, doc_id: uuid.UUID) -> int:
     )
 
 
-async def _chunk_counts_for_doc(session: AsyncSession, doc_id: uuid.UUID) -> tuple[int, int]:
+async def _chunk_counts_for_doc(
+    session: AsyncSession, doc_id: uuid.UUID
+) -> tuple[int, int]:
     """Return ``(total_chunks, embedded_chunks)`` for a document, where
     embedded chunks are those that carry a non-null vector."""
     total = await _chunk_count_for_doc(session, doc_id)
@@ -161,6 +167,7 @@ async def _chunk_counts_for_doc(session: AsyncSession, doc_id: uuid.UUID) -> tup
 
 
 # ─────────────────── Knowledge Bases ───────────────────
+
 
 @router.post(
     "/api/knowledge-bases",
@@ -236,9 +243,14 @@ async def list_knowledge_bases(
     ]
     if q:
         like = f"%{q.strip()}%"
-        filters.append(or_(KnowledgeBase.name.ilike(like), KnowledgeBase.description.ilike(like)))
+        filters.append(
+            or_(KnowledgeBase.name.ilike(like), KnowledgeBase.description.ilike(like))
+        )
     if status_:
-        filters.append(KnowledgeBase.status == _parse_enum(KnowledgeBaseStatus, status_, field="status"))
+        filters.append(
+            KnowledgeBase.status
+            == _parse_enum(KnowledgeBaseStatus, status_, field="status")
+        )
 
     total = int(
         await session.scalar(select(func.count(KnowledgeBase.id)).where(*filters)) or 0
@@ -266,11 +278,16 @@ async def list_knowledge_bases(
     for kb in rows:
         items.append(
             KnowledgeBaseRead.model_validate(
-                {**kb.__dict__, "document_count": await _doc_count_for_kb(session, kb.id)}
+                {
+                    **kb.__dict__,
+                    "document_count": await _doc_count_for_kb(session, kb.id),
+                }
             )
         )
 
-    return KnowledgeBaseListResponse(items=items, total=total, limit=limit, offset=offset)
+    return KnowledgeBaseListResponse(
+        items=items, total=total, limit=limit, offset=offset
+    )
 
 
 @router.get(
@@ -285,7 +302,9 @@ async def get_knowledge_base(
 ) -> KnowledgeBaseRead:
     kb = await _kb_for_org(session, kb_id=kb_id, organization_id=ctx.organization_id)
     if kb is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Knowledge base not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Knowledge base not found."
+        )
     return KnowledgeBaseRead.model_validate(
         {**kb.__dict__, "document_count": await _doc_count_for_kb(session, kb.id)}
     )
@@ -305,7 +324,9 @@ async def update_knowledge_base(
 ) -> KnowledgeBaseRead:
     kb = await _kb_for_org(session, kb_id=kb_id, organization_id=ctx.organization_id)
     if kb is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Knowledge base not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Knowledge base not found."
+        )
     before = {"name": kb.name, "status": kb.status.value, "description": kb.description}
     if payload.name is not None:
         kb.name = payload.name
@@ -322,7 +343,11 @@ async def update_knowledge_base(
         organization_id=str(ctx.organization_id),
         user_id=str(ctx.user_id),
         before=before,
-        after={"name": kb.name, "status": kb.status.value, "description": kb.description},
+        after={
+            "name": kb.name,
+            "status": kb.status.value,
+            "description": kb.description,
+        },
     )
     return KnowledgeBaseRead.model_validate(
         {**kb.__dict__, "document_count": await _doc_count_for_kb(session, kb.id)}
@@ -343,7 +368,9 @@ async def delete_knowledge_base(
 ) -> Response:
     kb = await _kb_for_org(session, kb_id=kb_id, organization_id=ctx.organization_id)
     if kb is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Knowledge base not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Knowledge base not found."
+        )
     kb.deleted_at = datetime.now(timezone.utc)
     await session.commit()
     audit(
@@ -380,7 +407,9 @@ _DEFAULT_MAX_BYTES = 25 * 1024 * 1024  # 25 MiB
 async def upload_document(
     background_tasks: BackgroundTasks,
     knowledge_base_id: uuid.UUID = Form(..., description="Target knowledge base UUID."),
-    folder_id: Optional[uuid.UUID] = Form(default=None, description="Optional target folder UUID."),
+    folder_id: Optional[uuid.UUID] = Form(
+        default=None, description="Optional target folder UUID."
+    ),
     file: UploadFile = File(..., description="Source file (PDF, TXT, DOCX, etc.)."),
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
@@ -389,7 +418,9 @@ async def upload_document(
         session, kb_id=knowledge_base_id, organization_id=ctx.organization_id
     )
     if kb is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Knowledge base not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Knowledge base not found."
+        )
 
     # Validate folder (if any) belongs to this KB + org.
     if folder_id is not None:
@@ -400,7 +431,9 @@ async def upload_document(
             .where(KnowledgeFolder.organization_id == ctx.organization_id)
         )
         if folder is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Folder not found.")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Folder not found."
+            )
 
     # Read the whole body so we can both size-check and stream into storage.
     body = await file.read()
@@ -548,11 +581,15 @@ async def list_documents(
     if knowledge_base_id is not None:
         filters.append(Document.knowledge_base_id == knowledge_base_id)
     if status_:
-        filters.append(Document.status == _parse_enum(DocumentStatus, status_, field="status"))
+        filters.append(
+            Document.status == _parse_enum(DocumentStatus, status_, field="status")
+        )
     if q:
         filters.append(Document.filename.ilike(f"%{q.strip()}%"))
 
-    total = int(await session.scalar(select(func.count(Document.id)).where(*filters)) or 0)
+    total = int(
+        await session.scalar(select(func.count(Document.id)).where(*filters)) or 0
+    )
 
     rows = (
         await session.scalars(
@@ -567,9 +604,7 @@ async def list_documents(
     items: list[DocumentRead] = []
     for d in rows:
         total_c, embedded_c = await _chunk_counts_for_doc(session, d.id)
-        items.append(
-            _doc_to_read(d, chunk_count=total_c, embedded_count=embedded_c)
-        )
+        items.append(_doc_to_read(d, chunk_count=total_c, embedded_count=embedded_c))
 
     return DocumentListResponse(items=items, total=total, limit=limit, offset=offset)
 
@@ -584,9 +619,13 @@ async def get_document(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> DocumentRead:
-    doc = await _doc_for_org(session, doc_id=document_id, organization_id=ctx.organization_id)
+    doc = await _doc_for_org(
+        session, doc_id=document_id, organization_id=ctx.organization_id
+    )
     if doc is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found."
+        )
     total_c, embedded_c = await _chunk_counts_for_doc(session, doc.id)
     return _doc_to_read(doc, chunk_count=total_c, embedded_count=embedded_c)
 
@@ -610,9 +649,13 @@ async def process_document_endpoint(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> DocumentRead:
-    doc = await _doc_for_org(session, doc_id=document_id, organization_id=ctx.organization_id)
+    doc = await _doc_for_org(
+        session, doc_id=document_id, organization_id=ctx.organization_id
+    )
     if doc is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found."
+        )
 
     # Flip status optimistically so polling sees movement immediately.
     doc.status = DocumentStatus.processing
@@ -650,9 +693,13 @@ async def list_chunks(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> list[ChunkRead]:
-    doc = await _doc_for_org(session, doc_id=document_id, organization_id=ctx.organization_id)
+    doc = await _doc_for_org(
+        session, doc_id=document_id, organization_id=ctx.organization_id
+    )
     if doc is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found."
+        )
     rows = (
         await session.scalars(
             select(DocumentChunk)
@@ -676,9 +723,13 @@ async def delete_document(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> Response:
-    doc = await _doc_for_org(session, doc_id=document_id, organization_id=ctx.organization_id)
+    doc = await _doc_for_org(
+        session, doc_id=document_id, organization_id=ctx.organization_id
+    )
     if doc is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found."
+        )
     doc.deleted_at = datetime.now(timezone.utc)
     await session.commit()
     audit(
@@ -692,6 +743,7 @@ async def delete_document(
 
 
 # ─────────────────── Dashboard stats ───────────────────
+
 
 @router.get(
     "/api/knowledge/stats",

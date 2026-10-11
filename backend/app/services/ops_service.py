@@ -6,6 +6,7 @@ checklist, feature-flag evaluation/CRUD, deployment history, and security-event
 queries. All read functions are org-scoped where applicable; system health is
 platform-wide.
 """
+
 from __future__ import annotations
 
 import os
@@ -24,7 +25,6 @@ from app.database.models.operations import (
     DeploymentStatus,
     FeatureFlag,
     SecurityEvent,
-    SecuritySeverity,
 )
 
 APP_VERSION = os.environ.get("ORAONE_VERSION", "1.0.0")
@@ -50,7 +50,11 @@ async def system_health(session: AsyncSession) -> dict[str, Any]:
     except Exception:  # noqa: BLE001
         db_ok = False
     checks.append(
-        {"component": "database", "status": "healthy" if db_ok else "down", "latency_ms": db_latency}
+        {
+            "component": "database",
+            "status": "healthy" if db_ok else "down",
+            "latency_ms": db_latency,
+        }
     )
 
     # configuration probes (presence, not values)
@@ -58,14 +62,19 @@ async def system_health(session: AsyncSession) -> dict[str, Any]:
         {
             "component": "ai_provider",
             "status": "configured"
-            if (os.environ.get("AWS_BEARER_TOKEN_BEDROCK") or os.environ.get("OPENAI_API_KEY"))
+            if (
+                os.environ.get("AWS_BEARER_TOKEN_BEDROCK")
+                or os.environ.get("OPENAI_API_KEY")
+            )
             else "degraded",
         }
     )
     checks.append(
         {
             "component": "object_storage",
-            "status": "configured" if os.environ.get("S3_BUCKET") or os.environ.get("AWS_REGION") else "local",
+            "status": "configured"
+            if os.environ.get("S3_BUCKET") or os.environ.get("AWS_REGION")
+            else "local",
         }
     )
     checks.append(
@@ -97,10 +106,7 @@ async def system_metrics(
         base = base.where(ApiRequestLog.organization_id == org_id)
 
     total = int(
-        await session.scalar(
-            select(func.count()).select_from(base.subquery())
-        )
-        or 0
+        await session.scalar(select(func.count()).select_from(base.subquery())) or 0
     )
     errors = int(
         await session.scalar(
@@ -137,7 +143,9 @@ async def system_metrics(
         await session.scalar(
             select(func.count(AuditLog.id)).where(
                 AuditLog.created_at >= since,
-                (AuditLog.organization_id == org_id) if org_id is not None else text("1=1"),
+                (AuditLog.organization_id == org_id)
+                if org_id is not None
+                else text("1=1"),
             )
         )
         or 0
@@ -146,7 +154,9 @@ async def system_metrics(
         await session.scalar(
             select(func.count(SecurityEvent.id)).where(
                 SecurityEvent.created_at >= since,
-                (SecurityEvent.organization_id == org_id) if org_id is not None else text("1=1"),
+                (SecurityEvent.organization_id == org_id)
+                if org_id is not None
+                else text("1=1"),
             )
         )
         or 0
@@ -181,21 +191,63 @@ async def readiness_checklist(session: AsyncSession) -> dict[str, Any]:
         return {"area": area, "status": "pass" if ok else "attention", "detail": detail}
 
     items = [
-        chk("Authentication & Authorization", True, "Cognito + RBAC permission matrix + resource ACL"),
-        chk("API Security", True, "JWT validation, scoped API keys, plan-based rate limiting"),
-        chk("Prompt Injection Protection", True, "Inline injection detection + prompt sanitization"),
-        chk("PII Detection & Moderation", True, "Regex PII masking + keyword content moderation"),
-        chk("Output Validation", True, "Secret / internal-URL redaction on model output"),
-        chk("Encryption & Secrets", bool(os.environ.get("AWS_REGION")), "TLS in transit; KMS/Secrets Manager in production"),
+        chk(
+            "Authentication & Authorization",
+            True,
+            "Cognito + RBAC permission matrix + resource ACL",
+        ),
+        chk(
+            "API Security",
+            True,
+            "JWT validation, scoped API keys, plan-based rate limiting",
+        ),
+        chk(
+            "Prompt Injection Protection",
+            True,
+            "Inline injection detection + prompt sanitization",
+        ),
+        chk(
+            "PII Detection & Moderation",
+            True,
+            "Regex PII masking + keyword content moderation",
+        ),
+        chk(
+            "Output Validation", True, "Secret / internal-URL redaction on model output"
+        ),
+        chk(
+            "Encryption & Secrets",
+            bool(os.environ.get("AWS_REGION")),
+            "TLS in transit; KMS/Secrets Manager in production",
+        ),
         chk("Audit Logging", True, "Immutable audit_logs + security_events stream"),
-        chk("Monitoring & Alerting", True, "Health, metrics, error-rate; CloudWatch in production"),
-        chk("Database", db_ok, "PostgreSQL reachable" if db_ok else "PostgreSQL unreachable"),
-        chk("Backup & Disaster Recovery", bool(os.environ.get("AWS_REGION")), "RDS automated backups + S3 versioning in production"),
+        chk(
+            "Monitoring & Alerting",
+            True,
+            "Health, metrics, error-rate; CloudWatch in production",
+        ),
+        chk(
+            "Database",
+            db_ok,
+            "PostgreSQL reachable" if db_ok else "PostgreSQL unreachable",
+        ),
+        chk(
+            "Backup & Disaster Recovery",
+            bool(os.environ.get("AWS_REGION")),
+            "RDS automated backups + S3 versioning in production",
+        ),
         chk("Compliance Readiness", True, "GDPR / SOC2 / ISO27001 controls mapped"),
         chk("Accessibility", True, "WCAG 2.2 AA targets (keyboard, contrast, motion)"),
-        chk("Security Headers", True, "CSP-ready, X-Frame-Options, nosniff, Referrer-Policy"),
+        chk(
+            "Security Headers",
+            True,
+            "CSP-ready, X-Frame-Options, nosniff, Referrer-Policy",
+        ),
         chk("Feature Flags", True, "Per-org / per-environment rollout switches"),
-        chk("CI/CD & Release Pipeline", True, "Tests → build → scan → deploy → smoke → rollback"),
+        chk(
+            "CI/CD & Release Pipeline",
+            True,
+            "Tests → build → scan → deploy → smoke → rollback",
+        ),
     ]
     passed = sum(1 for i in items if i["status"] == "pass")
     return {
@@ -213,11 +265,14 @@ async def list_feature_flags(
     session: AsyncSession, org_id: uuid.UUID, environment: Optional[str] = None
 ) -> list[dict[str, Any]]:
     stmt = select(FeatureFlag).where(
-        (FeatureFlag.organization_id == org_id) | (FeatureFlag.organization_id.is_(None))
+        (FeatureFlag.organization_id == org_id)
+        | (FeatureFlag.organization_id.is_(None))
     )
     if environment:
         stmt = stmt.where(FeatureFlag.environment == environment)
-    rows = (await session.execute(stmt.order_by(FeatureFlag.name.asc()))).scalars().all()
+    rows = (
+        (await session.execute(stmt.order_by(FeatureFlag.name.asc()))).scalars().all()
+    )
     return [
         {
             "id": str(f.id),
@@ -269,12 +324,17 @@ async def upsert_feature_flag(
 
 
 async def set_feature_flag_enabled(
-    session: AsyncSession, org_id: uuid.UUID, user_id: uuid.UUID, flag_id: uuid.UUID, enabled: bool
+    session: AsyncSession,
+    org_id: uuid.UUID,
+    user_id: uuid.UUID,
+    flag_id: uuid.UUID,
+    enabled: bool,
 ) -> Optional[FeatureFlag]:
     flag = await session.scalar(
         select(FeatureFlag).where(
             FeatureFlag.id == flag_id,
-            (FeatureFlag.organization_id == org_id) | (FeatureFlag.organization_id.is_(None)),
+            (FeatureFlag.organization_id == org_id)
+            | (FeatureFlag.organization_id.is_(None)),
         )
     )
     if flag is None:
@@ -291,12 +351,16 @@ async def list_deployments(
     session: AsyncSession, org_id: Optional[uuid.UUID], limit: int = 50
 ) -> list[dict[str, Any]]:
     rows = (
-        await session.execute(
-            select(DeploymentRecord)
-            .order_by(DeploymentRecord.created_at.desc())
-            .limit(limit)
+        (
+            await session.execute(
+                select(DeploymentRecord)
+                .order_by(DeploymentRecord.created_at.desc())
+                .limit(limit)
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     return [
         {
             "id": str(d.id),

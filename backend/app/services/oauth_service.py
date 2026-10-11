@@ -11,6 +11,7 @@ secrets.
 Tokens are returned in plaintext here; the caller encrypts them before
 persisting (see ``app.core.crypto``).
 """
+
 from __future__ import annotations
 
 import logging
@@ -86,7 +87,9 @@ def build_authorize_url(provider: str, *, state: str) -> str:
     return f"{cfg['auth_url']}?{urlencode(params)}"
 
 
-def complete_connect(provider: str, *, code: Optional[str] = None, **kwargs: Any) -> ConnectResult:
+def complete_connect(
+    provider: str, *, code: Optional[str] = None, **kwargs: Any
+) -> ConnectResult:
     """Exchange an authorization code for tokens (real OAuth providers)."""
     cfg = _cfg(provider)
     if cfg is None or not is_configured(provider):
@@ -159,7 +162,9 @@ def _fetch_account(cfg: dict[str, Any], access_token: Optional[str]) -> Optional
     if not url or not access_token:
         return None
     try:
-        r = httpx.get(url, headers={"Authorization": f"Bearer {access_token}"}, timeout=15)
+        r = httpx.get(
+            url, headers={"Authorization": f"Bearer {access_token}"}, timeout=15
+        )
         if r.status_code == 200:
             data = r.json()
             # Drive's /about returns {"user": {"emailAddress", "displayName"}};

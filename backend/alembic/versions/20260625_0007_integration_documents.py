@@ -7,6 +7,7 @@ folders/files the user selected to sync, plus per-file sync state
 
 Idempotent: uses ``IF NOT EXISTS`` so it tolerates partial state.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -35,7 +36,9 @@ def upgrade() -> None:
         sa.Column("parent_external_id", sa.String(length=255), nullable=True),
         sa.Column("is_folder", sa.Boolean(), nullable=False, server_default=sa.false()),
         sa.Column("selected", sa.Boolean(), nullable=False, server_default=sa.true()),
-        sa.Column("status", sa.String(length=20), nullable=False, server_default="pending"),
+        sa.Column(
+            "status", sa.String(length=20), nullable=False, server_default="pending"
+        ),
         sa.Column("checksum", sa.String(length=80), nullable=True),
         sa.Column("size_bytes", sa.BigInteger(), nullable=True),
         sa.Column("external_modified_at", sa.DateTime(timezone=True), nullable=True),
@@ -59,9 +62,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["organization_id"], ["organizations.id"], ondelete="CASCADE"
         ),
-        sa.ForeignKeyConstraint(
-            ["document_id"], ["documents.id"], ondelete="SET NULL"
-        ),
+        sa.ForeignKeyConstraint(["document_id"], ["documents.id"], ondelete="SET NULL"),
         sa.UniqueConstraint(
             "integration_id", "external_id", name="uq_integration_documents_ext"
         ),

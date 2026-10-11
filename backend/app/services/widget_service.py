@@ -4,6 +4,7 @@ Shared logic for the admin and public widget routers: domain
 normalisation, embed snippet generation, public-config assembly, an
 in-memory rate limiter, session resolution, and analytics event logging.
 """
+
 from __future__ import annotations
 
 import os
@@ -20,12 +21,13 @@ from app.database.models.agent import Agent, AgentStatus
 from app.database.models.widget import Widget, WidgetStatus
 from app.database.models.widget_domain import WidgetDomain
 from app.database.models.widget_event import WidgetEvent
-from app.database.models.widget_session import WidgetSession
 from app.services.cache import get_shared_cache
 
 
 def widget_cdn_base() -> str:
-    return os.environ.get("WIDGET_CDN_BASE", os.environ.get("FRONTEND_URL", "http://localhost:3000")).rstrip("/")
+    return os.environ.get(
+        "WIDGET_CDN_BASE", os.environ.get("FRONTEND_URL", "http://localhost:3000")
+    ).rstrip("/")
 
 
 def widget_api_base() -> str:

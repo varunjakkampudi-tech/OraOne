@@ -12,6 +12,7 @@ Because the frontier lives in Postgres (not RAM), a crawl can be **paused** and
 scale to very large sites (100k+ URLs) without holding the whole frontier in
 memory.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -26,11 +27,11 @@ from app.database.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 
 class FrontierStatus:
-    pending = "pending"      # waiting to be claimed
-    claimed = "claimed"      # a worker is fetching it
-    done = "done"            # fetched + processed
-    error = "error"          # failed after retries
-    skipped = "skipped"      # filtered out (robots/scope/etc.)
+    pending = "pending"  # waiting to be claimed
+    claimed = "claimed"  # a worker is fetching it
+    done = "done"  # fetched + processed
+    error = "error"  # failed after retries
+    skipped = "skipped"  # filtered out (robots/scope/etc.)
     ALL = {pending, claimed, done, error, skipped}
     TERMINAL = {done, error, skipped}
 
@@ -62,12 +63,19 @@ class CrawlFrontier(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     url: Mapped[str] = mapped_column(String(2048), nullable=False)
     host: Mapped[Optional[str]] = mapped_column(String(255))
-    depth: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    depth: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
 
     status: Mapped[str] = mapped_column(
-        String(16), nullable=False, default=FrontierStatus.pending, server_default=FrontierStatus.pending
+        String(16),
+        nullable=False,
+        default=FrontierStatus.pending,
+        server_default=FrontierStatus.pending,
     )
-    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    attempts: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
 
     claimed_by: Mapped[Optional[str]] = mapped_column(String(64))
     claimed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))

@@ -1,4 +1,5 @@
 """Phase 7 — Document processing & chunking tests."""
+
 from __future__ import annotations
 
 import asyncio
@@ -24,6 +25,7 @@ from app.services.document_processing import (
 
 # ─────────────────── Unit (no DB) ───────────────────
 
+
 def test_extract_txt_roundtrip():
     pages = extract_text("notes.txt", "text/plain", b"hello world")
     assert len(pages) == 1
@@ -46,7 +48,7 @@ def test_extract_csv_flattens_rows():
 
 def test_extract_pdf_multi_page():
     """Generate a tiny 3-page PDF with pypdf itself, then extract it."""
-    from pypdf import PdfReader, PdfWriter
+    from pypdf import PdfWriter
     from pypdf.generic import RectangleObject
 
     writer = PdfWriter()
@@ -113,7 +115,7 @@ def test_chunk_respects_target_and_overlap():
         # Find any 30-char window from the tail inside the next chunk
         windows = [tail[j : j + 30] for j in range(0, max(1, len(tail) - 30))]
         assert any(w and w in chunks[i + 1].content for w in windows), (
-            f"chunks {i} and {i+1} have no overlapping text — "
+            f"chunks {i} and {i + 1} have no overlapping text — "
             f"chunk {i} ends with {tail!r}"
         )
 
@@ -154,12 +156,17 @@ def test_swagger_documents_process_endpoint():
     assert op["summary"]
     # DocumentRead now has the telemetry fields
     schema = app.openapi()["components"]["schemas"]["DocumentRead"]
-    for f in ("processing_started_at", "processing_completed_at",
-              "processing_error", "processing_time_ms"):
+    for f in (
+        "processing_started_at",
+        "processing_completed_at",
+        "processing_error",
+        "processing_time_ms",
+    ):
         assert f in schema["properties"], f"missing field: {f}"
 
 
 # ─────────────────── DB-backed integration ───────────────────
+
 
 def _ctx(org_id: uuid.UUID, *, user_id: uuid.UUID | None = None) -> OrgContext:
     return OrgContext(
@@ -176,9 +183,8 @@ def _postgres_reachable() -> bool:
     url = os.environ.get("DATABASE_URL", "")
     if not url:
         return False
-    dsn = (
-        url.replace("postgresql+asyncpg://", "postgresql://")
-        .replace("postgresql+psycopg2://", "postgresql://")
+    dsn = url.replace("postgresql+asyncpg://", "postgresql://").replace(
+        "postgresql+psycopg2://", "postgresql://"
     )
 
     async def _probe() -> bool:
@@ -223,7 +229,9 @@ async def _seed_org(session, *, slug_hint: str):
 
     from app.database.models.organization import Organization, OrgPlan
     from app.database.models.organization_member import (
-        MemberRole, MemberStatus, OrganizationMember,
+        MemberRole,
+        MemberStatus,
+        OrganizationMember,
     )
     from app.database.models.project import Project
     from app.database.models.user import User
@@ -289,7 +297,9 @@ async def test_status_transitions_pending_processing_processed(
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
             # Create a KB
-            r = await client.post("/api/knowledge-bases", json={"name": "KB", "status": "active"})
+            r = await client.post(
+                "/api/knowledge-bases", json={"name": "KB", "status": "active"}
+            )
             assert r.status_code == 201
             kb_id = r.json()["id"]
 
@@ -349,21 +359,29 @@ async def test_reprocess_endpoint_idempotent(db_session, tmp_path, monkeypatch):
     try:
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            kb_id = (await client.post(
-                "/api/knowledge-bases", json={"name": "KB", "status": "active"}
-            )).json()["id"]
-            doc_id = (await client.post(
-                "/api/documents/upload",
-                data={"knowledge_base_id": kb_id},
-                files={"file": ("a.txt", b"Hello there. " * 100, "text/plain")},
-            )).json()["id"]
+            kb_id = (
+                await client.post(
+                    "/api/knowledge-bases", json={"name": "KB", "status": "active"}
+                )
+            ).json()["id"]
+            doc_id = (
+                await client.post(
+                    "/api/documents/upload",
+                    data={"knowledge_base_id": kb_id},
+                    files={"file": ("a.txt", b"Hello there. " * 100, "text/plain")},
+                )
+            ).json()["id"]
 
             for _ in range(50):
-                if (await client.get(f"/api/documents/{doc_id}")).json()["status"] == "processed":
+                if (await client.get(f"/api/documents/{doc_id}")).json()[
+                    "status"
+                ] == "processed":
                     break
                 await asyncio.sleep(0.05)
 
-            first_count = (await client.get(f"/api/documents/{doc_id}")).json()["chunk_count"]
+            first_count = (await client.get(f"/api/documents/{doc_id}")).json()[
+                "chunk_count"
+            ]
             assert first_count > 0
 
             # Manual reprocess
@@ -372,11 +390,15 @@ async def test_reprocess_endpoint_idempotent(db_session, tmp_path, monkeypatch):
             assert r.json()["status"] == "processing"
 
             for _ in range(50):
-                if (await client.get(f"/api/documents/{doc_id}")).json()["status"] == "processed":
+                if (await client.get(f"/api/documents/{doc_id}")).json()[
+                    "status"
+                ] == "processed":
                     break
                 await asyncio.sleep(0.05)
 
-            second_count = (await client.get(f"/api/documents/{doc_id}")).json()["chunk_count"]
+            second_count = (await client.get(f"/api/documents/{doc_id}")).json()[
+                "chunk_count"
+            ]
             # Reprocess should produce the same number of chunks for the same input
             assert second_count == first_count
     finally:

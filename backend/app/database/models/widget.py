@@ -10,6 +10,7 @@ Enterprise RAG engine (R4).
 Statuses / types / positions are plain strings (not DB enums) so the
 product surface can evolve without enum migrations.
 """
+
 from __future__ import annotations
 
 import secrets
@@ -29,18 +30,18 @@ if TYPE_CHECKING:
 
 
 class WidgetStatus:
-    draft = "draft"          # created, not published
+    draft = "draft"  # created, not published
     published = "published"  # live + embeddable
-    paused = "paused"        # temporarily disabled (loader returns 'paused')
+    paused = "paused"  # temporarily disabled (loader returns 'paused')
     ALL = {draft, published, paused}
 
 
 class WidgetType:
-    bubble = "bubble"        # floating bottom-corner bubble
-    inline = "inline"        # embedded inside a page element
-    fullpage = "fullpage"    # full-page experience
-    popup = "popup"          # auto-opens after a delay
-    button = "button"        # opens on a custom button click
+    bubble = "bubble"  # floating bottom-corner bubble
+    inline = "inline"  # embedded inside a page element
+    fullpage = "fullpage"  # full-page experience
+    popup = "popup"  # auto-opens after a delay
+    button = "button"  # opens on a custom button click
     ALL = {bubble, inline, fullpage, popup, button}
 
 
@@ -52,9 +53,9 @@ class WidgetPosition:
 
 
 class WidgetAuthMode:
-    public = "public"        # anyone can chat
+    public = "public"  # anyone can chat
     identified = "identified"  # host passes signed user context
-    sso = "sso"              # enterprise SSO/JWT verified
+    sso = "sso"  # enterprise SSO/JWT verified
     ALL = {public, identified, sso}
 
 
@@ -89,26 +90,40 @@ class Widget(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
 
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=WidgetStatus.draft, server_default=WidgetStatus.draft
+        String(20),
+        nullable=False,
+        default=WidgetStatus.draft,
+        server_default=WidgetStatus.draft,
     )
     widget_type: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=WidgetType.bubble, server_default=WidgetType.bubble
+        String(20),
+        nullable=False,
+        default=WidgetType.bubble,
+        server_default=WidgetType.bubble,
     )
     position: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=WidgetPosition.bottom_right,
+        String(20),
+        nullable=False,
+        default=WidgetPosition.bottom_right,
         server_default=WidgetPosition.bottom_right,
     )
     auth_mode: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=WidgetAuthMode.public,
+        String(20),
+        nullable=False,
+        default=WidgetAuthMode.public,
         server_default=WidgetAuthMode.public,
     )
 
     # The AI brain + knowledge source.
     agent_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("agents.id", ondelete="SET NULL"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("agents.id", ondelete="SET NULL"),
+        nullable=True,
     )
     knowledge_base_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("knowledge_bases.id", ondelete="SET NULL"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("knowledge_bases.id", ondelete="SET NULL"),
+        nullable=True,
     )
 
     # Branding / colors / typography (no secrets).

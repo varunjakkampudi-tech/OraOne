@@ -1,4 +1,5 @@
 """Sync job / log repositories (Phase 10)."""
+
 from __future__ import annotations
 
 import uuid

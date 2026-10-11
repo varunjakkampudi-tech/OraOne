@@ -12,6 +12,7 @@ Required environment variables:
 Usage:
   python scripts/bootstrap_platform_admin.py --cognito-sub <verified-sub>
 """
+
 from __future__ import annotations
 
 import argparse
@@ -34,14 +35,20 @@ from app.services.audit import audit
 async def promote(cognito_sub: str) -> int:
     approved = os.environ.get("PLATFORM_BOOTSTRAP_APPROVED_SUB", "").strip()
     if not approved or approved != cognito_sub:
-        raise SystemExit("PLATFORM_BOOTSTRAP_APPROVED_SUB must exactly match --cognito-sub.")
+        raise SystemExit(
+            "PLATFORM_BOOTSTRAP_APPROVED_SUB must exactly match --cognito-sub."
+        )
     if os.environ.get("PLATFORM_BOOTSTRAP_CONFIRM") != "PROMOTE_TO_SUPER_ADMIN":
-        raise SystemExit("Set PLATFORM_BOOTSTRAP_CONFIRM=PROMOTE_TO_SUPER_ADMIN to authorize this one-time action.")
+        raise SystemExit(
+            "Set PLATFORM_BOOTSTRAP_CONFIRM=PROMOTE_TO_SUPER_ADMIN to authorize this one-time action."
+        )
 
     async with session_scope() as session:
         user = await session.scalar(select(User).where(User.cognito_sub == cognito_sub))
         if user is None:
-            raise SystemExit("No existing Cognito-mapped user found; authenticate and hydrate identity first.")
+            raise SystemExit(
+                "No existing Cognito-mapped user found; authenticate and hydrate identity first."
+            )
         if user.role == UserRole.super_admin:
             print(f"Already super_admin: {user.email}")
             return 0

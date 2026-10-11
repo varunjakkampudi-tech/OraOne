@@ -4,9 +4,10 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parent
 # Explicit process/container environment wins over the local convenience file.
 # This is required for Compose/Hostinger secret injection and safe overrides.
-load_dotenv(ROOT_DIR / '.env', override=False)
+load_dotenv(ROOT_DIR / ".env", override=False)
 
 from app.core.logging import configure_logging  # noqa: E402
+
 configure_logging()
 
 import os
@@ -18,14 +19,13 @@ from typing import Optional
 
 from fastapi import FastAPI, APIRouter, HTTPException, Request, Depends
 from starlette.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Self-hosted auth router (Argon2 + JWT — see app/services/auth_service.py)
 from app.api.auth.routes import router as auth_router
 from app.api.contact import register_contact_routes
 from app.database.session import get_db
-from app.middleware.jwt_auth import get_current_user_claims
 from app.middleware.org_context import OrgContext, get_current_organization
 
 
@@ -49,6 +49,7 @@ async def lifespan(app: FastAPI):
     # is unreachable (e.g. private VPC). Routes that need it fail individually.
     try:
         from app.database.session import init_engine
+
         init_engine()
         log.info("Postgres engine initialised.")
     except Exception as e:
@@ -58,14 +59,17 @@ async def lifespan(app: FastAPI):
     if os.environ.get("RUN_BACKGROUND_WORKERS", "false").strip().lower() == "true":
         try:
             from app.services.workflow_scheduler import start_scheduler
+
             start_scheduler()
             from app.services.webhook_outbox import start_outbox_worker
+
             start_outbox_worker()
         except Exception as e:
             log.warning(f"Background workers not started: {e}")
     # OpenTelemetry tracing — no-op unless OTEL_EXPORTER_OTLP_ENDPOINT is set.
     try:
         from app.core.tracing import configure_tracing
+
         configure_tracing(app)
     except Exception as e:
         log.warning(f"Tracing not configured: {e}")
@@ -73,6 +77,7 @@ async def lifespan(app: FastAPI):
     try:
         from app.database.session import AsyncSessionLocal
         from app.services.billing_service import ensure_plans_seeded
+
         if AsyncSessionLocal is not None:
             async with AsyncSessionLocal() as _s:
                 await ensure_plans_seeded(_s)
@@ -91,16 +96,19 @@ async def lifespan(app: FastAPI):
     if os.environ.get("RUN_BACKGROUND_WORKERS", "false").strip().lower() == "true":
         try:
             from app.services.workflow_scheduler import stop_scheduler
+
             await stop_scheduler()
         except Exception:
             pass
         try:
             from app.services.webhook_outbox import stop_outbox_worker
+
             await stop_outbox_worker()
         except Exception:
             pass
     try:
         from app.database.session import dispose_engine
+
         await dispose_engine()
     except Exception:
         pass
@@ -141,7 +149,9 @@ async def complete_onboarding(
 
     org = await session.get(Organization, ctx.organization_id)
     if org is None:
-        raise HTTPException(status_code=404, detail="No workspace found for this account.")
+        raise HTTPException(
+            status_code=404, detail="No workspace found for this account."
+        )
 
     org.settings = {
         **(org.settings or {}),
@@ -180,131 +190,175 @@ register_contact_routes(api, get_db)
 app.include_router(api)
 # Postgres health probe (separate router, no auth)
 from app.api.health import router as health_router  # noqa: E402
+
 app.include_router(health_router)
 # Self-hosted authentication (Argon2 + JWT)
 app.include_router(auth_router)
 # Projects — workspace hierarchy (Organization → Project → resources)
 from app.api.projects import router as projects_router  # noqa: E402
+
 app.include_router(projects_router)
 # Phase 5 — tenant-scoped business API (Postgres-backed)
 from app.api.v2 import router as v2_router  # noqa: E402
+
 app.include_router(v2_router)
 # Phase 6 — full Agent CRUD (Postgres-backed)
 from app.api.agents import router as agents_router  # noqa: E402
+
 app.include_router(agents_router)
 # Phase 6 — Knowledge Base foundation (Postgres + S3-ready storage)
 from app.api.knowledge import router as knowledge_router  # noqa: E402
+
 app.include_router(knowledge_router)
 # R2 — Enterprise Knowledge: folders, search, preview, versions, bulk actions
 from app.api.knowledge import knowledge_org_router  # noqa: E402
+
 app.include_router(knowledge_org_router)
 
 from app.api.knowledge import knowledge_sources_router  # noqa: E402
+
 app.include_router(knowledge_sources_router)
 # Phase 8 — AI Chat & Agent Runtime (conversations, messages, SSE streaming)
 from app.api.chat import router as chat_router  # noqa: E402
+
 app.include_router(chat_router)
 # R1 — Enterprise Chat: folders + public share view
 from app.api.chat import folders_router as chat_folders_router  # noqa: E402
 from app.api.chat import public_chat_router  # noqa: E402
+
 app.include_router(chat_folders_router)
 app.include_router(public_chat_router)
 # Phase 10 — Integrations Platform (connect external apps → sync into KB)
 from app.api.integrations import router as integrations_router  # noqa: E402
+
 app.include_router(integrations_router)
 # Phase 11 — Workflow Automation (chain AI + KB + agents into automations)
 from app.api.workflows import router as workflows_router  # noqa: E402
+
 app.include_router(workflows_router)
 # Phase 12 — Enterprise SaaS: Billing & Subscriptions (Module 1)
 from app.api.billing import router as billing_router  # noqa: E402
+
 app.include_router(billing_router)
 # Phase 12 — Enterprise SaaS: RBAC permission matrix (Module 4)
 from app.api.rbac import router as rbac_router  # noqa: E402
+
 app.include_router(rbac_router)
 # Phase 12 — Enterprise SaaS: Team management (Module 3)
 from app.api.team import router as team_router  # noqa: E402
+
 app.include_router(team_router)
 # Phase 12 — Enterprise SaaS: Usage metering & quotas (Module 2)
 from app.api.usage import router as usage_router  # noqa: E402
+
 app.include_router(usage_router)
 # Phase 12 — Enterprise SaaS: Organization analytics (Module 6)
 from app.api.analytics import router as analytics_router  # noqa: E402
+
 app.include_router(analytics_router)
 # Phase 12 — Enterprise SaaS: API platform — key management (Module 9)
 from app.api.api_keys import router as api_keys_router  # noqa: E402
+
 app.include_router(api_keys_router)
 # Phase 12 — Enterprise SaaS: External programmatic API /api/v1 (Module 9)
 from app.api.public_api import router as public_api_router  # noqa: E402
+
 app.include_router(public_api_router)
 # Phase 12 — Enterprise SaaS: AI model router (Module 13)
 from app.api.ai_models import router as ai_models_router  # noqa: E402
+
 app.include_router(ai_models_router)
 # Phase 12 — Enterprise SaaS: White-label branding (Module 15)
 from app.api.branding import router as branding_router  # noqa: E402
+
 app.include_router(branding_router)
 # Phase 12 — Enterprise SaaS: Audit log viewer (Module 5)
 from app.api.audit import router as audit_router  # noqa: E402
+
 app.include_router(audit_router)
 # R3 — Enterprise Website Crawling Engine
 from app.api.websites import router as websites_router  # noqa: E402
+
 app.include_router(websites_router)
 # R4 — Enterprise RAG Engine (hybrid retrieval + grounded answers)
 from app.api.rag import router as rag_router  # noqa: E402
+
 app.include_router(rag_router)
 # R6 — Embedded Website Widget (admin CRUD + public domain-restricted chat)
 from app.api.widgets import router as widgets_router  # noqa: E402
 from app.api.widgets import public_router as widget_public_router  # noqa: E402
+
 app.include_router(widgets_router)
 app.include_router(widget_public_router)
 # Phase B — Channels & Deploy (Universal Agent: one agent, every channel)
 from app.api.channels import router as channels_router  # noqa: E402
+
 app.include_router(channels_router)
 # Phase M — Omnichannel inbound (WhatsApp, SMS, Telegram, Email, SDK, …)
 from app.api.omnichannel import router as omnichannel_router  # noqa: E402
+
 app.include_router(omnichannel_router)
 # R7 — Developer Platform: outbound webhooks (dashboard management)
 from app.api.webhooks.routes import router as webhooks_router  # noqa: E402
+
 app.include_router(webhooks_router)
 # R9 — Enterprise Team Collaboration (teams, sharing, comments, notifications, …)
 from app.api.collaboration import router as collaboration_router  # noqa: E402
+
 app.include_router(collaboration_router)
 # R10 — Enterprise Security & Release Readiness (security events, system ops)
 from app.api.operations import router as operations_router  # noqa: E402
+
 app.include_router(operations_router)
 # Leads (CRM) — first-class lead capture + pipeline (project-scoped)
 from app.api.leads import router as leads_router  # noqa: E402
+
 app.include_router(leads_router)
 # Feature requests / feedback board (org-scoped) — ideas, bugs, feedback + voting
 from app.api.feature_requests import router as feature_requests_router  # noqa: E402
+
 app.include_router(feature_requests_router)
 
 # Phase Z — AI Marketplace
 from app.api.marketplace import marketplace_router  # noqa: E402
+
 app.include_router(marketplace_router)
 
 # Bonus — AI assistants (meeting, QA, forecasting, personalization, A/B, copilot)
 from app.api.assistants import assistants_router  # noqa: E402
+
 app.include_router(assistants_router)
 
 # Workspace Intelligence — optimization score, knowledge coverage, revenue
 # attribution, customer 360, confidence heatmap, conversation simulator (org-scoped)
 from app.api.workspace_intel import router as workspace_intel_router  # noqa: E402
+
 app.include_router(workspace_intel_router)
 
 # Phase 1 — Product & feature entitlements (self-service read model)
 from app.api.entitlements import router as entitlements_router  # noqa: E402
+
 app.include_router(entitlements_router)
 
 from app.api.agent_versioning import router as agent_versioning_router  # noqa: E402
+
 app.include_router(agent_versioning_router)
 
 # Super Admin Control Center (platform-scoped, founder-only)
 from app.api.super_admin import super_admin_router  # noqa: E402
+
 app.include_router(super_admin_router)
 
-cors_origins_env = os.environ.get('CORS_ORIGINS', '*')
-allow_origins = ["*"] if cors_origins_env.strip() == "*" else [o.strip() for o in cors_origins_env.split(",") if o.strip()]
-if os.environ.get("ENVIRONMENT", "").strip().lower() in ("production", "prod") and allow_origins == ["*"]:
+cors_origins_env = os.environ.get("CORS_ORIGINS", "*")
+allow_origins = (
+    ["*"]
+    if cors_origins_env.strip() == "*"
+    else [o.strip() for o in cors_origins_env.split(",") if o.strip()]
+)
+if os.environ.get("ENVIRONMENT", "").strip().lower() in (
+    "production",
+    "prod",
+) and allow_origins == ["*"]:
     raise RuntimeError(
         "CORS_ORIGINS is unset (or '*') while ENVIRONMENT=production. "
         "Set CORS_ORIGINS to a comma-separated list of exact frontend origins "
@@ -328,7 +382,9 @@ class WidgetPublicCORSMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        if scope.get("type") != "http" or not scope.get("path", "").startswith(self.WIDGET_PREFIX):
+        if scope.get("type") != "http" or not scope.get("path", "").startswith(
+            self.WIDGET_PREFIX
+        ):
             return await self.app(scope, receive, send)
         headers = dict(scope.get("headers") or [])
         origin = headers.get(b"origin")
@@ -336,25 +392,28 @@ class WidgetPublicCORSMiddleware:
             return await self.app(scope, receive, send)
         if scope.get("method") == "OPTIONS":
             acrh = headers.get(b"access-control-request-headers") or b"*"
-            await send({
-                "type": "http.response.start",
-                "status": 204,
-                "headers": [
-                    (b"access-control-allow-origin", origin),
-                    (b"access-control-allow-methods", b"GET, POST, OPTIONS"),
-                    (b"access-control-allow-headers", acrh),
-                    (b"access-control-max-age", b"600"),
-                    (b"vary", b"Origin"),
-                    (b"content-length", b"0"),
-                ],
-            })
+            await send(
+                {
+                    "type": "http.response.start",
+                    "status": 204,
+                    "headers": [
+                        (b"access-control-allow-origin", origin),
+                        (b"access-control-allow-methods", b"GET, POST, OPTIONS"),
+                        (b"access-control-allow-headers", acrh),
+                        (b"access-control-max-age", b"600"),
+                        (b"vary", b"Origin"),
+                        (b"content-length", b"0"),
+                    ],
+                }
+            )
             await send({"type": "http.response.body", "body": b""})
             return
 
         async def send_wrapper(message):
             if message["type"] == "http.response.start":
                 hdrs = [
-                    (k, v) for (k, v) in message.get("headers", [])
+                    (k, v)
+                    for (k, v) in message.get("headers", [])
                     if k.lower() != b"access-control-allow-origin"
                 ]
                 hdrs.append((b"access-control-allow-origin", origin))
@@ -385,9 +444,18 @@ app.add_middleware(WidgetPublicCORSMiddleware)
 from starlette.responses import JSONResponse as _ErrJSONResponse  # noqa: E402
 
 _STATUS_CODE_NAMES = {
-    400: "BAD_REQUEST", 401: "UNAUTHORIZED", 402: "PAYMENT_REQUIRED", 403: "FORBIDDEN",
-    404: "NOT_FOUND", 405: "METHOD_NOT_ALLOWED", 409: "CONFLICT", 422: "VALIDATION_ERROR",
-    429: "RATE_LIMITED", 500: "INTERNAL_ERROR", 502: "BAD_GATEWAY", 503: "SERVICE_UNAVAILABLE",
+    400: "BAD_REQUEST",
+    401: "UNAUTHORIZED",
+    402: "PAYMENT_REQUIRED",
+    403: "FORBIDDEN",
+    404: "NOT_FOUND",
+    405: "METHOD_NOT_ALLOWED",
+    409: "CONFLICT",
+    422: "VALIDATION_ERROR",
+    429: "RATE_LIMITED",
+    500: "INTERNAL_ERROR",
+    502: "BAD_GATEWAY",
+    503: "SERVICE_UNAVAILABLE",
 }
 
 
@@ -404,7 +472,9 @@ async def structured_http_exception_handler(request: Request, exc: HTTPException
             "error": {"code": code, "message": message},
             "requestId": getattr(request.state, "request_id", None),
         }
-    return _ErrJSONResponse(status_code=exc.status_code, content=body, headers=exc.headers or {})
+    return _ErrJSONResponse(
+        status_code=exc.status_code, content=body, headers=exc.headers or {}
+    )
 
 
 # ---------- Security headers ----------
@@ -520,8 +590,10 @@ async def audit_flush_mw(request, call_next):
     response = await call_next(request)
     try:
         from app.services.audit import _PENDING, flush_pending
+
         if _PENDING:
             from app.database.session import AsyncSessionLocal
+
             if AsyncSessionLocal is not None:
                 async with AsyncSessionLocal() as _s:
                     await flush_pending(_s)
@@ -551,6 +623,7 @@ async def api_v1_access_log_mw(request, call_next):
         if ctx is not None:
             from app.database.models.api_log import ApiRequestLog
             from app.database.session import AsyncSessionLocal
+
             if AsyncSessionLocal is not None:
                 async with AsyncSessionLocal() as _s:
                     _s.add(

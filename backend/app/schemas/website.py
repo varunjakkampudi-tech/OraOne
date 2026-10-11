@@ -1,4 +1,5 @@
 """Pydantic schemas for the Website Crawling API (R3)."""
+
 from __future__ import annotations
 
 import uuid
@@ -10,18 +11,33 @@ from pydantic import BaseModel, ConfigDict, Field
 
 # ──────────────── Websites ────────────────
 
+
 class WebsiteCreate(BaseModel):
     knowledge_base_id: uuid.UUID
     base_url: str = Field(..., min_length=3, max_length=2048)
     name: Optional[str] = Field(default=None, max_length=200)
-    crawl_mode: str = Field(default="entire", description="entire | single | folder | sitemap")
+    crawl_mode: str = Field(
+        default="entire", description="entire | single | folder | sitemap"
+    )
     max_depth: int = Field(default=5, ge=0, le=10)
     max_pages: int = Field(default=500, ge=1, le=100_000)
-    crawl_frequency: str = Field(default="manual", description="manual | hourly | daily | weekly | monthly")
+    crawl_frequency: str = Field(
+        default="manual", description="manual | hourly | daily | weekly | monthly"
+    )
     respect_robots: bool = True
-    render_js: bool = Field(default=False, description="Render JavaScript with a headless browser when available")
-    crawl_delay_ms: int = Field(default=0, ge=0, le=60_000, description="Politeness delay between requests to the same host")
-    max_concurrency: int = Field(default=0, ge=0, le=16, description="Parallel workers (0 = adaptive)")
+    render_js: bool = Field(
+        default=False,
+        description="Render JavaScript with a headless browser when available",
+    )
+    crawl_delay_ms: int = Field(
+        default=0,
+        ge=0,
+        le=60_000,
+        description="Politeness delay between requests to the same host",
+    )
+    max_concurrency: int = Field(
+        default=0, ge=0, le=16, description="Parallel workers (0 = adaptive)"
+    )
     include_paths: list[str] = Field(default_factory=list)
     exclude_paths: list[str] = Field(default_factory=list)
     allowed_domains: list[str] = Field(default_factory=list)
@@ -82,6 +98,7 @@ class WebsiteListResponse(BaseModel):
 
 # ──────────────── Pages ────────────────
 
+
 class WebsitePageRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -117,6 +134,7 @@ class WebsitePageListResponse(BaseModel):
 
 
 # ──────────────── Crawl jobs & logs ────────────────
+
 
 class CrawlJobRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)

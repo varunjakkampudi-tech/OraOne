@@ -13,6 +13,7 @@ Identity resolution key (``visitor_key``) is stable per organization:
 
 Conversations link to a profile via ``conversations.visitor_profile_id``.
 """
+
 from __future__ import annotations
 
 import uuid

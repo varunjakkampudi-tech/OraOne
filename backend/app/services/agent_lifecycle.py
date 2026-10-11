@@ -9,6 +9,7 @@ non-empty system prompt. ``readiness`` exposes that as a per-row signal so
 the UI can warn about incomplete agents and the API can refuse to activate
 them.
 """
+
 from __future__ import annotations
 
 from app.database.models.agent import Agent, AgentStatus

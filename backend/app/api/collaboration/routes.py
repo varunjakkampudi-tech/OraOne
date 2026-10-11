@@ -4,6 +4,7 @@ Teams, resource-level sharing (ACL), threaded comments + mentions + reactions,
 notifications, activity feed, task assignment, and resource follows. All
 endpoints are strictly org-scoped via ``OrgContext``.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -13,7 +14,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.permissions import Permission
-from app.database.models.collaboration import PermissionLevel, PrincipalType, ResourceType
+from app.database.models.collaboration import (
+    PermissionLevel,
+    PrincipalType,
+    ResourceType,
+)
 from app.database.models.organization_member import MemberStatus, OrganizationMember
 from app.database.models.user import User
 from app.database.session import get_db
@@ -62,7 +67,13 @@ async def list_org_members(
     """All active org members — for mention pickers and share dialogs."""
     rows = (
         await session.execute(
-            select(User.id, User.full_name, User.email, User.avatar_url, OrganizationMember.role)
+            select(
+                User.id,
+                User.full_name,
+                User.email,
+                User.avatar_url,
+                OrganizationMember.role,
+            )
             .join(OrganizationMember, OrganizationMember.user_id == User.id)
             .where(
                 OrganizationMember.organization_id == ctx.organization_id,
@@ -205,7 +216,9 @@ async def remove_team_member(
     ctx: OrgContext = Depends(require_permission(Permission.TEAM_MANAGE)),
     session: AsyncSession = Depends(get_db),
 ) -> dict:
-    ok = await collab.remove_team_member(session, ctx.organization_id, team_id, member_id)
+    ok = await collab.remove_team_member(
+        session, ctx.organization_id, team_id, member_id
+    )
     if not ok:
         raise HTTPException(status_code=404, detail="Member not found.")
     return {"status": "removed", "id": str(member_id)}
@@ -264,7 +277,10 @@ async def share_resource(
         resource_id=payload.resource_id,
         organization_id=str(ctx.organization_id),
         user_id=str(ctx.user_id),
-        after={"principal_type": payload.principal_type, "permission": payload.permission},
+        after={
+            "principal_type": payload.principal_type,
+            "permission": payload.permission,
+        },
     )
     return {"id": str(grant.id), "permission": grant.permission}
 
@@ -288,7 +304,9 @@ async def list_permissions(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> dict:
-    grants = await collab.list_permissions(session, ctx.organization_id, resource_type, resource_id)
+    grants = await collab.list_permissions(
+        session, ctx.organization_id, resource_type, resource_id
+    )
     mine = await collab.effective_permission(
         session, ctx.organization_id, ctx.user_id, resource_type, resource_id
     )
@@ -393,7 +411,9 @@ async def mark_notification_read(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> dict:
-    ok = await collab.mark_notification_read(session, ctx.organization_id, ctx.user_id, notif_id)
+    ok = await collab.mark_notification_read(
+        session, ctx.organization_id, ctx.user_id, notif_id
+    )
     if not ok:
         raise HTTPException(status_code=404, detail="Notification not found.")
     return {"status": "read", "id": str(notif_id)}
@@ -490,7 +510,9 @@ async def list_follows(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> dict:
-    return {"follows": await collab.list_follows(session, ctx.organization_id, ctx.user_id)}
+    return {
+        "follows": await collab.list_follows(session, ctx.organization_id, ctx.user_id)
+    }
 
 
 @router.post("/api/follow", status_code=status.HTTP_201_CREATED)

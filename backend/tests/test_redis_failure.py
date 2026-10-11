@@ -12,12 +12,13 @@ Per-primitive policy under a Redis/cache outage:
 No DB or real Redis required — the cache backend is monkeypatched to raise,
 simulating an outage.
 """
+
 from __future__ import annotations
 
 import pytest
 
 from app.middleware.idempotency import idempotency_middleware
-from app.schemas.auth import LoginRequest, RefreshTokenRequest
+from app.schemas.auth import RefreshTokenRequest
 
 
 class _BrokenCache:
@@ -72,6 +73,7 @@ async def test_idempotency_fails_closed_when_cache_unreachable(monkeypatch):
 
     assert response.status_code == 503
     import json
+
     body = json.loads(bytes(response.body))
     assert body["error"]["code"] == "IDEMPOTENCY_UNAVAILABLE"
 
@@ -137,7 +139,9 @@ async def test_login_fails_safely_when_token_store_unreachable(monkeypatch):
     monkeypatch.setattr(token_service, "issue_token_pair", _broken_issue)
 
     with pytest.raises(HTTPException) as exc_info:
-        await auth_service.verify_login_otp(_FakeSession(), VerifyLoginOtpRequest(email="a@b.com", code="123456"))
+        await auth_service.verify_login_otp(
+            _FakeSession(), VerifyLoginOtpRequest(email="a@b.com", code="123456")
+        )
     assert exc_info.value.status_code == 503
 
 

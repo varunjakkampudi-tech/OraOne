@@ -5,6 +5,7 @@ Subscriptions and invoices are tenant-scoped (one active subscription per
 organization). Stripe identifiers are stored when real Stripe is wired up;
 in mock mode they stay null and the subscription is activated directly.
 """
+
 from __future__ import annotations
 
 import enum
@@ -28,7 +29,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 if TYPE_CHECKING:
-    from app.database.models.organization import Organization
+    pass
 
 
 class PlanCode(str, enum.Enum):
@@ -143,9 +144,7 @@ class Invoice(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     """A billing invoice (generated on activation / renewal)."""
 
     __tablename__ = "invoices"
-    __table_args__ = (
-        Index("ix_invoices_organization_id", "organization_id"),
-    )
+    __table_args__ = (Index("ix_invoices_organization_id", "organization_id"),)
 
     organization_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),

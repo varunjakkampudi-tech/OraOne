@@ -11,13 +11,14 @@ the workflow status is reserved for owners/admins.
 * ``DELETE /api/feature-requests/{id}``         — author or admin removes a post.
 * ``GET    /api/feature-requests/stats``        — board summary counts.
 """
+
 from __future__ import annotations
 
 import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from sqlalchemy import desc, func, select
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.feature_request import (
@@ -85,15 +86,20 @@ async def list_feature_requests(
         FeatureRequest.organization_id == ctx.organization_id
     )
     if type:
-        stmt = stmt.where(FeatureRequest.type == _validate_enum(type, FeatureRequestType.ALL, "type"))
+        stmt = stmt.where(
+            FeatureRequest.type == _validate_enum(type, FeatureRequestType.ALL, "type")
+        )
     if status_filter:
         stmt = stmt.where(
-            FeatureRequest.status == _validate_enum(status_filter, FeatureRequestStatus.ALL, "status")
+            FeatureRequest.status
+            == _validate_enum(status_filter, FeatureRequestStatus.ALL, "status")
         )
     if sort == "new":
         stmt = stmt.order_by(desc(FeatureRequest.created_at))
     else:
-        stmt = stmt.order_by(desc(FeatureRequest.votes), desc(FeatureRequest.created_at))
+        stmt = stmt.order_by(
+            desc(FeatureRequest.votes), desc(FeatureRequest.created_at)
+        )
     rows = (await session.scalars(stmt)).all()
     return FeatureRequestListResponse(
         items=[_to_read(r, ctx.user_id) for r in rows],

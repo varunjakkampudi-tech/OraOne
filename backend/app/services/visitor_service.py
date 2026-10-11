@@ -6,6 +6,7 @@ the agent can be primed with what it already knows about them — no repeated
 questions. All writes reassign new JSONB containers so SQLAlchemy reliably
 detects the change (the columns are plain ``JSONB``, not ``MutableDict``).
 """
+
 from __future__ import annotations
 
 import re
@@ -114,7 +115,9 @@ async def _merge_profiles(
     primary.name = primary.name or secondary.name
     primary.email = primary.email or secondary.email
     primary.phone = primary.phone or secondary.phone
-    primary.lead_score = primary.lead_score if primary.lead_score is not None else secondary.lead_score
+    primary.lead_score = (
+        primary.lead_score if primary.lead_score is not None else secondary.lead_score
+    )
     primary.lead_status = primary.lead_status or secondary.lead_status
 
     # secondary's context fills only gaps — primary (the identity) wins.
@@ -202,9 +205,7 @@ async def upsert_profile(
     profile: Optional[VisitorProfile]
     if by_key is not None and by_identity is not None and by_key.id != by_identity.id:
         # Same human reached us two ways — collapse into the durable identity.
-        profile = await _merge_profiles(
-            session, primary=by_identity, secondary=by_key
-        )
+        profile = await _merge_profiles(session, primary=by_identity, secondary=by_key)
         _add_alias(profile, visitor_key)
     elif by_identity is not None:
         profile = by_identity

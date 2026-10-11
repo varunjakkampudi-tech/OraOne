@@ -10,6 +10,7 @@ Routing: an adapter normalises the webhook, then we resolve the
 agent id) to learn which agent owns the surface, run the pipeline, and let the
 adapter deliver the reply.
 """
+
 from __future__ import annotations
 
 import logging
@@ -64,9 +65,7 @@ async def _resolve_binding(
         # Match the business number this message was sent to.
         num = parsed.to_address
         return await db.scalar(
-            base.where(
-                AgentChannel.phone_number.in_([num, f"+{num}", num.lstrip("+")])
-            )
+            base.where(AgentChannel.phone_number.in_([num, f"+{num}", num.lstrip("+")]))
         )
     if parsed.provider == "telegram" and parsed.bot_token:
         return await db.scalar(
@@ -133,7 +132,9 @@ async def _process(provider: str, request: Request, db: AsyncSession):
 
 
 @router.post("/telegram/{token}/inbound")
-async def telegram_inbound(token: str, request: Request, db: AsyncSession = Depends(get_db)):
+async def telegram_inbound(
+    token: str, request: Request, db: AsyncSession = Depends(get_db)
+):
     early, ctx, reply = await _process("telegram", request, db)
     if early is not None:
         return early
@@ -144,7 +145,9 @@ async def telegram_inbound(token: str, request: Request, db: AsyncSession = Depe
 
 
 @router.post("/{provider}/inbound")
-async def channel_inbound(provider: str, request: Request, db: AsyncSession = Depends(get_db)):
+async def channel_inbound(
+    provider: str, request: Request, db: AsyncSession = Depends(get_db)
+):
     early, ctx, reply = await _process(provider, request, db)
     if early is not None:
         # SDK clients expect a JSON reply even on skip.
@@ -156,7 +159,9 @@ async def channel_inbound(provider: str, request: Request, db: AsyncSession = De
         return {
             "ok": True,
             "reply": reply.text,
-            "conversation_id": str(reply.conversation_id) if reply.conversation_id else None,
+            "conversation_id": str(reply.conversation_id)
+            if reply.conversation_id
+            else None,
             "grounded": reply.grounded,
             "confidence": reply.confidence,
         }

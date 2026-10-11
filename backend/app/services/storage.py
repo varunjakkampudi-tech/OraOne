@@ -13,6 +13,7 @@ caller persists into ``documents.s3_key``. For S3-compatible storage it's
 just the key (no bucket prefix); for local mode it's ``local://<relative-path>``
 so you can tell the modes apart at a glance in the DB.
 """
+
 from __future__ import annotations
 
 import logging
@@ -66,8 +67,12 @@ def _client():
         }
         if endpoint:
             kwargs["endpoint_url"] = endpoint
-            kwargs["aws_access_key_id"] = os.environ.get("S3_ACCESS_KEY_ID") or os.environ.get("AWS_ACCESS_KEY_ID")
-            kwargs["aws_secret_access_key"] = os.environ.get("S3_SECRET_ACCESS_KEY") or os.environ.get("AWS_SECRET_ACCESS_KEY")
+            kwargs["aws_access_key_id"] = os.environ.get(
+                "S3_ACCESS_KEY_ID"
+            ) or os.environ.get("AWS_ACCESS_KEY_ID")
+            kwargs["aws_secret_access_key"] = os.environ.get(
+                "S3_SECRET_ACCESS_KEY"
+            ) or os.environ.get("AWS_SECRET_ACCESS_KEY")
             log.info("object storage: S3-compatible endpoint (%s)", endpoint)
         else:
             log.info("object storage: AWS S3")
@@ -97,7 +102,9 @@ def _ensure_bucket(client, bucket: str) -> None:
             client.create_bucket(Bucket=bucket)
             log.info("object storage: created missing bucket %s", bucket)
         except (BotoCoreError, ClientError) as e:
-            log.warning("object storage: could not auto-create bucket %s: %s", bucket, e)
+            log.warning(
+                "object storage: could not auto-create bucket %s: %s", bucket, e
+            )
 
 
 def put_object(*, key: str, body: BinaryIO, content_type: str | None) -> str:

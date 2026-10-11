@@ -1,4 +1,5 @@
 """Pydantic schemas for the org analytics API (Phase 12, Module 6)."""
+
 from __future__ import annotations
 
 from datetime import datetime

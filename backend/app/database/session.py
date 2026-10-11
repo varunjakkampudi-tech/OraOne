@@ -5,6 +5,7 @@ even when the database is unreachable (e.g. RDS sitting in a private VPC
 the preview pod can't see). Routes that actually need the DB will fail
 fast with a clear error; everything else keeps working.
 """
+
 from __future__ import annotations
 
 import contextlib
@@ -72,6 +73,7 @@ def _redact(url: str) -> str:
     """Hide password in a SQLAlchemy URL for logs."""
     try:
         from sqlalchemy.engine.url import make_url
+
         u = make_url(url)
         return str(u.set(password="***" if u.password else None))
     except Exception:

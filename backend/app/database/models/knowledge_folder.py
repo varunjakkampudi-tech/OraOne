@@ -5,6 +5,7 @@ is scoped to a knowledge base (and denormalised organization) so tenant
 checks stay single-table. A document references at most one folder via
 ``documents.folder_id``.
 """
+
 from __future__ import annotations
 
 import uuid

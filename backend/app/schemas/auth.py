@@ -1,4 +1,5 @@
 """Request/response models for the auth API."""
+
 from datetime import datetime
 from typing import Optional
 
@@ -88,6 +89,7 @@ class MessageResponse(BaseModel):
 # ──────────────────────────────────────────────────────────────────
 # Phase 3 — Postgres identity payload (user + org + membership)
 # ──────────────────────────────────────────────────────────────────
+
 
 class IdentityUser(BaseModel):
     id: str

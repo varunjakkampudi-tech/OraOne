@@ -8,6 +8,7 @@ protected even if an XSS bug leaks/tampers with JS-accessible storage —
 httpOnly means client-side JS can never read or exfiltrate them, and
 SameSite=Lax stops them being sent on cross-site requests.
 """
+
 from __future__ import annotations
 
 import os
@@ -21,7 +22,11 @@ REFRESH_COOKIE_NAME = "oraone_refresh_token"
 
 
 def _is_production() -> bool:
-    return os.environ.get("ENVIRONMENT", "").strip().lower() in ("production", "prod", "staging")
+    return os.environ.get("ENVIRONMENT", "").strip().lower() in (
+        "production",
+        "prod",
+        "staging",
+    )
 
 
 def _secure_flag() -> bool:
@@ -30,7 +35,9 @@ def _secure_flag() -> bool:
     return _is_production()
 
 
-def set_auth_cookies(response: Response, *, access_token: str, refresh_token: str | None) -> None:
+def set_auth_cookies(
+    response: Response, *, access_token: str, refresh_token: str | None
+) -> None:
     response.set_cookie(
         key=ACCESS_COOKIE_NAME,
         value=access_token,

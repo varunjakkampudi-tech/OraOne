@@ -18,6 +18,7 @@ The renderer is dependency-free. Templates use ``{{ name }}`` placeholders whose
 values are HTML-escaped. A single ``__CONTENT__`` marker in ``_base.html`` is
 where each body template is injected.
 """
+
 from __future__ import annotations
 
 import html
@@ -73,7 +74,9 @@ def _send_via_smtp(*, to: str, subject: str, html_body: str, cfg: dict) -> bool:
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
     if cfg["use_ssl"]:
-        server = smtplib.SMTP_SSL(cfg["host"], cfg["port"], context=ssl.create_default_context(), timeout=15)
+        server = smtplib.SMTP_SSL(
+            cfg["host"], cfg["port"], context=ssl.create_default_context(), timeout=15
+        )
     else:
         server = smtplib.SMTP(cfg["host"], cfg["port"], timeout=15)
     try:
@@ -95,6 +98,7 @@ def _load(name: str) -> str:
 
 def _substitute(template: str, context: dict) -> str:
     """Replace ``{{ key }}`` tokens with HTML-escaped values from ``context``."""
+
     def repl(match: re.Match) -> str:
         key = match.group(1)
         value = context.get(key, "")
@@ -103,7 +107,9 @@ def _substitute(template: str, context: dict) -> str:
     return _TOKEN_RE.sub(repl, template)
 
 
-def render(template_name: str, subject: str, context: dict, *, preheader: str = "") -> str:
+def render(
+    template_name: str, subject: str, context: dict, *, preheader: str = ""
+) -> str:
     """Render a body template inside the shared base layout. Returns full HTML."""
     base_ctx = {
         "subject": subject,
@@ -136,7 +142,12 @@ def send_email(
     if smtp_cfg:
         try:
             _send_via_smtp(to=to, subject=subject, html_body=html_body, cfg=smtp_cfg)
-            log.info("email sent via SMTP (%s) → to=%s subject=%r", smtp_cfg["host"], to, subject)
+            log.info(
+                "email sent via SMTP (%s) → to=%s subject=%r",
+                smtp_cfg["host"],
+                to,
+                subject,
+            )
             return True
         except Exception as exc:  # pragma: no cover - network/credential dependent
             log.warning("SMTP send failed → to=%s subject=%r err=%s", to, subject, exc)
@@ -144,13 +155,19 @@ def send_email(
 
     sender = _from_address()
     if not sender:
-        log.info("email (no SMTP_HOST/EMAIL_FROM configured) → to=%s subject=%r [not sent]", to, subject)
+        log.info(
+            "email (no SMTP_HOST/EMAIL_FROM configured) → to=%s subject=%r [not sent]",
+            to,
+            subject,
+        )
         return False
 
     try:
         import boto3
 
-        region = os.environ.get("SES_REGION") or os.environ.get("AWS_REGION", "us-east-1")
+        region = os.environ.get("SES_REGION") or os.environ.get(
+            "AWS_REGION", "us-east-1"
+        )
         client = boto3.client("ses", region_name=region)
         client.send_email(
             Source=sender,
@@ -169,6 +186,7 @@ def send_email(
 
 # ── typed convenience wrappers (one per template) ──────────────────────────
 
+
 def send_welcome(to: str, *, first_name: str, org_name: str) -> bool:
     return send_email(
         to=to,
@@ -183,7 +201,9 @@ def send_welcome(to: str, *, first_name: str, org_name: str) -> bool:
     )
 
 
-def send_verify_email(to: str, *, verify_url: str, code: str, expires_in: str = "24 hours") -> bool:
+def send_verify_email(
+    to: str, *, verify_url: str, code: str, expires_in: str = "24 hours"
+) -> bool:
     return send_email(
         to=to,
         subject="Verify your email",
@@ -193,13 +213,20 @@ def send_verify_email(to: str, *, verify_url: str, code: str, expires_in: str = 
     )
 
 
-def send_password_reset(to: str, *, reset_url: str, code: str, expires_in: str = "1 hour") -> bool:
+def send_password_reset(
+    to: str, *, reset_url: str, code: str, expires_in: str = "1 hour"
+) -> bool:
     return send_email(
         to=to,
         subject="Reset your OraOne password",
         template="password_reset.html",
         preheader="Use this link to set a new password.",
-        context={"email": to, "cta_url": reset_url, "code": code, "expires_in": expires_in},
+        context={
+            "email": to,
+            "cta_url": reset_url,
+            "code": code,
+            "expires_in": expires_in,
+        },
     )
 
 
@@ -214,7 +241,13 @@ def send_login_otp(to: str, *, code: str, expires_in: str = "10 minutes") -> boo
 
 
 def send_team_invite(
-    to: str, *, org_name: str, inviter_name: str, role: str, accept_url: str, expires_in: str = "7 days"
+    to: str,
+    *,
+    org_name: str,
+    inviter_name: str,
+    role: str,
+    accept_url: str,
+    expires_in: str = "7 days",
 ) -> bool:
     return send_email(
         to=to,
@@ -232,8 +265,15 @@ def send_team_invite(
 
 
 def send_lead_captured(
-    to: str, *, agent_name: str, channel: str, lead_name: str, lead_phone: str,
-    lead_email: str, lead_intent: str, lead_url: str,
+    to: str,
+    *,
+    agent_name: str,
+    channel: str,
+    lead_name: str,
+    lead_phone: str,
+    lead_email: str,
+    lead_intent: str,
+    lead_url: str,
 ) -> bool:
     return send_email(
         to=to,
@@ -241,16 +281,27 @@ def send_lead_captured(
         template="lead_captured.html",
         preheader=f"{lead_name} from {channel}.",
         context={
-            "agent_name": agent_name, "channel": channel, "lead_name": lead_name,
-            "lead_phone": lead_phone, "lead_email": lead_email,
-            "lead_intent": lead_intent, "cta_url": lead_url,
+            "agent_name": agent_name,
+            "channel": channel,
+            "lead_name": lead_name,
+            "lead_phone": lead_phone,
+            "lead_email": lead_email,
+            "lead_intent": lead_intent,
+            "cta_url": lead_url,
         },
     )
 
 
 def send_conversation_escalated(
-    to: str, *, agent_name: str, channel: str, customer_name: str, reason: str,
-    last_message: str, escalated_at: str, conversation_url: str,
+    to: str,
+    *,
+    agent_name: str,
+    channel: str,
+    customer_name: str,
+    reason: str,
+    last_message: str,
+    escalated_at: str,
+    conversation_url: str,
 ) -> bool:
     return send_email(
         to=to,
@@ -258,16 +309,27 @@ def send_conversation_escalated(
         template="conversation_escalated.html",
         preheader=f"{agent_name} escalated a {channel} conversation.",
         context={
-            "agent_name": agent_name, "channel": channel, "customer_name": customer_name,
-            "reason": reason, "last_message": last_message, "escalated_at": escalated_at,
+            "agent_name": agent_name,
+            "channel": channel,
+            "customer_name": customer_name,
+            "reason": reason,
+            "last_message": last_message,
+            "escalated_at": escalated_at,
             "cta_url": conversation_url,
         },
     )
 
 
 def send_usage_warning(
-    to: str, *, org_name: str, plan_name: str, metric_label: str,
-    used: str, limit: str, percent: int, plans_url: str,
+    to: str,
+    *,
+    org_name: str,
+    plan_name: str,
+    metric_label: str,
+    used: str,
+    limit: str,
+    percent: int,
+    plans_url: str,
 ) -> bool:
     return send_email(
         to=to,
@@ -275,15 +337,28 @@ def send_usage_warning(
         template="usage_warning.html",
         preheader=f"{percent}% of your {metric_label} used.",
         context={
-            "org_name": org_name, "plan_name": plan_name, "metric_label": metric_label,
-            "used": used, "limit": limit, "percent": percent, "cta_url": plans_url,
+            "org_name": org_name,
+            "plan_name": plan_name,
+            "metric_label": metric_label,
+            "used": used,
+            "limit": limit,
+            "percent": percent,
+            "cta_url": plans_url,
         },
     )
 
 
 def send_subscription_receipt(
-    to: str, *, first_name: str, plan_name: str, billing_cycle: str, amount: str,
-    renewal_date: str, invoice_number: str, payment_method: str, billing_url: str,
+    to: str,
+    *,
+    first_name: str,
+    plan_name: str,
+    billing_cycle: str,
+    amount: str,
+    renewal_date: str,
+    invoice_number: str,
+    payment_method: str,
+    billing_url: str,
 ) -> bool:
     return send_email(
         to=to,
@@ -291,16 +366,29 @@ def send_subscription_receipt(
         template="subscription_receipt.html",
         preheader=f"Receipt for {plan_name}.",
         context={
-            "first_name": first_name, "plan_name": plan_name, "billing_cycle": billing_cycle,
-            "amount": amount, "renewal_date": renewal_date, "invoice_number": invoice_number,
-            "payment_method": payment_method, "cta_url": billing_url,
+            "first_name": first_name,
+            "plan_name": plan_name,
+            "billing_cycle": billing_cycle,
+            "amount": amount,
+            "renewal_date": renewal_date,
+            "invoice_number": invoice_number,
+            "payment_method": payment_method,
+            "cta_url": billing_url,
         },
     )
 
 
 def send_weekly_digest(
-    to: str, *, org_name: str, period_start: str, period_end: str,
-    conversations: str, leads: str, resolution_rate: str, csat: str, analytics_url: str,
+    to: str,
+    *,
+    org_name: str,
+    period_start: str,
+    period_end: str,
+    conversations: str,
+    leads: str,
+    resolution_rate: str,
+    csat: str,
+    analytics_url: str,
 ) -> bool:
     return send_email(
         to=to,
@@ -308,8 +396,13 @@ def send_weekly_digest(
         template="weekly_digest.html",
         preheader=f"{conversations} conversations, {leads} leads this week.",
         context={
-            "org_name": org_name, "period_start": period_start, "period_end": period_end,
-            "conversations": conversations, "leads": leads,
-            "resolution_rate": resolution_rate, "csat": csat, "cta_url": analytics_url,
+            "org_name": org_name,
+            "period_start": period_start,
+            "period_end": period_end,
+            "conversations": conversations,
+            "leads": leads,
+            "resolution_rate": resolution_rate,
+            "csat": csat,
+            "cta_url": analytics_url,
         },
     )

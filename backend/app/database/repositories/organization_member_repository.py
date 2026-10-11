@@ -1,4 +1,5 @@
 """OrganizationMember repository."""
+
 from __future__ import annotations
 
 import uuid
@@ -39,9 +40,7 @@ class OrganizationMemberRepository(BaseRepository[OrganizationMember]):
         role: MemberRole = MemberRole.member,
         invited_by_user_id: Optional[uuid.UUID] = None,
     ) -> OrganizationMember:
-        existing = await self.find(
-            organization_id=organization_id, user_id=user_id
-        )
+        existing = await self.find(organization_id=organization_id, user_id=user_id)
         if existing is not None:
             return existing
         member = OrganizationMember(

@@ -10,6 +10,7 @@ Replaces AWS Cognito. Responsibility split (SOLID):
 Routes stay thin (app/api/auth/routes.py): they only call these functions
 and translate results to HTTP responses.
 """
+
 from __future__ import annotations
 
 import logging
@@ -82,6 +83,7 @@ def _to_tokens_response(pair: token_service.TokenPair) -> TokensResponse:
 # Registration / email verification
 # ─────────────────────────────────────────────────────────────
 
+
 async def sign_up(session: AsyncSession, data: SignUpRequest) -> dict:
     from app.services.email_service import send_verify_email
 
@@ -107,7 +109,9 @@ async def sign_up(session: AsyncSession, data: SignUpRequest) -> dict:
     await session.commit()
 
     code = generate_numeric_code()
-    _cache().set(_verify_code_key(data.email), code, ttl_seconds=_VERIFY_CODE_TTL_SECONDS)
+    _cache().set(
+        _verify_code_key(data.email), code, ttl_seconds=_VERIFY_CODE_TTL_SECONDS
+    )
     sent = send_verify_email(
         data.email,
         verify_url=f"{_frontend_url()}/verify-email?email={data.email}",
@@ -127,13 +131,18 @@ async def confirm_sign_up(session: AsyncSession, data: ConfirmSignUpRequest) -> 
     users = UserRepository(session)
     user = await users.get_by_email(data.email)
     if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No account found with this email.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account found with this email.",
+        )
     user.is_email_verified = True
     await session.commit()
     _cache().delete(_verify_code_key(data.email))
 
 
-async def resend_confirmation_code(session: AsyncSession, data: ResendConfirmationRequest) -> dict:
+async def resend_confirmation_code(
+    session: AsyncSession, data: ResendConfirmationRequest
+) -> dict:
     from app.services.email_service import send_verify_email
 
     users = UserRepository(session)
@@ -142,14 +151,21 @@ async def resend_confirmation_code(session: AsyncSession, data: ResendConfirmati
         # Don't leak account existence/verification state.
         return {"delivery": {}}
     code = generate_numeric_code()
-    _cache().set(_verify_code_key(data.email), code, ttl_seconds=_VERIFY_CODE_TTL_SECONDS)
-    send_verify_email(data.email, verify_url=f"{_frontend_url()}/verify-email?email={data.email}", code=code)
+    _cache().set(
+        _verify_code_key(data.email), code, ttl_seconds=_VERIFY_CODE_TTL_SECONDS
+    )
+    send_verify_email(
+        data.email,
+        verify_url=f"{_frontend_url()}/verify-email?email={data.email}",
+        code=code,
+    )
     return {"delivery": {}}
 
 
 # ─────────────────────────────────────────────────────────────
 # Login / refresh / logout
 # ─────────────────────────────────────────────────────────────
+
 
 async def login(session: AsyncSession, data: LoginRequest) -> LoginOtpRequiredResponse:
     """Verify credentials and email a one-time code — tokens are issued by
@@ -160,13 +176,21 @@ async def login(session: AsyncSession, data: LoginRequest) -> LoginOtpRequiredRe
     users = UserRepository(session)
     user = await users.get_by_email(data.email)
     if user is None or not verify_password(data.password, user.password_hash or ""):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password.",
+        )
 
     if user.status.value != "active":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account has been disabled.")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account has been disabled.",
+        )
 
     require_verified = bool(
-        os.environ.get("SMTP_HOST") or os.environ.get("EMAIL_FROM") or os.environ.get("SES_FROM_EMAIL")
+        os.environ.get("SMTP_HOST")
+        or os.environ.get("EMAIL_FROM")
+        or os.environ.get("SES_FROM_EMAIL")
     )
     if require_verified and not user.is_email_verified:
         raise HTTPException(
@@ -181,22 +205,31 @@ async def login(session: AsyncSession, data: LoginRequest) -> LoginOtpRequiredRe
     return LoginOtpRequiredResponse(email=data.email)
 
 
-async def verify_login_otp(session: AsyncSession, data: VerifyLoginOtpRequest) -> TokensResponse:
+async def verify_login_otp(
+    session: AsyncSession, data: VerifyLoginOtpRequest
+) -> TokensResponse:
     stored = _cache().get(_login_otp_key(data.email))
     if not stored or stored != data.code:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect or expired code.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect or expired code."
+        )
     _cache().delete(_login_otp_key(data.email))
 
     users = UserRepository(session)
     user = await users.get_by_email(data.email)
     if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No account found with this email.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account found with this email.",
+        )
 
     user.last_login_at = datetime.now(timezone.utc)
     await session.commit()
 
     try:
-        pair = token_service.issue_token_pair(user_id=user.cognito_sub, email=user.email, name=user.full_name)
+        pair = token_service.issue_token_pair(
+            user_id=user.cognito_sub, email=user.email, name=user.full_name
+        )
     except Exception as e:  # noqa: BLE001 — fail safely: no session store, no tokens, clear retryable error
         log.error("token_issue_failed user=%s err=%s", user.cognito_sub, e)
         raise HTTPException(
@@ -244,6 +277,7 @@ def logout_all(user_id: str) -> None:
 # Password reset
 # ─────────────────────────────────────────────────────────────
 
+
 async def forgot_password(session: AsyncSession, data: ForgotPasswordRequest) -> dict:
     from app.services.email_service import send_password_reset
 
@@ -254,18 +288,30 @@ async def forgot_password(session: AsyncSession, data: ForgotPasswordRequest) ->
         return {"delivery": {}}
     code = generate_numeric_code()
     _cache().set(_reset_code_key(data.email), code, ttl_seconds=_RESET_CODE_TTL_SECONDS)
-    send_password_reset(data.email, reset_url=f"{_frontend_url()}/reset-password?email={data.email}", code=code)
+    send_password_reset(
+        data.email,
+        reset_url=f"{_frontend_url()}/reset-password?email={data.email}",
+        code=code,
+    )
     return {"delivery": {}}
 
 
-async def confirm_forgot_password(session: AsyncSession, data: ConfirmForgotPasswordRequest) -> None:
+async def confirm_forgot_password(
+    session: AsyncSession, data: ConfirmForgotPasswordRequest
+) -> None:
     stored = _cache().get(_reset_code_key(data.email))
     if not stored or stored != data.code:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect or expired reset code.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect or expired reset code.",
+        )
     users = UserRepository(session)
     user = await users.get_by_email(data.email)
     if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No account found with this email.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account found with this email.",
+        )
     user.password_hash = hash_password(data.new_password)
     await session.commit()
     _cache().delete(_reset_code_key(data.email))
@@ -274,13 +320,22 @@ async def confirm_forgot_password(session: AsyncSession, data: ConfirmForgotPass
     token_service.revoke_all_for_user(user.cognito_sub)
 
 
-async def change_password(session: AsyncSession, user_id: str, *, current_password: str, new_password: str) -> None:
+async def change_password(
+    session: AsyncSession, user_id: str, *, current_password: str, new_password: str
+) -> None:
     """Change the caller's password while logged in (Settings page)."""
     users = UserRepository(session)
     user = await users.get_by_cognito_sub(user_id)
     if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found.")
-    if not user.password_hash or not verify_password(current_password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Account not found."
+        )
+    if not user.password_hash or not verify_password(
+        current_password, user.password_hash
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect.",
+        )
     user.password_hash = hash_password(new_password)
     await session.commit()

@@ -7,6 +7,7 @@ meaningless.
 Usage (with tunnel up):
     ORG_ID=<org-uuid> python scripts/reembed_org.py
 """
+
 import asyncio
 import os
 import sys
@@ -23,6 +24,7 @@ BATCH = int(os.environ.get("BATCH", "50"))
 async def main() -> None:
     from sqlalchemy import select
     from app.database.session import init_engine
+
     init_engine()
     from app.database.session import AsyncSessionLocal
     from app.database.models.document import Document
@@ -30,17 +32,23 @@ async def main() -> None:
     from app.providers.embeddings import get_embedding_provider
 
     provider = get_embedding_provider()
-    print(f"Re-embedding org {ORG_ID} with provider={provider.name} (dim={provider.dim})")
+    print(
+        f"Re-embedding org {ORG_ID} with provider={provider.name} (dim={provider.dim})"
+    )
 
     async with AsyncSessionLocal() as s:
         rows = (
-            await s.execute(
-                select(DocumentChunk)
-                .join(Document, Document.id == DocumentChunk.document_id)
-                .where(Document.organization_id == ORG_ID)
-                .order_by(DocumentChunk.id)
+            (
+                await s.execute(
+                    select(DocumentChunk)
+                    .join(Document, Document.id == DocumentChunk.document_id)
+                    .where(Document.organization_id == ORG_ID)
+                    .order_by(DocumentChunk.id)
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         print(f"  {len(rows)} chunks to re-embed")
 
         for i in range(0, len(rows), BATCH):

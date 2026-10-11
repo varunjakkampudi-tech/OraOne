@@ -8,6 +8,7 @@ integrations, webhooks, api keys, …).
 The concrete model must expose both ``organization_id`` and ``project_id``
 columns — asserted at construction so misuse fails loudly.
 """
+
 from __future__ import annotations
 
 import uuid

@@ -4,6 +4,7 @@ Events power the widget dashboard (opens, messages, lead captures,
 escalations, bookings, errors). They are append-only and tenant-scoped via
 ``organization_id`` for cheap aggregation.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -29,8 +30,17 @@ class WidgetEventType:
     upload = "upload"
     error = "error"
     ALL = {
-        loaded, opened, closed, message, answer, lead,
-        escalation, booking, feedback, upload, error,
+        loaded,
+        opened,
+        closed,
+        message,
+        answer,
+        lead,
+        escalation,
+        booking,
+        feedback,
+        upload,
+        error,
     }
 
 

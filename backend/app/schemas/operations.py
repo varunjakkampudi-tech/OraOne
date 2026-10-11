@@ -1,4 +1,5 @@
 """R10 — Security & Operations request schemas."""
+
 from __future__ import annotations
 
 from typing import Optional

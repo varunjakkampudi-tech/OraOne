@@ -1,4 +1,5 @@
 """Conversation — one customer↔agent thread across any channel."""
+
 from __future__ import annotations
 
 import enum
@@ -15,7 +16,6 @@ from app.database.base import Base, SoftDeleteMixin, TimestampMixin, UUIDPrimary
 if TYPE_CHECKING:
     from app.database.models.agent import Agent
     from app.database.models.message import Message
-    from app.database.models.user import User
 
 
 class ConversationChannel(str, enum.Enum):
@@ -85,9 +85,7 @@ class Conversation(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
         nullable=True,
     )
     title: Mapped[Optional[str]] = mapped_column(String(255))
-    last_message_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True)
-    )
+    last_message_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
     # Customer identity (denormalised — a `contacts` table can come later)
     customer_name: Mapped[Optional[str]] = mapped_column(String(160))
@@ -104,7 +102,9 @@ class Conversation(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
         index=True,
     )
 
-    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
     ended_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     duration_seconds: Mapped[Optional[int]] = mapped_column()
 
@@ -147,5 +147,6 @@ class Conversation(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
         cascade="all, delete-orphan",
         order_by="Message.created_at",
     )
+
     def __repr__(self) -> str:  # pragma: no cover
         return f"<Conversation {self.id} {self.channel} {self.status}>"

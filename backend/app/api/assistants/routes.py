@@ -7,6 +7,7 @@ are organization-scoped and audit-logged.
 * ``GET  /api/assistants``            — list available assistants
 * ``POST /api/assistants/{kind}/run`` — run one assistant with a free-form input
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -47,11 +48,16 @@ async def run_assistant(
     try:
         out = await assistants.run(kind, payload.input or {})
     except KeyError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown assistant.") from e
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Unknown assistant."
+        ) from e
 
     audit(
-        "run", resource="assistant", resource_id=kind,
-        organization_id=str(ctx.organization_id), user_id=str(ctx.user_id),
+        "run",
+        resource="assistant",
+        resource_id=kind,
+        organization_id=str(ctx.organization_id),
+        user_id=str(ctx.user_id),
         meta={"generated": out["generated"]},
     )
     return AssistantRunOut(kind=kind, result=out["result"], generated=out["generated"])

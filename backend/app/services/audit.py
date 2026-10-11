@@ -10,6 +10,7 @@ gives an org-scoped, queryable history for compliance review.
 a bounded buffer. ``flush_pending(session)`` drains the buffer into the DB
 and is invoked by middleware after each request.
 """
+
 from __future__ import annotations
 
 import json
@@ -108,7 +109,9 @@ async def flush_pending(session) -> int:
             "user_id": _coerce_uuid(rec.get("user_id")),
             "action": str(rec.get("action") or "")[:40],
             "resource": str(rec.get("resource") or "")[:80],
-            "resource_id": (str(rec["resource_id"])[:120] if rec.get("resource_id") else None),
+            "resource_id": (
+                str(rec["resource_id"])[:120] if rec.get("resource_id") else None
+            ),
             "before": rec.get("before"),
             "after": rec.get("after"),
             "meta": rec.get("meta"),

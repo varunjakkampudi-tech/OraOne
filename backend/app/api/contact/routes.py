@@ -25,7 +25,9 @@ def register_contact_routes(api, get_db) -> None:
     from fastapi import Depends
 
     @api.post("/contact")
-    async def submit_contact(payload: ContactIn, session: AsyncSession = Depends(get_db)):
+    async def submit_contact(
+        payload: ContactIn, session: AsyncSession = Depends(get_db)
+    ):
         row = ContactSubmission(
             name=payload.name,
             email=payload.email,
@@ -38,7 +40,9 @@ def register_contact_routes(api, get_db) -> None:
         return {"message": "Thanks! We'll be in touch shortly.", "id": str(row.id)}
 
     @api.post("/newsletter")
-    async def subscribe_newsletter(payload: NewsletterIn, session: AsyncSession = Depends(get_db)):
+    async def subscribe_newsletter(
+        payload: NewsletterIn, session: AsyncSession = Depends(get_db)
+    ):
         email = payload.email.lower()
         stmt = (
             pg_insert(NewsletterSubscriber)

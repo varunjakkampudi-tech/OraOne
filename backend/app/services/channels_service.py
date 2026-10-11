@@ -16,6 +16,7 @@ Nothing here duplicates AI logic — answers still flow through the existing
 AgentRuntime / RAG / widget pipeline. This only wires the agent to its
 delivery surfaces.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -85,6 +86,7 @@ def is_valid_channel(channel: str) -> bool:
 
 # ─────────────────────────── channels ───────────────────────────
 
+
 async def ensure_channels(session: AsyncSession, agent: Agent) -> list[AgentChannel]:
     """Find-or-create an AgentChannel row for every supported channel.
 
@@ -105,21 +107,27 @@ async def ensure_channels(session: AsyncSession, agent: Agent) -> list[AgentChan
     }
     missing = [d for d in CHANNEL_DEFS if d["channel"] not in existing]
     if missing:
-        stmt = pg_insert(AgentChannel).values(
-            [
-                {
-                    "organization_id": agent.organization_id,
-                    "project_id": agent.project_id,
-                    "agent_id": agent.id,
-                    "channel": d["channel"],
-                    "enabled": bool(d["default_enabled"]),
-                    "status": ChannelStatus.active if d["default_enabled"] else ChannelStatus.disabled,
-                    "provider": d.get("provider"),
-                    "configuration": {},
-                }
-                for d in missing
-            ]
-        ).on_conflict_do_nothing(index_elements=["agent_id", "channel"])
+        stmt = (
+            pg_insert(AgentChannel)
+            .values(
+                [
+                    {
+                        "organization_id": agent.organization_id,
+                        "project_id": agent.project_id,
+                        "agent_id": agent.id,
+                        "channel": d["channel"],
+                        "enabled": bool(d["default_enabled"]),
+                        "status": ChannelStatus.active
+                        if d["default_enabled"]
+                        else ChannelStatus.disabled,
+                        "provider": d.get("provider"),
+                        "configuration": {},
+                    }
+                    for d in missing
+                ]
+            )
+            .on_conflict_do_nothing(index_elements=["agent_id", "channel"])
+        )
         await session.execute(stmt)
         await session.flush()
         existing = {
@@ -227,7 +235,8 @@ async def update_channel(
         elif enabled is False:
             # Only pause if NO embeddable channel remains enabled.
             others = [
-                r for r in rows
+                r
+                for r in rows
                 if r.channel in ("widget", "chat") and r.channel != channel
             ]
             if not any(o.enabled for o in others):
@@ -236,6 +245,7 @@ async def update_channel(
 
 
 # ─────────────────────────── widget binding ───────────────────────────
+
 
 async def ensure_widget(session: AsyncSession, agent: Agent) -> Widget:
     """Find-or-create the Widget that backs this agent's embeddable channels.
@@ -266,7 +276,11 @@ async def ensure_widget(session: AsyncSession, agent: Agent) -> Widget:
         theme={"primary_color": "#2563EB", "bubble_color": "#2563EB", "mode": "auto"},
         settings={
             "agent_name": agent.name,
-            "welcome_message": (cfg.greeting if cfg and cfg.greeting else "Hi! 👋 How can I help you today?"),
+            "welcome_message": (
+                cfg.greeting
+                if cfg and cfg.greeting
+                else "Hi! 👋 How can I help you today?"
+            ),
         },
     )
     session.add(widget)
@@ -281,6 +295,7 @@ def _new_key() -> str:
 
 
 # ─────────────────────────── domains ───────────────────────────
+
 
 async def get_domains(session: AsyncSession, widget: Widget) -> list[str]:
     return await widget_service.widget_domains(session, widget.id)
@@ -319,21 +334,28 @@ async def set_domains(
 
 # ─────────────────────────── verification ───────────────────────────
 
+
 async def verify_installation(session: AsyncSession, widget: Widget) -> dict:
     """Has the widget ever loaded on a real page? Pull it from telemetry."""
-    total = await session.scalar(
-        select(func.count(WidgetEvent.id)).where(WidgetEvent.widget_id == widget.id)
-    ) or 0
+    total = (
+        await session.scalar(
+            select(func.count(WidgetEvent.id)).where(WidgetEvent.widget_id == widget.id)
+        )
+        or 0
+    )
     last_seen = await session.scalar(
         select(func.max(WidgetEvent.created_at)).where(
             WidgetEvent.widget_id == widget.id
         )
     )
-    loaded = await session.scalar(
-        select(func.count(WidgetEvent.id))
-        .where(WidgetEvent.widget_id == widget.id)
-        .where(WidgetEvent.event == "loaded")
-    ) or 0
+    loaded = (
+        await session.scalar(
+            select(func.count(WidgetEvent.id))
+            .where(WidgetEvent.widget_id == widget.id)
+            .where(WidgetEvent.event == "loaded")
+        )
+        or 0
+    )
     return {
         "installed": bool(loaded),
         "events_count": int(total),
@@ -344,17 +366,39 @@ async def verify_installation(session: AsyncSession, widget: Widget) -> dict:
 
 # ─────────────────────────── deploy payload ───────────────────────────
 
+
 def sdk_methods() -> list[dict[str, str]]:
     return [
-        {"name": "OraOne.init(options)", "description": "Optional boot hook — pass { user, context, autoOpen } once the script tag has loaded."},
+        {
+            "name": "OraOne.init(options)",
+            "description": "Optional boot hook — pass { user, context, autoOpen } once the script tag has loaded.",
+        },
         {"name": "OraOne.open()", "description": "Open the chat panel."},
         {"name": "OraOne.close()", "description": "Close the chat panel."},
-        {"name": "OraOne.startChat(message?)", "description": "Open chat and optionally send a first message."},
-        {"name": "OraOne.identifyUser(traits)", "description": "Attach name/email/phone so the agent recognises them everywhere."},
-        {"name": "OraOne.updateContext(data)", "description": "Merge live page/user context into the conversation."},
-        {"name": "OraOne.trackEvent(name, data)", "description": "Send a custom event (button clicks, page views, …)."},
-        {"name": "OraOne.setLeadData(data)", "description": "Push qualified lead fields to your CRM pipeline."},
-        {"name": "OraOne.trackPurchase(data)", "description": "Record a purchase / conversion for attribution."},
+        {
+            "name": "OraOne.startChat(message?)",
+            "description": "Open chat and optionally send a first message.",
+        },
+        {
+            "name": "OraOne.identifyUser(traits)",
+            "description": "Attach name/email/phone so the agent recognises them everywhere.",
+        },
+        {
+            "name": "OraOne.updateContext(data)",
+            "description": "Merge live page/user context into the conversation.",
+        },
+        {
+            "name": "OraOne.trackEvent(name, data)",
+            "description": "Send a custom event (button clicks, page views, …).",
+        },
+        {
+            "name": "OraOne.setLeadData(data)",
+            "description": "Push qualified lead fields to your CRM pipeline.",
+        },
+        {
+            "name": "OraOne.trackPurchase(data)",
+            "description": "Record a purchase / conversion for attribution.",
+        },
     ]
 
 
@@ -415,10 +459,10 @@ def install_guides(public_key: str) -> list[dict[str, str]]:
         "// app/layout.tsx (App Router) — add inside <body>\n"
         "import Script from 'next/script';\n\n"
         "<Script\n"
-        f"  src=\"{base}/widget.js\"\n"
-        f"  data-widget-id=\"{public_key}\"\n"
-        + (f"  data-api=\"{api}\"\n" if api_attr else "")
-        + "  strategy=\"afterInteractive\"\n"
+        f'  src="{base}/widget.js"\n'
+        f'  data-widget-id="{public_key}"\n'
+        + (f'  data-api="{api}"\n' if api_attr else "")
+        + '  strategy="afterInteractive"\n'
         "/>"
     )
     vue = (
@@ -444,7 +488,7 @@ def install_guides(public_key: str) -> list[dict[str, str]]:
     wordpress = (
         "Appearance → Theme File Editor → footer.php, paste before </body>:\n\n"
         f"{tag}\n\n"
-        "Or use a plugin like \"Insert Headers and Footers\" and paste the same line."
+        'Or use a plugin like "Insert Headers and Footers" and paste the same line.'
     )
     shopify = (
         "Online Store → Themes → Edit code → layout/theme.liquid,\n"
@@ -456,19 +500,31 @@ def install_guides(public_key: str) -> list[dict[str, str]]:
         f"{tag}\n\n"
         "Publish the site to apply."
     )
-    html = (
-        "Paste this once, just before the closing </body> tag:\n\n"
-        f"{tag}"
-    )
+    html = f"Paste this once, just before the closing </body> tag:\n\n{tag}"
     return [
         {"platform": "html", "label": "HTML", "language": "html", "code": html},
         {"platform": "react", "label": "React", "language": "jsx", "code": react},
         {"platform": "nextjs", "label": "Next.js", "language": "tsx", "code": nextjs},
         {"platform": "vue", "label": "Vue", "language": "js", "code": vue},
         {"platform": "angular", "label": "Angular", "language": "ts", "code": angular},
-        {"platform": "wordpress", "label": "WordPress", "language": "text", "code": wordpress},
-        {"platform": "shopify", "label": "Shopify", "language": "text", "code": shopify},
-        {"platform": "webflow", "label": "Webflow", "language": "text", "code": webflow},
+        {
+            "platform": "wordpress",
+            "label": "WordPress",
+            "language": "text",
+            "code": wordpress,
+        },
+        {
+            "platform": "shopify",
+            "label": "Shopify",
+            "language": "text",
+            "code": shopify,
+        },
+        {
+            "platform": "webflow",
+            "label": "Webflow",
+            "language": "text",
+            "code": webflow,
+        },
     ]
 
 
@@ -487,10 +543,10 @@ def trigger_snippets() -> list[dict[str, str]]:
             "name": "Form submit → identify + follow-up",
             "language": "html",
             "code": (
-                "<form id=\"lead-form\">\n"
-                "  <input name=\"name\" placeholder=\"Name\" />\n"
-                "  <input name=\"email\" type=\"email\" placeholder=\"Email\" />\n"
-                "  <button type=\"submit\">Get started</button>\n"
+                '<form id="lead-form">\n'
+                '  <input name="name" placeholder="Name" />\n'
+                '  <input name="email" type="email" placeholder="Email" />\n'
+                '  <button type="submit">Get started</button>\n'
                 "</form>\n"
                 "<script>\n"
                 "  document.getElementById('lead-form').addEventListener('submit', function (e) {\n"
@@ -506,9 +562,7 @@ def trigger_snippets() -> list[dict[str, str]]:
     ]
 
 
-async def build_deploy_info(
-    session: AsyncSession, agent: Agent
-) -> dict:
+async def build_deploy_info(session: AsyncSession, agent: Agent) -> dict:
     widget = await ensure_widget(session, agent)
     channels = await ensure_channels(session, agent)
     domains = await get_domains(session, widget)

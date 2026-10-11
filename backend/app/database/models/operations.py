@@ -5,15 +5,14 @@ signal stream distinct from the immutable ``audit_logs``), feature flags
 (per-org / per-environment rollout switches), and a deployment history /
 release log used by the Operations dashboard and release pipeline.
 """
+
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
 from typing import Any, Optional
 
 from sqlalchemy import (
     Boolean,
-    DateTime,
     ForeignKey,
     Index,
     Integer,
@@ -84,14 +83,19 @@ class SecurityEvent(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         PG_UUID(as_uuid=True), nullable=True
     )
     severity: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=SecuritySeverity.INFO, server_default=SecuritySeverity.INFO
+        String(20),
+        nullable=False,
+        default=SecuritySeverity.INFO,
+        server_default=SecuritySeverity.INFO,
     )
     event_type: Mapped[str] = mapped_column(String(60), nullable=False)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     ip_address: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     user_agent: Mapped[Optional[str]] = mapped_column(String(400), nullable=True)
-    meta: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict, server_default="{}")
+    meta: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default="{}"
+    )
 
 
 class FeatureFlag(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -100,7 +104,9 @@ class FeatureFlag(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "feature_flags"
     __table_args__ = (
         UniqueConstraint(
-            "organization_id", "name", "environment",
+            "organization_id",
+            "name",
+            "environment",
             name="uq_feature_flags_scope",
         ),
         Index("ix_feature_flags_org", "organization_id"),
@@ -108,11 +114,15 @@ class FeatureFlag(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     organization_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=True,
     )
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
+    enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
     environment: Mapped[str] = mapped_column(
         String(20), nullable=False, default="production", server_default="production"
     )
@@ -120,7 +130,9 @@ class FeatureFlag(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         Integer, nullable=False, default=100, server_default="100"
     )
     updated_by_user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
     )
 
 
@@ -150,10 +162,15 @@ class DeploymentRecord(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         String(20), nullable=False, default="production", server_default="production"
     )
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=DeploymentStatus.SUCCEEDED, server_default=DeploymentStatus.SUCCEEDED
+        String(20),
+        nullable=False,
+        default=DeploymentStatus.SUCCEEDED,
+        server_default=DeploymentStatus.SUCCEEDED,
     )
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     deployed_by_user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         PG_UUID(as_uuid=True), nullable=True
     )
-    meta: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict, server_default="{}")
+    meta: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default="{}"
+    )

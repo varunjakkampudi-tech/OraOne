@@ -5,6 +5,7 @@ across all tenants. Reads are audited; the only writes are feature-flag
 toggles. Secrets are exposed **masked and read-only** — plaintext never
 leaves the server.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -66,8 +67,15 @@ def _audit(
 # Identity / gate                                                             #
 # --------------------------------------------------------------------------- #
 @router.get("/me")
-async def whoami(admin: PlatformAdminContext = Depends(get_platform_admin)) -> dict[str, Any]:
-    return {"user_id": str(admin.user_id), "email": admin.email, "full_name": admin.full_name, "is_platform_admin": True}
+async def whoami(
+    admin: PlatformAdminContext = Depends(get_platform_admin),
+) -> dict[str, Any]:
+    return {
+        "user_id": str(admin.user_id),
+        "email": admin.email,
+        "full_name": admin.full_name,
+        "is_platform_admin": True,
+    }
 
 
 # --------------------------------------------------------------------------- #
@@ -113,7 +121,9 @@ async def get_customer_detail(
 ) -> dict[str, Any]:
     data = await svc.customer_detail(db, org_id)
     if data is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found."
+        )
     _audit(admin, "read", "platform_customer", resource_id=org_id)
     return data
 
@@ -217,10 +227,20 @@ async def patch_feature_flag(
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     result = await svc.set_feature_flag(
-        db, key, enabled=payload.enabled,
-        rollout_percentage=payload.rollout_percentage, admin_user_id=admin.user_id,
+        db,
+        key,
+        enabled=payload.enabled,
+        rollout_percentage=payload.rollout_percentage,
+        admin_user_id=admin.user_id,
     )
-    _audit(admin, "update", "feature_flag", resource_id=key, enabled=payload.enabled, rollout=payload.rollout_percentage)
+    _audit(
+        admin,
+        "update",
+        "feature_flag",
+        resource_id=key,
+        enabled=payload.enabled,
+        rollout=payload.rollout_percentage,
+    )
     return result
 
 
@@ -291,20 +311,32 @@ async def patch_product(
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     result = await ent.set_product(
-        db, key,
-        status=payload.status, visibility=payload.visibility,
-        version=payload.version, release_notes=payload.release_notes,
+        db,
+        key,
+        status=payload.status,
+        visibility=payload.visibility,
+        version=payload.version,
+        release_notes=payload.release_notes,
         default_enabled=payload.default_enabled,
-        display_name=payload.display_name, description=payload.description,
-        icon=payload.icon, documentation_url=payload.documentation_url,
+        display_name=payload.display_name,
+        description=payload.description,
+        icon=payload.icon,
+        documentation_url=payload.documentation_url,
         sort_order=payload.sort_order,
     )
     if result is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Unknown product '{key}'.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Unknown product '{key}'."
+        )
     _audit(
-        admin, "update", "product", resource_id=key,
-        before=result["before"], after=result["after"],
-        request=request, reason=payload.reason,
+        admin,
+        "update",
+        "product",
+        resource_id=key,
+        before=result["before"],
+        after=result["after"],
+        request=request,
+        reason=payload.reason,
     )
     return result
 
@@ -318,7 +350,10 @@ async def get_customer_entitlements(
     try:
         org_uuid = uuid.UUID(organization_id)
     except ValueError:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid organization id.")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Invalid organization id.",
+        )
     return await ent.get_org_products(db, org_uuid)
 
 
@@ -334,15 +369,26 @@ async def patch_customer_entitlement(
     try:
         org_uuid = uuid.UUID(organization_id)
     except ValueError:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid organization id.")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Invalid organization id.",
+        )
     result = await ent.set_org_entitlement(
-        db, org_uuid, product_key, enabled=payload.enabled, admin_user_id=admin.user_id,
+        db,
+        org_uuid,
+        product_key,
+        enabled=payload.enabled,
+        admin_user_id=admin.user_id,
     )
     _audit(
-        admin, "update", "org_entitlement",
+        admin,
+        "update",
+        "org_entitlement",
         resource_id=f"{organization_id}:{product_key}",
-        before=result.get("before"), after=result.get("after"),
-        request=request, reason=payload.reason,
+        before=result.get("before"),
+        after=result.get("after"),
+        request=request,
+        reason=payload.reason,
     )
     return result
 

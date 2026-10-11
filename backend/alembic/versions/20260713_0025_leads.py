@@ -4,6 +4,7 @@ Creates the ``leads`` table so conversations/widgets can materialise sales
 leads with status, scoring and assignment (previously leads only existed as
 append-only ``widget_events`` of type ``lead``).
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -22,12 +23,20 @@ depends_on: Union[str, Sequence[str], None] = None
 # ``create_type=False`` so SQLAlchemy never auto-emits CREATE TYPE during the
 # CREATE TABLE that references these — we issue CREATE TYPE explicitly below.
 lead_status = postgresql.ENUM(
-    "new", "contacted", "qualified", "won", "lost",
-    name="lead_status", create_type=False,
+    "new",
+    "contacted",
+    "qualified",
+    "won",
+    "lost",
+    name="lead_status",
+    create_type=False,
 )
 lead_temperature = postgresql.ENUM(
-    "hot", "warm", "cold",
-    name="lead_temperature", create_type=False,
+    "hot",
+    "warm",
+    "cold",
+    name="lead_temperature",
+    create_type=False,
 )
 
 
@@ -36,9 +45,7 @@ def upgrade() -> None:
         "CREATE TYPE lead_status AS ENUM "
         "('new', 'contacted', 'qualified', 'won', 'lost')"
     )
-    op.execute(
-        "CREATE TYPE lead_temperature AS ENUM ('hot', 'warm', 'cold')"
-    )
+    op.execute("CREATE TYPE lead_temperature AS ENUM ('hot', 'warm', 'cold')")
 
     op.create_table(
         "leads",
@@ -85,9 +92,7 @@ def upgrade() -> None:
         sa.Column("company", sa.String(200)),
         sa.Column("intent", sa.String(255)),
         sa.Column("message", sa.Text()),
-        sa.Column(
-            "source", sa.String(40), nullable=False, server_default="widget"
-        ),
+        sa.Column("source", sa.String(40), nullable=False, server_default="widget"),
         sa.Column("status", lead_status, nullable=False, server_default="new"),
         sa.Column(
             "temperature", lead_temperature, nullable=False, server_default="warm"

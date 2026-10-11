@@ -7,6 +7,7 @@ or headers. Repositories used here MUST be the ``OrgScoped*`` variants.
 Mounted under ``/api/v2`` so the legacy MongoDB-backed routes in
 ``server.py`` keep working until Phase 2 migrates them.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -59,6 +60,7 @@ router = APIRouter(prefix="/api/v2", tags=["v2"])
 
 # ─────────────────── Observability helpers ───────────────────
 
+
 def _message_out(m: Message) -> MessageOut:
     """Project a Message ORM row to MessageOut, surfacing the observability
     fields stored inside ``metadata_`` (model, token split, cost, latency,
@@ -104,7 +106,10 @@ async def _usage_rollups(
         .group_by(Message.conversation_id)
     )
     return {
-        r.conversation_id: {"message_count": int(r.cnt), "total_tokens": int(r.tokens or 0)}
+        r.conversation_id: {
+            "message_count": int(r.cnt),
+            "total_tokens": int(r.tokens or 0),
+        }
         for r in rows
     }
 
@@ -140,6 +145,7 @@ def _conversation_out(c: Conversation, rollup: Optional[dict]) -> ConversationOu
 
 # ─────────────────────────── Whoami ───────────────────────────
 
+
 @router.get("/me/organization")
 async def whoami(ctx: OrgContext = Depends(get_current_organization)) -> dict:
     """Echo back the server-resolved org context (handy for debugging)."""
@@ -156,6 +162,7 @@ async def whoami(ctx: OrgContext = Depends(get_current_organization)) -> dict:
 
 # ───────────────────── Conversations ─────────────────────
 
+
 @router.get("/conversations", response_model=list[ConversationOut])
 async def list_conversations(
     status_filter: Optional[str] = Query(default=None, alias="status"),
@@ -169,8 +176,11 @@ async def list_conversations(
     parsed_status = ConversationStatus(status_filter) if status_filter else None
     repo = OrgScopedConversationRepository(session, ctx)
     convs = await repo.list_filtered(
-        status=parsed_status, agent_id=agent_id, project_id=pctx.project_id,
-        limit=limit, offset=offset,
+        status=parsed_status,
+        agent_id=agent_id,
+        project_id=pctx.project_id,
+        limit=limit,
+        offset=offset,
     )
     rollups = await _usage_rollups(session, [c.id for c in convs])
     return [_conversation_out(c, rollups.get(c.id)) for c in convs]
@@ -236,6 +246,7 @@ async def get_conversation(
 
 # ─────────────────────── Messages ───────────────────────
 
+
 @router.get(
     "/conversations/{conversation_id}/messages",
     response_model=list[MessageOut],
@@ -291,6 +302,7 @@ async def create_message(
 
 
 # ───────────────────── Integrations ─────────────────────
+
 
 @router.get("/integrations", response_model=list[IntegrationOut])
 async def list_integrations(

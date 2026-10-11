@@ -5,6 +5,7 @@ Postgres `users` + `organizations` + `organization_members` triad.
 login: it finds-or-creates the user, and on first-touch also auto-creates
 a personal organisation with the user as owner.
 """
+
 from __future__ import annotations
 
 import re
@@ -55,6 +56,7 @@ def _derive_workspace_display(
     Anything UUID-shaped (e.g. an accidentally-leaked Cognito sub) is rejected
     at every step and we fall through to the next candidate.
     """
+
     def _clean(candidate: Optional[str]) -> Optional[str]:
         if not candidate:
             return None
@@ -162,7 +164,9 @@ class IdentityService:
         membership = await self.members.ensure_membership(
             organization_id=organization.id,
             user_id=user.id,
-            role=MemberRole.owner if organization.owner_user_id == user.id else MemberRole.member,
+            role=MemberRole.owner
+            if organization.owner_user_id == user.id
+            else MemberRole.member,
         )
 
         return IdentityResult(

@@ -8,6 +8,7 @@ Production Compose must select and fully configure the intended provider.
 Fail-fast policy: required values raise at import time if missing. This
 prevents silently booting with a weak/default JWT secret in production.
 """
+
 import os
 from pathlib import Path
 
@@ -42,7 +43,9 @@ class Settings:
     # ---- Identity provider ----
     auth_provider: str = os.environ.get("AUTH_PROVIDER", "self_hosted").strip().lower()
     cognito_user_pool_id: str = os.environ.get("COGNITO_USER_POOL_ID", "").strip()
-    cognito_region: str = os.environ.get("COGNITO_REGION", os.environ.get("AWS_REGION", "")).strip()
+    cognito_region: str = os.environ.get(
+        "COGNITO_REGION", os.environ.get("AWS_REGION", "")
+    ).strip()
     cognito_client_id: str = os.environ.get("COGNITO_CLIENT_ID", "").strip()
     cognito_issuer: str = os.environ.get("COGNITO_ISSUER", "").strip()
     cognito_userinfo_url: str = os.environ.get("COGNITO_USERINFO_URL", "").strip()
@@ -50,7 +53,9 @@ class Settings:
     environment: str = os.environ.get("ENVIRONMENT", "development").strip().lower()
 
     # ---- Self-hosted migration auth ----
-    jwt_secret_key: str = os.environ.get("JWT_SECRET_KEY", os.environ.get("LOCAL_AUTH_SECRET", ""))
+    jwt_secret_key: str = os.environ.get(
+        "JWT_SECRET_KEY", os.environ.get("LOCAL_AUTH_SECRET", "")
+    )
     jwt_access_ttl_minutes: int = int(os.environ.get("JWT_ACCESS_TTL_MINUTES", "15"))
     jwt_refresh_ttl_days: int = int(os.environ.get("JWT_REFRESH_TTL_DAYS", "30"))
     jwt_leeway_seconds: int = int(os.environ.get("JWT_LEEWAY_SECONDS", "60"))
@@ -58,27 +63,32 @@ class Settings:
 
     def __init__(self) -> None:
         if self.auth_provider not in {"self_hosted", "cognito"}:
-            raise RuntimeError("AUTH_PROVIDER must be either 'self_hosted' or 'cognito'.")
+            raise RuntimeError(
+                "AUTH_PROVIDER must be either 'self_hosted' or 'cognito'."
+            )
         if self.auth_provider == "self_hosted" and len(self.jwt_secret_key) < 32:
             raise RuntimeError(
                 "JWT_SECRET_KEY must be at least 32 characters. Generate one with: "
-                "python -c \"import secrets; print(secrets.token_urlsafe(48))\""
+                'python -c "import secrets; print(secrets.token_urlsafe(48))"'
             )
         if self.auth_provider == "cognito":
             missing = [
-                name for name, value in {
+                name
+                for name, value in {
                     "COGNITO_USER_POOL_ID": self.cognito_user_pool_id,
                     "COGNITO_REGION": self.cognito_region,
                     "COGNITO_CLIENT_ID": self.cognito_client_id,
-                }.items() if not value
+                }.items()
+                if not value
             ]
             if not self.cognito_domain:
                 missing.append("COGNITO_DOMAIN")
             if missing:
-                raise RuntimeError(
-                    "Cognito auth requires: " + ", ".join(missing)
-                )
-        if self.environment in {"production", "prod", "staging"} and self.auth_provider != "cognito":
+                raise RuntimeError("Cognito auth requires: " + ", ".join(missing))
+        if (
+            self.environment in {"production", "prod", "staging"}
+            and self.auth_provider != "cognito"
+        ):
             raise RuntimeError("Production and staging must use AUTH_PROVIDER=cognito.")
 
     @property
@@ -95,7 +105,9 @@ class Settings:
 
     @property
     def cognito_token_issuer(self) -> str:
-        return self.cognito_issuer or self.cognito_jwks_url.removesuffix("/.well-known/jwks.json")
+        return self.cognito_issuer or self.cognito_jwks_url.removesuffix(
+            "/.well-known/jwks.json"
+        )
 
     @property
     def cognito_userinfo_endpoint(self) -> str:

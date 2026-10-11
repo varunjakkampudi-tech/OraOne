@@ -1,4 +1,5 @@
 """Audit log query service (Phase 12, Module 5)."""
+
 from __future__ import annotations
 
 import uuid

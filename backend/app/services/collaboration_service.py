@@ -5,6 +5,7 @@ comments + mentions + reactions, notifications, the activity feed, task
 assignment, and resource follows. Every function takes an explicit
 ``organization_id`` and never trusts client-supplied tenant data.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -47,7 +48,9 @@ async def _user_directory(
         return {}
     rows = (
         await session.execute(
-            select(User.id, User.full_name, User.email, User.avatar_url).where(User.id.in_(ids))
+            select(User.id, User.full_name, User.email, User.avatar_url).where(
+                User.id.in_(ids)
+            )
         )
     ).all()
     out: dict[str, dict[str, Any]] = {}
@@ -64,17 +67,23 @@ async def _user_directory(
 # ─────────────────────────── teams ───────────────────────────
 async def list_teams(session: AsyncSession, org_id: uuid.UUID) -> list[dict[str, Any]]:
     teams = (
-        await session.execute(
-            select(Team)
-            .where(Team.organization_id == org_id, Team.deleted_at.is_(None))
-            .order_by(Team.created_at.asc())
+        (
+            await session.execute(
+                select(Team)
+                .where(Team.organization_id == org_id, Team.deleted_at.is_(None))
+                .order_by(Team.created_at.asc())
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     counts = dict(
         (
             await session.execute(
                 select(TeamMember.team_id, func.count(TeamMember.id))
-                .where(TeamMember.team_id.in_([t.id for t in teams]) if teams else False)
+                .where(
+                    TeamMember.team_id.in_([t.id for t in teams]) if teams else False
+                )
                 .group_by(TeamMember.team_id)
             )
         ).all()
@@ -115,7 +124,9 @@ async def create_team(
     await session.flush()
     # creator becomes the team lead
     session.add(
-        TeamMember(team_id=team.id, user_id=user_id, role=TeamRole.LEAD, joined_at=_utcnow())
+        TeamMember(
+            team_id=team.id, user_id=user_id, role=TeamRole.LEAD, joined_at=_utcnow()
+        )
     )
     await session.commit()
     await session.refresh(team)
@@ -127,16 +138,24 @@ async def get_team(
 ) -> Optional[dict[str, Any]]:
     team = await session.scalar(
         select(Team).where(
-            Team.id == team_id, Team.organization_id == org_id, Team.deleted_at.is_(None)
+            Team.id == team_id,
+            Team.organization_id == org_id,
+            Team.deleted_at.is_(None),
         )
     )
     if team is None:
         return None
     members = (
-        await session.execute(
-            select(TeamMember).where(TeamMember.team_id == team_id).order_by(TeamMember.joined_at.asc())
+        (
+            await session.execute(
+                select(TeamMember)
+                .where(TeamMember.team_id == team_id)
+                .order_by(TeamMember.joined_at.asc())
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     directory = await _user_directory(session, [m.user_id for m in members])
     return {
         "id": str(team.id),
@@ -163,7 +182,9 @@ async def update_team(
 ) -> Optional[Team]:
     team = await session.scalar(
         select(Team).where(
-            Team.id == team_id, Team.organization_id == org_id, Team.deleted_at.is_(None)
+            Team.id == team_id,
+            Team.organization_id == org_id,
+            Team.deleted_at.is_(None),
         )
     )
     if team is None:
@@ -176,10 +197,14 @@ async def update_team(
     return team
 
 
-async def delete_team(session: AsyncSession, org_id: uuid.UUID, team_id: uuid.UUID) -> bool:
+async def delete_team(
+    session: AsyncSession, org_id: uuid.UUID, team_id: uuid.UUID
+) -> bool:
     team = await session.scalar(
         select(Team).where(
-            Team.id == team_id, Team.organization_id == org_id, Team.deleted_at.is_(None)
+            Team.id == team_id,
+            Team.organization_id == org_id,
+            Team.deleted_at.is_(None),
         )
     )
     if team is None:
@@ -198,20 +223,26 @@ async def add_team_member(
 ) -> Optional[TeamMember]:
     team = await session.scalar(
         select(Team).where(
-            Team.id == team_id, Team.organization_id == org_id, Team.deleted_at.is_(None)
+            Team.id == team_id,
+            Team.organization_id == org_id,
+            Team.deleted_at.is_(None),
         )
     )
     if team is None:
         return None
     existing = await session.scalar(
-        select(TeamMember).where(TeamMember.team_id == team_id, TeamMember.user_id == user_id)
+        select(TeamMember).where(
+            TeamMember.team_id == team_id, TeamMember.user_id == user_id
+        )
     )
     if existing is not None:
         existing.role = role
         await session.commit()
         await session.refresh(existing)
         return existing
-    member = TeamMember(team_id=team_id, user_id=user_id, role=role, joined_at=_utcnow())
+    member = TeamMember(
+        team_id=team_id, user_id=user_id, role=role, joined_at=_utcnow()
+    )
     session.add(member)
     await session.commit()
     await session.refresh(member)
@@ -239,8 +270,14 @@ async def remove_team_member(
 
 async def _team_ids_for_user(session: AsyncSession, user_id: uuid.UUID) -> list[str]:
     rows = (
-        await session.execute(select(TeamMember.team_id).where(TeamMember.user_id == user_id))
-    ).scalars().all()
+        (
+            await session.execute(
+                select(TeamMember.team_id).where(TeamMember.user_id == user_id)
+            )
+        )
+        .scalars()
+        .all()
+    )
     return [str(t) for t in rows]
 
 
@@ -293,7 +330,8 @@ async def unshare_resource(
 ) -> bool:
     grant = await session.scalar(
         select(ResourcePermission).where(
-            ResourcePermission.id == grant_id, ResourcePermission.organization_id == org_id
+            ResourcePermission.id == grant_id,
+            ResourcePermission.organization_id == org_id,
         )
     )
     if grant is None:
@@ -307,16 +345,20 @@ async def list_permissions(
     session: AsyncSession, org_id: uuid.UUID, resource_type: str, resource_id: str
 ) -> list[dict[str, Any]]:
     grants = (
-        await session.execute(
-            select(ResourcePermission)
-            .where(
-                ResourcePermission.organization_id == org_id,
-                ResourcePermission.resource_type == resource_type,
-                ResourcePermission.resource_id == resource_id,
+        (
+            await session.execute(
+                select(ResourcePermission)
+                .where(
+                    ResourcePermission.organization_id == org_id,
+                    ResourcePermission.resource_type == resource_type,
+                    ResourcePermission.resource_id == resource_id,
+                )
+                .order_by(ResourcePermission.created_at.asc())
             )
-            .order_by(ResourcePermission.created_at.asc())
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     user_ids = [
         uuid.UUID(g.principal_id)
         for g in grants
@@ -331,7 +373,9 @@ async def list_permissions(
     team_names = dict(
         (
             await session.execute(
-                select(Team.id, Team.name).where(Team.id.in_(team_ids) if team_ids else False)
+                select(Team.id, Team.name).where(
+                    Team.id.in_(team_ids) if team_ids else False
+                )
             )
         ).all()
     )
@@ -361,7 +405,11 @@ async def list_permissions(
 
 
 async def effective_permission(
-    session: AsyncSession, org_id: uuid.UUID, user_id: uuid.UUID, resource_type: str, resource_id: str
+    session: AsyncSession,
+    org_id: uuid.UUID,
+    user_id: uuid.UUID,
+    resource_type: str,
+    resource_id: str,
 ) -> Optional[str]:
     """Highest permission level a user has on a resource (None if no access)."""
     team_ids = await _team_ids_for_user(session, user_id)
@@ -380,15 +428,19 @@ async def effective_permission(
             )
         )
     grants = (
-        await session.execute(
-            select(ResourcePermission.permission).where(
-                ResourcePermission.organization_id == org_id,
-                ResourcePermission.resource_type == resource_type,
-                ResourcePermission.resource_id == resource_id,
-                or_(*conds),
+        (
+            await session.execute(
+                select(ResourcePermission.permission).where(
+                    ResourcePermission.organization_id == org_id,
+                    ResourcePermission.resource_type == resource_type,
+                    ResourcePermission.resource_id == resource_id,
+                    or_(*conds),
+                )
             )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     if not grants:
         return None
     return max(grants, key=lambda p: PermissionLevel.RANK.get(p, 0))
@@ -399,23 +451,29 @@ async def list_comments(
     session: AsyncSession, org_id: uuid.UUID, resource_type: str, resource_id: str
 ) -> list[dict[str, Any]]:
     comments = (
-        await session.execute(
-            select(Comment)
-            .where(
-                Comment.organization_id == org_id,
-                Comment.resource_type == resource_type,
-                Comment.resource_id == resource_id,
-                Comment.deleted_at.is_(None),
+        (
+            await session.execute(
+                select(Comment)
+                .where(
+                    Comment.organization_id == org_id,
+                    Comment.resource_type == resource_type,
+                    Comment.resource_id == resource_id,
+                    Comment.deleted_at.is_(None),
+                )
+                .order_by(Comment.created_at.asc())
             )
-            .order_by(Comment.created_at.asc())
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     directory = await _user_directory(session, [c.user_id for c in comments])
 
     def _ser(c: Comment) -> dict[str, Any]:
         return {
             "id": str(c.id),
-            "parent_comment_id": str(c.parent_comment_id) if c.parent_comment_id else None,
+            "parent_comment_id": str(c.parent_comment_id)
+            if c.parent_comment_id
+            else None,
             "user": directory.get(str(c.user_id)),
             "body": c.body,
             "resolved": c.resolved,
@@ -471,7 +529,11 @@ async def create_comment(
             continue
         if muid == user_id:
             continue
-        session.add(Mention(comment_id=comment.id, organization_id=org_id, mentioned_user_id=muid))
+        session.add(
+            Mention(
+                comment_id=comment.id, organization_id=org_id, mentioned_user_id=muid
+            )
+        )
         session.add(
             Notification(
                 organization_id=org_id,
@@ -656,7 +718,9 @@ async def list_notifications(
                 "title": n.title,
                 "body": n.body,
                 "link": n.link,
-                "actor": directory.get(str(n.actor_user_id)) if n.actor_user_id else None,
+                "actor": directory.get(str(n.actor_user_id))
+                if n.actor_user_id
+                else None,
                 "resource_type": n.resource_type,
                 "resource_id": n.resource_id,
                 "read": n.read_at is not None,
@@ -667,7 +731,9 @@ async def list_notifications(
     }
 
 
-async def unread_count(session: AsyncSession, org_id: uuid.UUID, user_id: uuid.UUID) -> int:
+async def unread_count(
+    session: AsyncSession, org_id: uuid.UUID, user_id: uuid.UUID
+) -> int:
     return int(
         await session.scalar(
             select(func.count(Notification.id)).where(
@@ -698,16 +764,22 @@ async def mark_notification_read(
     return True
 
 
-async def mark_all_read(session: AsyncSession, org_id: uuid.UUID, user_id: uuid.UUID) -> int:
+async def mark_all_read(
+    session: AsyncSession, org_id: uuid.UUID, user_id: uuid.UUID
+) -> int:
     rows = (
-        await session.execute(
-            select(Notification).where(
-                Notification.organization_id == org_id,
-                Notification.user_id == user_id,
-                Notification.read_at.is_(None),
+        (
+            await session.execute(
+                select(Notification).where(
+                    Notification.organization_id == org_id,
+                    Notification.user_id == user_id,
+                    Notification.read_at.is_(None),
+                )
             )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     now = _utcnow()
     for n in rows:
         n.read_at = now
@@ -856,8 +928,12 @@ async def list_tasks(
             "title": t.title,
             "description": t.description,
             "status": t.status,
-            "assignee": directory.get(str(t.assignee_user_id)) if t.assignee_user_id else None,
-            "created_by": directory.get(str(t.created_by_user_id)) if t.created_by_user_id else None,
+            "assignee": directory.get(str(t.assignee_user_id))
+            if t.assignee_user_id
+            else None,
+            "created_by": directory.get(str(t.created_by_user_id))
+            if t.created_by_user_id
+            else None,
             "resource_type": t.resource_type,
             "resource_id": t.resource_id,
             "due_at": t.due_at,
@@ -946,12 +1022,19 @@ async def list_follows(
     session: AsyncSession, org_id: uuid.UUID, user_id: uuid.UUID
 ) -> list[dict[str, Any]]:
     rows = (
-        await session.execute(
-            select(ResourceFollow)
-            .where(ResourceFollow.organization_id == org_id, ResourceFollow.user_id == user_id)
-            .order_by(ResourceFollow.created_at.desc())
+        (
+            await session.execute(
+                select(ResourceFollow)
+                .where(
+                    ResourceFollow.organization_id == org_id,
+                    ResourceFollow.user_id == user_id,
+                )
+                .order_by(ResourceFollow.created_at.desc())
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     return [
         {
             "id": str(f.id),
@@ -967,13 +1050,17 @@ async def _follower_user_ids(
     session: AsyncSession, resource_type: str, resource_id: str
 ) -> list[uuid.UUID]:
     return (
-        await session.execute(
-            select(ResourceFollow.user_id).where(
-                ResourceFollow.resource_type == resource_type,
-                ResourceFollow.resource_id == resource_id,
+        (
+            await session.execute(
+                select(ResourceFollow.user_id).where(
+                    ResourceFollow.resource_type == resource_type,
+                    ResourceFollow.resource_id == resource_id,
+                )
             )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
 
 
 # ─────────────────────────── workspace overview ───────────────────────────

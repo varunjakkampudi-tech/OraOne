@@ -13,6 +13,7 @@ GET  /api/auth/identity
 
 Routes stay thin: all business logic lives in app.services.auth_service.
 """
+
 import logging
 from datetime import datetime, timezone
 from typing import Optional
@@ -24,7 +25,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cookies import REFRESH_COOKIE_NAME, clear_auth_cookies, set_auth_cookies
 from app.database.session import get_db
-from app.middleware.jwt_auth import get_current_access_token, get_current_user_claims, verify_cognito_access_token
+from app.middleware.jwt_auth import (
+    get_current_access_token,
+    get_current_user_claims,
+    verify_cognito_access_token,
+)
 from app.core.config import settings
 from app.schemas.auth import (
     ChangePasswordRequest,
@@ -64,10 +69,14 @@ class CognitoRefreshRequest(BaseModel):
 
 def _require_self_hosted() -> None:
     if settings.auth_provider == "cognito":
-        raise HTTPException(status_code=404, detail="Password authentication is disabled.")
+        raise HTTPException(
+            status_code=404, detail="Password authentication is disabled."
+        )
 
 
-def _degraded_identity_response(*, sub: str, email: str, full_name: Optional[str]) -> IdentityResponse:
+def _degraded_identity_response(
+    *, sub: str, email: str, full_name: Optional[str]
+) -> IdentityResponse:
     """Return a minimal identity payload when Postgres is temporarily unavailable.
 
     This keeps auth/login usable during transient DB outages. The payload is
@@ -121,17 +130,23 @@ async def signup(payload: SignUpRequest, session: AsyncSession = Depends(get_db)
 
 
 @router.post("/verify", response_model=MessageResponse)
-async def verify(payload: ConfirmSignUpRequest, session: AsyncSession = Depends(get_db)):
+async def verify(
+    payload: ConfirmSignUpRequest, session: AsyncSession = Depends(get_db)
+):
     _require_self_hosted()
     await auth_service.confirm_sign_up(session, payload)
     return MessageResponse(message="Email verified. You can now log in.")
 
 
 @router.post("/resend", response_model=MessageResponse)
-async def resend(payload: ResendConfirmationRequest, session: AsyncSession = Depends(get_db)):
+async def resend(
+    payload: ResendConfirmationRequest, session: AsyncSession = Depends(get_db)
+):
     _require_self_hosted()
     await auth_service.resend_confirmation_code(session, payload)
-    return MessageResponse(message="If an account exists for this email, a new code has been sent.")
+    return MessageResponse(
+        message="If an account exists for this email, a new code has been sent."
+    )
 
 
 @router.post("/login", response_model=LoginOtpRequiredResponse)
@@ -143,55 +158,83 @@ async def login(payload: LoginRequest, session: AsyncSession = Depends(get_db)):
 
 
 @router.post("/login/verify-otp", response_model=TokensResponse)
-async def login_verify_otp(payload: VerifyLoginOtpRequest, response: Response, session: AsyncSession = Depends(get_db)):
+async def login_verify_otp(
+    payload: VerifyLoginOtpRequest,
+    response: Response,
+    session: AsyncSession = Depends(get_db),
+):
     _require_self_hosted()
     tokens = await auth_service.verify_login_otp(session, payload)
-    set_auth_cookies(response, access_token=tokens.access_token, refresh_token=tokens.refresh_token)
+    set_auth_cookies(
+        response, access_token=tokens.access_token, refresh_token=tokens.refresh_token
+    )
     return tokens
 
 
 @router.post("/refresh", response_model=TokensResponse)
-async def refresh(request: Request, response: Response, payload: Optional[RefreshTokenRequest] = None):
+async def refresh(
+    request: Request, response: Response, payload: Optional[RefreshTokenRequest] = None
+):
     _require_self_hosted()
     # Browser sessions may rely solely on the httpOnly refresh cookie; API/
     # bearer clients still pass it in the JSON body.
-    token = (payload.refresh_token if payload else None) or request.cookies.get(REFRESH_COOKIE_NAME)
+    token = (payload.refresh_token if payload else None) or request.cookies.get(
+        REFRESH_COOKIE_NAME
+    )
     if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing refresh token.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing refresh token."
+        )
     tokens = await auth_service.refresh_tokens(RefreshTokenRequest(refresh_token=token))
-    set_auth_cookies(response, access_token=tokens.access_token, refresh_token=tokens.refresh_token)
+    set_auth_cookies(
+        response, access_token=tokens.access_token, refresh_token=tokens.refresh_token
+    )
     return tokens
 
 
 @router.post("/forgot-password", response_model=MessageResponse)
-async def forgot_password(payload: ForgotPasswordRequest, session: AsyncSession = Depends(get_db)):
+async def forgot_password(
+    payload: ForgotPasswordRequest, session: AsyncSession = Depends(get_db)
+):
     _require_self_hosted()
     await auth_service.forgot_password(session, payload)
-    return MessageResponse(message="If an account exists for this email, a reset code has been sent.")
+    return MessageResponse(
+        message="If an account exists for this email, a reset code has been sent."
+    )
 
 
 @router.post("/reset-password", response_model=MessageResponse)
-async def reset_password(payload: ConfirmForgotPasswordRequest, session: AsyncSession = Depends(get_db)):
+async def reset_password(
+    payload: ConfirmForgotPasswordRequest, session: AsyncSession = Depends(get_db)
+):
     _require_self_hosted()
     await auth_service.confirm_forgot_password(session, payload)
     return MessageResponse(message="Password reset successful. You can now log in.")
 
 
 @router.post("/logout", response_model=MessageResponse)
-async def logout(request: Request, response: Response, payload: Optional[RefreshTokenRequest] = None):
+async def logout(
+    request: Request, response: Response, payload: Optional[RefreshTokenRequest] = None
+):
     _require_self_hosted()
-    token = (payload.refresh_token if payload else None) or request.cookies.get(REFRESH_COOKIE_NAME)
+    token = (payload.refresh_token if payload else None) or request.cookies.get(
+        REFRESH_COOKIE_NAME
+    )
     auth_service.logout(token)
     clear_auth_cookies(response)
     return MessageResponse(message="Logged out.")
 
 
 @router.post("/logout-all", response_model=MessageResponse)
-async def logout_all(response: Response, claims: dict = Depends(get_current_user_claims)):
+async def logout_all(
+    response: Response, claims: dict = Depends(get_current_user_claims)
+):
     """Revoke every refresh token for this account — signs out every device."""
     user_id = claims.get("sub")
     if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token claims.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token claims."
+        )
     auth_service.logout_all(user_id)
     clear_auth_cookies(response)
     return MessageResponse(message="Signed out of all devices.")
@@ -204,7 +247,9 @@ async def me(
 ):
     user_id = claims.get("sub")
     if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token claims.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token claims."
+        )
 
     profile = await user_service.get_user_profile(session, user_id)
     if not profile:
@@ -238,10 +283,16 @@ async def update_profile(
 ):
     user_id = claims.get("sub")
     if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token claims.")
-    profile = await user_service.update_profile(session, user_id, full_name=payload.full_name)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token claims."
+        )
+    profile = await user_service.update_profile(
+        session, user_id, full_name=payload.full_name
+    )
     if not profile:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User profile not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User profile not found."
+        )
     return profile
 
 
@@ -254,9 +305,14 @@ async def change_password(
     _require_self_hosted()
     user_id = claims.get("sub")
     if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token claims.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token claims."
+        )
     await auth_service.change_password(
-        session, user_id, current_password=payload.current_password, new_password=payload.new_password
+        session,
+        user_id,
+        current_password=payload.current_password,
+        new_password=payload.new_password,
     )
     return MessageResponse(message="Password updated.")
 
@@ -264,6 +320,7 @@ async def change_password(
 # ──────────────────────────────────────────────────────────────────
 # Postgres identity (find-or-create user + personal org, idempotent)
 # ──────────────────────────────────────────────────────────────────
+
 
 @router.get("/identity", response_model=IdentityResponse)
 async def identity(
@@ -279,7 +336,9 @@ async def identity(
     """
     sub = claims.get("sub")
     if not sub:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token claims.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token claims."
+        )
 
     email = claims.get("email")
     full_name = claims.get("name") or None
@@ -300,12 +359,16 @@ async def identity(
                 )
                 profile_response.raise_for_status()
                 profile = profile_response.json()
-            email = profile.get("email") if profile.get("email_verified") is True else None
+            email = (
+                profile.get("email") if profile.get("email_verified") is True else None
+            )
             full_name = full_name or profile.get("name")
             given_name = given_name or profile.get("given_name")
             avatar_url = avatar_url or profile.get("picture")
         except (httpx.HTTPError, ValueError) as exc:
-            log.warning("cognito_userinfo_failed sub=%s reason=%s", sub, type(exc).__name__)
+            log.warning(
+                "cognito_userinfo_failed sub=%s reason=%s", sub, type(exc).__name__
+            )
     if not email:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -360,13 +423,20 @@ async def identity(
     except Exception as exc:  # keep auth resilient when DB is transiently unavailable
         await session.rollback()
         if isinstance(exc, ValueError):
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+            ) from exc
         if settings.auth_provider == "cognito":
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Identity service is temporarily unavailable. Please retry.",
             ) from exc
-        log.warning("identity_degraded_fallback sub=%s reason=%s: %s", sub, type(exc).__name__, exc)
+        log.warning(
+            "identity_degraded_fallback sub=%s reason=%s: %s",
+            sub,
+            type(exc).__name__,
+            exc,
+        )
         return _degraded_identity_response(sub=sub, email=email, full_name=full_name)
 
 
@@ -374,16 +444,22 @@ async def identity(
 async def establish_cognito_session(payload: CognitoSessionRequest, response: Response):
     """Exchange a Cognito browser token for an httpOnly OraOne session cookie."""
     if settings.auth_provider != "cognito":
-        raise HTTPException(status_code=404, detail="Cognito authentication is not enabled.")
+        raise HTTPException(
+            status_code=404, detail="Cognito authentication is not enabled."
+        )
     await verify_cognito_access_token(payload.access_token)
-    set_auth_cookies(response, access_token=payload.access_token, refresh_token=payload.refresh_token)
+    set_auth_cookies(
+        response, access_token=payload.access_token, refresh_token=payload.refresh_token
+    )
     return MessageResponse(message="Session established.")
 
 
 @router.post("/cognito/logout", response_model=MessageResponse)
 async def logout_cognito(request: Request, response: Response):
     if settings.auth_provider != "cognito":
-        raise HTTPException(status_code=404, detail="Cognito authentication is not enabled.")
+        raise HTTPException(
+            status_code=404, detail="Cognito authentication is not enabled."
+        )
 
     # Revoke the provider session when the app client has token revocation enabled.
     # Local cookies are cleared regardless, so logout remains fail-safe if Cognito is
@@ -408,12 +484,21 @@ async def logout_cognito(request: Request, response: Response):
 
 
 @router.post("/cognito/refresh", response_model=MessageResponse)
-async def refresh_cognito(request: Request, response: Response, payload: CognitoRefreshRequest | None = None):
+async def refresh_cognito(
+    request: Request, response: Response, payload: CognitoRefreshRequest | None = None
+):
     if settings.auth_provider != "cognito":
-        raise HTTPException(status_code=404, detail="Cognito authentication is not enabled.")
-    refresh_token = (payload.refresh_token if payload else None) or request.cookies.get(REFRESH_COOKIE_NAME)
+        raise HTTPException(
+            status_code=404, detail="Cognito authentication is not enabled."
+        )
+    refresh_token = (payload.refresh_token if payload else None) or request.cookies.get(
+        REFRESH_COOKIE_NAME
+    )
     if not refresh_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing Cognito refresh token.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing Cognito refresh token.",
+        )
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             token_response = await client.post(
@@ -427,14 +512,21 @@ async def refresh_cognito(request: Request, response: Response, payload: Cognito
             token_response.raise_for_status()
             tokens = token_response.json()
     except (httpx.HTTPError, ValueError) as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cognito session expired.") from exc
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Cognito session expired."
+        ) from exc
     access_token = tokens.get("access_token")
     if not access_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cognito did not return an access token.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Cognito did not return an access token.",
+        )
     await verify_cognito_access_token(access_token)
     # Cognito token rotation may return a replacement refresh token. Persist it
     # in the narrow httpOnly cookie immediately; otherwise the next refresh
     # would replay a rotated token and force a needless sign-in.
     next_refresh_token = tokens.get("refresh_token") or refresh_token
-    set_auth_cookies(response, access_token=access_token, refresh_token=next_refresh_token)
+    set_auth_cookies(
+        response, access_token=access_token, refresh_token=next_refresh_token
+    )
     return MessageResponse(message="Session refreshed.")

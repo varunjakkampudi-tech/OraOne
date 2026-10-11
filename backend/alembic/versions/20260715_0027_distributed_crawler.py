@@ -9,6 +9,7 @@ Turns the single-process crawler into a distributed, resumable one:
 * ``crawl_jobs`` gains ``worker_count``, ``concurrency``, ``frontier_size``,
   ``heartbeat_at`` for live engine telemetry.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -26,15 +27,36 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # ── websites: crawl tuning ──
-    op.add_column("websites", sa.Column("render_js", sa.Boolean(), nullable=False, server_default="false"))
-    op.add_column("websites", sa.Column("crawl_delay_ms", sa.Integer(), nullable=False, server_default="0"))
-    op.add_column("websites", sa.Column("max_concurrency", sa.Integer(), nullable=False, server_default="0"))
+    op.add_column(
+        "websites",
+        sa.Column("render_js", sa.Boolean(), nullable=False, server_default="false"),
+    )
+    op.add_column(
+        "websites",
+        sa.Column("crawl_delay_ms", sa.Integer(), nullable=False, server_default="0"),
+    )
+    op.add_column(
+        "websites",
+        sa.Column("max_concurrency", sa.Integer(), nullable=False, server_default="0"),
+    )
 
     # ── crawl_jobs: engine telemetry ──
-    op.add_column("crawl_jobs", sa.Column("worker_count", sa.Integer(), nullable=False, server_default="1"))
-    op.add_column("crawl_jobs", sa.Column("concurrency", sa.Integer(), nullable=False, server_default="0"))
-    op.add_column("crawl_jobs", sa.Column("frontier_size", sa.Integer(), nullable=False, server_default="0"))
-    op.add_column("crawl_jobs", sa.Column("heartbeat_at", sa.DateTime(timezone=True), nullable=True))
+    op.add_column(
+        "crawl_jobs",
+        sa.Column("worker_count", sa.Integer(), nullable=False, server_default="1"),
+    )
+    op.add_column(
+        "crawl_jobs",
+        sa.Column("concurrency", sa.Integer(), nullable=False, server_default="0"),
+    )
+    op.add_column(
+        "crawl_jobs",
+        sa.Column("frontier_size", sa.Integer(), nullable=False, server_default="0"),
+    )
+    op.add_column(
+        "crawl_jobs",
+        sa.Column("heartbeat_at", sa.DateTime(timezone=True), nullable=True),
+    )
 
     # ── crawl_frontier: the distributed URL queue ──
     op.create_table(
@@ -46,19 +68,35 @@ def upgrade() -> None:
         sa.Column("url", sa.String(length=2048), nullable=False),
         sa.Column("host", sa.String(length=255), nullable=True),
         sa.Column("depth", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("status", sa.String(length=16), nullable=False, server_default="pending"),
+        sa.Column(
+            "status", sa.String(length=16), nullable=False, server_default="pending"
+        ),
         sa.Column("attempts", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("claimed_by", sa.String(length=64), nullable=True),
         sa.Column("claimed_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("error", sa.String(length=1000), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.ForeignKeyConstraint(["job_id"], ["crawl_jobs.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["website_id"], ["websites.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["organization_id"], ["organizations.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["organization_id"], ["organizations.id"], ondelete="CASCADE"
+        ),
         sa.UniqueConstraint("job_id", "url", name="uq_crawl_frontier_job_url"),
     )
-    op.create_index("ix_crawl_frontier_job_status", "crawl_frontier", ["job_id", "status"])
+    op.create_index(
+        "ix_crawl_frontier_job_status", "crawl_frontier", ["job_id", "status"]
+    )
     op.create_index("ix_crawl_frontier_website_id", "crawl_frontier", ["website_id"])
 
 

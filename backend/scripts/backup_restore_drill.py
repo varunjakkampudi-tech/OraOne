@@ -14,13 +14,13 @@ Usage:
 Requires `pg_dump`/`pg_restore`/`psql` on PATH (same major version family as
 the target server; mismatches can cause restore errors).
 """
+
 from __future__ import annotations
 
 import argparse
 import os
 import subprocess
 import sys
-import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -60,8 +60,19 @@ def _row_counts(env: dict, host: str, port: str, user: str, db: str) -> dict[str
     for table in CHECK_TABLES:
         result = _run(
             [
-                "psql", "-h", host, "-p", port, "-U", user, "-d", db,
-                "-t", "-A", "-c", f"SELECT count(*) FROM {table};",
+                "psql",
+                "-h",
+                host,
+                "-p",
+                port,
+                "-U",
+                user,
+                "-d",
+                db,
+                "-t",
+                "-A",
+                "-c",
+                f"SELECT count(*) FROM {table};",
             ],
             env,
         )
@@ -71,7 +82,9 @@ def _row_counts(env: dict, host: str, port: str, user: str, db: str) -> dict[str
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--keep-dump", action="store_true", help="Don't delete the dump file afterwards")
+    parser.add_argument(
+        "--keep-dump", action="store_true", help="Don't delete the dump file afterwards"
+    )
     args = parser.parse_args()
 
     host = _env("DB_HOST", "localhost")
@@ -89,18 +102,79 @@ def main() -> int:
     dump_path = dump_dir / f"oraone_{timestamp}.dump"
 
     print(f"[1/5] Dumping {db} -> {dump_path}")
-    _run(["pg_dump", "-h", host, "-p", port, "-U", user, "-d", db, "-Fc", "-f", str(dump_path)], env)
+    _run(
+        [
+            "pg_dump",
+            "-h",
+            host,
+            "-p",
+            port,
+            "-U",
+            user,
+            "-d",
+            db,
+            "-Fc",
+            "-f",
+            str(dump_path),
+        ],
+        env,
+    )
 
     print(f"[2/5] Capturing baseline row counts from {db}")
     baseline = _row_counts(env, host, port, user, db)
     print(f"       {baseline}")
 
     print(f"[3/5] Restoring into throwaway database {drill_db}")
-    _run(["psql", "-h", host, "-p", port, "-U", user, "-d", "postgres", "-c", f"DROP DATABASE IF EXISTS {drill_db};"], env)
-    _run(["psql", "-h", host, "-p", port, "-U", user, "-d", "postgres", "-c", f"CREATE DATABASE {drill_db} OWNER {user};"], env)
+    _run(
+        [
+            "psql",
+            "-h",
+            host,
+            "-p",
+            port,
+            "-U",
+            user,
+            "-d",
+            "postgres",
+            "-c",
+            f"DROP DATABASE IF EXISTS {drill_db};",
+        ],
+        env,
+    )
+    _run(
+        [
+            "psql",
+            "-h",
+            host,
+            "-p",
+            port,
+            "-U",
+            user,
+            "-d",
+            "postgres",
+            "-c",
+            f"CREATE DATABASE {drill_db} OWNER {user};",
+        ],
+        env,
+    )
     restore = subprocess.run(
-        ["pg_restore", "-h", host, "-p", port, "-U", user, "-d", drill_db, "--no-owner", "--no-privileges", str(dump_path)],
-        env=env, capture_output=True, text=True,
+        [
+            "pg_restore",
+            "-h",
+            host,
+            "-p",
+            port,
+            "-U",
+            user,
+            "-d",
+            drill_db,
+            "--no-owner",
+            "--no-privileges",
+            str(dump_path),
+        ],
+        env=env,
+        capture_output=True,
+        text=True,
     )
     # pg_restore can return non-zero on harmless warnings (e.g. extension
     # already owned by a different role); only treat it as fatal if no
@@ -114,14 +188,33 @@ def main() -> int:
     print(f"       {restored}")
 
     print(f"[5/5] Cleaning up {drill_db}")
-    _run(["psql", "-h", host, "-p", port, "-U", user, "-d", "postgres", "-c", f"DROP DATABASE IF EXISTS {drill_db};"], env)
+    _run(
+        [
+            "psql",
+            "-h",
+            host,
+            "-p",
+            port,
+            "-U",
+            user,
+            "-d",
+            "postgres",
+            "-c",
+            f"DROP DATABASE IF EXISTS {drill_db};",
+        ],
+        env,
+    )
 
     if not args.keep_dump:
         dump_path.unlink(missing_ok=True)
     else:
         print(f"Dump retained at {dump_path}")
 
-    mismatches = {t: (baseline[t], restored[t]) for t in CHECK_TABLES if baseline[t] != restored[t]}
+    mismatches = {
+        t: (baseline[t], restored[t])
+        for t in CHECK_TABLES
+        if baseline[t] != restored[t]
+    }
     if mismatches:
         print(f"DRILL FAILED — row count mismatches: {mismatches}")
         return 1

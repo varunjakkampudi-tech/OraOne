@@ -1,4 +1,5 @@
 """Pydantic schemas for the RAG query/search API (R4)."""
+
 from __future__ import annotations
 
 import uuid

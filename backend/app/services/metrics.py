@@ -21,6 +21,7 @@ Select via ``METRICS_BACKEND`` (``inprocess`` | ``prometheus`` | ``otel``). The
 stub backends lazily import their (absent) dependency and the factory falls
 back to in-process if it isn't installed, so nothing breaks by default.
 """
+
 from __future__ import annotations
 
 import logging
@@ -60,12 +61,12 @@ class MetricsBackend(ABC):
     name: str = "backend"
 
     @abstractmethod
-    def inc(self, name: str, amount: float = 1.0, **labels: str) -> None:
-        ...
+    def inc(self, name: str, amount: float = 1.0, **labels: str) -> None: ...
 
     @abstractmethod
-    def observe(self, name: str, value: float, buckets: tuple[int, ...] = _DEFAULT_BUCKETS_MS) -> None:
-        ...
+    def observe(
+        self, name: str, value: float, buckets: tuple[int, ...] = _DEFAULT_BUCKETS_MS
+    ) -> None: ...
 
     def snapshot(self) -> dict[str, Any]:
         """JSON-friendly view (in-process only; remote backends may be empty)."""
@@ -74,8 +75,7 @@ class MetricsBackend(ABC):
     def prometheus_text(self) -> str:
         return ""
 
-    def reset(self) -> None:
-        ...
+    def reset(self) -> None: ...
 
 
 class InProcessBackend(MetricsBackend):
@@ -96,7 +96,9 @@ class InProcessBackend(MetricsBackend):
             series = self._counters.setdefault(name, {})
             series[sig] = series.get(sig, 0.0) + amount
 
-    def observe(self, name: str, value: float, buckets: tuple[int, ...] = _DEFAULT_BUCKETS_MS) -> None:
+    def observe(
+        self, name: str, value: float, buckets: tuple[int, ...] = _DEFAULT_BUCKETS_MS
+    ) -> None:
         with self._lock:
             h = self._histograms.get(name)
             if h is None:
@@ -140,7 +142,8 @@ class InProcessBackend(MetricsBackend):
                     labels = _decode_labels(sig)
                     label_str = (
                         "{" + ",".join(f'{k}="{v}"' for k, v in labels.items()) + "}"
-                        if labels else ""
+                        if labels
+                        else ""
                     )
                     lines.append(f"{name}{label_str} {val}")
             for name, h in self._histograms.items():
@@ -189,11 +192,15 @@ class PrometheusBackend(MetricsBackend):
                 self._counters[name] = c
             return c
 
-    def inc(self, name: str, amount: float = 1.0, **labels: str) -> None:  # pragma: no cover
+    def inc(
+        self, name: str, amount: float = 1.0, **labels: str
+    ) -> None:  # pragma: no cover
         c = self._counter(name, tuple(sorted(labels)))
         (c.labels(**labels) if labels else c).inc(amount)
 
-    def observe(self, name: str, value: float, buckets: tuple[int, ...] = _DEFAULT_BUCKETS_MS) -> None:  # pragma: no cover
+    def observe(
+        self, name: str, value: float, buckets: tuple[int, ...] = _DEFAULT_BUCKETS_MS
+    ) -> None:  # pragma: no cover
         with self._lock:
             h = self._histograms.get(name)
             if h is None:
@@ -228,7 +235,9 @@ class OpenTelemetryBackend(MetricsBackend):
         self._counters: dict[str, Any] = {}
         self._histograms: dict[str, Any] = {}
 
-    def inc(self, name: str, amount: float = 1.0, **labels: str) -> None:  # pragma: no cover
+    def inc(
+        self, name: str, amount: float = 1.0, **labels: str
+    ) -> None:  # pragma: no cover
         with self._lock:
             c = self._counters.get(name)
             if c is None:
@@ -236,7 +245,9 @@ class OpenTelemetryBackend(MetricsBackend):
                 self._counters[name] = c
         c.add(amount, attributes=labels or None)
 
-    def observe(self, name: str, value: float, buckets: tuple[int, ...] = _DEFAULT_BUCKETS_MS) -> None:  # pragma: no cover
+    def observe(
+        self, name: str, value: float, buckets: tuple[int, ...] = _DEFAULT_BUCKETS_MS
+    ) -> None:  # pragma: no cover
         with self._lock:
             h = self._histograms.get(name)
             if h is None:
@@ -256,7 +267,9 @@ def _make_backend() -> MetricsBackend:
             log.info("metrics backend: prometheus")
             return b
         except Exception as e:  # pragma: no cover
-            log.warning("prometheus metrics backend unavailable (%s); using in-process.", e)
+            log.warning(
+                "prometheus metrics backend unavailable (%s); using in-process.", e
+            )
     elif choice in {"otel", "opentelemetry"}:
         try:
             b = OpenTelemetryBackend()
@@ -285,7 +298,9 @@ def inc(name: str, amount: float = 1.0, **labels: str) -> None:
     _backend.inc(name, amount, **labels)
 
 
-def observe(name: str, value: float, buckets: tuple[int, ...] = _DEFAULT_BUCKETS_MS) -> None:
+def observe(
+    name: str, value: float, buckets: tuple[int, ...] = _DEFAULT_BUCKETS_MS
+) -> None:
     """Record one observation (e.g. a latency in ms) into a histogram."""
     _backend.observe(name, value, buckets)
 

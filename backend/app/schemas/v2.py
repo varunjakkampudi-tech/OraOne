@@ -1,4 +1,5 @@
 """Request/response schemas for the tenant-scoped business API (Phase 5)."""
+
 from __future__ import annotations
 
 import uuid
@@ -9,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 # ──────────────── Agents ────────────────
+
 
 class AgentIn(BaseModel):
     name: str = Field(..., min_length=1, max_length=160)
@@ -35,6 +37,7 @@ class AgentOut(BaseModel):
 
 
 # ──────────────── Conversations ────────────────
+
 
 class ConversationIn(BaseModel):
     agent_id: uuid.UUID
@@ -78,6 +81,7 @@ class ConversationOut(BaseModel):
 
 # ──────────────── Messages ────────────────
 
+
 class MessageIn(BaseModel):
     sender: str
     message: str
@@ -118,6 +122,7 @@ class MessageOut(BaseModel):
 
 
 # ──────────────── Integrations ────────────────
+
 
 class IntegrationIn(BaseModel):
     provider: str = Field(..., min_length=1, max_length=60)

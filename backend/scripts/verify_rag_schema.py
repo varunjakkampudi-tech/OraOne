@@ -1,4 +1,5 @@
 """Quick check that the Phase 9 RAG schema landed on the live DB."""
+
 import os
 from pathlib import Path
 

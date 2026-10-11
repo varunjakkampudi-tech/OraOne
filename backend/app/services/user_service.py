@@ -3,6 +3,7 @@
 Replaces the old DynamoDB-backed profile store; the Postgres ``users`` row
 is now the single source of truth (no shadow copy to keep in sync).
 """
+
 from __future__ import annotations
 
 from typing import Optional
@@ -13,7 +14,9 @@ from app.database.repositories.user_repository import UserRepository
 from app.schemas.auth import UserProfile
 
 
-async def get_user_profile(session: AsyncSession, user_id: str) -> Optional[UserProfile]:
+async def get_user_profile(
+    session: AsyncSession, user_id: str
+) -> Optional[UserProfile]:
     """Resolve the external subject and return the internal UUID identity."""
     users = UserRepository(session)
     user = await users.get_by_cognito_sub(user_id)
@@ -32,7 +35,9 @@ async def get_user_profile(session: AsyncSession, user_id: str) -> Optional[User
     )
 
 
-async def update_profile(session: AsyncSession, user_id: str, *, full_name: str) -> Optional[UserProfile]:
+async def update_profile(
+    session: AsyncSession, user_id: str, *, full_name: str
+) -> Optional[UserProfile]:
     """Update the caller's display name. Returns the refreshed profile."""
     users = UserRepository(session)
     user = await users.get_by_cognito_sub(user_id)

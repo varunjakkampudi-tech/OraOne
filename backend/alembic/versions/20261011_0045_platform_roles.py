@@ -5,11 +5,11 @@ workspace permissions. Legacy ``users.role`` values are not evidence of global
 platform authority, so all legacy values are mapped to the least-privileged
 platform ``user`` role.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
 
-import sqlalchemy as sa
 from alembic import op
 
 revision: str = "0045_platform_roles"
@@ -22,10 +22,10 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute("CREATE TYPE user_role_new AS ENUM ('super_admin', 'admin', 'manager', 'user')")
     op.execute(
-        "ALTER TABLE users ALTER COLUMN role DROP DEFAULT"
+        "CREATE TYPE user_role_new AS ENUM ('super_admin', 'admin', 'manager', 'user')"
     )
+    op.execute("ALTER TABLE users ALTER COLUMN role DROP DEFAULT")
     op.execute(
         "ALTER TABLE users ALTER COLUMN role TYPE user_role_new USING "
         "'user'::user_role_new"

@@ -4,6 +4,7 @@ Adds a ``priority`` column to ``feature_requests`` so submissions become
 prioritised support tickets (low / medium / high / urgent) alongside the
 existing type (feature / bug / help / feedback).
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union

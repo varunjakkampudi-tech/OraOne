@@ -5,6 +5,7 @@ across ALL channels (chat, voice, forms, api) — and links conversations to it
 via ``conversations.visitor_profile_id``. This is what lets the agent share
 memory across channels ("the AI already knows you").
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -97,9 +98,7 @@ def upgrade() -> None:
 
     op.add_column(
         "conversations",
-        sa.Column(
-            "visitor_profile_id", postgresql.UUID(as_uuid=True), nullable=True
-        ),
+        sa.Column("visitor_profile_id", postgresql.UUID(as_uuid=True), nullable=True),
     )
     op.create_foreign_key(
         "fk_conversations_visitor_profile_id",
@@ -126,7 +125,5 @@ def downgrade() -> None:
     op.drop_index("ix_visitor_profiles_last_seen_at", table_name="visitor_profiles")
     op.drop_index("ix_visitor_profiles_phone", table_name="visitor_profiles")
     op.drop_index("ix_visitor_profiles_email", table_name="visitor_profiles")
-    op.drop_index(
-        "ix_visitor_profiles_organization_id", table_name="visitor_profiles"
-    )
+    op.drop_index("ix_visitor_profiles_organization_id", table_name="visitor_profiles")
     op.drop_table("visitor_profiles")

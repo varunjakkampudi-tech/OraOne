@@ -1,4 +1,5 @@
 """Message — a single utterance inside a Conversation."""
+
 from __future__ import annotations
 
 import enum

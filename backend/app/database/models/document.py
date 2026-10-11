@@ -3,6 +3,7 @@
 Binary content lives in object storage (S3 in prod; local disk in dev).
 Only metadata + the storage key is persisted in Postgres.
 """
+
 from __future__ import annotations
 
 import enum
@@ -10,7 +11,16 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import BigInteger, DateTime, Enum, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import (
+    BigInteger,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+)
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -22,10 +32,10 @@ if TYPE_CHECKING:
 
 
 class DocumentStatus(str, enum.Enum):
-    pending = "pending"        # uploaded, awaiting processing
+    pending = "pending"  # uploaded, awaiting processing
     processing = "processing"  # chunking / embedding in flight
-    processed = "processed"    # ready for retrieval
-    failed = "failed"          # processing failed
+    processed = "processed"  # ready for retrieval
+    failed = "failed"  # processing failed
 
 
 class Document(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):

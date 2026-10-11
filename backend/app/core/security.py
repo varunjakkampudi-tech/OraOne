@@ -8,6 +8,7 @@ Replaces AWS Cognito. Two building blocks:
   Redis/cache (see ``app/services/token_service.py``) so they can be
   individually revoked and rotated, which a stateless JWT can't do.
 """
+
 from __future__ import annotations
 
 import secrets
@@ -100,6 +101,7 @@ def decode_access_token(token: str) -> dict[str, Any]:
 
 
 # ─────────────────────────── refresh tokens (opaque) ───────────────────────────
+
 
 def generate_refresh_token() -> str:
     """A high-entropy, URL-safe opaque token (not a JWT — tracked server-side)."""

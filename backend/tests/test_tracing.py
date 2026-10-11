@@ -1,5 +1,6 @@
 """OpenTelemetry tracing config — must be a true no-op when unconfigured,
 and must not crash even when a (fake/unreachable) OTLP endpoint is set."""
+
 from __future__ import annotations
 
 import importlib

@@ -8,6 +8,7 @@ restores a prior version (one-click rollback).
 All functions are organization-scoped — the caller passes the request's
 ``organization_id`` and we only ever touch rows for that tenant.
 """
+
 from __future__ import annotations
 
 import difflib
@@ -201,7 +202,9 @@ def _line_diff(old: Optional[str], new: Optional[str]) -> dict[str, Any]:
             removed += 1
             hunks.append({"type": "remove", "text": line[1:]})
         else:
-            hunks.append({"type": "context", "text": line[1:] if line.startswith(" ") else line})
+            hunks.append(
+                {"type": "context", "text": line[1:] if line.startswith(" ") else line}
+            )
     similarity = round(
         difflib.SequenceMatcher(None, old or "", new or "").ratio() * 100, 1
     )
@@ -276,7 +279,9 @@ async def diff_versions(
         "agent_name": agent.name,
         "from": {"version": left.get("version"), "label": left.get("label")},
         "to": {"version": right.get("version"), "label": right.get("label")},
-        "prompt_diff": _line_diff(left.get("system_prompt"), right.get("system_prompt")),
+        "prompt_diff": _line_diff(
+            left.get("system_prompt"), right.get("system_prompt")
+        ),
         "field_changes": _field_changes(left, right),
     }
 

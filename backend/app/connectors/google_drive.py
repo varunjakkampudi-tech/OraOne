@@ -12,6 +12,7 @@ Mode is chosen by ``integration.connection_type``: ``oauth`` → real,
 ``mock`` → demo corpus. Real mode also auto-falls back to mock if no
 usable access token is present, so the UI never hard-fails in dev.
 """
+
 from __future__ import annotations
 
 import logging
@@ -142,7 +143,11 @@ class GoogleDriveConnector(BaseConnector):
             return self._mock_browse(parent_id=parent_id, query=query, recent=recent)
         try:
             return self._browse_drive(
-                token, parent_id=parent_id, query=query, recent=recent, page_size=page_size
+                token,
+                parent_id=parent_id,
+                query=query,
+                recent=recent,
+                page_size=page_size,
             )
         except httpx.HTTPStatusError as e:
             if e.response is not None and e.response.status_code in (401, 403):
@@ -152,7 +157,6 @@ class GoogleDriveConnector(BaseConnector):
             raise ConnectorError(f"Google Drive browse failed: {e}") from e
         except httpx.HTTPError as e:
             raise ConnectorError(f"Google Drive browse request failed: {e}") from e
-
 
     # ── internals ──
     def _is_mock(self) -> bool:
@@ -340,9 +344,7 @@ class GoogleDriveConnector(BaseConnector):
             return None
         return r.json()
 
-    def _to_remote(
-        self, token: str, f: dict, *, path: str
-    ) -> Optional[RemoteDocument]:
+    def _to_remote(self, token: str, f: dict, *, path: str) -> Optional[RemoteDocument]:
         mime = f.get("mimeType", "")
         if mime in _GOOGLE_EXPORT:
             export_mime, _ext = _GOOGLE_EXPORT[mime]

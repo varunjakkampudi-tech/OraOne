@@ -1,4 +1,5 @@
 """Conversation folders + public (unauthenticated) share endpoints (R1)."""
+
 from __future__ import annotations
 
 import uuid
@@ -156,6 +157,7 @@ async def delete_folder(
 
 
 # ─────────────────── public, unauthenticated read ──────────────────
+
 
 @public_chat_router.get("/{token}", response_model=PublicConversation)
 async def public_conversation(

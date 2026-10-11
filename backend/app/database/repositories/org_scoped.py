@@ -16,6 +16,7 @@ Until then, every business-domain repo *must* extend this class and
 ``AsyncSession``). Routes get the context from the
 ``get_current_organization`` dependency.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -56,8 +57,12 @@ class OrgScopedRepository(BaseRepository[ModelT]):
         Returns ``None`` if the row exists but belongs to a different
         organization — never raises a leak.
         """
-        q = select(self.model).where(self.model.id == id_).where(  # type: ignore[attr-defined]
-            self.model.organization_id == self.organization_id  # type: ignore[attr-defined]
+        q = (
+            select(self.model)
+            .where(self.model.id == id_)
+            .where(  # type: ignore[attr-defined]
+                self.model.organization_id == self.organization_id  # type: ignore[attr-defined]
+            )
         )
         if hasattr(self.model, "deleted_at"):
             q = q.where(self.model.deleted_at.is_(None))  # type: ignore[attr-defined]

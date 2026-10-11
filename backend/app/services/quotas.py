@@ -19,6 +19,7 @@ field is a placeholder (0) and the caller (``AuthorizationService``) only ever
 denies on quota when ``AUTHZ_ENFORCE_QUOTAS`` is set. When a real usage source
 exists (a metering table / time-series counter), fill in ``_current_usage``.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -41,8 +42,12 @@ class QuotaKey:
     API_CALLS = "api_calls"
 
     ALL = (
-        AI_REQUESTS, KB_SIZE_MB, STORAGE_MB,
-        PROJECTS, USERS, API_CALLS,
+        AI_REQUESTS,
+        KB_SIZE_MB,
+        STORAGE_MB,
+        PROJECTS,
+        USERS,
+        API_CALLS,
     )
 
 
@@ -57,27 +62,45 @@ class QuotaSpec:
 
 QUOTA_SPECS: dict[str, QuotaSpec] = {
     QuotaKey.AI_REQUESTS: QuotaSpec(
-        QuotaKey.AI_REQUESTS, "AI Requests", "requests", "month",
+        QuotaKey.AI_REQUESTS,
+        "AI Requests",
+        "requests",
+        "month",
         "LLM completions / agent turns per billing period.",
     ),
     QuotaKey.KB_SIZE_MB: QuotaSpec(
-        QuotaKey.KB_SIZE_MB, "Knowledge Base Size", "MB", "total",
+        QuotaKey.KB_SIZE_MB,
+        "Knowledge Base Size",
+        "MB",
+        "total",
         "Total stored, indexed knowledge-base content.",
     ),
     QuotaKey.STORAGE_MB: QuotaSpec(
-        QuotaKey.STORAGE_MB, "Storage", "MB", "total",
+        QuotaKey.STORAGE_MB,
+        "Storage",
+        "MB",
+        "total",
         "Total object storage (uploads, recordings, exports).",
     ),
     QuotaKey.PROJECTS: QuotaSpec(
-        QuotaKey.PROJECTS, "Projects", "projects", "total",
+        QuotaKey.PROJECTS,
+        "Projects",
+        "projects",
+        "total",
         "Concurrent workspaces / projects in the organization.",
     ),
     QuotaKey.USERS: QuotaSpec(
-        QuotaKey.USERS, "Users", "seats", "total",
+        QuotaKey.USERS,
+        "Users",
+        "seats",
+        "total",
         "Active member seats in the organization.",
     ),
     QuotaKey.API_CALLS: QuotaSpec(
-        QuotaKey.API_CALLS, "API Calls", "calls", "month",
+        QuotaKey.API_CALLS,
+        "API Calls",
+        "calls",
+        "month",
         "Public API requests per billing period.",
     ),
 }
@@ -129,10 +152,10 @@ _DEFAULT_PLAN = "free"
 class QuotaDecision:
     allowed: bool
     key: str
-    limit: int          # -1 == unlimited
+    limit: int  # -1 == unlimited
     used: int
-    remaining: int      # -1 == unlimited
-    outcome: str        # "allow" | "exceeded" | "unmetered"
+    remaining: int  # -1 == unlimited
+    outcome: str  # "allow" | "exceeded" | "unmetered"
     meta: dict[str, Any] = field(default_factory=dict)
 
 
@@ -148,11 +171,15 @@ def resolve_limit(
             return int(plan_limits[key])
         except (TypeError, ValueError):
             pass
-    table = DEFAULT_LIMITS.get((plan_code or _DEFAULT_PLAN), DEFAULT_LIMITS[_DEFAULT_PLAN])
+    table = DEFAULT_LIMITS.get(
+        (plan_code or _DEFAULT_PLAN), DEFAULT_LIMITS[_DEFAULT_PLAN]
+    )
     return int(table.get(key, UNLIMITED))
 
 
-async def _current_usage(session: AsyncSession, organization_id: uuid.UUID, key: str) -> Optional[int]:
+async def _current_usage(
+    session: AsyncSession, organization_id: uuid.UUID, key: str
+) -> Optional[int]:
     """Return the org's current usage for ``key``, or ``None`` if unmetered.
 
     DESIGN STUB: no metering source is wired up yet, so this always returns
@@ -188,6 +215,10 @@ async def check_quota(
     remaining = max(limit - used, 0)
     allowed = (used + amount) <= limit
     return QuotaDecision(
-        allowed, key, limit, used, remaining,
+        allowed,
+        key,
+        limit,
+        used,
+        remaining,
         "allow" if allowed else "exceeded",
     )

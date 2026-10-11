@@ -5,6 +5,7 @@ An organization can have many knowledge bases (e.g. "Product docs",
 foundation — chunking, embeddings, and retrieval come in subsequent
 phases.
 """
+
 from __future__ import annotations
 
 import enum
@@ -30,9 +31,7 @@ class KnowledgeBaseStatus(str, enum.Enum):
 
 class KnowledgeBase(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "knowledge_bases"
-    __table_args__ = (
-        Index("ix_knowledge_bases_organization_id", "organization_id"),
-    )
+    __table_args__ = (Index("ix_knowledge_bases_organization_id", "organization_id"),)
 
     organization_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),

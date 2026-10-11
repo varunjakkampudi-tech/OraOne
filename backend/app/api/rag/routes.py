@@ -8,9 +8,10 @@ Endpoints
 
 All endpoints are tenant-scoped via :class:`OrgContext`.
 """
+
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -144,4 +145,6 @@ async def rag_sources(
         )
         or 0
     )
-    return RagSourcesResponse(documents=docs, websites=sites, chunks=chunks, knowledge_bases=kbs)
+    return RagSourcesResponse(
+        documents=docs, websites=sites, chunks=chunks, knowledge_bases=kbs
+    )

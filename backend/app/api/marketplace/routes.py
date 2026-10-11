@@ -13,6 +13,7 @@ building blocks: agent templates, integrations and workflows.
 Installing an ``agent_template`` provisions a real :class:`Agent` (+ config) in
 the active project so the tenant has a working agent immediately.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -39,6 +40,7 @@ router = APIRouter(prefix="/api/marketplace", tags=["marketplace"])
 
 
 # ─────────────────────────────── schemas ─────────────────────────────────────
+
 
 class ListingRead(BaseModel):
     slug: str
@@ -102,6 +104,7 @@ class InstallResponse(BaseModel):
 
 # ─────────────────────────────── helpers ─────────────────────────────────────
 
+
 async def _installed_slugs(db: AsyncSession, organization_id: uuid.UUID) -> set[str]:
     rows = await db.scalars(
         select(MarketplaceInstallation.listing_slug)
@@ -111,7 +114,9 @@ async def _installed_slugs(db: AsyncSession, organization_id: uuid.UUID) -> set[
     return set(rows.all())
 
 
-async def _ratings_for(db: AsyncSession, slugs: Optional[list[str]] = None) -> dict[str, dict[str, Any]]:
+async def _ratings_for(
+    db: AsyncSession, slugs: Optional[list[str]] = None
+) -> dict[str, dict[str, Any]]:
     """Aggregate average rating + review count per listing slug (global)."""
     stmt = select(
         MarketplaceReview.listing_slug,
@@ -128,7 +133,8 @@ async def _ratings_for(db: AsyncSession, slugs: Optional[list[str]] = None) -> d
 
 
 def _to_listing_read(
-    item: dict[str, Any], installed: set[str],
+    item: dict[str, Any],
+    installed: set[str],
     ratings: Optional[dict[str, dict[str, Any]]] = None,
 ) -> ListingRead:
     agg = (ratings or {}).get(item["slug"], {})
@@ -148,6 +154,7 @@ def _to_listing_read(
 
 
 # ─────────────────────────────── routes ──────────────────────────────────────
+
 
 @router.get("/categories")
 async def list_categories(
@@ -264,9 +271,9 @@ async def install_listing(
                 project_id=pctx.project_id,
                 name=f"{item['name']} Knowledge",
                 description=(
-                    "Starter knowledge base. Suggested structure: "
-                    + ", ".join(topics)
-                    if topics else "Starter knowledge base."
+                    "Starter knowledge base. Suggested structure: " + ", ".join(topics)
+                    if topics
+                    else "Starter knowledge base."
                 ),
                 status=KnowledgeBaseStatus.draft,
             )
@@ -285,16 +292,27 @@ async def install_listing(
         listing_name=item["name"],
         category=item["category"],
         status=InstallStatus.installed,
-        meta={"blueprint": blueprint, "knowledge_base_id": kb_id if item["category"] == "agent_template" else None},
+        meta={
+            "blueprint": blueprint,
+            "knowledge_base_id": kb_id
+            if item["category"] == "agent_template"
+            else None,
+        },
     )
     db.add(row)
     await db.commit()
     await db.refresh(row)
 
     audit(
-        "install", resource="marketplace_listing", resource_id=item["slug"],
-        organization_id=str(ctx.organization_id), user_id=str(ctx.user_id),
-        meta={"category": item["category"], "agent_id": str(agent_id) if agent_id else None},
+        "install",
+        resource="marketplace_listing",
+        resource_id=item["slug"],
+        organization_id=str(ctx.organization_id),
+        user_id=str(ctx.user_id),
+        meta={
+            "category": item["category"],
+            "agent_id": str(agent_id) if agent_id else None,
+        },
     )
     return InstallResponse(
         installation=InstallationRead.model_validate(row),
@@ -302,7 +320,11 @@ async def install_listing(
     )
 
 
-@router.delete("/installations/{installation_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
+@router.delete(
+    "/installations/{installation_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
 async def uninstall_listing(
     installation_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),
@@ -318,22 +340,30 @@ async def uninstall_listing(
     row.status = InstallStatus.removed
     await db.commit()
     audit(
-        "uninstall", resource="marketplace_listing", resource_id=row.listing_slug,
-        organization_id=str(ctx.organization_id), user_id=str(ctx.user_id),
+        "uninstall",
+        resource="marketplace_listing",
+        resource_id=row.listing_slug,
+        organization_id=str(ctx.organization_id),
+        user_id=str(ctx.user_id),
     )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 # ─────────────────────────────── reviews ─────────────────────────────────────
 
+
 def _author_name(u: Optional[User]) -> str:
     if u is None:
         return "OraOne user"
     name = (getattr(u, "full_name", None) or getattr(u, "name", None) or "").strip()
-    return name or (u.email.split("@")[0] if getattr(u, "email", None) else "OraOne user")
+    return name or (
+        u.email.split("@")[0] if getattr(u, "email", None) else "OraOne user"
+    )
 
 
-def _to_review_read(r: MarketplaceReview, author: str, my_user_id: uuid.UUID) -> ReviewRead:
+def _to_review_read(
+    r: MarketplaceReview, author: str, my_user_id: uuid.UUID
+) -> ReviewRead:
     return ReviewRead(
         id=r.id,
         listing_slug=r.listing_slug,
@@ -393,7 +423,11 @@ async def list_reviews(
     )
 
 
-@router.put("/listings/{slug}/reviews", response_model=ReviewRead, status_code=status.HTTP_200_OK)
+@router.put(
+    "/listings/{slug}/reviews",
+    response_model=ReviewRead,
+    status_code=status.HTTP_200_OK,
+)
 async def upsert_review(
     slug: str,
     payload: ReviewCreate,
@@ -430,14 +464,21 @@ async def upsert_review(
 
     user = await db.get(User, ctx.user_id)
     audit(
-        action, resource="marketplace_review", resource_id=slug,
-        organization_id=str(ctx.organization_id), user_id=str(ctx.user_id),
+        action,
+        resource="marketplace_review",
+        resource_id=slug,
+        organization_id=str(ctx.organization_id),
+        user_id=str(ctx.user_id),
         meta={"rating": payload.rating},
     )
     return _to_review_read(row, _author_name(user), ctx.user_id)
 
 
-@router.delete("/listings/{slug}/reviews", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
+@router.delete(
+    "/listings/{slug}/reviews",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
 async def delete_review(
     slug: str,
     ctx: OrgContext = Depends(get_current_organization),
@@ -454,7 +495,10 @@ async def delete_review(
     await db.delete(row)
     await db.commit()
     audit(
-        "delete", resource="marketplace_review", resource_id=slug,
-        organization_id=str(ctx.organization_id), user_id=str(ctx.user_id),
+        "delete",
+        resource="marketplace_review",
+        resource_id=slug,
+        organization_id=str(ctx.organization_id),
+        user_id=str(ctx.user_id),
     )
     return Response(status_code=status.HTTP_204_NO_CONTENT)

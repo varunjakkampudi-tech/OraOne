@@ -13,6 +13,7 @@ Idempotent / safe: the embedding column and index are created with
 state. Dimensionality (1024) matches Amazon Titan Text Embeddings v2 and
 the hashing fallback (see ``app/providers/embeddings.py``).
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union

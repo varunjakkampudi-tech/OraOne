@@ -5,6 +5,7 @@ Argon2 + JWT auth service (app/services/auth_service.py) needs. Any password
 backfill is strictly opt-in: both LOCAL_ADMIN_EMAIL and LOCAL_ADMIN_PASSWORD
 must be supplied by the operator. There is no fallback identity or password.
 """
+
 from __future__ import annotations
 
 import os
@@ -20,7 +21,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column("users", sa.Column("password_hash", sa.String(length=255), nullable=True))
+    op.add_column(
+        "users", sa.Column("password_hash", sa.String(length=255), nullable=True)
+    )
     op.add_column(
         "users",
         sa.Column(

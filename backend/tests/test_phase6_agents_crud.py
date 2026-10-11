@@ -4,6 +4,7 @@ Mix of fast unit tests (no DB) and DB-backed integration tests. The
 DB-backed tests auto-skip when Postgres isn't reachable so the suite
 passes everywhere; the unit tests run anywhere.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -13,14 +14,16 @@ from typing import AsyncIterator
 
 import pytest
 import pytest_asyncio
-from fastapi.testclient import TestClient
 
 from app.middleware.org_context import OrgContext
 
 
 # ───────────────────── Helpers shared with Phase 5 ─────────────────────
 
-def _ctx(org_id: uuid.UUID, *, user_id: uuid.UUID | None = None, role: str = "owner") -> OrgContext:
+
+def _ctx(
+    org_id: uuid.UUID, *, user_id: uuid.UUID | None = None, role: str = "owner"
+) -> OrgContext:
     return OrgContext(
         user_id=user_id or uuid.uuid4(),
         cognito_sub="sub-" + str(org_id),
@@ -37,9 +40,8 @@ def _postgres_reachable() -> bool:
     url = os.environ.get("DATABASE_URL", "")
     if not url:
         return False
-    dsn = (
-        url.replace("postgresql+asyncpg://", "postgresql://")
-        .replace("postgresql+psycopg2://", "postgresql://")
+    dsn = url.replace("postgresql+asyncpg://", "postgresql://").replace(
+        "postgresql+psycopg2://", "postgresql://"
     )
 
     async def _probe() -> bool:
@@ -64,9 +66,11 @@ REQUIRES_DB = pytest.mark.skipif(
 
 # ─────────────────── 1) Unit-level tests (no DB) ───────────────────
 
+
 def test_schemas_partial_update_keeps_all_optional():
     """`AgentUpdate` must allow zero fields → no validation errors."""
     from app.schemas.agents import AgentUpdate
+
     assert AgentUpdate().model_dump(exclude_unset=True) == {}
 
 
@@ -127,6 +131,7 @@ def test_audit_emits_structured_record(caplog):
 def test_router_paths_registered():
     """OpenAPI must expose the full CRUD surface required by the spec."""
     from server import app
+
     paths = set(app.openapi()["paths"].keys())
     assert "/api/agents" in paths
     assert "/api/agents/{agent_id}" in paths
@@ -140,6 +145,7 @@ def test_router_paths_registered():
 def test_swagger_describes_filters_and_pagination():
     """The list endpoint must document `q`, `type`, `status`, `model`, `limit`, `offset`."""
     from server import app
+
     op = app.openapi()["paths"]["/api/agents"]["get"]
     names = {p["name"] for p in op.get("parameters", [])}
     for required in ("q", "type", "status", "model", "limit", "offset", "sort"):
@@ -147,6 +153,7 @@ def test_swagger_describes_filters_and_pagination():
 
 
 # ─────────────────── 2) DB-backed integration tests ───────────────────
+
 
 @pytest_asyncio.fixture
 async def db_session() -> AsyncIterator:
@@ -170,7 +177,11 @@ async def _seed_org(session, *, email: str, slug_hint: str):
     from datetime import datetime, timezone
 
     from app.database.models.organization import Organization, OrgPlan
-    from app.database.models.organization_member import MemberRole, MemberStatus, OrganizationMember
+    from app.database.models.organization_member import (
+        MemberRole,
+        MemberStatus,
+        OrganizationMember,
+    )
     from app.database.models.project import Project
     from app.database.models.user import User
 
@@ -220,7 +231,9 @@ async def test_crud_full_lifecycle(db_session):
     from app.middleware.org_context import get_current_organization
     from server import app
 
-    user, org = await _seed_org(db_session, email=f"alice-{uuid.uuid4()}@x.com", slug_hint="alice")
+    user, org = await _seed_org(
+        db_session, email=f"alice-{uuid.uuid4()}@x.com", slug_hint="alice"
+    )
     await db_session.commit()
 
     async def _override() -> OrgContext:
@@ -229,6 +242,7 @@ async def test_crud_full_lifecycle(db_session):
     app.dependency_overrides[get_current_organization] = _override
     try:
         from httpx import ASGITransport, AsyncClient
+
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
             # CREATE
@@ -297,7 +311,9 @@ async def test_pagination_and_sort(db_session):
     from app.middleware.org_context import get_current_organization
     from server import app
 
-    user, org = await _seed_org(db_session, email=f"pg-{uuid.uuid4()}@x.com", slug_hint="pg")
+    user, org = await _seed_org(
+        db_session, email=f"pg-{uuid.uuid4()}@x.com", slug_hint="pg"
+    )
     await db_session.commit()
 
     async def _override() -> OrgContext:
@@ -306,20 +322,27 @@ async def test_pagination_and_sort(db_session):
     app.dependency_overrides[get_current_organization] = _override
     try:
         from httpx import ASGITransport, AsyncClient
+
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
             for i in range(5):
-                r = await client.post("/api/agents", json={"name": f"A{i}", "type": "chat"})
+                r = await client.post(
+                    "/api/agents", json={"name": f"A{i}", "type": "chat"}
+                )
                 assert r.status_code == 201
 
-            r = await client.get("/api/agents", params={"limit": 2, "offset": 0, "sort": "name"})
+            r = await client.get(
+                "/api/agents", params={"limit": 2, "offset": 0, "sort": "name"}
+            )
             assert r.status_code == 200
             page1 = r.json()
             assert len(page1["items"]) == 2
             assert page1["total"] >= 5
             assert page1["limit"] == 2 and page1["offset"] == 0
 
-            r = await client.get("/api/agents", params={"limit": 2, "offset": 2, "sort": "name"})
+            r = await client.get(
+                "/api/agents", params={"limit": 2, "offset": 2, "sort": "name"}
+            )
             page2 = r.json()
             page1_ids = {a["id"] for a in page1["items"]}
             page2_ids = {a["id"] for a in page2["items"]}

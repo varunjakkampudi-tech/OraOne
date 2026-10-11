@@ -1,4 +1,5 @@
 """AI model router schemas (Phase 12, Module 13)."""
+
 from __future__ import annotations
 
 from typing import List, Optional

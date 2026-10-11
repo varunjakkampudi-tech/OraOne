@@ -17,11 +17,11 @@ Endpoints
 
 Tenant-safe: every read/write is scoped to the caller's organization.
 """
+
 from __future__ import annotations
 
 import logging
 import uuid
-from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -117,7 +117,10 @@ def _snapshot(workflow: Workflow, steps: list[WorkflowStep]) -> dict:
 
 # ─────────────────── list / create ───────────────────
 
-@router.get("/api/workflows", response_model=WorkflowListResponse, summary="List workflows")
+
+@router.get(
+    "/api/workflows", response_model=WorkflowListResponse, summary="List workflows"
+)
 async def list_workflows(
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
@@ -191,6 +194,7 @@ async def create_workflow(
 
 # ─────────────────── analytics ───────────────────
 
+
 @router.get(
     "/api/workflows/analytics",
     response_model=WorkflowAnalytics,
@@ -207,7 +211,12 @@ async def workflow_analytics(
 
 # ─────────────────── retrieve / update / delete ───────────────────
 
-@router.get("/api/workflows/{workflow_id}", response_model=WorkflowDetail, summary="Get a workflow")
+
+@router.get(
+    "/api/workflows/{workflow_id}",
+    response_model=WorkflowDetail,
+    summary="Get a workflow",
+)
 async def get_workflow(
     workflow_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),
@@ -216,7 +225,9 @@ async def get_workflow(
     repo = _repo(session, ctx)
     workflow = await repo.get(workflow_id)
     if workflow is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found."
+        )
     steps = await repo.steps_for(workflow_id)
     return _detail(workflow, steps)
 
@@ -236,7 +247,9 @@ async def update_workflow(
     repo = _repo(session, ctx)
     workflow = await repo.get(workflow_id)
     if workflow is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found."
+        )
 
     # Snapshot the current definition into version history before mutating.
     current_steps = await repo.steps_for(workflow_id)
@@ -257,11 +270,15 @@ async def update_workflow(
         workflow.description = payload.description
     if payload.status is not None:
         if payload.status not in _VALID_STATUSES:
-            raise HTTPException(status_code=422, detail=f"Unknown status '{payload.status}'.")
+            raise HTTPException(
+                status_code=422, detail=f"Unknown status '{payload.status}'."
+            )
         workflow.status = WorkflowStatus(payload.status)
     if payload.trigger_type is not None:
         if payload.trigger_type not in _VALID_TRIGGERS:
-            raise HTTPException(status_code=422, detail=f"Unknown trigger '{payload.trigger_type}'.")
+            raise HTTPException(
+                status_code=422, detail=f"Unknown trigger '{payload.trigger_type}'."
+            )
         workflow.trigger_type = WorkflowTrigger(payload.trigger_type)
     if payload.trigger_config is not None:
         workflow.trigger_config = payload.trigger_config
@@ -306,7 +323,9 @@ async def delete_workflow(
     repo = _repo(session, ctx)
     workflow = await repo.get(workflow_id)
     if workflow is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found."
+        )
     workflow.deleted_at = datetime.now(timezone.utc)
     await session.commit()
     audit(
@@ -320,6 +339,7 @@ async def delete_workflow(
 
 
 # ─────────────────── run ───────────────────
+
 
 @router.post(
     "/api/workflows/{workflow_id}/run",
@@ -338,10 +358,14 @@ async def run_workflow(
     repo = _repo(session, ctx)
     workflow = await repo.get(workflow_id)
     if workflow is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found."
+        )
     steps = await repo.steps_for(workflow_id)
     if not steps:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Workflow has no steps.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Workflow has no steps."
+        )
 
     run = WorkflowRun(
         workflow_id=workflow.id,
@@ -398,7 +422,9 @@ async def list_runs(
     repo = _repo(session, ctx)
     workflow = await repo.get(workflow_id)
     if workflow is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found."
+        )
     rows = await repo.list_runs(workflow_id=workflow_id, limit=limit, offset=offset)
     total = await repo.count_runs(workflow_id=workflow_id)
     return RunListResponse(
@@ -422,7 +448,9 @@ async def get_run(
     repo = _repo(session, ctx)
     run = await repo.get_run(run_id)
     if run is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Run not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Run not found."
+        )
     run_steps = await repo.run_steps_for(run_id)
     data = RunRead.model_validate(run).model_dump()
     data["run_steps"] = [RunStepRead.model_validate(s) for s in run_steps]
@@ -430,6 +458,7 @@ async def get_run(
 
 
 # ─────────────────── human approval ───────────────────
+
 
 @router.post(
     "/api/workflows/runs/{run_id}/decision",
@@ -447,7 +476,9 @@ async def decide_run(
     repo = _repo(session, ctx)
     run = await repo.get_run(run_id)
     if run is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Run not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Run not found."
+        )
     if run.status != RunStatus.awaiting_approval:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -455,7 +486,9 @@ async def decide_run(
         )
     decision = payload.decision.strip().lower()
     if decision not in ("approve", "reject"):
-        raise HTTPException(status_code=422, detail="decision must be 'approve' or 'reject'.")
+        raise HTTPException(
+            status_code=422, detail="decision must be 'approve' or 'reject'."
+        )
 
     approved = decision == "approve"
     background.add_task(resume_run, run_id, approved=approved, note=payload.note or "")
@@ -477,6 +510,7 @@ async def decide_run(
 
 # ─────────────────── versioning ───────────────────
 
+
 @router.get(
     "/api/workflows/{workflow_id}/versions",
     response_model=WorkflowVersionListResponse,
@@ -490,7 +524,9 @@ async def list_versions(
     repo = _repo(session, ctx)
     workflow = await repo.get(workflow_id)
     if workflow is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found."
+        )
     rows = await repo.list_versions(workflow_id)
     return WorkflowVersionListResponse(
         items=[WorkflowVersionRead.model_validate(v) for v in rows],
@@ -513,10 +549,14 @@ async def rollback_version(
     repo = _repo(session, ctx)
     workflow = await repo.get(workflow_id)
     if workflow is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found."
+        )
     target = await repo.get_version(workflow_id, version)
     if target is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Version not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Version not found."
+        )
 
     snap = dict(target.snapshot or {})
 
@@ -577,6 +617,7 @@ async def rollback_version(
 
 
 # ─────────────────── helpers ───────────────────
+
 
 def _materialise_steps(
     workflow: Workflow, organization_id: uuid.UUID, steps: list[StepCreate]

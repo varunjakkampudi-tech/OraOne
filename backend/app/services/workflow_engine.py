@@ -29,6 +29,7 @@ Step types
 Each step also supports ``retry`` (extra attempts) and
 ``continue_on_error`` (don't fail the whole run) in its config.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -82,6 +83,7 @@ def _maker():
 
 # ───────────────────────── public entry points ─────────────────────────
 
+
 async def execute_run(run_id: uuid.UUID) -> None:
     """Background entry point for a fresh run. Owns its own DB session."""
     Maker = _maker()
@@ -107,6 +109,7 @@ async def resume_run(run_id: uuid.UUID, *, approved: bool, note: str = "") -> No
 
 
 # ───────────────────────── orchestration ─────────────────────────
+
 
 async def _load(session: AsyncSession, run_id: uuid.UUID):
     run = await session.get(WorkflowRun, run_id)
@@ -140,7 +143,8 @@ async def _start(session: AsyncSession, run_id: uuid.UUID) -> None:
 
     context: dict[str, Any] = dict(run.input or {})
     context.setdefault(
-        "trigger", run.trigger.value if hasattr(run.trigger, "value") else str(run.trigger)
+        "trigger",
+        run.trigger.value if hasattr(run.trigger, "value") else str(run.trigger),
     )
     await _run_loop(session, workflow, run, steps, context, start_index=0)
 
@@ -169,10 +173,16 @@ async def _resume(
     astep = steps[idx]
     if not approved:
         astep.status = RunStepStatus.skipped
-        astep.output = {"decision": "rejected", "note": note, "text": "Rejected by reviewer."}
+        astep.output = {
+            "decision": "rejected",
+            "note": note,
+            "text": "Rejected by reviewer.",
+        }
         astep.finished_at = _utcnow()
         run.status = RunStatus.cancelled
-        run.error_message = ("Rejected at approval step." + (f" {note}" if note else ""))[:2000]
+        run.error_message = (
+            "Rejected at approval step." + (f" {note}" if note else "")
+        )[:2000]
         run.finished_at = _utcnow()
         workflow.run_count += 1
         workflow.last_run_at = run.finished_at
@@ -181,7 +191,11 @@ async def _resume(
         return
 
     astep.status = RunStepStatus.completed
-    astep.output = {"decision": "approved", "note": note, "text": "Approved by reviewer."}
+    astep.output = {
+        "decision": "approved",
+        "note": note,
+        "text": "Approved by reviewer.",
+    }
     astep.finished_at = _utcnow()
     run.steps_completed += 1
     run.status = RunStatus.running
@@ -211,7 +225,9 @@ async def _run_loop(
             rstep.started_at = _utcnow()
             rstep.input = _safe_json(context)
             rstep.output = {
-                "prompt": _render(str(cfg.get("message", "Approval required.")), context),
+                "prompt": _render(
+                    str(cfg.get("message", "Approval required.")), context
+                ),
                 "text": _render(str(cfg.get("message", "Approval required.")), context),
             }
             run.status = RunStatus.awaiting_approval
@@ -239,7 +255,10 @@ async def _run_loop(
                 last_exc = exc
                 log.warning(
                     "step %s attempt %d/%d failed: %s",
-                    rstep.name, attempt + 1, attempts, exc,
+                    rstep.name,
+                    attempt + 1,
+                    attempts,
+                    exc,
                 )
                 if attempt < attempts - 1 and retry_delay:
                     await asyncio.sleep(retry_delay)
@@ -292,8 +311,14 @@ async def _finalize(
     _audit_run(workflow, run)
 
 
-def _audit_run(workflow: Workflow, run: WorkflowRun, *, extra: Optional[dict] = None) -> None:
-    meta = {"run_id": str(run.id), "status": run.status.value, "steps": run.steps_completed}
+def _audit_run(
+    workflow: Workflow, run: WorkflowRun, *, extra: Optional[dict] = None
+) -> None:
+    meta = {
+        "run_id": str(run.id),
+        "status": run.status.value,
+        "steps": run.steps_completed,
+    }
     if extra:
         meta.update(extra)
     audit(
@@ -306,7 +331,9 @@ def _audit_run(workflow: Workflow, run: WorkflowRun, *, extra: Optional[dict] = 
     )
 
 
-async def _mark_run_failed(session: AsyncSession, run_id: uuid.UUID, message: str) -> None:
+async def _mark_run_failed(
+    session: AsyncSession, run_id: uuid.UUID, message: str
+) -> None:
     run = await session.get(WorkflowRun, run_id)
     if run is None:
         return
@@ -317,6 +344,7 @@ async def _mark_run_failed(session: AsyncSession, run_id: uuid.UUID, message: st
 
 
 # ───────────────────────── step dispatch ─────────────────────────
+
 
 async def _run_step(
     session: AsyncSession,
@@ -358,6 +386,7 @@ async def _run_step(
 
 
 # ───────────────────────── AI helpers ─────────────────────────
+
 
 async def _chat(
     cfg: dict[str, Any],
@@ -403,6 +432,7 @@ def _parse_json(text: str) -> Any:
 
 
 # ───────────────────────── step executors ─────────────────────────
+
 
 async def _step_ai_prompt(
     workflow: Workflow, cfg: dict[str, Any], context: dict[str, Any]
@@ -482,7 +512,11 @@ async def _step_ai_extract(
     # Also surface individual fields for easy templating.
     for f in fields:
         context[str(f)] = data.get(str(f))
-    return {"text": json.dumps(data, ensure_ascii=False), "data": data, "output_var": out_var}
+    return {
+        "text": json.dumps(data, ensure_ascii=False),
+        "data": data,
+        "output_var": out_var,
+    }
 
 
 async def _step_ai_summarize(
@@ -492,7 +526,9 @@ async def _step_ai_summarize(
     if not text_in:
         raise ValueError("ai_summarize step requires 'input' text.")
     max_words = int(cfg.get("max_words", 120) or 120)
-    system = f"Summarise the text in at most {max_words} words. Be faithful and concise."
+    system = (
+        f"Summarise the text in at most {max_words} words. Be faithful and concise."
+    )
     text = await _chat(cfg, system, text_in)
     out_var = str(cfg.get("output_var") or "summary")
     context[out_var] = text
@@ -515,13 +551,20 @@ async def _step_ai_sentiment(
     if sentiment not in ("positive", "negative", "neutral"):
         low = raw.lower()
         sentiment = (
-            "positive" if "positive" in low
-            else "negative" if "negative" in low
+            "positive"
+            if "positive" in low
+            else "negative"
+            if "negative" in low
             else "neutral"
         )
     out_var = str(cfg.get("output_var") or "sentiment")
     context[out_var] = sentiment
-    return {"text": sentiment, "sentiment": sentiment, "score": parsed.get("score"), "output_var": out_var}
+    return {
+        "text": sentiment,
+        "sentiment": sentiment,
+        "score": parsed.get("score"),
+        "output_var": out_var,
+    }
 
 
 async def _step_ai_translate(
@@ -530,7 +573,10 @@ async def _step_ai_translate(
     text_in = _render(str(cfg.get("input", cfg.get("text", ""))), context).strip()
     if not text_in:
         raise ValueError("ai_translate step requires 'input' text.")
-    target = _render(str(cfg.get("target_language", "English")), context).strip() or "English"
+    target = (
+        _render(str(cfg.get("target_language", "English")), context).strip()
+        or "English"
+    )
     system = f"Translate the user's text into {target}. Output only the translation."
     text = await _chat(cfg, system, text_in)
     out_var = str(cfg.get("output_var") or "translation")
@@ -567,9 +613,7 @@ async def _step_kb_query(
         "output_var": out_var,
         "match_count": len(chunks),
         "context": joined,
-        "sources": [
-            {"document": c.document_name, "score": c.score} for c in chunks
-        ],
+        "sources": [{"document": c.document_name, "score": c.score} for c in chunks],
     }
 
 
@@ -584,7 +628,11 @@ async def _step_agent_run(
         raise ValueError("agent_run step requires an 'agent_id'.")
     agent_id = uuid.UUID(str(agent_id_raw))
     agent = await session.get(Agent, agent_id)
-    if agent is None or agent.organization_id != workflow.organization_id or agent.deleted_at is not None:
+    if (
+        agent is None
+        or agent.organization_id != workflow.organization_id
+        or agent.deleted_at is not None
+    ):
         raise ValueError("Agent not found in this organization.")
 
     message = _render(str(cfg.get("message", "")), context).strip()
@@ -648,7 +696,12 @@ def _step_notification(
 ) -> dict[str, Any]:
     channel = str(cfg.get("channel", "log"))
     message = _render(str(cfg.get("message", "")), context)[:_MAX_OUTPUT_CHARS]
-    log.info("WORKFLOW NOTIFY org=%s channel=%s :: %s", workflow.organization_id, channel, message)
+    log.info(
+        "WORKFLOW NOTIFY org=%s channel=%s :: %s",
+        workflow.organization_id,
+        channel,
+        message,
+    )
     return {"channel": channel, "message": message, "text": message, "delivered": True}
 
 
@@ -667,7 +720,10 @@ async def _step_webhook(cfg: dict[str, Any], context: dict[str, Any]) -> dict[st
     if isinstance(payload, str):
         payload = {"text": _render(payload, context)}
     elif isinstance(payload, dict):
-        payload = {k: _render(str(v), context) if isinstance(v, str) else v for k, v in payload.items()}
+        payload = {
+            k: _render(str(v), context) if isinstance(v, str) else v
+            for k, v in payload.items()
+        }
     else:
         payload = {"context": _safe_json(context)}
 
@@ -675,13 +731,19 @@ async def _step_webhook(cfg: dict[str, Any], context: dict[str, Any]) -> dict[st
 
     async with httpx.AsyncClient(timeout=15.0) as client:
         resp = await client.post(url, json=payload)
-    return {"status_code": resp.status_code, "ok": resp.is_success, "text": f"HTTP {resp.status_code}"}
+    return {
+        "status_code": resp.status_code,
+        "ok": resp.is_success,
+        "text": f"HTTP {resp.status_code}",
+    }
 
 
 # ───────────────────────── helpers ─────────────────────────
 
+
 def _render(template: str, context: dict[str, Any]) -> str:
     """Substitute ``{{var}}`` tokens from ``context`` (supports dotted keys)."""
+
     def repl(m: "re.Match[str]") -> str:
         key = m.group(1)
         val: Any = context

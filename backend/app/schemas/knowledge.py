@@ -1,4 +1,5 @@
 """Pydantic schemas for the Knowledge Base / Documents API (Phase 6)."""
+
 from __future__ import annotations
 
 import uuid
@@ -9,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 # ──────────────── Knowledge Bases ────────────────
+
 
 class KnowledgeBaseCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=160)
@@ -43,6 +45,7 @@ class KnowledgeBaseListResponse(BaseModel):
 
 
 # ──────────────── Documents ────────────────
+
 
 class DocumentRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -81,8 +84,10 @@ class DocumentListResponse(BaseModel):
 
 # ──────────────── Document organization (R2) ────────────────
 
+
 class DocumentPatch(BaseModel):
     """Move to a folder, clear folder, or set tags."""
+
     folder_id: Optional[uuid.UUID] = None
     clear_folder: bool = False
     tags: Optional[list[str]] = None
@@ -124,6 +129,7 @@ class DocumentVersionOut(BaseModel):
 
 # ──────────────── Knowledge folders (R2) ────────────────
 
+
 class KnowledgeFolderCreate(BaseModel):
     knowledge_base_id: uuid.UUID
     name: str = Field(..., min_length=1, max_length=160)
@@ -152,6 +158,7 @@ class KnowledgeFolderOut(BaseModel):
 
 # ──────────────── Knowledge search (R2) ────────────────
 
+
 class KnowledgeSearchRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=500)
     knowledge_base_id: Optional[uuid.UUID] = None
@@ -177,6 +184,7 @@ class KnowledgeSearchResponse(BaseModel):
 
 # ──────────────── Document Chunks (read-only for now) ────────────────
 
+
 class ChunkRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -188,6 +196,7 @@ class ChunkRead(BaseModel):
 
 
 # ──────────────── Dashboard ────────────────
+
 
 class KnowledgeStats(BaseModel):
     total_knowledge_bases: int

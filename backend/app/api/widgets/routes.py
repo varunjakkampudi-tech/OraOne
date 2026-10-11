@@ -4,6 +4,7 @@ Create a widget in the dashboard, bind an agent + knowledge base,
 customize branding/behavior, pin allowed domains, publish, and read
 usage analytics. The public loader/chat surface lives in ``public.py``.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -48,6 +49,7 @@ router = APIRouter(prefix="/api/widgets", tags=["widgets"])
 
 
 # ─────────────────── helpers ───────────────────
+
 
 async def _widget_for_org(
     session: AsyncSession, *, widget_id: uuid.UUID, organization_id: uuid.UUID
@@ -114,7 +116,9 @@ async def _validate_refs(
             .where(KnowledgeBase.deleted_at.is_(None))
         )
         if not ok:
-            raise HTTPException(422, "knowledge_base_id not found in this organization.")
+            raise HTTPException(
+                422, "knowledge_base_id not found in this organization."
+            )
 
 
 async def _set_domains(
@@ -131,6 +135,7 @@ async def _set_domains(
 
 
 # ─────────────────── CRUD ───────────────────
+
 
 @router.post(
     "",
@@ -205,10 +210,7 @@ async def list_widgets(
     if q:
         stmt = stmt.where(Widget.name.ilike(f"%{q}%"))
     total = int(
-        await session.scalar(
-            select(func.count()).select_from(stmt.subquery())
-        )
-        or 0
+        await session.scalar(select(func.count()).select_from(stmt.subquery())) or 0
     )
     rows = (
         await session.scalars(stmt.order_by(Widget.created_at.desc()).limit(limit))
@@ -320,6 +322,7 @@ async def delete_widget(
 
 # ─────────────────── publish / key rotation ───────────────────
 
+
 @router.post(
     "/{widget_id}/publish",
     response_model=WidgetRead,
@@ -399,6 +402,7 @@ async def regenerate_key(
 
 
 # ─────────────────── analytics ───────────────────
+
 
 @router.get(
     "/{widget_id}/analytics",

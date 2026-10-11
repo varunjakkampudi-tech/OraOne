@@ -4,6 +4,7 @@
 Model + system_prompt are the hot-path fields kept on the agent row itself;
 deeper, optional config lives in the 1:1 `agent_configs` sidecar.
 """
+
 from __future__ import annotations
 
 import enum

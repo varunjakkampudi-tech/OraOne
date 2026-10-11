@@ -25,6 +25,7 @@ Runtime enforcement:
   * :func:`require_product` — 403 (denied) / 503 (maintenance) / 403 (coming soon).
   * :func:`require_feature` — 403 unless a feature (and its parent product) is on.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -68,8 +69,14 @@ _DEFAULT_PRODUCTS: list[dict[str, Any]] = [
         "documentation_url": "https://docs.oraone.in/ai-platform",
         "version": "2.0.0",
         "default_features": [
-            "chat_agents", "knowledge_ai", "workflow_builder", "analytics",
-            "crm", "lead_scoring", "memory", "marketplace",
+            "chat_agents",
+            "knowledge_ai",
+            "workflow_builder",
+            "analytics",
+            "crm",
+            "lead_scoring",
+            "memory",
+            "marketplace",
         ],
         "default_enabled": True,
         "sort_order": 0,
@@ -155,15 +162,24 @@ async def _seed_missing_products(session: AsyncSession) -> None:
     created = False
     for spec in _DEFAULT_PRODUCTS:
         if spec["key"] not in by_key:
-            session.add(Product(
-                key=spec["key"], slug=spec["slug"], name=spec["name"],
-                display_name=spec["display_name"], description=spec["description"],
-                icon=spec["icon"], route_prefix=spec["route_prefix"],
-                documentation_url=spec["documentation_url"],
-                status=ProductStatus.GA, visibility=ProductVisibility.VISIBLE,
-                version=spec["version"], default_features=spec["default_features"],
-                default_enabled=spec["default_enabled"], sort_order=spec["sort_order"],
-            ))
+            session.add(
+                Product(
+                    key=spec["key"],
+                    slug=spec["slug"],
+                    name=spec["name"],
+                    display_name=spec["display_name"],
+                    description=spec["description"],
+                    icon=spec["icon"],
+                    route_prefix=spec["route_prefix"],
+                    documentation_url=spec["documentation_url"],
+                    status=ProductStatus.GA,
+                    visibility=ProductVisibility.VISIBLE,
+                    version=spec["version"],
+                    default_features=spec["default_features"],
+                    default_enabled=spec["default_enabled"],
+                    sort_order=spec["sort_order"],
+                )
+            )
             created = True
     if created:
         try:
@@ -178,9 +194,7 @@ async def list_products(session: AsyncSession) -> list[Product]:
     """Return the full product catalog, seeding defaults on first use."""
     await _seed_missing_products(session)
     rows = (
-        await session.scalars(
-            select(Product).order_by(Product.sort_order, Product.key)
-        )
+        await session.scalars(select(Product).order_by(Product.sort_order, Product.key))
     ).all()
     return list(rows)
 
@@ -212,7 +226,9 @@ def product_to_dict(p: Product) -> dict[str, Any]:
 
 
 async def set_product(
-    session: AsyncSession, key: str, *,
+    session: AsyncSession,
+    key: str,
+    *,
     status: Optional[str] = None,
     visibility: Optional[str] = None,
     version: Optional[str] = None,
@@ -328,24 +344,32 @@ async def get_org_products(
     for p in products:
         ov = overrides.get(p.key)
         override_enabled = bool(ov.enabled) if ov is not None else None
-        enabled = _effective_product_enabled(p.status, p.default_enabled, override_enabled)
-        out.append({
-            **product_to_dict(p),
-            "enabled": enabled,
-            "has_override": ov is not None,
-            "override_enabled": override_enabled,
-            "maintenance": p.status == ProductStatus.MAINTENANCE,
-            "coming_soon": p.status == ProductStatus.COMING_SOON,
-            "beta": p.status == ProductStatus.BETA,
-            "preview": p.status == ProductStatus.PREVIEW,
-            "deprecated": p.status == ProductStatus.DEPRECATED,
-        })
+        enabled = _effective_product_enabled(
+            p.status, p.default_enabled, override_enabled
+        )
+        out.append(
+            {
+                **product_to_dict(p),
+                "enabled": enabled,
+                "has_override": ov is not None,
+                "override_enabled": override_enabled,
+                "maintenance": p.status == ProductStatus.MAINTENANCE,
+                "coming_soon": p.status == ProductStatus.COMING_SOON,
+                "beta": p.status == ProductStatus.BETA,
+                "preview": p.status == ProductStatus.PREVIEW,
+                "deprecated": p.status == ProductStatus.DEPRECATED,
+            }
+        )
     return out
 
 
 async def set_org_entitlement(
-    session: AsyncSession, organization_id: uuid.UUID, product_key: str,
-    enabled: bool, *, admin_user_id: Optional[uuid.UUID] = None,
+    session: AsyncSession,
+    organization_id: uuid.UUID,
+    product_key: str,
+    enabled: bool,
+    *,
+    admin_user_id: Optional[uuid.UUID] = None,
 ) -> dict[str, Any]:
     """Create or update an org's explicit override for a product.
 
@@ -359,12 +383,15 @@ async def set_org_entitlement(
     )
     before = (
         {"product_key": row.product_key, "enabled": bool(row.enabled)}
-        if row is not None else None
+        if row is not None
+        else None
     )
     if row is None:
         row = OrganizationEntitlement(
-            organization_id=organization_id, product_key=product_key,
-            enabled=bool(enabled), updated_by_user_id=admin_user_id,
+            organization_id=organization_id,
+            product_key=product_key,
+            enabled=bool(enabled),
+            updated_by_user_id=admin_user_id,
         )
         session.add(row)
     else:
@@ -399,10 +426,11 @@ async def entitlement_overview(session: AsyncSession) -> dict[str, Any]:
     products = await list_products(session)
     total_orgs = int(
         await session.scalar(
-            select(func.count()).select_from(Organization).where(
-                Organization.deleted_at.is_(None)
-            )
-        ) or 0
+            select(func.count())
+            .select_from(Organization)
+            .where(Organization.deleted_at.is_(None))
+        )
+        or 0
     )
 
     # override counts per product_key
@@ -432,19 +460,21 @@ async def entitlement_overview(session: AsyncSession) -> dict[str, Any]:
         default_on = status_is_usable(p.status) and bool(p.default_enabled)
         effective_enabled = oe + (orgs_without_override if default_on else 0)
         effective_enabled = min(effective_enabled, total_orgs)
-        items.append({
-            "key": p.key,
-            "name": p.display_name or p.name,
-            "status": p.status,
-            "version": p.version,
-            "default_enabled": bool(p.default_enabled),
-            "total_orgs": total_orgs,
-            "enabled_orgs": effective_enabled,
-            "disabled_orgs": max(total_orgs - effective_enabled, 0),
-            "overrides": overrides_total,
-            "overrides_enabled": oe,
-            "overrides_disabled": od,
-        })
+        items.append(
+            {
+                "key": p.key,
+                "name": p.display_name or p.name,
+                "status": p.status,
+                "version": p.version,
+                "default_enabled": bool(p.default_enabled),
+                "total_orgs": total_orgs,
+                "enabled_orgs": effective_enabled,
+                "disabled_orgs": max(total_orgs - effective_enabled, 0),
+                "overrides": overrides_total,
+                "overrides_enabled": oe,
+                "overrides_disabled": od,
+            }
+        )
     return {"total_orgs": total_orgs, "products": items}
 
 
@@ -499,7 +529,8 @@ async def _resolve_raw_features(
 
 
 async def evaluate_features(
-    session: AsyncSession, organization_id: uuid.UUID,
+    session: AsyncSession,
+    organization_id: uuid.UUID,
     product_enabled: Optional[dict[str, bool]] = None,
 ) -> dict[str, bool]:
     """Resolve every known feature flag for one org, gated by parent product.
@@ -511,7 +542,8 @@ async def evaluate_features(
     raw = await _resolve_raw_features(session, organization_id)
     if product_enabled is None:
         product_enabled = {
-            p["key"]: p["enabled"] for p in await get_org_products(session, organization_id)
+            p["key"]: p["enabled"]
+            for p in await get_org_products(session, organization_id)
         }
     gated: dict[str, bool] = {}
     for name, on in raw.items():
@@ -547,7 +579,9 @@ async def _build_snapshot(
     products = {p["key"]: p["enabled"] for p in detailed}
     maintenance = {p["key"]: p["maintenance"] for p in detailed}
     statuses = {p["key"]: p["status"] for p in detailed}
-    features = await evaluate_features(session, organization_id, product_enabled=products)
+    features = await evaluate_features(
+        session, organization_id, product_enabled=products
+    )
     return {
         "products": products,
         "maintenance": maintenance,
@@ -620,7 +654,9 @@ async def is_product_in_maintenance(
     return bool(snapshot.get("maintenance", {}).get(product_key, False))
 
 
-def _product_status_from_snapshot(snapshot: dict[str, Any], product_key: str) -> Optional[str]:
+def _product_status_from_snapshot(
+    snapshot: dict[str, Any], product_key: str
+) -> Optional[str]:
     return snapshot.get("statuses", {}).get(product_key)
 
 
@@ -628,8 +664,11 @@ def _product_status_from_snapshot(snapshot: dict[str, Any], product_key: str) ->
 # Access-request records (for the "Request Access" CTA)                         #
 # --------------------------------------------------------------------------- #
 async def record_access_request(
-    session: AsyncSession, ctx: OrgContext, product_key: str,
-    *, reason: Optional[str] = None,
+    session: AsyncSession,
+    ctx: OrgContext,
+    product_key: str,
+    *,
+    reason: Optional[str] = None,
 ) -> dict[str, Any]:
     """Persist an audit trail for a customer requesting a product.
 

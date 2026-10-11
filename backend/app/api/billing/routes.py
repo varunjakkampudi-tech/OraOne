@@ -12,6 +12,7 @@ Endpoints
 
 Writes require the ``owner``/``admin`` role (billing admins).
 """
+
 from __future__ import annotations
 
 import logging
@@ -102,14 +103,20 @@ async def checkout(
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except RuntimeError as e:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(e)
+        )
 
     audit(
         "checkout",
         resource="subscription",
         organization_id=str(ctx.organization_id),
         user_id=str(ctx.user_id),
-        meta={"plan_code": payload.plan_code, "cycle": payload.billing_cycle, "mode": result["mode"]},
+        meta={
+            "plan_code": payload.plan_code,
+            "cycle": payload.billing_cycle,
+            "mode": result["mode"],
+        },
     )
 
     sub_detail = (
@@ -182,14 +189,19 @@ async def list_invoices(
     )
 
 
-@router.post("/api/billing/webhook", summary="Stripe webhook sink", include_in_schema=False)
+@router.post(
+    "/api/billing/webhook", summary="Stripe webhook sink", include_in_schema=False
+)
 async def stripe_webhook(
     request: Request,
     session: AsyncSession = Depends(get_db),
 ) -> dict:
     """Verify and process Stripe events (real mode only)."""
     if not billing_service.stripe_enabled():
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Stripe billing is not configured.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Stripe billing is not configured.",
+        )
 
     import stripe
 
@@ -199,7 +211,9 @@ async def stripe_webhook(
     if not secret:
         # Real Stripe mode requires signature verification — an unsigned
         # payload can be forged by anyone to fake payments/subscriptions.
-        log.error("STRIPE_WEBHOOK_SECRET is not set while Stripe billing is enabled; rejecting webhook.")
+        log.error(
+            "STRIPE_WEBHOOK_SECRET is not set while Stripe billing is enabled; rejecting webhook."
+        )
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Webhook verification is not configured.",
@@ -207,7 +221,9 @@ async def stripe_webhook(
     try:
         event = stripe.Webhook.construct_event(payload, sig, secret)
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid webhook: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid webhook: {e}"
+        )
 
     await billing_service.handle_webhook_event(session, dict(event))
     return {"received": True}

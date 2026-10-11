@@ -11,6 +11,7 @@
 The programmatic surface (``/api/v1``) *fires* these; this router *manages* them
 and is gated by the ``apikeys.manage`` / ``apikeys.read`` permissions.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -87,10 +88,16 @@ async def create_webhook(
     )
 
 
-async def _require_endpoint(session: AsyncSession, ctx: OrgContext, endpoint_id: uuid.UUID):
-    endpoint = await webhook_service.get_endpoint(session, ctx.organization_id, endpoint_id)
+async def _require_endpoint(
+    session: AsyncSession, ctx: OrgContext, endpoint_id: uuid.UUID
+):
+    endpoint = await webhook_service.get_endpoint(
+        session, ctx.organization_id, endpoint_id
+    )
     if endpoint is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Webhook not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Webhook not found."
+        )
     return endpoint
 
 
@@ -160,7 +167,9 @@ async def test_webhook(
     return WebhookDeliveryOut.model_validate(delivery)
 
 
-@router.get("/api/webhooks/{endpoint_id}/deliveries", response_model=list[WebhookDeliveryOut])
+@router.get(
+    "/api/webhooks/{endpoint_id}/deliveries", response_model=list[WebhookDeliveryOut]
+)
 async def webhook_deliveries(
     endpoint_id: uuid.UUID,
     limit: int = Query(50, ge=1, le=200),

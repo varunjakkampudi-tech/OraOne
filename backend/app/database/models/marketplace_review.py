@@ -4,6 +4,7 @@ The marketplace catalogue lives in code (slug-keyed), so a review only needs
 to reference the ``listing_slug`` rather than a foreign key. One review per
 (organization, user, listing) — re-submitting updates the existing row.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -20,7 +21,9 @@ class MarketplaceReview(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "marketplace_reviews"
     __table_args__ = (
         UniqueConstraint(
-            "organization_id", "user_id", "listing_slug",
+            "organization_id",
+            "user_id",
+            "listing_slug",
             name="uq_marketplace_review_org_user_slug",
         ),
         Index("ix_marketplace_reviews_slug", "listing_slug"),

@@ -5,6 +5,7 @@ Idempotent: on some environments (notably a fresh database created after
 the column exists before this migration runs. Guard with an inspector check
 so `alembic upgrade head` succeeds either way.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -26,7 +27,9 @@ def upgrade() -> None:
     if "config" not in existing:
         op.add_column(
             "workflow_run_steps",
-            sa.Column("config", postgresql.JSONB(), nullable=False, server_default="{}"),
+            sa.Column(
+                "config", postgresql.JSONB(), nullable=False, server_default="{}"
+            ),
         )
 
 

@@ -5,6 +5,7 @@ white-label features (hiding the "Powered by" mark, custom domains) require
 the ``business`` tier or above; basic theming (name, logo, colours,
 support links) is available to everyone.
 """
+
 from __future__ import annotations
 
 import re
@@ -45,9 +46,7 @@ async def get_branding(
     session: AsyncSession, organization_id: uuid.UUID
 ) -> Optional[OrgBranding]:
     return await session.scalar(
-        select(OrgBranding).where(
-            OrgBranding.organization_id == organization_id
-        )
+        select(OrgBranding).where(OrgBranding.organization_id == organization_id)
     )
 
 
@@ -78,9 +77,7 @@ def _norm_hex(value: str, field: str) -> str:
     return v
 
 
-async def branding_view(
-    session: AsyncSession, organization_id: uuid.UUID
-) -> dict:
+async def branding_view(session: AsyncSession, organization_id: uuid.UUID) -> dict:
     plan_code = await _plan_code(session, organization_id)
     branding = await get_or_create_branding(session, organization_id)
     org = await session.get(Organization, organization_id)
@@ -174,9 +171,7 @@ async def set_branding_asset(
     return branding
 
 
-async def public_branding(
-    session: AsyncSession, *, org_ref: str
-) -> Optional[dict]:
+async def public_branding(session: AsyncSession, *, org_ref: str) -> Optional[dict]:
     """Resolve public-safe branding by org slug or UUID (no auth).
 
     Used to white-label customer-facing surfaces before a user signs in.

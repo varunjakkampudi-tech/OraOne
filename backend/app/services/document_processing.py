@@ -22,6 +22,7 @@ so the RAG retriever can do cosine-similarity search. The
 ``DocumentChunk.metadata`` JSONB stores citation hints (page number,
 section heading, source file).
 """
+
 from __future__ import annotations
 
 import csv
@@ -52,6 +53,7 @@ CHUNK_OVERLAP_CHARS = 100
 
 # ────────────────────────── text extraction ──────────────────────────
 
+
 @dataclass
 class ExtractedPage:
     """One logical "page" of source text. PDFs have real pages; for
@@ -63,7 +65,9 @@ class ExtractedPage:
     section: Optional[str] = None
 
 
-def extract_text(filename: str, content_type: Optional[str], data: bytes) -> list[ExtractedPage]:
+def extract_text(
+    filename: str, content_type: Optional[str], data: bytes
+) -> list[ExtractedPage]:
     """Dispatch to the right parser based on filename / content type.
 
     Returns one or more ``ExtractedPage`` blocks. Raises
@@ -313,7 +317,7 @@ def _extract_html(data: bytes) -> list[ExtractedPage]:
 # ────────────────────────── normalization ──────────────────────────
 
 _WS_RE = re.compile(r"[ \t\u00A0]+")  # spaces, tabs, NBSP
-_NL_RE = re.compile(r"\n{3,}")       # collapse 3+ newlines to 2
+_NL_RE = re.compile(r"\n{3,}")  # collapse 3+ newlines to 2
 
 
 def normalize(text: str) -> str:
@@ -419,6 +423,7 @@ def chunk_pages(
 
 # ────────────────────────── embedding ──────────────────────────
 
+
 def _embed_chunks(texts: list[str]) -> list[Optional[list[float]]]:
     """Embed chunk texts, returning one vector per text (or ``None`` on
     failure so the chunk is still persisted without an embedding).
@@ -443,13 +448,76 @@ def _embed_chunks(texts: list[str]) -> list[Optional[list[float]]]:
 _SENT_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
 _WORD_RE = re.compile(r"[A-Za-z][A-Za-z'-]{2,}")
 _STOPWORDS = {
-    "the", "and", "for", "are", "but", "not", "you", "all", "any", "can", "her",
-    "was", "one", "our", "out", "day", "get", "has", "him", "his", "how", "man",
-    "new", "now", "old", "see", "two", "way", "who", "boy", "did", "its", "let",
-    "put", "say", "she", "too", "use", "this", "that", "with", "from", "they",
-    "have", "will", "your", "what", "when", "which", "their", "there", "would",
-    "about", "into", "than", "then", "them", "these", "those", "been", "were",
-    "also", "such", "each", "more", "most", "some", "other", "only", "over",
+    "the",
+    "and",
+    "for",
+    "are",
+    "but",
+    "not",
+    "you",
+    "all",
+    "any",
+    "can",
+    "her",
+    "was",
+    "one",
+    "our",
+    "out",
+    "day",
+    "get",
+    "has",
+    "him",
+    "his",
+    "how",
+    "man",
+    "new",
+    "now",
+    "old",
+    "see",
+    "two",
+    "way",
+    "who",
+    "boy",
+    "did",
+    "its",
+    "let",
+    "put",
+    "say",
+    "she",
+    "too",
+    "use",
+    "this",
+    "that",
+    "with",
+    "from",
+    "they",
+    "have",
+    "will",
+    "your",
+    "what",
+    "when",
+    "which",
+    "their",
+    "there",
+    "would",
+    "about",
+    "into",
+    "than",
+    "then",
+    "them",
+    "these",
+    "those",
+    "been",
+    "were",
+    "also",
+    "such",
+    "each",
+    "more",
+    "most",
+    "some",
+    "other",
+    "only",
+    "over",
 }
 
 
@@ -507,7 +575,9 @@ def derive_questions(text: str, pages: list[ExtractedPage]) -> list[str]:
             if w in _STOPWORDS:
                 continue
             counts[w] = counts.get(w, 0) + 1
-        top = [w for w, _ in sorted(counts.items(), key=lambda kv: kv[1], reverse=True)[:6]]
+        top = [
+            w for w, _ in sorted(counts.items(), key=lambda kv: kv[1], reverse=True)[:6]
+        ]
         for w in top:
             if len(questions) >= 3:
                 break
@@ -521,6 +591,7 @@ def derive_questions(text: str, pages: list[ExtractedPage]) -> list[str]:
 
 
 # ────────────────────────── pipeline ──────────────────────────
+
 
 async def process_document(document_id: uuid.UUID) -> None:
     """Run the full pipeline for one document, in its own session.
@@ -622,7 +693,9 @@ async def _run_pipeline(session: AsyncSession, document_id: uuid.UUID) -> None:
             len(chunks),
             embedded,
             int(
-                (doc.processing_completed_at - doc.processing_started_at).total_seconds()
+                (
+                    doc.processing_completed_at - doc.processing_started_at
+                ).total_seconds()
                 * 1000
             ),
         )

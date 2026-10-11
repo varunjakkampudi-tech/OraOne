@@ -5,6 +5,7 @@ policy, (b) the plan's entitlements, and (c) catalogue availability —
 falling back gracefully so inference never dies on a bad/disabled model
 id. Also powers the management view used by the dashboard.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -36,7 +37,9 @@ def _settings(policy: Optional[AIModelPolicy]) -> dict:
 
 
 def _routing_strategy(policy: Optional[AIModelPolicy]) -> str:
-    strat = str(_settings(policy).get("routing_strategy") or DEFAULT_ROUTING_STRATEGY).lower()
+    strat = str(
+        _settings(policy).get("routing_strategy") or DEFAULT_ROUTING_STRATEGY
+    ).lower()
     return strat if strat in ROUTING_STRATEGIES else DEFAULT_ROUTING_STRATEGY
 
 
@@ -75,12 +78,9 @@ def _retrieval(policy: Optional[AIModelPolicy]) -> dict:
     }
 
 
-async def retrieval_config(
-    session: AsyncSession, organization_id: uuid.UUID
-) -> dict:
+async def retrieval_config(session: AsyncSession, organization_id: uuid.UUID) -> dict:
     """The org's hybrid-retrieval / reranker settings."""
     return _retrieval(await get_policy(session, organization_id))
-
 
 
 async def current_month_spend(
@@ -110,9 +110,7 @@ async def get_policy(
     session: AsyncSession, organization_id: uuid.UUID
 ) -> Optional[AIModelPolicy]:
     return await session.scalar(
-        select(AIModelPolicy).where(
-            AIModelPolicy.organization_id == organization_id
-        )
+        select(AIModelPolicy).where(AIModelPolicy.organization_id == organization_id)
     )
 
 
@@ -216,10 +214,7 @@ async def ordered_chain(
     return chain
 
 
-
-async def router_view(
-    session: AsyncSession, organization_id: uuid.UUID
-) -> dict:
+async def router_view(session: AsyncSession, organization_id: uuid.UUID) -> dict:
     """Catalogue annotated with entitlement/enabled state + current policy."""
     plan_code = await _plan_code(session, organization_id)
     policy = await get_or_create_policy(session, organization_id)
@@ -228,12 +223,14 @@ async def router_view(
     models = []
     for m in MODEL_CATALOGUE:
         entitled = is_entitled(m, plan_code)
-        models.append({
-            **m,
-            "entitled": entitled,
-            "enabled": entitled and m["id"] not in disabled,
-            "disabled_by_org": m["id"] in disabled,
-        })
+        models.append(
+            {
+                **m,
+                "entitled": entitled,
+                "enabled": entitled and m["id"] not in disabled,
+                "disabled_by_org": m["id"] in disabled,
+            }
+        )
 
     budget = _monthly_budget(policy)
     spend = await current_month_spend(session, organization_id)
@@ -310,7 +307,8 @@ async def update_policy(
 
     # Disabled list: keep only known model ids.
     clean_disabled = [
-        d for d in (disabled_models or [])
+        d
+        for d in (disabled_models or [])
         if get_model(d) is not None and d != default_model
     ]
 
@@ -325,7 +323,9 @@ async def update_policy(
     # ``monthly_budget_usd`` / ``max_latency_ms``: a value of 0 or None clears.
     budget = None
     try:
-        budget = float(monthly_budget_usd) if monthly_budget_usd not in (None, "") else None
+        budget = (
+            float(monthly_budget_usd) if monthly_budget_usd not in (None, "") else None
+        )
     except (TypeError, ValueError):
         budget = None
     settings["monthly_budget_usd"] = budget if budget and budget > 0 else None

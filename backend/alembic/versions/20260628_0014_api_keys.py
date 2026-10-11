@@ -3,6 +3,7 @@
 Adds the ``api_keys`` table for org-scoped programmatic access. No new enum
 types — ``scopes`` is a JSONB array validated at the application layer.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -23,8 +24,10 @@ def upgrade() -> None:
         "api_keys",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column(
-            "organization_id", postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False,
+            "organization_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("organizations.id", ondelete="CASCADE"),
+            nullable=False,
         ),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("prefix", sa.String(length=40), nullable=False),
@@ -33,18 +36,32 @@ def upgrade() -> None:
         sa.Column("last_used_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column(
-            "created_by_user_id", postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True,
+            "created_by_user_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("users.id", ondelete="SET NULL"),
+            nullable=True,
         ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.UniqueConstraint("prefix", name="uq_api_keys_prefix"),
         if_not_exists=True,
     )
     op.create_index(
-        "ix_api_keys_organization_id", "api_keys",
-        ["organization_id"], if_not_exists=True,
+        "ix_api_keys_organization_id",
+        "api_keys",
+        ["organization_id"],
+        if_not_exists=True,
     )
     op.create_index("ix_api_keys_prefix", "api_keys", ["prefix"], if_not_exists=True)
 

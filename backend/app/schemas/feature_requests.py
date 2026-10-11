@@ -1,4 +1,5 @@
 """Schemas for the feature-request / feedback board."""
+
 from __future__ import annotations
 
 import uuid
@@ -9,7 +10,6 @@ from pydantic import BaseModel, Field
 
 from app.database.models.feature_request import (
     FeatureRequestPriority,
-    FeatureRequestStatus,
     FeatureRequestType,
 )
 

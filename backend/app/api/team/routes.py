@@ -4,6 +4,7 @@ Members + token-based invitations. Read endpoints require ``team.read``;
 mutating endpoints require ``team.manage``. Invite *acceptance* only
 requires authentication (the accepting user may not yet belong to the org).
 """
+
 from __future__ import annotations
 
 import os
@@ -54,7 +55,9 @@ def _invitation_read(inv: OrganizationInvitation, *, with_url: bool) -> Invitati
         role=inv.role.value,
         status=inv.status.value,
         invited_by=invited_by,
-        invite_url=team_service.build_invite_url(_APP_URL, inv.token) if with_url else None,
+        invite_url=team_service.build_invite_url(_APP_URL, inv.token)
+        if with_url
+        else None,
         expires_at=inv.expires_at,
         created_at=inv.created_at,
         accepted_at=inv.accepted_at,
@@ -164,7 +167,9 @@ async def list_invitations(
     return InvitationListResponse(items=items, total=len(items))
 
 
-@router.post("/api/team/invitations", response_model=InviteCreateResponse, status_code=201)
+@router.post(
+    "/api/team/invitations", response_model=InviteCreateResponse, status_code=201
+)
 async def create_invitation(
     body: InviteCreateRequest,
     ctx: OrgContext = Depends(require_permission("team.manage")),

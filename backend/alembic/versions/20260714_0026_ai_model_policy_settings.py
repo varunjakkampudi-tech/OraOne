@@ -7,6 +7,7 @@ to hold the org's routing rules without further schema churn:
 * ``monthly_budget_usd`` — soft monthly spend cap (downgrades to cheapest)
 * ``max_latency_ms`` — drop models slower than this from routing
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union

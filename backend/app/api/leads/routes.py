@@ -4,6 +4,7 @@ All endpoints are organization- + project-scoped (via ``ProjectContext``),
 soft-delete aware and audit-logged. Leads are produced automatically by the
 widget lead-capture endpoint and can also be created/edited manually here.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -35,6 +36,7 @@ router = APIRouter(prefix="/api/leads", tags=["leads"])
 
 
 # ─────────────────────────── helpers ───────────────────────────
+
 
 def _parse_status(value: Optional[str]) -> Optional[LeadStatus]:
     if value is None:
@@ -107,6 +109,7 @@ async def _load(
 
 # ─────────────────────────── routes ────────────────────────────
 
+
 @router.get("", response_model=list[LeadRead], summary="List leads")
 async def list_leads(
     q: Optional[str] = Query(default=None, max_length=200),
@@ -176,14 +179,18 @@ async def lead_stats(
     by_status = dict(
         (
             await session.execute(
-                select(Lead.status, func.count(Lead.id)).where(*base).group_by(Lead.status)
+                select(Lead.status, func.count(Lead.id))
+                .where(*base)
+                .group_by(Lead.status)
             )
         ).all()
     )
     by_temp = dict(
         (
             await session.execute(
-                select(Lead.temperature, func.count(Lead.id)).where(*base).group_by(Lead.temperature)
+                select(Lead.temperature, func.count(Lead.id))
+                .where(*base)
+                .group_by(Lead.temperature)
             )
         ).all()
     )
@@ -215,7 +222,9 @@ async def lead_stats(
 
 
 @router.post(
-    "", response_model=LeadRead, status_code=status.HTTP_201_CREATED,
+    "",
+    response_model=LeadRead,
+    status_code=status.HTTP_201_CREATED,
     summary="Create a lead",
 )
 async def create_lead(
@@ -239,8 +248,10 @@ async def create_lead(
         temperature=_parse_temperature(payload.temperature),
     )
     audit(
-        "create", resource="lead",
-        organization_id=str(pctx.organization_id), user_id=str(pctx.user_id),
+        "create",
+        resource="lead",
+        organization_id=str(pctx.organization_id),
+        user_id=str(pctx.user_id),
         meta={"lead_id": str(lead.id), "source": lead.source},
     )
     await session.commit()
@@ -350,8 +361,10 @@ async def update_lead(
         lead.extra = extra
 
     audit(
-        "update", resource="lead",
-        organization_id=str(pctx.organization_id), user_id=str(pctx.user_id),
+        "update",
+        resource="lead",
+        organization_id=str(pctx.organization_id),
+        user_id=str(pctx.user_id),
         meta={"lead_id": str(lead.id)},
     )
     await session.commit()
@@ -360,7 +373,9 @@ async def update_lead(
 
 
 @router.delete(
-    "/{lead_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete a lead",
+    "/{lead_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a lead",
 )
 async def delete_lead(
     lead_id: uuid.UUID,
@@ -370,8 +385,10 @@ async def delete_lead(
     lead = await _load(session, lead_id=lead_id, organization_id=pctx.organization_id)
     lead.deleted_at = func.now()
     audit(
-        "delete", resource="lead",
-        organization_id=str(pctx.organization_id), user_id=str(pctx.user_id),
+        "delete",
+        resource="lead",
+        organization_id=str(pctx.organization_id),
+        user_id=str(pctx.user_id),
         meta={"lead_id": str(lead.id)},
     )
     await session.commit()

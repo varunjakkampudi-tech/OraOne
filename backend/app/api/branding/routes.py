@@ -7,6 +7,7 @@
 
 Reads require ``settings.read``; updates require ``settings.manage``.
 """
+
 from __future__ import annotations
 
 import io
@@ -52,7 +53,6 @@ def _public_base() -> str:
     return base.rstrip("/")
 
 
-
 @router.get("/api/branding", response_model=BrandingView)
 async def get_branding(
     ctx: OrgContext = Depends(require_permission(Permission.SETTINGS_READ)),
@@ -86,7 +86,10 @@ async def update_branding(
         resource="org_branding",
         organization_id=str(ctx.organization_id),
         user_id=str(ctx.user_id),
-        after={"brand_name": payload.brand_name, "primary_color": payload.primary_color},
+        after={
+            "brand_name": payload.brand_name,
+            "primary_color": payload.primary_color,
+        },
     )
     view = await branding_service.branding_view(session, ctx.organization_id)
     return BrandingView(**view)
@@ -103,7 +106,9 @@ async def _upload_brand_asset(
         )
     body = await file.read()
     if len(body) == 0:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty file.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Empty file."
+        )
     if len(body) > _MAX_ASSET_BYTES:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,

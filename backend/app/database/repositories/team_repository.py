@@ -3,6 +3,7 @@
 All queries are scoped to a single ``organization_id`` to preserve tenant
 isolation.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -111,7 +112,5 @@ class TeamRepository:
         """Token lookup is intentionally NOT org-scoped (the accepting user
         may not yet belong to the org)."""
         return await session.scalar(
-            select(OrganizationInvitation).where(
-                OrganizationInvitation.token == token
-            )
+            select(OrganizationInvitation).where(OrganizationInvitation.token == token)
         )

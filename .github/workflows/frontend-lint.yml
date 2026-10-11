@@ -1,4 +1,4 @@
-name: Frontend lint
+name: Frontend lint and format
 
 on:
   push:
@@ -37,13 +37,57 @@ jobs:
       - name: Apply safe ESLint fixes
         run: npm run lint:fix
 
+      - name: Apply safe formatting fixes
+        run: npm run format
+
       - name: Require auto-fixes to be committed
         run: |
           if ! git diff --quiet -- frontend/src; then
-            echo "ESLint produced safe fixes. Run 'npm run lint:fix' in frontend and commit the result."
+            echo "Lint or formatting produced safe fixes. Run 'npm run lint:fix && npm run format' in frontend and commit the result."
             git diff -- frontend/src
             exit 1
           fi
 
       - name: Run ESLint
         run: npm run lint:check
+
+      - name: Verify formatting
+        run: npm run format:check
+
+  backend-quality:
+    name: Backend lint and format
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+
+      - name: Install locked backend dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Apply safe Ruff fixes and formatting
+        run: |
+          ruff check . --fix
+          ruff format .
+
+      - name: Require auto-fixes to be committed
+        run: |
+          if ! git diff --quiet -- backend; then
+            echo "Ruff produced safe fixes or formatting changes. Run the backend quality commands locally and commit the result."
+            git diff -- backend
+            exit 1
+          fi
+
+      - name: Run strict backend lint and format checks
+        run: |
+          ruff check .
+          ruff format --check .

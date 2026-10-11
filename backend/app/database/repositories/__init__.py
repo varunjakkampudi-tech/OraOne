@@ -11,7 +11,9 @@ Layering:
 from app.database.repositories.base import BaseRepository
 from app.database.repositories.user_repository import UserRepository
 from app.database.repositories.organization_repository import OrganizationRepository
-from app.database.repositories.organization_member_repository import OrganizationMemberRepository
+from app.database.repositories.organization_member_repository import (
+    OrganizationMemberRepository,
+)
 from app.database.repositories.agent_repository import AgentRepository
 from app.database.repositories.conversation_repository import ConversationRepository
 from app.database.repositories.message_repository import MessageRepository

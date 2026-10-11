@@ -16,18 +16,17 @@ These are intentionally conservative heuristics that provide a working safety
 layer today; they can later be augmented with Amazon Comprehend / Bedrock
 Guardrails without changing the call sites.
 """
+
 from __future__ import annotations
 
 import re
 import uuid
-from datetime import datetime, timezone
 from typing import Any, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.operations import (
     SecurityEvent,
-    SecurityEventType,
     SecuritySeverity,
 )
 
@@ -37,12 +36,16 @@ _LUHN_RE = re.compile(r"\b(?:\d[ -]*?){13,19}\b")
 
 PII_PATTERNS: dict[str, re.Pattern] = {
     "email": re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
-    "phone": re.compile(r"\b(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?){2,4}\d{2,4}\b"),
+    "phone": re.compile(
+        r"\b(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?){2,4}\d{2,4}\b"
+    ),
     "ssn": re.compile(r"\b\d{3}-\d{2}-\d{4}\b"),
     "aadhaar": re.compile(r"\b\d{4}\s?\d{4}\s?\d{4}\b"),
     "pan": re.compile(r"\b[A-Z]{5}\d{4}[A-Z]\b"),
     "passport": re.compile(r"\b[A-PR-WYa-pr-wy][1-9]\d{6,7}\b"),
-    "ip_address": re.compile(r"\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b"),
+    "ip_address": re.compile(
+        r"\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b"
+    ),
     "bank_account": re.compile(r"\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b"),
 }
 
@@ -70,13 +73,23 @@ def detect_pii(text: str) -> list[dict[str, Any]]:
     for pii_type, pattern in PII_PATTERNS.items():
         for m in pattern.finditer(text):
             findings.append(
-                {"type": pii_type, "value": m.group(0), "start": m.start(), "end": m.end()}
+                {
+                    "type": pii_type,
+                    "value": m.group(0),
+                    "start": m.start(),
+                    "end": m.end(),
+                }
             )
     # credit cards: regex candidates validated by Luhn
     for m in _LUHN_RE.finditer(text):
         if _luhn_ok(m.group(0)):
             findings.append(
-                {"type": "credit_card", "value": m.group(0), "start": m.start(), "end": m.end()}
+                {
+                    "type": "credit_card",
+                    "value": m.group(0),
+                    "start": m.start(),
+                    "end": m.end(),
+                }
             )
     return findings
 
@@ -98,18 +111,52 @@ def mask_pii(text: str) -> dict[str, Any]:
     out = text
     for f in sorted(findings, key=lambda x: x["start"], reverse=True):
         out = out[: f["start"]] + _mask_value(f["value"]) + out[f["end"] :]
-    redacted = [{"type": f["type"], "start": f["start"], "end": f["end"]} for f in findings]
+    redacted = [
+        {"type": f["type"], "start": f["start"], "end": f["end"]} for f in findings
+    ]
     return {"text": out, "findings": redacted, "masked": True}
 
 
 # ─────────────────────────── prompt injection ───────────────────────────
 INJECTION_PATTERNS: list[tuple[str, re.Pattern]] = [
-    ("instruction_override", re.compile(r"ignore (?:all )?(?:the )?(?:previous|prior|above) (?:instructions|prompts?)", re.I)),
-    ("system_prompt_leak", re.compile(r"(?:reveal|show|print|repeat)(?:\s+me)?\s+(?:your|the)\s+(?:system\s+prompt|instructions|rules)", re.I)),
-    ("role_escape", re.compile(r"you are now (?:a|an|in)\s|developer mode|do anything now|\bDAN\b", re.I)),
-    ("exfiltration", re.compile(r"(?:send|email|post|leak|exfiltrate).{0,30}(?:password|secret|api[_\s-]?key|database|credentials)", re.I)),
-    ("override_guardrails", re.compile(r"(?:disregard|bypass|override).{0,20}(?:safety|guardrails?|filters?|policy)", re.I)),
-    ("prompt_terminator", re.compile(r"</?(?:system|assistant|user)>|\[/?INST\]|###\s*system", re.I)),
+    (
+        "instruction_override",
+        re.compile(
+            r"ignore (?:all )?(?:the )?(?:previous|prior|above) (?:instructions|prompts?)",
+            re.I,
+        ),
+    ),
+    (
+        "system_prompt_leak",
+        re.compile(
+            r"(?:reveal|show|print|repeat)(?:\s+me)?\s+(?:your|the)\s+(?:system\s+prompt|instructions|rules)",
+            re.I,
+        ),
+    ),
+    (
+        "role_escape",
+        re.compile(
+            r"you are now (?:a|an|in)\s|developer mode|do anything now|\bDAN\b", re.I
+        ),
+    ),
+    (
+        "exfiltration",
+        re.compile(
+            r"(?:send|email|post|leak|exfiltrate).{0,30}(?:password|secret|api[_\s-]?key|database|credentials)",
+            re.I,
+        ),
+    ),
+    (
+        "override_guardrails",
+        re.compile(
+            r"(?:disregard|bypass|override).{0,20}(?:safety|guardrails?|filters?|policy)",
+            re.I,
+        ),
+    ),
+    (
+        "prompt_terminator",
+        re.compile(r"</?(?:system|assistant|user)>|\[/?INST\]|###\s*system", re.I),
+    ),
 ]
 
 
@@ -135,7 +182,13 @@ MODERATION_LEXICON: dict[str, list[str]] = {
     "self_harm": ["suicide", "self-harm", "kill myself", "end my life"],
     "adult": ["porn", "explicit sexual", "nsfw"],
     "illegal": ["how to make a bomb", "buy drugs", "counterfeit", "launder money"],
-    "malware": ["ransomware", "keylogger", "rootkit", "sql injection payload", "exploit kit"],
+    "malware": [
+        "ransomware",
+        "keylogger",
+        "rootkit",
+        "sql injection payload",
+        "exploit kit",
+    ],
     "fraud": ["phishing", "steal credit card", "fake invoice", "wire fraud"],
 }
 
@@ -145,19 +198,27 @@ def moderate_content(text: str) -> dict[str, Any]:
     if not text:
         return {"flagged": False, "categories": []}
     low = text.lower()
-    categories = [cat for cat, words in MODERATION_LEXICON.items() if any(w in low for w in words)]
+    categories = [
+        cat for cat, words in MODERATION_LEXICON.items() if any(w in low for w in words)
+    ]
     return {"flagged": bool(categories), "categories": categories}
 
 
 # ─────────────────────────── output validation ───────────────────────────
 SECRET_PATTERNS: dict[str, re.Pattern] = {
     "aws_access_key": re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
-    "aws_secret_key": re.compile(r"\b(?<![A-Za-z0-9/+])[A-Za-z0-9/+]{40}(?![A-Za-z0-9/+])"),
+    "aws_secret_key": re.compile(
+        r"\b(?<![A-Za-z0-9/+])[A-Za-z0-9/+]{40}(?![A-Za-z0-9/+])"
+    ),
     "private_key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
     "bearer_token": re.compile(r"\bBearer\s+[A-Za-z0-9\-._~+/]+=*", re.I),
     "jwt": re.compile(r"\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b"),
-    "internal_url": re.compile(r"https?://(?:localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|169\.254\.\d+\.\d+)"),
-    "connection_string": re.compile(r"\b(?:postgres(?:ql)?|mysql|mongodb)(?:\+\w+)?://[^\s\"']+", re.I),
+    "internal_url": re.compile(
+        r"https?://(?:localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|169\.254\.\d+\.\d+)"
+    ),
+    "connection_string": re.compile(
+        r"\b(?:postgres(?:ql)?|mysql|mongodb)(?:\+\w+)?://[^\s\"']+", re.I
+    ),
 }
 
 
@@ -194,7 +255,11 @@ def scan_text(text: str, *, direction: str = "input") -> dict[str, Any]:
     moderation = moderate_content(text)
     result: dict[str, Any] = {
         "direction": direction,
-        "pii": {"detected": bool(pii), "count": len(pii), "types": sorted({p["type"] for p in pii})},
+        "pii": {
+            "detected": bool(pii),
+            "count": len(pii),
+            "types": sorted({p["type"] for p in pii}),
+        },
         "prompt_injection": injection,
         "moderation": moderation,
     }
@@ -204,13 +269,19 @@ def scan_text(text: str, *, direction: str = "input") -> dict[str, Any]:
         bool(pii)
         or injection["injection"]
         or moderation["flagged"]
-        or (direction == "output" and not result.get("output_validation", {}).get("safe", True))
+        or (
+            direction == "output"
+            and not result.get("output_validation", {}).get("safe", True)
+        )
     )
     result["safe"] = not issues
     # derive a severity for any event this scan triggers
     if injection["injection"] or moderation["flagged"]:
         result["severity"] = SecuritySeverity.HIGH
-    elif pii or (direction == "output" and not result.get("output_validation", {}).get("safe", True)):
+    elif pii or (
+        direction == "output"
+        and not result.get("output_validation", {}).get("safe", True)
+    ):
         result["severity"] = SecuritySeverity.MEDIUM
     else:
         result["severity"] = SecuritySeverity.INFO

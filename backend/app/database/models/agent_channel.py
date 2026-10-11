@@ -4,6 +4,7 @@ Shared omnichannel infrastructure used by the Chat Platform (website widget,
 WhatsApp, SMS, email, API). A single :class:`~app.database.models.agent.Agent`
 can be bound to multiple channels via one ``agent_channels`` row per channel.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -57,10 +58,17 @@ class AgentChannel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("agents.id", ondelete="CASCADE"),
         nullable=False,
     )
-    channel: Mapped[str] = mapped_column(String(20), nullable=False, default=ChannelType.chat)
-    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
+    channel: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=ChannelType.chat
+    )
+    enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default="true"
+    )
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=ChannelStatus.active, server_default=ChannelStatus.active
+        String(20),
+        nullable=False,
+        default=ChannelStatus.active,
+        server_default=ChannelStatus.active,
     )
     # Channel-specific binding (e.g. phone number for SMS/WhatsApp) + free config.
     phone_number: Mapped[Optional[str]] = mapped_column(String(32))

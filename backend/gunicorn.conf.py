@@ -6,6 +6,7 @@ reloads, and a single place to tune concurrency/timeouts for production.
 Docker still owns the container lifecycle (restart policy, health checks);
 Gunicorn owns process-level supervision inside the container.
 """
+
 from __future__ import annotations
 
 import multiprocessing
@@ -32,6 +33,6 @@ max_requests_jitter = int(os.environ.get("GUNICORN_MAX_REQUESTS_JITTER", "200"))
 graceful_timeout = int(os.environ.get("GUNICORN_GRACEFUL_TIMEOUT_SECONDS", "30"))
 keepalive = int(os.environ.get("GUNICORN_KEEPALIVE_SECONDS", "5"))
 
-accesslog = "-"   # stdout — combined with the app's own structured access log
-errorlog = "-"    # stderr
+accesslog = "-"  # stdout — combined with the app's own structured access log
+errorlog = "-"  # stderr
 loglevel = os.environ.get("GUNICORN_LOG_LEVEL", "info")

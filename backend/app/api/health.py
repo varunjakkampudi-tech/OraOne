@@ -1,4 +1,5 @@
 """Health endpoints — liveness, readiness, and database probes."""
+
 from __future__ import annotations
 
 import logging
@@ -75,5 +76,7 @@ async def readiness() -> dict:
             checks["redis"] = f"unreachable: {type(e).__name__}"
 
     if not ready:
-        raise HTTPException(status_code=503, detail={"status": "not_ready", "checks": checks})
+        raise HTTPException(
+            status_code=503, detail={"status": "not_ready", "checks": checks}
+        )
     return {"status": "ready", "checks": checks}

@@ -10,6 +10,7 @@ Usage:
     source .venv/bin/activate
     python scripts/bootstrap_db.py        # then: alembic upgrade head
 """
+
 from __future__ import annotations
 
 import os
@@ -42,8 +43,12 @@ def main() -> int:
 
     # Connect to the default 'postgres' maintenance DB.
     conn = psycopg2.connect(
-        host=host, port=port, user=user, password=password,
-        dbname="postgres", connect_timeout=10,
+        host=host,
+        port=port,
+        user=user,
+        password=password,
+        dbname="postgres",
+        connect_timeout=10,
     )
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 

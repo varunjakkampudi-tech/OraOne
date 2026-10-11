@@ -1,4 +1,5 @@
 """AgentConfig — 1:1 sidecar holding the LLM config + JSONB extras."""
+
 from __future__ import annotations
 
 import uuid
@@ -16,9 +17,7 @@ if TYPE_CHECKING:
 
 class AgentConfig(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "agent_configs"
-    __table_args__ = (
-        UniqueConstraint("agent_id", name="uq_agent_configs_agent"),
-    )
+    __table_args__ = (UniqueConstraint("agent_id", name="uq_agent_configs_agent"),)
 
     agent_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),

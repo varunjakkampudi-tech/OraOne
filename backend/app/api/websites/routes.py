@@ -20,18 +20,32 @@ Endpoints
 Crawling runs in a FastAPI background task; the job row is polled by the
 UI for live progress. Every URL is SSRF-validated before registration.
 """
+
 from __future__ import annotations
 
 import uuid
 from typing import Optional
 from urllib.parse import urlparse
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Query,
+    Response,
+    status,
+)
 from sqlalchemy import asc, desc, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.crawl_frontier import CrawlFrontier, FrontierStatus
-from app.database.models.crawl_job import CrawlJob, CrawlJobStatus, CrawlLog, CrawlTrigger
+from app.database.models.crawl_job import (
+    CrawlJob,
+    CrawlJobStatus,
+    CrawlLog,
+    CrawlTrigger,
+)
 from app.database.models.document_chunk import DocumentChunk
 from app.database.models.knowledge_base import KnowledgeBase
 from app.database.models.website import (
@@ -42,7 +56,11 @@ from app.database.models.website import (
 )
 from app.database.models.website_page import PageStatus, WebsitePage
 from app.database.session import get_db
-from app.middleware.org_context import OrgContext, get_current_organization, require_role
+from app.middleware.org_context import (
+    OrgContext,
+    get_current_organization,
+    require_role,
+)
 from app.middleware.project_context import ProjectContext, get_current_project
 from app.schemas.website import (
     CrawlJobListResponse,
@@ -66,6 +84,7 @@ router = APIRouter(tags=["websites"])
 
 # ─────────────────── helpers ───────────────────
 
+
 def _validate_choice(value, allowed: set, field: str):
     if value is not None and value not in allowed:
         raise HTTPException(
@@ -74,7 +93,9 @@ def _validate_choice(value, allowed: set, field: str):
         )
 
 
-async def _website_for_org(session, *, website_id, organization_id) -> Optional[Website]:
+async def _website_for_org(
+    session, *, website_id, organization_id
+) -> Optional[Website]:
     return await session.scalar(
         select(Website)
         .where(Website.id == website_id)
@@ -116,6 +137,7 @@ async def _start_crawl(
 
 # ─────────────────── Websites CRUD ───────────────────
 
+
 @router.post(
     "/api/websites",
     response_model=WebsiteRead,
@@ -136,11 +158,17 @@ async def create_website(
     try:
         base_url = validate_url(payload.base_url)
     except URLValidationError as e:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)) from e
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
+        ) from e
 
-    kb = await _kb_for_org(session, kb_id=payload.knowledge_base_id, organization_id=ctx.organization_id)
+    kb = await _kb_for_org(
+        session, kb_id=payload.knowledge_base_id, organization_id=ctx.organization_id
+    )
     if kb is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Knowledge base not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Knowledge base not found."
+        )
 
     name = (payload.name or "").strip() or (urlparse(base_url).hostname or base_url)
     website = Website(
@@ -183,7 +211,9 @@ async def create_website(
     return WebsiteRead.model_validate(website)
 
 
-@router.get("/api/websites", response_model=WebsiteListResponse, summary="List websites")
+@router.get(
+    "/api/websites", response_model=WebsiteListResponse, summary="List websites"
+)
 async def list_websites(
     q: Optional[str] = Query(default=None, max_length=200),
     status_: Optional[str] = Query(default=None, alias="status"),
@@ -208,9 +238,13 @@ async def list_websites(
     if knowledge_base_id:
         base = base.where(Website.knowledge_base_id == knowledge_base_id)
 
-    total = int(await session.scalar(select(func.count()).select_from(base.subquery())) or 0)
+    total = int(
+        await session.scalar(select(func.count()).select_from(base.subquery())) or 0
+    )
     rows = (
-        await session.scalars(base.order_by(desc(Website.created_at)).limit(limit).offset(offset))
+        await session.scalars(
+            base.order_by(desc(Website.created_at)).limit(limit).offset(offset)
+        )
     ).all()
     return WebsiteListResponse(
         items=[WebsiteRead.model_validate(w) for w in rows],
@@ -220,28 +254,40 @@ async def list_websites(
     )
 
 
-@router.get("/api/websites/{website_id}", response_model=WebsiteRead, summary="Get a website")
+@router.get(
+    "/api/websites/{website_id}", response_model=WebsiteRead, summary="Get a website"
+)
 async def get_website(
     website_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> WebsiteRead:
-    website = await _website_for_org(session, website_id=website_id, organization_id=ctx.organization_id)
+    website = await _website_for_org(
+        session, website_id=website_id, organization_id=ctx.organization_id
+    )
     if website is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Website not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Website not found."
+        )
     return WebsiteRead.model_validate(website)
 
 
-@router.put("/api/websites/{website_id}", response_model=WebsiteRead, summary="Update a website")
+@router.put(
+    "/api/websites/{website_id}", response_model=WebsiteRead, summary="Update a website"
+)
 async def update_website(
     website_id: uuid.UUID,
     payload: WebsiteUpdate,
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> WebsiteRead:
-    website = await _website_for_org(session, website_id=website_id, organization_id=ctx.organization_id)
+    website = await _website_for_org(
+        session, website_id=website_id, organization_id=ctx.organization_id
+    )
     if website is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Website not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Website not found."
+        )
 
     _validate_choice(payload.crawl_mode, CrawlMode.ALL, "crawl_mode")
     _validate_choice(payload.crawl_frequency, CrawlFrequency.ALL, "crawl_frequency")
@@ -273,15 +319,21 @@ async def delete_website(
     ctx: OrgContext = Depends(require_role("owner", "admin")),
     session: AsyncSession = Depends(get_db),
 ) -> Response:
-    website = await _website_for_org(session, website_id=website_id, organization_id=ctx.organization_id)
+    website = await _website_for_org(
+        session, website_id=website_id, organization_id=ctx.organization_id
+    )
     if website is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Website not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Website not found."
+        )
 
     from datetime import datetime, timezone
 
     # remove the website's chunks from search, then soft-delete
     page_ids = (
-        await session.scalars(select(WebsitePage.id).where(WebsitePage.website_id == website.id))
+        await session.scalars(
+            select(WebsitePage.id).where(WebsitePage.website_id == website.id)
+        )
     ).all()
     if page_ids:
         from sqlalchemy import delete as sa_delete
@@ -305,23 +357,38 @@ async def delete_website(
 
 # ─────────────────── crawl control ───────────────────
 
-@router.post("/api/websites/{website_id}/crawl", response_model=CrawlJobRead, summary="Start a crawl")
+
+@router.post(
+    "/api/websites/{website_id}/crawl",
+    response_model=CrawlJobRead,
+    summary="Start a crawl",
+)
 async def crawl_website(
     website_id: uuid.UUID,
     background: BackgroundTasks,
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> CrawlJobRead:
-    website = await _website_for_org(session, website_id=website_id, organization_id=ctx.organization_id)
+    website = await _website_for_org(
+        session, website_id=website_id, organization_id=ctx.organization_id
+    )
     if website is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Website not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Website not found."
+        )
     if website.status == WebsiteStatus.crawling:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="A crawl is already running.")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="A crawl is already running."
+        )
     job = await _start_crawl(session, website, background)
     return CrawlJobRead.model_validate(job)
 
 
-@router.post("/api/websites/{website_id}/recrawl", response_model=CrawlJobRead, summary="Force re-crawl")
+@router.post(
+    "/api/websites/{website_id}/recrawl",
+    response_model=CrawlJobRead,
+    summary="Force re-crawl",
+)
 async def recrawl_website(
     website_id: uuid.UUID,
     background: BackgroundTasks,
@@ -331,15 +398,23 @@ async def recrawl_website(
     return await crawl_website(website_id, background, ctx, session)
 
 
-@router.post("/api/websites/{website_id}/pause", response_model=WebsiteRead, summary="Pause a website")
+@router.post(
+    "/api/websites/{website_id}/pause",
+    response_model=WebsiteRead,
+    summary="Pause a website",
+)
 async def pause_website(
     website_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> WebsiteRead:
-    website = await _website_for_org(session, website_id=website_id, organization_id=ctx.organization_id)
+    website = await _website_for_org(
+        session, website_id=website_id, organization_id=ctx.organization_id
+    )
     if website is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Website not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Website not found."
+        )
     website.status = WebsiteStatus.paused
     website.next_crawl_at = None
     # Signal any in-flight crawl to stop cooperatively (frontier is preserved
@@ -355,16 +430,24 @@ async def pause_website(
     return WebsiteRead.model_validate(website)
 
 
-@router.post("/api/websites/{website_id}/resume", response_model=WebsiteRead, summary="Resume a website")
+@router.post(
+    "/api/websites/{website_id}/resume",
+    response_model=WebsiteRead,
+    summary="Resume a website",
+)
 async def resume_website(
     website_id: uuid.UUID,
     background: BackgroundTasks,
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> WebsiteRead:
-    website = await _website_for_org(session, website_id=website_id, organization_id=ctx.organization_id)
+    website = await _website_for_org(
+        session, website_id=website_id, organization_id=ctx.organization_id
+    )
     if website is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Website not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Website not found."
+        )
 
     # If a paused job still has un-fetched URLs in its frontier, resume it in
     # place rather than starting a fresh crawl.
@@ -379,7 +462,11 @@ async def resume_website(
             select(func.count())
             .select_from(CrawlFrontier)
             .where(CrawlFrontier.job_id == paused_job.id)
-            .where(CrawlFrontier.status.in_((FrontierStatus.pending, FrontierStatus.claimed)))
+            .where(
+                CrawlFrontier.status.in_(
+                    (FrontierStatus.pending, FrontierStatus.claimed)
+                )
+            )
         )
         if pending:
             paused_job.status = CrawlJobStatus.queued
@@ -390,35 +477,52 @@ async def resume_website(
             background.add_task(run_crawl, paused_job.id)
             return WebsiteRead.model_validate(website)
 
-    website.status = WebsiteStatus.ready if website.pages_count else WebsiteStatus.pending
+    website.status = (
+        WebsiteStatus.ready if website.pages_count else WebsiteStatus.pending
+    )
     await session.commit()
     await session.refresh(website)
     return WebsiteRead.model_validate(website)
 
 
-@router.post("/api/websites/{website_id}/cancel", response_model=WebsiteRead, summary="Cancel a running crawl")
+@router.post(
+    "/api/websites/{website_id}/cancel",
+    response_model=WebsiteRead,
+    summary="Cancel a running crawl",
+)
 async def cancel_website(
     website_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> WebsiteRead:
-    website = await _website_for_org(session, website_id=website_id, organization_id=ctx.organization_id)
+    website = await _website_for_org(
+        session, website_id=website_id, organization_id=ctx.organization_id
+    )
     if website is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Website not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Website not found."
+        )
     # Stop the active crawl; the engine drains and finalises as cancelled.
     await session.execute(
         update(CrawlJob)
         .where(CrawlJob.website_id == website.id)
-        .where(CrawlJob.status.in_((CrawlJobStatus.queued, CrawlJobStatus.crawling, CrawlJobStatus.paused)))
+        .where(
+            CrawlJob.status.in_(
+                (CrawlJobStatus.queued, CrawlJobStatus.crawling, CrawlJobStatus.paused)
+            )
+        )
         .values(status=CrawlJobStatus.cancelled)
     )
-    website.status = WebsiteStatus.ready if website.pages_count else WebsiteStatus.pending
+    website.status = (
+        WebsiteStatus.ready if website.pages_count else WebsiteStatus.pending
+    )
     await session.commit()
     await session.refresh(website)
     return WebsiteRead.model_validate(website)
 
 
 # ─────────────────── pages ───────────────────
+
 
 @router.get(
     "/api/websites/{website_id}/pages",
@@ -434,9 +538,13 @@ async def list_pages(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> WebsitePageListResponse:
-    website = await _website_for_org(session, website_id=website_id, organization_id=ctx.organization_id)
+    website = await _website_for_org(
+        session, website_id=website_id, organization_id=ctx.organization_id
+    )
     if website is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Website not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Website not found."
+        )
     base = (
         select(WebsitePage)
         .where(WebsitePage.website_id == website.id)
@@ -444,12 +552,20 @@ async def list_pages(
     )
     if q:
         like = f"%{q}%"
-        base = base.where(or_(WebsitePage.url.ilike(like), WebsitePage.title.ilike(like)))
+        base = base.where(
+            or_(WebsitePage.url.ilike(like), WebsitePage.title.ilike(like))
+        )
     if classification:
         base = base.where(WebsitePage.classification == classification)
-    total = int(await session.scalar(select(func.count()).select_from(base.subquery())) or 0)
+    total = int(
+        await session.scalar(select(func.count()).select_from(base.subquery())) or 0
+    )
     rows = (
-        await session.scalars(base.order_by(asc(WebsitePage.depth), asc(WebsitePage.url)).limit(limit).offset(offset))
+        await session.scalars(
+            base.order_by(asc(WebsitePage.depth), asc(WebsitePage.url))
+            .limit(limit)
+            .offset(offset)
+        )
     ).all()
     return WebsitePageListResponse(
         items=[WebsitePageRead.model_validate(p) for p in rows],
@@ -470,20 +586,27 @@ async def get_page(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> WebsitePageDetail:
-    website = await _website_for_org(session, website_id=website_id, organization_id=ctx.organization_id)
+    website = await _website_for_org(
+        session, website_id=website_id, organization_id=ctx.organization_id
+    )
     if website is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Website not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Website not found."
+        )
     page = await session.scalar(
         select(WebsitePage)
         .where(WebsitePage.id == page_id)
         .where(WebsitePage.website_id == website.id)
     )
     if page is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Page not found."
+        )
     return WebsitePageDetail.model_validate(page)
 
 
 # ─────────────────── jobs & logs ───────────────────
+
 
 @router.get(
     "/api/websites/{website_id}/jobs",
@@ -497,13 +620,21 @@ async def list_jobs(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> CrawlJobListResponse:
-    website = await _website_for_org(session, website_id=website_id, organization_id=ctx.organization_id)
+    website = await _website_for_org(
+        session, website_id=website_id, organization_id=ctx.organization_id
+    )
     if website is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Website not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Website not found."
+        )
     base = select(CrawlJob).where(CrawlJob.website_id == website.id)
-    total = int(await session.scalar(select(func.count()).select_from(base.subquery())) or 0)
+    total = int(
+        await session.scalar(select(func.count()).select_from(base.subquery())) or 0
+    )
     rows = (
-        await session.scalars(base.order_by(desc(CrawlJob.created_at)).limit(limit).offset(offset))
+        await session.scalars(
+            base.order_by(desc(CrawlJob.created_at)).limit(limit).offset(offset)
+        )
     ).all()
     return CrawlJobListResponse(
         items=[CrawlJobRead.model_validate(j) for j in rows],
@@ -526,9 +657,13 @@ async def list_job_logs(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> CrawlLogListResponse:
-    website = await _website_for_org(session, website_id=website_id, organization_id=ctx.organization_id)
+    website = await _website_for_org(
+        session, website_id=website_id, organization_id=ctx.organization_id
+    )
     if website is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Website not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Website not found."
+        )
     base = (
         select(CrawlLog)
         .where(CrawlLog.job_id == job_id)
@@ -536,8 +671,12 @@ async def list_job_logs(
     )
     if level:
         base = base.where(CrawlLog.level == level)
-    total = int(await session.scalar(select(func.count()).select_from(base.subquery())) or 0)
-    rows = (await session.scalars(base.order_by(asc(CrawlLog.created_at)).limit(limit))).all()
+    total = int(
+        await session.scalar(select(func.count()).select_from(base.subquery())) or 0
+    )
+    rows = (
+        await session.scalars(base.order_by(asc(CrawlLog.created_at)).limit(limit))
+    ).all()
     return CrawlLogListResponse(
         items=[CrawlLogRead.model_validate(x) for x in rows],
         total=total,
@@ -545,6 +684,7 @@ async def list_job_logs(
 
 
 # ─────────────────── analytics ───────────────────
+
 
 @router.get(
     "/api/websites/{website_id}/analytics",
@@ -556,9 +696,13 @@ async def website_analytics(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> WebsiteAnalytics:
-    website = await _website_for_org(session, website_id=website_id, organization_id=ctx.organization_id)
+    website = await _website_for_org(
+        session, website_id=website_id, organization_id=ctx.organization_id
+    )
     if website is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Website not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Website not found."
+        )
 
     indexed = int(
         await session.scalar(

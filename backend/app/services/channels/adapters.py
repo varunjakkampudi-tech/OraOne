@@ -10,6 +10,7 @@ The AI itself lives entirely in :mod:`app.services.omnichannel_service`
 (identity + memory + RAG), so adapters never touch model logic. New channels
 are added by writing one small adapter and registering it here.
 """
+
 from __future__ import annotations
 
 import logging
@@ -30,12 +31,12 @@ _HTTP_TIMEOUT = 15.0
 class ParsedInbound:
     """Provider-agnostic view of one inbound message + routing hints."""
 
-    channel: str                       # "whatsapp" | "sms" | "telegram" | …
-    provider: str                      # "twilio" | "telegram" | "meta" | …
+    channel: str  # "whatsapp" | "sms" | "telegram" | …
+    provider: str  # "twilio" | "telegram" | "meta" | …
     text: str
     # Routing hints — used to find the AgentChannel binding.
-    to_address: Optional[str] = None   # business number / page id / inbox
-    bot_token: Optional[str] = None    # telegram bot token (path-based routing)
+    to_address: Optional[str] = None  # business number / page id / inbox
+    bot_token: Optional[str] = None  # telegram bot token (path-based routing)
     route_value: Optional[str] = None  # generic value matched in configuration
     # Sender identity (whichever the channel knows).
     name: Optional[str] = None
@@ -44,7 +45,7 @@ class ParsedInbound:
     handle: Optional[str] = None
     external_id: Optional[str] = None
     external_thread_id: Optional[str] = None
-    reply_to: Optional[str] = None     # where to send the reply (chat id, number)
+    reply_to: Optional[str] = None  # where to send the reply (chat id, number)
     meta: dict[str, Any] = field(default_factory=dict)
 
 
@@ -72,6 +73,7 @@ class ChannelAdapter:
 
 
 # ─────────────────────────────── Twilio (WhatsApp + SMS) ──────────────────────
+
 
 class TwilioMessagingAdapter(ChannelAdapter):
     provider = "twilio"
@@ -120,7 +122,9 @@ class TwilioMessagingAdapter(ChannelAdapter):
             async with httpx.AsyncClient(timeout=_HTTP_TIMEOUT) as client:
                 resp = await client.post(url, data=data, auth=(sid, token))
             if resp.status_code >= 400:
-                log.warning("twilio send failed %s: %s", resp.status_code, resp.text[:200])
+                log.warning(
+                    "twilio send failed %s: %s", resp.status_code, resp.text[:200]
+                )
                 return False
             return True
         except Exception as e:  # noqa: BLE001
@@ -129,6 +133,7 @@ class TwilioMessagingAdapter(ChannelAdapter):
 
 
 # ─────────────────────────────── Telegram ────────────────────────────────────
+
 
 class TelegramAdapter(ChannelAdapter):
     provider = "telegram"
@@ -177,6 +182,7 @@ class TelegramAdapter(ChannelAdapter):
 
 # ─────────────────────────────── Email ───────────────────────────────────────
 
+
 class EmailAdapter(ChannelAdapter):
     """Generic inbound-email webhook (SendGrid/SES/Mailgun-style JSON or form).
 
@@ -192,7 +198,9 @@ class EmailAdapter(ChannelAdapter):
         data = json or form or {}
         sender = data.get("from") or data.get("sender") or ""
         to_addr = data.get("to") or data.get("recipient") or ""
-        text = (data.get("text") or data.get("body-plain") or data.get("body") or "").strip()
+        text = (
+            data.get("text") or data.get("body-plain") or data.get("body") or ""
+        ).strip()
         subject = data.get("subject") or ""
         if not sender or not text:
             return None
@@ -216,6 +224,7 @@ class EmailAdapter(ChannelAdapter):
 
 
 # ─────────────────────────────── SDK (mobile/desktop) ─────────────────────────
+
 
 class SdkAdapter(ChannelAdapter):
     """Native mobile/desktop SDK — request carries identity inline and the
@@ -243,7 +252,11 @@ class SdkAdapter(ChannelAdapter):
             phone=user.get("phone"),
             external_id=user.get("id") or user.get("device_id"),
             external_thread_id=data.get("session_id"),
-            meta={k: v for k, v in user.items() if k not in ("name", "email", "phone", "id")},
+            meta={
+                k: v
+                for k, v in user.items()
+                if k not in ("name", "email", "phone", "id")
+            },
         )
 
     async def send(self, *, binding, parsed, text):

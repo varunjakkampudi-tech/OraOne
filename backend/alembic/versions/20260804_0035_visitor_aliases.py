@@ -5,6 +5,7 @@ created on different channels (a browser token vs. a phone number) can be
 folded into ONE identity without ever duplicating the visitor. Lookups match
 ``visitor_key = key OR aliases @> [key]``.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union

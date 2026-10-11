@@ -4,6 +4,7 @@ Twilio credentials are used by the omnichannel adapters (WhatsApp / SMS) to
 send outbound replies. Optional at import time so the server still boots
 without messaging credentials configured; adapters degrade gracefully.
 """
+
 from __future__ import annotations
 
 import os

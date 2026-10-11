@@ -3,6 +3,7 @@
 Adds the ``feature_requests`` table backing the in-product feedback board where
 customers submit ideas, report bugs and upvote what matters to them.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -25,15 +26,31 @@ def upgrade() -> None:
         sa.Column("organization_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("author_name", sa.String(length=160), nullable=True),
-        sa.Column("type", sa.String(length=20), nullable=False, server_default="feature"),
-        sa.Column("status", sa.String(length=20), nullable=False, server_default="open"),
+        sa.Column(
+            "type", sa.String(length=20), nullable=False, server_default="feature"
+        ),
+        sa.Column(
+            "status", sa.String(length=20), nullable=False, server_default="open"
+        ),
         sa.Column("title", sa.String(length=255), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column("votes", sa.Integer(), nullable=False, server_default="1"),
         sa.Column("voter_ids", postgresql.JSONB(), nullable=False, server_default="[]"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.ForeignKeyConstraint(["organization_id"], ["organizations.id"], ondelete="CASCADE"),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["organization_id"], ["organizations.id"], ondelete="CASCADE"
+        ),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="SET NULL"),
     )
     op.create_index("ix_feature_requests_org", "feature_requests", ["organization_id"])

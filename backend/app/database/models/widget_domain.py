@@ -5,6 +5,7 @@ only initialise and answer on origins registered here. An empty allow-list
 means the widget is unrestricted (useful in draft/dev), but publishing a
 widget for production should always pin its domains.
 """
+
 from __future__ import annotations
 
 import uuid

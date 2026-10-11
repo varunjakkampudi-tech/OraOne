@@ -8,6 +8,7 @@ These are management endpoints used by the in-app dashboard and are gated
 by the RBAC permissions ``apikeys.read`` / ``apikeys.manage``. The external
 programmatic surface authenticated *by* API keys lives under ``/api/v1``.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -39,7 +40,9 @@ async def list_api_keys(
     pctx: ProjectContext = Depends(get_current_project),
     session: AsyncSession = Depends(get_db),
 ) -> ApiKeyListResponse:
-    keys = await api_key_service.list_keys(session, ctx.organization_id, pctx.project_id)
+    keys = await api_key_service.list_keys(
+        session, ctx.organization_id, pctx.project_id
+    )
     return ApiKeyListResponse(
         keys=[ApiKeyOut.model_validate(k) for k in keys],
         scopes=[ScopeOption(**s) for s in scope_catalogue()],

@@ -9,6 +9,7 @@ duration_ms, user_id, organization_id. Replaces the hand-rolled
 ``configure_logging()`` is idempotent — safe to call multiple times (e.g.
 once from server.py, once from a test fixture) without duplicating handlers.
 """
+
 from __future__ import annotations
 
 import logging
@@ -32,7 +33,9 @@ def configure_logging() -> None:
     # JSON in anything that looks like a real deployment; a human-readable
     # console renderer for local dev (nicer to read while hacking).
     is_dev = os.environ.get("ENVIRONMENT", "development").strip().lower() not in (
-        "production", "prod", "staging",
+        "production",
+        "prod",
+        "staging",
     )
 
     shared_processors = [

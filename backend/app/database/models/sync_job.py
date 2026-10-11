@@ -4,6 +4,7 @@ Each manual or scheduled sync creates a ``sync_jobs`` row so the UI can
 show history, progress, and failures. ``documents_synced`` counts how
 many remote documents were imported/updated in this run.
 """
+
 from __future__ import annotations
 
 import enum

@@ -10,11 +10,12 @@ Concrete providers live alongside this module:
 * :class:`~app.providers.openai_provider.OpenAIProvider`
 * :class:`~app.providers.mock_provider.MockProvider`  (offline / no-key dev)
 """
+
 from __future__ import annotations
 
 import abc
 from dataclasses import dataclass, field
-from typing import AsyncIterator, Optional
+from typing import AsyncIterator
 
 
 @dataclass

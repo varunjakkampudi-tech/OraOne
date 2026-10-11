@@ -10,6 +10,7 @@ This is a deliberate, one-way product removal rather than a reversible schema
 tweak: ``downgrade()`` does not attempt to resurrect Voice Platform data. If a
 rollback is ever required, restore from a pre-migration database backup.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union

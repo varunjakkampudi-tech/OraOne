@@ -6,6 +6,7 @@ the browser so conversations persist across reloads. ``user_context`` holds
 the non-sensitive identity/page context the host page passed via
 ``OraOne.init({...})`` (name, email, plan, current URL, …).
 """
+
 from __future__ import annotations
 
 import uuid

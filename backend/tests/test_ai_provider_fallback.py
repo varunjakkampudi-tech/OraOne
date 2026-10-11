@@ -1,4 +1,5 @@
 """AI provider resilience — provider outages must surface, not fabricate data."""
+
 from __future__ import annotations
 
 import pytest
@@ -32,7 +33,9 @@ async def test_generate_reply_surfaces_provider_error_when_chain_exhausted(monke
     monkeypatch.setattr(runtime, "_route_chain", _fake_route_chain)
 
     with pytest.raises(AIProviderError, match="simulated provider outage"):
-        await runtime.generate_reply(agent=None, messages=[ChatMessage(role="user", content="hi")])
+        await runtime.generate_reply(
+            agent=None, messages=[ChatMessage(role="user", content="hi")]
+        )
 
 
 def test_mock_provider_is_forbidden_in_production(monkeypatch):

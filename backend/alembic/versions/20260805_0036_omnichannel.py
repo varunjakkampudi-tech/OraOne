@@ -7,6 +7,7 @@ thread can carry SMS, email, social DMs, team chat and the mobile/desktop SDKs.
 Only new enum *values* are added (no value is used in this migration), which
 PostgreSQL 12+ permits inside the normal Alembic transaction.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -35,9 +36,7 @@ _NEW_VALUES = [
 
 def upgrade() -> None:
     for value in _NEW_VALUES:
-        op.execute(
-            f"ALTER TYPE conversation_channel ADD VALUE IF NOT EXISTS '{value}'"
-        )
+        op.execute(f"ALTER TYPE conversation_channel ADD VALUE IF NOT EXISTS '{value}'")
 
 
 def downgrade() -> None:

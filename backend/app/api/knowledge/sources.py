@@ -13,6 +13,7 @@ Both reuse the *exact* same downstream pipeline as file upload: we persist a
 Security: the website fetcher is SSRF-guarded — only ``http``/``https`` public
 hosts are allowed; loopback, private, link-local and reserved IPs are rejected.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -42,13 +43,26 @@ _MAX_FETCH_BYTES = 5 * 1024 * 1024  # 5 MB cap on a fetched page
 _FETCH_TIMEOUT = 15.0
 
 SOURCE_TYPES = [
-    {"value": "file", "label": "File upload", "description": "PDF, DOCX, TXT, CSV, XLSX, PPTX, MD."},
-    {"value": "website", "label": "Website URL", "description": "Crawl a public web page into the knowledge base."},
-    {"value": "text", "label": "Text / FAQ", "description": "Paste raw text or Q&A content directly."},
+    {
+        "value": "file",
+        "label": "File upload",
+        "description": "PDF, DOCX, TXT, CSV, XLSX, PPTX, MD.",
+    },
+    {
+        "value": "website",
+        "label": "Website URL",
+        "description": "Crawl a public web page into the knowledge base.",
+    },
+    {
+        "value": "text",
+        "label": "Text / FAQ",
+        "description": "Paste raw text or Q&A content directly.",
+    },
 ]
 
 
 # ─────────────────────────────── schemas ─────────────────────────────────────
+
 
 class WebsiteSourceIn(BaseModel):
     knowledge_base_id: uuid.UUID
@@ -64,6 +78,7 @@ class TextSourceIn(BaseModel):
 
 
 # ─────────────────────────────── helpers ─────────────────────────────────────
+
 
 def _guard_public_url(raw: str) -> str:
     """Validate a URL is a public http(s) endpoint (SSRF protection)."""
@@ -83,7 +98,9 @@ async def _fetch_public_page(raw_url: str) -> tuple[str, str, bytes]:
     unbounded body before the size cap is enforced.
     """
     current = _guard_public_url(raw_url)
-    async with httpx.AsyncClient(follow_redirects=False, timeout=_FETCH_TIMEOUT) as client:
+    async with httpx.AsyncClient(
+        follow_redirects=False, timeout=_FETCH_TIMEOUT
+    ) as client:
         for _ in range(5):
             try:
                 async with client.stream(
@@ -92,35 +109,55 @@ async def _fetch_public_page(raw_url: str) -> tuple[str, str, bytes]:
                     if resp.status_code in {301, 302, 303, 307, 308}:
                         location = resp.headers.get("location")
                         if not location:
-                            raise HTTPException(status_code=502, detail="Redirect response has no location.")
+                            raise HTTPException(
+                                status_code=502,
+                                detail="Redirect response has no location.",
+                            )
                         try:
                             current = validate_url(urljoin(current, location))
                         except URLValidationError as exc:
-                            raise HTTPException(status_code=422, detail=str(exc)) from exc
+                            raise HTTPException(
+                                status_code=422, detail=str(exc)
+                            ) from exc
                         continue
 
                     resp.raise_for_status()
                     content_length = resp.headers.get("content-length")
                     if content_length and int(content_length) > _MAX_FETCH_BYTES:
-                        raise HTTPException(status_code=413, detail="The page is too large to ingest.")
+                        raise HTTPException(
+                            status_code=413, detail="The page is too large to ingest."
+                        )
 
                     chunks: list[bytes] = []
                     total = 0
                     async for chunk in resp.aiter_bytes():
                         total += len(chunk)
                         if total > _MAX_FETCH_BYTES:
-                            raise HTTPException(status_code=413, detail="The page is too large to ingest.")
+                            raise HTTPException(
+                                status_code=413,
+                                detail="The page is too large to ingest.",
+                            )
                         chunks.append(chunk)
-                    return current, resp.headers.get("content-type", "text/html"), b"".join(chunks)
+                    return (
+                        current,
+                        resp.headers.get("content-type", "text/html"),
+                        b"".join(chunks),
+                    )
             except HTTPException:
                 raise
             except (httpx.HTTPError, ValueError) as exc:
-                raise HTTPException(status_code=502, detail="Could not fetch the page safely.") from exc
+                raise HTTPException(
+                    status_code=502, detail="Could not fetch the page safely."
+                ) from exc
 
-    raise HTTPException(status_code=502, detail="Too many redirects while fetching the page.")
+    raise HTTPException(
+        status_code=502, detail="Too many redirects while fetching the page."
+    )
 
 
-async def _kb_for_org(session: AsyncSession, *, kb_id: uuid.UUID, organization_id: uuid.UUID) -> KnowledgeBase:
+async def _kb_for_org(
+    session: AsyncSession, *, kb_id: uuid.UUID, organization_id: uuid.UUID
+) -> KnowledgeBase:
     kb = await session.scalar(
         select(KnowledgeBase)
         .where(KnowledgeBase.id == kb_id)
@@ -132,7 +169,13 @@ async def _kb_for_org(session: AsyncSession, *, kb_id: uuid.UUID, organization_i
     return kb
 
 
-async def _validate_folder(session: AsyncSession, *, folder_id: Optional[uuid.UUID], kb: KnowledgeBase, organization_id: uuid.UUID) -> None:
+async def _validate_folder(
+    session: AsyncSession,
+    *,
+    folder_id: Optional[uuid.UUID],
+    kb: KnowledgeBase,
+    organization_id: uuid.UUID,
+) -> None:
     if folder_id is None:
         return
     folder = await session.scalar(
@@ -169,7 +212,9 @@ async def _ingest(
         .where(Document.deleted_at.is_(None))
     )
     if dup is not None:
-        return DocumentRead.model_validate({**dup.__dict__, "chunk_count": 0, "embedded_count": 0})
+        return DocumentRead.model_validate(
+            {**dup.__dict__, "chunk_count": 0, "embedded_count": 0}
+        )
 
     from io import BytesIO
 
@@ -197,15 +242,21 @@ async def _ingest(
     await session.refresh(doc)
 
     audit(
-        "create", resource="document", resource_id=str(doc.id),
-        organization_id=str(organization_id), user_id=str(user_id),
+        "create",
+        resource="document",
+        resource_id=str(doc.id),
+        organization_id=str(organization_id),
+        user_id=str(user_id),
         after={"filename": filename, "source": source, "source_ref": source_ref},
     )
     background_tasks.add_task(process_document, doc.id)
-    return DocumentRead.model_validate({**doc.__dict__, "chunk_count": 0, "embedded_count": 0})
+    return DocumentRead.model_validate(
+        {**doc.__dict__, "chunk_count": 0, "embedded_count": 0}
+    )
 
 
 # ─────────────────────────────── routes ──────────────────────────────────────
+
 
 @router.get("/api/knowledge/sources/types")
 async def list_source_types(
@@ -226,8 +277,12 @@ async def ingest_website(
     session: AsyncSession = Depends(get_db),
 ) -> DocumentRead:
     url = _guard_public_url(payload.url)
-    kb = await _kb_for_org(session, kb_id=payload.knowledge_base_id, organization_id=ctx.organization_id)
-    await _validate_folder(session, folder_id=payload.folder_id, kb=kb, organization_id=ctx.organization_id)
+    kb = await _kb_for_org(
+        session, kb_id=payload.knowledge_base_id, organization_id=ctx.organization_id
+    )
+    await _validate_folder(
+        session, folder_id=payload.folder_id, kb=kb, organization_id=ctx.organization_id
+    )
 
     final_url, response_content_type, body = await _fetch_public_page(url)
 
@@ -241,9 +296,17 @@ async def ingest_website(
     filename = f"{host}.html" if content_type == "text/html" else f"{host}.txt"
 
     return await _ingest(
-        session, background_tasks, kb=kb, organization_id=ctx.organization_id,
-        user_id=ctx.user_id, filename=filename, content_type=content_type, body=body,
-        folder_id=payload.folder_id, source="website", source_ref=final_url,
+        session,
+        background_tasks,
+        kb=kb,
+        organization_id=ctx.organization_id,
+        user_id=ctx.user_id,
+        filename=filename,
+        content_type=content_type,
+        body=body,
+        folder_id=payload.folder_id,
+        source="website",
+        source_ref=final_url,
     )
 
 
@@ -258,15 +321,30 @@ async def ingest_text(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> DocumentRead:
-    kb = await _kb_for_org(session, kb_id=payload.knowledge_base_id, organization_id=ctx.organization_id)
-    await _validate_folder(session, folder_id=payload.folder_id, kb=kb, organization_id=ctx.organization_id)
+    kb = await _kb_for_org(
+        session, kb_id=payload.knowledge_base_id, organization_id=ctx.organization_id
+    )
+    await _validate_folder(
+        session, folder_id=payload.folder_id, kb=kb, organization_id=ctx.organization_id
+    )
 
     title = payload.title.strip()
-    safe = "".join(c if c.isalnum() or c in " -_" else "_" for c in title)[:80].strip() or "note"
+    safe = (
+        "".join(c if c.isalnum() or c in " -_" else "_" for c in title)[:80].strip()
+        or "note"
+    )
     body = f"# {title}\n\n{payload.content}".encode("utf-8")
 
     return await _ingest(
-        session, background_tasks, kb=kb, organization_id=ctx.organization_id,
-        user_id=ctx.user_id, filename=f"{safe}.txt", content_type="text/plain", body=body,
-        folder_id=payload.folder_id, source="text", source_ref=title,
+        session,
+        background_tasks,
+        kb=kb,
+        organization_id=ctx.organization_id,
+        user_id=ctx.user_id,
+        filename=f"{safe}.txt",
+        content_type="text/plain",
+        body=body,
+        folder_id=payload.folder_id,
+        source="text",
+        source_ref=title,
     )

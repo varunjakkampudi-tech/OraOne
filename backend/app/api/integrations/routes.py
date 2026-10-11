@@ -18,6 +18,7 @@ Endpoints
 Tenant-safe: every read/write is scoped to the caller's organization.
 Secrets are encrypted at rest and never returned in responses.
 """
+
 from __future__ import annotations
 
 import logging
@@ -125,6 +126,7 @@ def _frontend_url() -> str:
 
 # ─────────────────── helpers ───────────────────
 
+
 def _catalog_item(spec) -> ProviderCatalogItem:
     return ProviderCatalogItem(
         provider=spec.provider,
@@ -162,6 +164,7 @@ async def _by_provider(
 
 
 # ─────────────────── catalog ───────────────────
+
 
 @router.get(
     "/api/integrations",
@@ -216,11 +219,14 @@ async def get_integration(
         session, integration_id=integration_id, organization_id=ctx.organization_id
     )
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found."
+        )
     return IntegrationRead.model_validate(row.__dict__)
 
 
 # ─────────────────── connect ───────────────────
+
 
 @router.post(
     "/api/integrations/connect",
@@ -409,6 +415,7 @@ async def google_oauth_callback(
 
 # ─────────────────── sync ───────────────────
 
+
 @router.post(
     "/api/integrations/{integration_id}/sync",
     response_model=SyncJobRead,
@@ -425,7 +432,9 @@ async def trigger_sync(
         session, integration_id=integration_id, organization_id=ctx.organization_id
     )
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found."
+        )
     if row.status == IntegrationStatus.disconnected:
         raise HTTPException(status_code=409, detail="Integration is not connected.")
 
@@ -455,6 +464,7 @@ async def trigger_sync(
 
 # ─────────────────── browse & selection (selective sync) ───────────────────
 
+
 @router.get(
     "/api/integrations/{integration_id}/browse",
     response_model=BrowseResponse,
@@ -472,7 +482,9 @@ async def browse_integration(
         session, integration_id=integration_id, organization_id=ctx.organization_id
     )
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found."
+        )
     if row.status == IntegrationStatus.disconnected:
         raise HTTPException(status_code=409, detail="Integration is not connected.")
     try:
@@ -498,7 +510,9 @@ async def get_selection(
         session, integration_id=integration_id, organization_id=ctx.organization_id
     )
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found."
+        )
     selection = (row.config or {}).get("selection")
     if not selection:
         return SelectionPayload()
@@ -521,7 +535,9 @@ async def set_selection(
         session, integration_id=integration_id, organization_id=ctx.organization_id
     )
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found."
+        )
 
     # "Quick" mode = recent files only; encode as a recent_days window.
     if payload.mode == "quick" and not payload.options.recent_days:
@@ -566,7 +582,9 @@ async def list_synced_items(
         session, integration_id=integration_id, organization_id=ctx.organization_id
     )
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found."
+        )
     total = int(
         await session.scalar(
             select(func.count(IntegrationDocument.id)).where(
@@ -612,7 +630,9 @@ async def remove_synced_items(
         session, integration_id=integration_id, organization_id=ctx.organization_id
     )
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found."
+        )
 
     external_ids = [str(x) for x in (payload.get("external_ids") or [])]
     if not external_ids:
@@ -649,7 +669,8 @@ async def remove_synced_items(
             kept = [
                 ref
                 for ref in (selection.get(key) or [])
-                if (ref.get("external_id") if isinstance(ref, dict) else ref) not in drop
+                if (ref.get("external_id") if isinstance(ref, dict) else ref)
+                not in drop
             ]
             selection[key] = kept
         row.config = {**(row.config or {}), "selection": selection}
@@ -730,6 +751,7 @@ async def _seed_manifest(
 
 # ─────────────────── disconnect ───────────────────
 
+
 @router.delete(
     "/api/integrations/{integration_id}",
     status_code=status.HTTP_200_OK,
@@ -745,7 +767,9 @@ async def disconnect_integration(
         session, integration_id=integration_id, organization_id=ctx.organization_id
     )
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found."
+        )
 
     # Best-effort provider-side token revocation.
     try:
@@ -792,6 +816,7 @@ async def disconnect_integration(
 
 # ─────────────────── jobs & logs ───────────────────
 
+
 @router.get(
     "/api/integrations/{integration_id}/jobs",
     response_model=SyncJobListResponse,
@@ -807,7 +832,9 @@ async def list_jobs(
         session, integration_id=integration_id, organization_id=ctx.organization_id
     )
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found."
+        )
     total = int(
         await session.scalar(
             select(func.count(SyncJob.id)).where(SyncJob.integration_id == row.id)
@@ -842,7 +869,9 @@ async def list_logs(
         session, integration_id=integration_id, organization_id=ctx.organization_id
     )
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found."
+        )
     total = int(
         await session.scalar(
             select(func.count(SyncLog.id)).where(SyncLog.integration_id == row.id)
@@ -864,6 +893,7 @@ async def list_logs(
 
 # ─────────────────── health, refresh & analytics (R5) ───────────────────
 
+
 @router.get(
     "/api/integrations/{integration_id}/health",
     response_model=IntegrationHealth,
@@ -880,11 +910,12 @@ async def integration_health(
         session, integration_id=integration_id, organization_id=ctx.organization_id
     )
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found."
+        )
 
     token_expired = bool(
-        row.token_expires_at
-        and row.token_expires_at <= datetime.now(timezone.utc)
+        row.token_expires_at and row.token_expires_at <= datetime.now(timezone.utc)
     )
 
     detail: Optional[str] = None
@@ -931,7 +962,9 @@ async def refresh_integration(
         session, integration_id=integration_id, organization_id=ctx.organization_id
     )
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found."
+        )
     if row.status == IntegrationStatus.disconnected:
         raise HTTPException(status_code=409, detail="Integration is not connected.")
 
@@ -979,7 +1012,9 @@ async def integration_analytics(
         session, integration_id=integration_id, organization_id=ctx.organization_id
     )
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Integration not found."
+        )
 
     agg = (
         await session.execute(
@@ -1042,6 +1077,8 @@ async def integration_analytics(
         documents_deleted_total=int(docs_deleted or 0),
         errors_total=int(errors_total or 0),
         last_synced_at=row.last_synced_at,
-        avg_sync_seconds=round(float(avg_seconds), 2) if avg_seconds is not None else None,
+        avg_sync_seconds=round(float(avg_seconds), 2)
+        if avg_seconds is not None
+        else None,
         recent_jobs=[SyncJobRead.model_validate(j.__dict__) for j in recent],
     )

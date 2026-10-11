@@ -4,6 +4,7 @@
 completed/failed) with live progress counters. ``CrawlLog`` records a
 per-URL line so the UI can show exactly what happened to each page.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -26,7 +27,16 @@ class CrawlJobStatus:
     failed = "failed"
     paused = "paused"
     cancelled = "cancelled"
-    ALL = {queued, crawling, extracting, embedding, completed, failed, paused, cancelled}
+    ALL = {
+        queued,
+        crawling,
+        extracting,
+        embedding,
+        completed,
+        failed,
+        paused,
+        cancelled,
+    }
     TERMINAL = {completed, failed, cancelled}
 
 
@@ -56,22 +66,44 @@ class CrawlJob(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     status: Mapped[str] = mapped_column(
-        String(16), nullable=False, default=CrawlJobStatus.queued, server_default=CrawlJobStatus.queued
+        String(16),
+        nullable=False,
+        default=CrawlJobStatus.queued,
+        server_default=CrawlJobStatus.queued,
     )
     trigger: Mapped[str] = mapped_column(
-        String(16), nullable=False, default=CrawlTrigger.manual, server_default=CrawlTrigger.manual
+        String(16),
+        nullable=False,
+        default=CrawlTrigger.manual,
+        server_default=CrawlTrigger.manual,
     )
 
-    pages_total: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    pages_completed: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    pages_failed: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    pages_skipped: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    chunks_created: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    pages_total: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    pages_completed: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    pages_failed: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    pages_skipped: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    chunks_created: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
 
     # ── distributed engine telemetry (R3+) ──
-    worker_count: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
-    concurrency: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    frontier_size: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    worker_count: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=1, server_default="1"
+    )
+    concurrency: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    frontier_size: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
     heartbeat_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
     started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
@@ -101,7 +133,9 @@ class CrawlLog(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     url: Mapped[Optional[str]] = mapped_column(String(2048))
     status: Mapped[Optional[str]] = mapped_column(String(40))
-    level: Mapped[str] = mapped_column(String(10), nullable=False, default="info", server_default="info")
+    level: Mapped[str] = mapped_column(
+        String(10), nullable=False, default="info", server_default="info"
+    )
     message: Mapped[Optional[str]] = mapped_column(Text)
 
     def __repr__(self) -> str:  # pragma: no cover

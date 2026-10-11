@@ -16,6 +16,7 @@ Backed by app.services.cache.get_shared_cache("idempotency") (Redis when
 REDIS_URL is set, in-process otherwise). Never blocks requests that don't
 send the header — this is strictly opt-in per the API contract.
 """
+
 from __future__ import annotations
 
 import json
@@ -84,7 +85,9 @@ async def idempotency_middleware(request: Request, call_next):
         )
 
     try:
-        acquired = cache.set_if_not_exists(f"lock:{scoped_key}", True, ttl_seconds=_LOCK_TTL_SECONDS)
+        acquired = cache.set_if_not_exists(
+            f"lock:{scoped_key}", True, ttl_seconds=_LOCK_TTL_SECONDS
+        )
     except Exception as e:  # noqa: BLE001
         log.error("idempotency_cache_unavailable path=%s err=%s", request.url.path, e)
         return JSONResponse(
@@ -131,7 +134,11 @@ async def idempotency_middleware(request: Request, call_next):
                         ttl_seconds=_RESPONSE_TTL_SECONDS,
                     )
                 except Exception as e:  # noqa: BLE001 — mutation already succeeded; don't fail the response over a cache write
-                    log.warning("idempotency_cache_write_failed path=%s err=%s", request.url.path, e)
+                    log.warning(
+                        "idempotency_cache_write_failed path=%s err=%s",
+                        request.url.path,
+                        e,
+                    )
 
         return Response(
             content=body,
@@ -143,4 +150,6 @@ async def idempotency_middleware(request: Request, call_next):
         try:
             cache.delete(lock_key)
         except Exception as e:  # noqa: BLE001 — lock will still expire via its own TTL
-            log.warning("idempotency_lock_release_failed path=%s err=%s", request.url.path, e)
+            log.warning(
+                "idempotency_lock_release_failed path=%s err=%s", request.url.path, e
+            )

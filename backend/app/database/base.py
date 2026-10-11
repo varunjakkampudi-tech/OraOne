@@ -1,4 +1,5 @@
 """Declarative base + common mixins for SQLAlchemy models."""
+
 from __future__ import annotations
 
 import uuid

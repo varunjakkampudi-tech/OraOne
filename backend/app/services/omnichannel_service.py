@@ -13,6 +13,7 @@ is delivered by the :class:`VisitorProfile`: every channel resolves the SAME
 profile (by phone / email / handle) and contributes to one rolling memory, so
 the agent always knows who it is talking to regardless of surface.
 """
+
 from __future__ import annotations
 
 import logging
@@ -50,7 +51,7 @@ _AGENT_UNAVAILABLE = (
 class InboundMessage:
     """A provider-agnostic inbound message, produced by a channel adapter."""
 
-    channel: str                                   # "whatsapp", "sms", "telegram", …
+    channel: str  # "whatsapp", "sms", "telegram", …
     organization_id: uuid.UUID
     agent_id: uuid.UUID
     text: str
@@ -59,9 +60,9 @@ class InboundMessage:
     name: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
-    handle: Optional[str] = None                    # @username, page-scoped id, …
-    external_id: Optional[str] = None               # provider's stable user id
-    external_thread_id: Optional[str] = None        # provider conversation id
+    handle: Optional[str] = None  # @username, page-scoped id, …
+    external_id: Optional[str] = None  # provider's stable user id
+    external_thread_id: Optional[str] = None  # provider conversation id
     meta: dict[str, Any] = field(default_factory=dict)
 
 
@@ -120,7 +121,10 @@ async def _find_or_create_thread(
             .limit(1)
         )
         if conversation is not None and conversation.last_message_at is not None:
-            if visitor_service.now_utc() - conversation.last_message_at > _THREAD_WINDOW:
+            if (
+                visitor_service.now_utc() - conversation.last_message_at
+                > _THREAD_WINDOW
+            ):
                 conversation = None  # too stale — start fresh
 
     if conversation is None:

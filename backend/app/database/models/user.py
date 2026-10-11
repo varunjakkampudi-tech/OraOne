@@ -5,6 +5,7 @@ migration work, while production uses AWS Cognito. ``cognito_sub`` is kept as
 the external subject column for backward compatibility; all application
 authorization resolves it to the internal ``users.id`` UUID.
 """
+
 from __future__ import annotations
 
 import enum

@@ -5,6 +5,7 @@ white-label the dashboard and any public-facing surfaces (chat widget,
 invite pages). Premium controls (hiding the "Powered by" mark, custom
 domains) are gated by plan at the service layer.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -21,9 +22,7 @@ class OrgBranding(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     """Per-org white-label brand settings."""
 
     __tablename__ = "org_branding"
-    __table_args__ = (
-        UniqueConstraint("organization_id", name="uq_org_branding_org"),
-    )
+    __table_args__ = (UniqueConstraint("organization_id", name="uq_org_branding_org"),)
 
     organization_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),

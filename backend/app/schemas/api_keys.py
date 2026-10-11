@@ -1,4 +1,5 @@
 """API key request/response schemas (Phase 12, Module 9)."""
+
 from __future__ import annotations
 
 import uuid

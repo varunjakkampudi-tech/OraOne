@@ -4,6 +4,7 @@ Adds ``agent_prompt_versions`` — immutable snapshots of an agent's prompt
 and config, captured each time a new version is published. Powers the
 version history timeline, prompt diff viewer, and one-click rollback.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union

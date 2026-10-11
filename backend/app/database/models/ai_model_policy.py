@@ -5,6 +5,7 @@ preferred default model, an ordered fallback chain, and any models the org
 has explicitly disabled. Entitlement (which models a plan *may* use) is
 derived from the billing plan + catalogue, not stored here.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -42,4 +43,6 @@ class AIModelPolicy(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     def __repr__(self) -> str:  # pragma: no cover
-        return f"<AIModelPolicy org={self.organization_id} default={self.default_model}>"
+        return (
+            f"<AIModelPolicy org={self.organization_id} default={self.default_model}>"
+        )

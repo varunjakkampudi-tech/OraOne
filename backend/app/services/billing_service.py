@@ -9,6 +9,7 @@ subscription lifecycle. Stripe is required for paid billing:
 * Without Stripe, new workspaces remain on the Free plan and paid checkout is
   rejected. No mock checkout grants entitlements or creates paid invoices.
 """
+
 from __future__ import annotations
 
 import logging
@@ -43,13 +44,21 @@ PLAN_CATALOGUE: list[dict] = [
         "price_cents_yearly": 0,
         "sort_order": 0,
         "features": [
-            "1 Workspace", "2 Users", "2 Agents",
-            "500 MB Storage", "100 AI Messages/day",
+            "1 Workspace",
+            "2 Users",
+            "2 Agents",
+            "500 MB Storage",
+            "100 AI Messages/day",
         ],
         "limits": {
-            "users": 2, "agents": 2, "knowledge_bases": 1,
-            "storage_mb": 500, "ai_messages_per_day": 100,
-            "workflows": 1, "integrations": 1, "api_rpm": 0,
+            "users": 2,
+            "agents": 2,
+            "knowledge_bases": 1,
+            "storage_mb": 500,
+            "ai_messages_per_day": 100,
+            "workflows": 1,
+            "integrations": 1,
+            "api_rpm": 0,
         },
     },
     {
@@ -60,13 +69,21 @@ PLAN_CATALOGUE: list[dict] = [
         "price_cents_yearly": 49000,
         "sort_order": 1,
         "features": [
-            "10 Users", "20 Agents", "20 GB Storage",
-            "Unlimited Chat", "Basic Integrations",
+            "10 Users",
+            "20 Agents",
+            "20 GB Storage",
+            "Unlimited Chat",
+            "Basic Integrations",
         ],
         "limits": {
-            "users": 10, "agents": 20, "knowledge_bases": 10,
-            "storage_mb": 20480, "ai_messages_per_day": -1,
-            "workflows": 25, "integrations": 10, "api_rpm": 100,
+            "users": 10,
+            "agents": 20,
+            "knowledge_bases": 10,
+            "storage_mb": 20480,
+            "ai_messages_per_day": -1,
+            "workflows": 25,
+            "integrations": 10,
+            "api_rpm": 100,
         },
     },
     {
@@ -77,14 +94,21 @@ PLAN_CATALOGUE: list[dict] = [
         "price_cents_yearly": 199000,
         "sort_order": 2,
         "features": [
-            "Unlimited Users", "Unlimited Agents",
-            "Unlimited Knowledge Bases", "Workflow Automation",
+            "Unlimited Users",
+            "Unlimited Agents",
+            "Unlimited Knowledge Bases",
+            "Workflow Automation",
             "Priority Support",
         ],
         "limits": {
-            "users": -1, "agents": -1, "knowledge_bases": -1,
-            "storage_mb": 512000, "ai_messages_per_day": -1,
-            "workflows": -1, "integrations": -1, "api_rpm": 1000,
+            "users": -1,
+            "agents": -1,
+            "knowledge_bases": -1,
+            "storage_mb": 512000,
+            "ai_messages_per_day": -1,
+            "workflows": -1,
+            "integrations": -1,
+            "api_rpm": 1000,
         },
     },
     {
@@ -95,13 +119,22 @@ PLAN_CATALOGUE: list[dict] = [
         "price_cents_yearly": 0,
         "sort_order": 3,
         "features": [
-            "SSO", "Audit Logs", "Custom Models",
-            "Dedicated Support", "Custom SLAs", "Private Deployment",
+            "SSO",
+            "Audit Logs",
+            "Custom Models",
+            "Dedicated Support",
+            "Custom SLAs",
+            "Private Deployment",
         ],
         "limits": {
-            "users": -1, "agents": -1, "knowledge_bases": -1,
-            "storage_mb": -1, "ai_messages_per_day": -1,
-            "workflows": -1, "integrations": -1, "api_rpm": -1,
+            "users": -1,
+            "agents": -1,
+            "knowledge_bases": -1,
+            "storage_mb": -1,
+            "ai_messages_per_day": -1,
+            "workflows": -1,
+            "integrations": -1,
+            "api_rpm": -1,
         },
     },
 ]
@@ -121,6 +154,7 @@ def stripe_enabled() -> bool:
         return False
     try:
         import stripe  # noqa: F401
+
         return True
     except Exception:
         return False
@@ -134,9 +168,7 @@ async def ensure_plans_seeded(session: AsyncSession) -> int:
     """Insert any catalogue plans missing from the DB. Idempotent."""
     created = 0
     for spec in PLAN_CATALOGUE:
-        existing = await session.scalar(
-            select(Plan).where(Plan.code == spec["code"])
-        )
+        existing = await session.scalar(select(Plan).where(Plan.code == spec["code"]))
         if existing is not None:
             continue
         session.add(
@@ -165,16 +197,18 @@ async def get_or_create_subscription(
 ) -> Subscription:
     """Return the org's subscription, creating a Free one if absent."""
     sub = await session.scalar(
-        select(Subscription).where(
-            Subscription.organization_id == organization_id
-        )
+        select(Subscription).where(Subscription.organization_id == organization_id)
     )
 
     # Until real Stripe billing is integrated, every workspace runs on the
     # Missing Stripe must never grant paid entitlements. Existing paid rows are
     # left intact for reconciliation; new rows always start on Free.
     environment = os.environ.get("ENVIRONMENT", "development").strip().lower()
-    seed_code = PlanCode.free if environment in {"production", "prod", "staging"} else PlanCode.starter
+    seed_code = (
+        PlanCode.free
+        if environment in {"production", "prod", "staging"}
+        else PlanCode.starter
+    )
 
     if sub is not None:
         return sub
@@ -238,7 +272,9 @@ async def _activate(
         org.plan = _ORG_PLAN_MAP.get(plan.code, OrgPlan.free)
 
     # Issue an invoice (skip $0 plans).
-    amount = plan.price_cents_yearly if cycle == BillingCycle.yearly else plan.price_cents
+    amount = (
+        plan.price_cents_yearly if cycle == BillingCycle.yearly else plan.price_cents
+    )
     if amount > 0:
         count_q = select(Invoice).where(Invoice.organization_id == organization_id)
         existing = len((await session.scalars(count_q)).all())
@@ -276,7 +312,9 @@ async def create_checkout(
     cycle = _cycle(billing_cycle)
 
     if not stripe_enabled():
-        raise RuntimeError("Paid billing is not configured. Configure Stripe before enabling upgrades.")
+        raise RuntimeError(
+            "Paid billing is not configured. Configure Stripe before enabling upgrades."
+        )
 
     # Real Stripe Checkout.
     import stripe
@@ -285,26 +323,34 @@ async def create_checkout(
     sub = await get_or_create_subscription(session, organization_id)
     customer_id = sub.stripe_customer_id
     if not customer_id:
-        customer = stripe.Customer.create(metadata={"organization_id": str(organization_id)})
+        customer = stripe.Customer.create(
+            metadata={"organization_id": str(organization_id)}
+        )
         customer_id = customer["id"]
         sub.stripe_customer_id = customer_id
         await session.commit()
 
-    price_amount = plan.price_cents_yearly if cycle == BillingCycle.yearly else plan.price_cents
+    price_amount = (
+        plan.price_cents_yearly if cycle == BillingCycle.yearly else plan.price_cents
+    )
     cs = stripe.checkout.Session.create(
         mode="subscription",
         customer=customer_id,
         success_url=success_url,
         cancel_url=cancel_url,
-        line_items=[{
-            "price_data": {
-                "currency": plan.currency,
-                "product_data": {"name": plan.name},
-                "recurring": {"interval": "year" if cycle == BillingCycle.yearly else "month"},
-                "unit_amount": price_amount,
-            },
-            "quantity": 1,
-        }],
+        line_items=[
+            {
+                "price_data": {
+                    "currency": plan.currency,
+                    "product_data": {"name": plan.name},
+                    "recurring": {
+                        "interval": "year" if cycle == BillingCycle.yearly else "month"
+                    },
+                    "unit_amount": price_amount,
+                },
+                "quantity": 1,
+            }
+        ],
         metadata={
             "organization_id": str(organization_id),
             "plan_code": plan_code,
@@ -328,6 +374,7 @@ async def cancel_subscription(
     sub.cancel_at_period_end = True
     if stripe_enabled() and sub.stripe_subscription_id:
         import stripe
+
         stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
         try:
             stripe.Subscription.modify(
@@ -353,10 +400,15 @@ async def create_portal(
             "message": "Billing portal is unavailable until Stripe is configured.",
         }
     import stripe
+
     stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
     sub = await get_or_create_subscription(session, organization_id)
     if not sub.stripe_customer_id:
-        return {"mode": "stripe", "portal_url": None, "message": "No Stripe customer yet."}
+        return {
+            "mode": "stripe",
+            "portal_url": None,
+            "message": "No Stripe customer yet.",
+        }
     ps = stripe.billing_portal.Session.create(
         customer=sub.stripe_customer_id, return_url=return_url
     )
@@ -379,7 +431,10 @@ async def handle_webhook_event(session: AsyncSession, event: dict) -> None:
         )
         if plan is not None:
             await _activate(
-                session, organization_id, plan, _cycle(meta.get("billing_cycle", "monthly")),
+                session,
+                organization_id,
+                plan,
+                _cycle(meta.get("billing_cycle", "monthly")),
                 stripe_customer_id=obj.get("customer"),
                 stripe_subscription_id=obj.get("subscription"),
             )

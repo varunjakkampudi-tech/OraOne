@@ -7,6 +7,7 @@ installed.
 
 Model is configurable via ``OPENAI_MODEL`` (default ``openai/gpt-5.5``).
 """
+
 from __future__ import annotations
 
 import logging
@@ -65,7 +66,7 @@ class _ReasoningStreamFilter:
                     if len(self._buf) > tail:
                         self._buf = self._buf[-tail:]
                     break
-                self._buf = self._buf[ci + len(_REASONING_CLOSE):]
+                self._buf = self._buf[ci + len(_REASONING_CLOSE) :]
                 self._in_reasoning = False
                 continue
             oi = self._buf.find(_REASONING_OPEN)
@@ -77,11 +78,11 @@ class _ReasoningStreamFilter:
                         keep = k
                         break
                 emit = self._buf[: len(self._buf) - keep] if keep else self._buf
-                self._buf = self._buf[len(self._buf) - keep:] if keep else ""
+                self._buf = self._buf[len(self._buf) - keep :] if keep else ""
                 out += emit
                 break
             out += self._buf[:oi]
-            self._buf = self._buf[oi + len(_REASONING_OPEN):]
+            self._buf = self._buf[oi + len(_REASONING_OPEN) :]
             self._in_reasoning = True
         if out and not self._emitted:
             out = out.lstrip()
@@ -138,15 +139,24 @@ class OpenAIProvider(AIProvider):
         name = type(exc).__name__
         msg = str(exc)
         if name in ("APITimeoutError", "Timeout", "TimeoutError"):
-            return AIProviderError("The AI provider timed out.", code="timeout", retryable=True)
+            return AIProviderError(
+                "The AI provider timed out.", code="timeout", retryable=True
+            )
         if name in ("RateLimitError",):
-            return AIProviderError("The AI provider is rate limited.", code="rate_limit", retryable=True)
+            return AIProviderError(
+                "The AI provider is rate limited.", code="rate_limit", retryable=True
+            )
         if name in ("AuthenticationError", "PermissionDeniedError"):
             return AIProviderError("Invalid AI provider credentials.", code="auth")
         if name in ("APIConnectionError", "APIConnectionTimeoutError"):
-            return AIProviderError("Could not reach the AI provider.", code="network", retryable=True)
+            return AIProviderError(
+                "Could not reach the AI provider.", code="network", retryable=True
+            )
         if "context length" in msg.lower() or "maximum context" in msg.lower():
-            return AIProviderError("The conversation exceeded the model context window.", code="context_overflow")
+            return AIProviderError(
+                "The conversation exceeded the model context window.",
+                code="context_overflow",
+            )
         return AIProviderError(f"AI provider error: {msg}", code="provider")
 
     async def chat(
@@ -207,8 +217,6 @@ class OpenAIProvider(AIProvider):
                 max_tokens=max_tokens,
                 stream=True,
             )
-            buffer = ""
-            reasoning_resolved = False
             rfilter = _ReasoningStreamFilter()
             async for event in stream:
                 if not event.choices:

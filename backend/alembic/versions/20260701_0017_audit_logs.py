@@ -1,4 +1,5 @@
 """Phase 12 Module 5: persisted audit trail (audit_logs)."""
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -26,14 +27,32 @@ def upgrade() -> None:
         sa.Column("before", postgresql.JSONB(), nullable=True),
         sa.Column("after", postgresql.JSONB(), nullable=True),
         sa.Column("meta", postgresql.JSONB(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         if_not_exists=True,
     )
-    op.create_index("ix_audit_logs_organization_id", "audit_logs", ["organization_id"], if_not_exists=True)
-    op.create_index("ix_audit_logs_user_id", "audit_logs", ["user_id"], if_not_exists=True)
-    op.create_index("ix_audit_logs_action", "audit_logs", ["action"], if_not_exists=True)
-    op.create_index("ix_audit_logs_resource", "audit_logs", ["resource"], if_not_exists=True)
-    op.create_index("ix_audit_logs_created_at", "audit_logs", ["created_at"], if_not_exists=True)
+    op.create_index(
+        "ix_audit_logs_organization_id",
+        "audit_logs",
+        ["organization_id"],
+        if_not_exists=True,
+    )
+    op.create_index(
+        "ix_audit_logs_user_id", "audit_logs", ["user_id"], if_not_exists=True
+    )
+    op.create_index(
+        "ix_audit_logs_action", "audit_logs", ["action"], if_not_exists=True
+    )
+    op.create_index(
+        "ix_audit_logs_resource", "audit_logs", ["resource"], if_not_exists=True
+    )
+    op.create_index(
+        "ix_audit_logs_created_at", "audit_logs", ["created_at"], if_not_exists=True
+    )
 
 
 def downgrade() -> None:

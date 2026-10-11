@@ -4,6 +4,7 @@ Token-based invites (no email service yet): the backend mints a secure
 token and returns a shareable link. A signed-in user whose email matches
 the invite accepts it to join the organisation.
 """
+
 from __future__ import annotations
 
 import secrets
@@ -117,7 +118,9 @@ async def revoke_invitation(
 
 async def preview_invitation(
     session: AsyncSession, *, token: str
-) -> tuple[bool, Optional[OrganizationInvitation], Optional[Organization], Optional[str]]:
+) -> tuple[
+    bool, Optional[OrganizationInvitation], Optional[Organization], Optional[str]
+]:
     invite = await TeamRepository.get_invitation_by_token(session, token)
     if invite is None:
         return False, None, None, "This invitation link is invalid."

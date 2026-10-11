@@ -13,6 +13,7 @@ underlying ``messages`` table speaks ``sender``
 (agent/customer/system/tool). The two enums are bridged here so the rest
 of Phase 8 can stay role-native without a schema rewrite.
 """
+
 from __future__ import annotations
 
 import logging
@@ -184,7 +185,9 @@ class AgentRuntime:
         context_blocks: Optional[list[str]],
     ) -> list[ChatMessage]:
         msgs: list[ChatMessage] = [
-            ChatMessage(role="system", content=self.build_system_prompt(agent, context_blocks))
+            ChatMessage(
+                role="system", content=self.build_system_prompt(agent, context_blocks)
+            )
         ]
         for m in history:
             role = sender_to_role(m.sender)
@@ -225,7 +228,9 @@ class AgentRuntime:
         # agent's own configured model is used.
         forced = os.environ.get("AI_FORCE_MODEL", "").strip()
         model = forced or agent.model or DEFAULT_MODEL
-        temperature = float(cfg.temperature) if cfg and cfg.temperature is not None else 0.7
+        temperature = (
+            float(cfg.temperature) if cfg and cfg.temperature is not None else 0.7
+        )
         configured_max = cfg.max_tokens if cfg and cfg.max_tokens else 1024
         hard_max = int(os.environ.get("AI_MAX_OUTPUT_TOKENS", "2048"))
         max_tokens = max(1, min(int(configured_max), hard_max))

@@ -13,6 +13,7 @@ Backfill is non-destructive:
 Columns stay nullable so the change is backward-compatible with the
 running app until the API/UI start setting ``project_id`` explicitly.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -46,9 +47,7 @@ _RESOURCE_TABLES = [
 
 def upgrade() -> None:
     # ── 1. project_status enum ──
-    project_status = postgresql.ENUM(
-        "active", "archived", name="project_status"
-    )
+    project_status = postgresql.ENUM("active", "archived", name="project_status")
     project_status.create(op.get_bind(), checkfirst=True)
 
     # ── 2. projects table ──
@@ -61,24 +60,52 @@ def upgrade() -> None:
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column(
             "status",
-            postgresql.ENUM("active", "archived", name="project_status", create_type=False),
+            postgresql.ENUM(
+                "active", "archived", name="project_status", create_type=False
+            ),
             nullable=False,
             server_default="active",
         ),
         sa.Column("color", sa.String(length=20), nullable=True),
         sa.Column("icon", sa.String(length=40), nullable=True),
-        sa.Column("is_default", sa.Boolean(), nullable=False, server_default=sa.text("false")),
-        sa.Column("settings", postgresql.JSONB(), nullable=False, server_default=sa.text("'{}'::jsonb")),
+        sa.Column(
+            "is_default", sa.Boolean(), nullable=False, server_default=sa.text("false")
+        ),
+        sa.Column(
+            "settings",
+            postgresql.JSONB(),
+            nullable=False,
+            server_default=sa.text("'{}'::jsonb"),
+        ),
         sa.Column("created_by_user_id", postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(["organization_id"], ["organizations.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["created_by_user_id"], ["users.id"], ondelete="SET NULL"),
+        sa.ForeignKeyConstraint(
+            ["organization_id"], ["organizations.id"], ondelete="CASCADE"
+        ),
+        sa.ForeignKeyConstraint(
+            ["created_by_user_id"], ["users.id"], ondelete="SET NULL"
+        ),
         sa.UniqueConstraint("organization_id", "slug", name="uq_projects_org_slug"),
         if_not_exists=True,
     )
-    op.create_index("ix_projects_organization_id", "projects", ["organization_id"], if_not_exists=True)
+    op.create_index(
+        "ix_projects_organization_id",
+        "projects",
+        ["organization_id"],
+        if_not_exists=True,
+    )
     op.create_index("ix_projects_status", "projects", ["status"], if_not_exists=True)
 
     # ── 3. project_id columns on resource tables (+ chunks) ──

@@ -9,6 +9,7 @@ against a *healthy* cache at the same instant). Uses the real
 racing on it resolve deterministically to exactly one winner, same as
 Redis's atomic ``SET NX`` would under a real race.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -26,7 +27,10 @@ def _fake_request(*, idem_key="race-key-1"):
         "type": "http",
         "method": "POST",
         "path": "/api/agents",
-        "headers": [(b"authorization", b"Bearer faketoken"), (b"idempotency-key", idem_key.encode())],
+        "headers": [
+            (b"authorization", b"Bearer faketoken"),
+            (b"idempotency-key", idem_key.encode()),
+        ],
         "query_string": b"",
         "client": ("127.0.0.1", 0),
     }
@@ -40,6 +44,7 @@ class _StreamedResponse:
 
     def __init__(self, status_code: int, content: dict):
         import json as _json
+
         self.status_code = status_code
         self.headers = {"content-type": "application/json"}
         self.media_type = "application/json"
@@ -74,7 +79,9 @@ async def test_concurrent_requests_with_same_key_execute_once(monkeypatch):
         idempotency_middleware(_fake_request(), _slow_call_next),
     )
 
-    assert execution_count == 1, "the underlying mutation ran more than once for the same Idempotency-Key"
+    assert execution_count == 1, (
+        "the underlying mutation ran more than once for the same Idempotency-Key"
+    )
 
     statuses = sorted(r.status_code for r in results)
     # Winner gets 201 (executed for real); the loser gets a 409
@@ -84,6 +91,7 @@ async def test_concurrent_requests_with_same_key_execute_once(monkeypatch):
 
     loser = next(r for r in results if r.status_code == 409)
     import json
+
     body = json.loads(bytes(loser.body))
     assert body["error"]["code"] == "IDEMPOTENCY_IN_PROGRESS"
 
@@ -106,11 +114,16 @@ async def test_sequential_requests_with_same_key_replay_cached_response(monkeypa
         execution_count += 1
         return _StreamedResponse(201, {"id": "created-once", "n": execution_count})
 
-    first = await idempotency_middleware(_fake_request(idem_key="seq-key-1"), _call_next)
-    second = await idempotency_middleware(_fake_request(idem_key="seq-key-1"), _call_next)
+    first = await idempotency_middleware(
+        _fake_request(idem_key="seq-key-1"), _call_next
+    )
+    second = await idempotency_middleware(
+        _fake_request(idem_key="seq-key-1"), _call_next
+    )
 
     assert execution_count == 1
     assert first.status_code == 201 and second.status_code == 201
     import json
+
     assert json.loads(bytes(first.body)) == json.loads(bytes(second.body))
     assert second.headers.get("Idempotency-Replayed") == "true"

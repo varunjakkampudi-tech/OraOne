@@ -4,6 +4,7 @@ HTTP workers must not own these loops: a Gunicorn deployment can run multiple
 HTTP processes, while this process is intentionally deployed as one Compose
 service and uses database row locks for safe claims.
 """
+
 from __future__ import annotations
 
 import asyncio

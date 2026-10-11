@@ -4,6 +4,7 @@ These cover the security-critical decisions (fail-closed access, lifecycle
 gating, deterministic rollout, Product→Feature parenting, cache invalidation)
 without touching the database, so they run fast in CI.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -57,7 +58,12 @@ def test_effective_override_false_wins_over_default_on():
 
 @pytest.mark.parametrize(
     "status_value",
-    [ProductStatus.DISABLED, ProductStatus.COMING_SOON, ProductStatus.MAINTENANCE, ProductStatus.INTERNAL],
+    [
+        ProductStatus.DISABLED,
+        ProductStatus.COMING_SOON,
+        ProductStatus.MAINTENANCE,
+        ProductStatus.INTERNAL,
+    ],
 )
 def test_non_usable_status_denies_even_with_override_true(status_value):
     # A non-usable lifecycle status is fail-closed regardless of the org switch.
@@ -87,7 +93,6 @@ def test_rollout_bucket_is_deterministic_and_bounded():
 
 def test_rollout_bucket_varies_by_flag_and_org():
     org_a = uuid.uuid4()
-    org_b = uuid.uuid4()
     # Different flags for the same org should generally differ; different orgs too.
     assert ent._rollout_bucket(org_a, "a") == ent._rollout_bucket(org_a, "a")
     # Not asserting inequality (hash collisions possible) — just determinism above.
@@ -98,15 +103,23 @@ def _flag(enabled=True, rollout=100, name="f"):
 
 
 def test_flag_disabled_is_off_regardless_of_rollout():
-    assert ent._flag_enabled_for_org(_flag(enabled=False, rollout=100), uuid.uuid4()) is False
+    assert (
+        ent._flag_enabled_for_org(_flag(enabled=False, rollout=100), uuid.uuid4())
+        is False
+    )
 
 
 def test_flag_full_rollout_is_on():
-    assert ent._flag_enabled_for_org(_flag(enabled=True, rollout=100), uuid.uuid4()) is True
+    assert (
+        ent._flag_enabled_for_org(_flag(enabled=True, rollout=100), uuid.uuid4())
+        is True
+    )
 
 
 def test_flag_zero_rollout_is_off():
-    assert ent._flag_enabled_for_org(_flag(enabled=True, rollout=0), uuid.uuid4()) is False
+    assert (
+        ent._flag_enabled_for_org(_flag(enabled=True, rollout=0), uuid.uuid4()) is False
+    )
 
 
 def test_flag_partial_rollout_is_stable_per_org():
@@ -153,6 +166,7 @@ def test_cache_expiry(monkeypatch):
     # in-process TTL logic specifically, via a monkeypatched monotonic clock,
     # which a real Redis TTL wouldn't honour.
     from app.services import cache as cache_module
+
     monkeypatch.setattr(ent, "_cache", cache_module.InProcessCacheBackend())
     ent.invalidate_all()
     org = uuid.uuid4()

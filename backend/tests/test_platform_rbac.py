@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import uuid
 
 import pytest
 
@@ -44,4 +43,6 @@ def test_platform_role_parser_rejects_organization_roles():
 def test_platform_role_change_never_uses_browser_supplied_role():
     # The endpoint receives only the requested target role. Authorization is
     # derived from the actor's DB-backed UserRole, not request JSON or JWT data.
-    assert can_change_platform_role(UserRole.user, UserRole.user, UserRole.admin) is False
+    assert (
+        can_change_platform_role(UserRole.user, UserRole.user, UserRole.admin) is False
+    )

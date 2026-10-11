@@ -7,6 +7,7 @@
 Reading the catalogue requires ``settings.read``; changing the policy
 requires ``settings.manage``.
 """
+
 from __future__ import annotations
 
 from typing import List, Literal, Optional
@@ -102,6 +103,7 @@ async def resolve_model(
 # selectable option chips, and a final free-text prompt captures anything else.
 # The answers are folded into the agent's system prompt by the frontend.
 
+
 class ClarifyRequest(BaseModel):
     goal_id: Optional[str] = None
     goal_type: Optional[str] = None  # chat | whatsapp
@@ -135,7 +137,13 @@ def _opt(label: str) -> ClarifyOption:
     return ClarifyOption(id=slug or "opt", label=label)
 
 
-def _q(qid: str, question: str, labels: List[str], qtype: str = "single", optional: bool = False) -> ClarifyQuestion:
+def _q(
+    qid: str,
+    question: str,
+    labels: List[str],
+    qtype: str = "single",
+    optional: bool = False,
+) -> ClarifyQuestion:
     return ClarifyQuestion(
         id=qid,
         question=question,
@@ -176,7 +184,11 @@ def _build_clarifying_questions(req: ClarifyRequest) -> List[ClarifyQuestion]:
             _q(
                 "lead_intent",
                 "How proactively should it pursue leads?",
-                ["Only when explicitly asked", "Capture an email when interest shows", "Always nudge toward a demo"],
+                [
+                    "Only when explicitly asked",
+                    "Capture an email when interest shows",
+                    "Always nudge toward a demo",
+                ],
             )
         )
     elif goal == "support":
@@ -184,7 +196,11 @@ def _build_clarifying_questions(req: ClarifyRequest) -> List[ClarifyQuestion]:
             _q(
                 "frustration",
                 "How should it handle a frustrated customer?",
-                ["Apologise and escalate fast", "Stay calm and troubleshoot", "Offer goodwill options"],
+                [
+                    "Apologise and escalate fast",
+                    "Stay calm and troubleshoot",
+                    "Offer goodwill options",
+                ],
             )
         )
     elif goal == "whatsapp":

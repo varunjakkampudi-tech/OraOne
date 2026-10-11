@@ -9,13 +9,14 @@ These tables capture things that are otherwise lossy:
 * ``cost_reports``     — per-provider/model token + cost rollups.
 * ``answer_feedback``  — 👍/👎 feedback on individual answers.
 """
+
 from __future__ import annotations
 
 import uuid
-from datetime import date as date_t, datetime
+from datetime import date as date_t
 from typing import Any, Optional
 
-from sqlalchemy import Date, DateTime, Float, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import Date, Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -40,7 +41,9 @@ class AnalyticsEvent(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     entity: Mapped[Optional[str]] = mapped_column(String(60), nullable=True)
     entity_id: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
     user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
     )
     event_metadata: Mapped[dict[str, Any]] = mapped_column(
         "metadata", JSONB, nullable=False, default=dict, server_default="{}"
@@ -49,9 +52,7 @@ class AnalyticsEvent(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 class DailyMetric(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "daily_metrics"
-    __table_args__ = (
-        Index("ix_daily_metrics_org_date", "organization_id", "date"),
-    )
+    __table_args__ = (Index("ix_daily_metrics_org_date", "organization_id", "date"),)
 
     organization_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -59,12 +60,24 @@ class DailyMetric(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     date: Mapped[date_t] = mapped_column(Date, nullable=False)
-    messages: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    conversations: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    cost: Mapped[float] = mapped_column(Float, nullable=False, default=0.0, server_default="0")
-    active_users: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    avg_latency_ms: Mapped[float] = mapped_column(Float, nullable=False, default=0.0, server_default="0")
+    messages: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    conversations: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    tokens: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    cost: Mapped[float] = mapped_column(
+        Float, nullable=False, default=0.0, server_default="0"
+    )
+    active_users: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    avg_latency_ms: Mapped[float] = mapped_column(
+        Float, nullable=False, default=0.0, server_default="0"
+    )
     extra: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, default=dict, server_default="{}"
     )
@@ -85,11 +98,21 @@ class CostReport(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     date: Mapped[date_t] = mapped_column(Date, nullable=False)
     provider: Mapped[str] = mapped_column(String(60), nullable=False, default="bedrock")
     model: Mapped[str] = mapped_column(String(120), nullable=False, default="")
-    prompt_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    completion_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    requests: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    cost: Mapped[float] = mapped_column(Float, nullable=False, default=0.0, server_default="0")
+    prompt_tokens: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    completion_tokens: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    tokens: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    requests: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    cost: Mapped[float] = mapped_column(
+        Float, nullable=False, default=0.0, server_default="0"
+    )
 
 
 class AnswerFeedback(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -106,14 +129,22 @@ class AnswerFeedback(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     conversation_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("conversations.id", ondelete="CASCADE"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("conversations.id", ondelete="CASCADE"),
+        nullable=True,
     )
     message_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("messages.id", ondelete="CASCADE"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("messages.id", ondelete="CASCADE"),
+        nullable=True,
     )
     user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
     )
-    rating: Mapped[int] = mapped_column(Integer, nullable=False, default=0)  # 1 = up, -1 = down, or 1..5
+    rating: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0
+    )  # 1 = up, -1 = down, or 1..5
     reason: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
     comment: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

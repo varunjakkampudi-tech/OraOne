@@ -20,6 +20,7 @@ this poller), even across a restart.
 Single-process, best-effort poller — matches the same trade-off already
 accepted by app/services/workflow_scheduler.py for this self-hosted scale.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -39,7 +40,9 @@ log = logging.getLogger("app.webhooks.outbox")
 _POLL_SECONDS = 5
 _BATCH_SIZE = 20
 _MAX_ATTEMPTS = 5
-_STALE_PROCESSING_SECONDS = 120  # reclaim rows stuck in PROCESSING (worker crashed mid-delivery)
+_STALE_PROCESSING_SECONDS = (
+    120  # reclaim rows stuck in PROCESSING (worker crashed mid-delivery)
+)
 
 _task: Optional[asyncio.Task] = None
 
@@ -48,7 +51,13 @@ def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def enqueue(session: AsyncSession, *, organization_id: uuid.UUID, event: str, data: dict[str, Any]) -> WebhookOutbox:
+def enqueue(
+    session: AsyncSession,
+    *,
+    organization_id: uuid.UUID,
+    event: str,
+    data: dict[str, Any],
+) -> WebhookOutbox:
     """Add a pending outbox row to ``session`` — caller commits alongside
     their own business-data changes so both succeed or fail together."""
     row = WebhookOutbox(organization_id=organization_id, event=event, payload=data)
@@ -103,7 +112,6 @@ async def _loop() -> None:
 
 
 async def _tick() -> None:
-    from app.services import webhook_service  # local import — avoid a cycle at module load
 
     Maker = _maker()
     async with Maker() as session:  # type: ignore[misc]
@@ -125,7 +133,10 @@ async def _tick() -> None:
             ).all()
         )
         for row in stale_rows:
-            log.warning("reclaiming stale PROCESSING outbox row id=%s (worker likely crashed mid-delivery)", row.id)
+            log.warning(
+                "reclaiming stale PROCESSING outbox row id=%s (worker likely crashed mid-delivery)",
+                row.id,
+            )
             row.status = OutboxStatus.PENDING
         if stale_rows:
             await session.commit()
@@ -182,23 +193,42 @@ async def _deliver_outbox_row(outbox_id: uuid.UUID) -> None:
             if result.failed:
                 row.last_error = f"{result.failed} webhook endpoint(s) failed"
                 row.status = (
-                    OutboxStatus.FAILED if row.attempts >= _MAX_ATTEMPTS else OutboxStatus.PENDING
+                    OutboxStatus.FAILED
+                    if row.attempts >= _MAX_ATTEMPTS
+                    else OutboxStatus.PENDING
                 )
                 if row.status == OutboxStatus.FAILED:
                     row.processed_at = _utcnow()
                 log.warning(
                     "outbox delivery incomplete id=%s event=%s succeeded=%d failed=%d attempt=%d",
-                    row.id, row.event, result.succeeded, result.failed, row.attempts,
+                    row.id,
+                    row.event,
+                    result.succeeded,
+                    result.failed,
+                    row.attempts,
                 )
             else:
                 row.status = OutboxStatus.COMPLETED
                 row.processed_at = _utcnow()
-                log.info("outbox delivered id=%s event=%s succeeded=%d", row.id, row.event, result.succeeded)
+                log.info(
+                    "outbox delivered id=%s event=%s succeeded=%d",
+                    row.id,
+                    row.event,
+                    result.succeeded,
+                )
         except Exception as e:  # noqa: BLE001
             row.attempts = (row.attempts or 0) + 1
             row.last_error = str(e)[:500]
             row.status = (
-                OutboxStatus.FAILED if row.attempts >= _MAX_ATTEMPTS else OutboxStatus.PENDING
+                OutboxStatus.FAILED
+                if row.attempts >= _MAX_ATTEMPTS
+                else OutboxStatus.PENDING
             )
-            log.warning("outbox delivery failed id=%s event=%s attempt=%d err=%s", row.id, row.event, row.attempts, e)
+            log.warning(
+                "outbox delivery failed id=%s event=%s attempt=%d err=%s",
+                row.id,
+                row.event,
+                row.attempts,
+                e,
+            )
         await session.commit()

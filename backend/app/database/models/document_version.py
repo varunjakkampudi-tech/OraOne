@@ -5,6 +5,7 @@ previous storage key + checksum are preserved as a version row so users
 can see the history and the system can detect duplicate content via the
 SHA-256 checksum.
 """
+
 from __future__ import annotations
 
 import uuid

@@ -1,4 +1,5 @@
 """Organization — the multi-tenant boundary (Apollo Clinic, Jockey, REMAX, …)."""
+
 from __future__ import annotations
 
 import enum

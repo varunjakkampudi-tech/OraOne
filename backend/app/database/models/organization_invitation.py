@@ -5,6 +5,7 @@ backend mints a secure token and the frontend surfaces a shareable
 ``/app/invite/{token}`` link. A signed-in user whose email matches the
 invite can accept it to join the organisation.
 """
+
 from __future__ import annotations
 
 import enum
