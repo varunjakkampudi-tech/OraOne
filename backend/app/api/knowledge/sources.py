@@ -15,11 +15,9 @@ hosts are allowed; loopback, private, link-local and reserved IPs are rejected.
 """
 from __future__ import annotations
 
-import ipaddress
-import socket
 import uuid
 from typing import Optional
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 import httpx
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
@@ -36,6 +34,7 @@ from app.schemas.knowledge import DocumentRead
 from app.services import storage
 from app.services.audit import audit
 from app.services.document_processing import compute_checksum, process_document
+from app.services.website_crawler import URLValidationError, validate_url
 
 router = APIRouter(tags=["knowledge-sources"])
 
@@ -68,24 +67,57 @@ class TextSourceIn(BaseModel):
 
 def _guard_public_url(raw: str) -> str:
     """Validate a URL is a public http(s) endpoint (SSRF protection)."""
-    parsed = urlparse(raw.strip())
-    if parsed.scheme not in {"http", "https"}:
-        raise HTTPException(status_code=422, detail="URL must start with http:// or https://.")
-    host = parsed.hostname
-    if not host:
-        raise HTTPException(status_code=422, detail="URL is missing a host.")
     try:
-        infos = socket.getaddrinfo(host, parsed.port or (443 if parsed.scheme == "https" else 80))
-    except socket.gaierror as e:
-        raise HTTPException(status_code=422, detail="Could not resolve host.") from e
-    for info in infos:
-        ip = ipaddress.ip_address(info[4][0])
-        if (
-            ip.is_private or ip.is_loopback or ip.is_link_local
-            or ip.is_reserved or ip.is_multicast or ip.is_unspecified
-        ):
-            raise HTTPException(status_code=422, detail="That host is not allowed.")
-    return raw.strip()
+        return validate_url(raw)
+    except URLValidationError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+async def _fetch_public_page(raw_url: str) -> tuple[str, str, bytes]:
+    """Fetch a bounded public page while validating every redirect hop.
+
+    Following redirects in ``httpx`` without inspecting each target allows a
+    public URL to redirect the backend into loopback, private, or cloud
+    metadata networks. The URL validator is therefore applied before every
+    request. Streaming also prevents a hostile response from allocating an
+    unbounded body before the size cap is enforced.
+    """
+    current = _guard_public_url(raw_url)
+    async with httpx.AsyncClient(follow_redirects=False, timeout=_FETCH_TIMEOUT) as client:
+        for _ in range(5):
+            try:
+                async with client.stream(
+                    "GET", current, headers={"User-Agent": "OraOneBot/1.0"}
+                ) as resp:
+                    if resp.status_code in {301, 302, 303, 307, 308}:
+                        location = resp.headers.get("location")
+                        if not location:
+                            raise HTTPException(status_code=502, detail="Redirect response has no location.")
+                        try:
+                            current = validate_url(urljoin(current, location))
+                        except URLValidationError as exc:
+                            raise HTTPException(status_code=422, detail=str(exc)) from exc
+                        continue
+
+                    resp.raise_for_status()
+                    content_length = resp.headers.get("content-length")
+                    if content_length and int(content_length) > _MAX_FETCH_BYTES:
+                        raise HTTPException(status_code=413, detail="The page is too large to ingest.")
+
+                    chunks: list[bytes] = []
+                    total = 0
+                    async for chunk in resp.aiter_bytes():
+                        total += len(chunk)
+                        if total > _MAX_FETCH_BYTES:
+                            raise HTTPException(status_code=413, detail="The page is too large to ingest.")
+                        chunks.append(chunk)
+                    return current, resp.headers.get("content-type", "text/html"), b"".join(chunks)
+            except HTTPException:
+                raise
+            except (httpx.HTTPError, ValueError) as exc:
+                raise HTTPException(status_code=502, detail="Could not fetch the page safely.") from exc
+
+    raise HTTPException(status_code=502, detail="Too many redirects while fetching the page.")
 
 
 async def _kb_for_org(session: AsyncSession, *, kb_id: uuid.UUID, organization_id: uuid.UUID) -> KnowledgeBase:
@@ -197,19 +229,13 @@ async def ingest_website(
     kb = await _kb_for_org(session, kb_id=payload.knowledge_base_id, organization_id=ctx.organization_id)
     await _validate_folder(session, folder_id=payload.folder_id, kb=kb, organization_id=ctx.organization_id)
 
-    try:
-        async with httpx.AsyncClient(follow_redirects=True, timeout=_FETCH_TIMEOUT) as client:
-            resp = await client.get(url, headers={"User-Agent": "OraOneBot/1.0"})
-            resp.raise_for_status()
-            body = resp.content[:_MAX_FETCH_BYTES]
-    except httpx.HTTPError as e:
-        raise HTTPException(status_code=502, detail=f"Could not fetch the page: {e}") from e
+    final_url, response_content_type, body = await _fetch_public_page(url)
 
     if not body:
         raise HTTPException(status_code=422, detail="The page returned no content.")
 
-    host = urlparse(url).hostname or "page"
-    content_type = resp.headers.get("content-type", "text/html").split(";")[0].strip() or "text/html"
+    host = urlparse(final_url).hostname or "page"
+    content_type = response_content_type.split(";")[0].strip() or "text/html"
     if content_type not in {"text/html", "text/plain", "application/json"}:
         content_type = "text/html"
     filename = f"{host}.html" if content_type == "text/html" else f"{host}.txt"
@@ -217,7 +243,7 @@ async def ingest_website(
     return await _ingest(
         session, background_tasks, kb=kb, organization_id=ctx.organization_id,
         user_id=ctx.user_id, filename=filename, content_type=content_type, body=body,
-        folder_id=payload.folder_id, source="website", source_ref=url,
+        folder_id=payload.folder_id, source="website", source_ref=final_url,
     )
 
 
