@@ -117,10 +117,8 @@ services:
       - backend
 
   workers:
-    build:
-      context: ./backend
-      args:
-        APP_VERSION: ${ORAONE_VERSION:-v1.0.0}
+    # The worker runs the same image as the API. Build it once via the backend
+    # service to avoid concurrent duplicate exports for the same version tag.
     image: oraone-backend:${ORAONE_VERSION:-v1.0.0}
     container_name: oraone-workers
     restart: unless-stopped

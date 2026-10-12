@@ -4,6 +4,7 @@
 
 - Recreate the edge proxy after deployment so bind-mounted Caddy configuration changes are applied.
 - Require HTTPS security-header checks at the edge before publishing the release tag.
+- Build the shared API/worker image once per release to prevent conflicting concurrent image exports.
 
 ## v1.0.8 — Preserve frontend security headers
 
