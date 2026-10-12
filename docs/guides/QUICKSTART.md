@@ -51,7 +51,6 @@ The backend loads backend/.env automatically. Create it locally and keep it igno
 From the repository root:
 
 ```powershell
-Copy-Item backend/.env.example backend/.env
 $jwt = python -c "import secrets; print(secrets.token_urlsafe(48))"
 @"
 ENVIRONMENT=development
@@ -99,7 +98,6 @@ If PowerShell blocks activation, invoke the interpreter directly as backend\.ven
 From the repository root:
 
 ```bash
-cp backend/.env.example backend/.env
 JWT_SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')" python3 - <<'PY'
 from pathlib import Path
 import os
@@ -145,7 +143,14 @@ The shell variable and generated backend file contain a local secret. Do not pas
 Open a second terminal at the repository root:
 
 ```powershell
-Copy-Item frontend/.env.example frontend/.env
+@"
+REACT_APP_ENV=development
+REACT_APP_API_URL=http://localhost:8000
+REACT_APP_AUTH_PROVIDER=self_hosted
+REACT_APP_COGNITO_DOMAIN=
+REACT_APP_COGNITO_CLIENT_ID=
+REACT_APP_COGNITO_REDIRECT_URI=http://localhost:3000/auth/callback
+"@ | Set-Content frontend/.env
 cd frontend
 npm ci
 $env:PORT = "3000"
@@ -155,13 +160,20 @@ npm start
 Linux/macOS:
 
 ```bash
-cp frontend/.env.example frontend/.env
+cat > frontend/.env <<'EOF'
+REACT_APP_ENV=development
+REACT_APP_API_URL=http://localhost:8000
+REACT_APP_AUTH_PROVIDER=self_hosted
+REACT_APP_COGNITO_DOMAIN=
+REACT_APP_COGNITO_CLIENT_ID=
+REACT_APP_COGNITO_REDIRECT_URI=http://localhost:3000/auth/callback
+EOF
 cd frontend
 npm ci
 PORT=3000 npm start
 ```
 
-The frontend uses http://localhost:8000 from frontend/.env.example and runs at http://localhost:3000. If port 3000 is occupied, use port 3001 and set CORS_ORIGINS and FRONTEND_URL in backend/.env to include http://localhost:3001.
+The frontend uses http://localhost:8000 from the generated frontend/.env and runs at http://localhost:3000. If port 3000 is occupied, use port 3001 and set CORS_ORIGINS and FRONTEND_URL in backend/.env to include http://localhost:3001.
 
 ## 4. Verify the local stack
 

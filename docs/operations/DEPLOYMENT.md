@@ -14,6 +14,12 @@ This describes the production-like Compose artifact. It does not claim Hostinger
 
 Caddy terminates TLS and routes /api/* to FastAPI. Other services remain private.
 
+## Manual GitHub deployment
+
+Production deployment is intentionally manual. Run the **Manual Hostinger deployment** workflow from the GitHub Actions UI, select `main`, and type `DEPLOY`. The job rejects every other branch and verifies the exact fetched SHA plus `/api/health/ready` after Compose starts.
+
+The protected `production` environment must contain `HOSTINGER_HOST`, `HOSTINGER_USER`, `HOSTINGER_SSH_KEY`, and `HOSTINGER_KNOWN_HOSTS`. The deployment host keeps `.env.production` and `backend/.env` outside Git; the workflow never accepts secrets as workflow inputs and never prints them.
+
 Keep previous image tags and Git SHA. Roll back by redeploying the previous image while preserving a compatible schema. Reverse migrations only with a reviewed down migration and verified backup.
 
 ## Hostinger deployment

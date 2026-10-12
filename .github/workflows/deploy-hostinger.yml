@@ -1,0 +1,58 @@
+name: Manual Hostinger deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type DEPLOY to deploy the latest main commit'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hostinger-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy main to Hostinger
+    if: github.ref == 'refs/heads/main' && inputs.confirm == 'DEPLOY'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out the selected main commit
+        uses: actions/checkout@v5
+
+      - name: Configure deployment SSH
+        env:
+          HOSTINGER_SSH_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+          HOSTINGER_KNOWN_HOSTS: ${{ secrets.HOSTINGER_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$HOSTINGER_SSH_KEY"
+          test -n "$HOSTINGER_KNOWN_HOSTS"
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$HOSTINGER_SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$HOSTINGER_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+
+      - name: Deploy and verify the stack
+        env:
+          HOSTINGER_HOST: ${{ secrets.HOSTINGER_HOST }}
+          HOSTINGER_USER: ${{ secrets.HOSTINGER_USER }}
+        run: |
+          set -euo pipefail
+          test -n "$HOSTINGER_HOST"
+          test -n "$HOSTINGER_USER"
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTINGER_USER@$HOSTINGER_HOST" 'bash -se' <<'REMOTE'
+          set -euo pipefail
+          cd /srv/apps/oraone
+          git fetch origin main
+          git checkout -B main origin/main
+          docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build --remove-orphans
+          docker compose --env-file .env.production -f docker-compose.prod.yml ps
+          curl --fail --silent --show-error http://127.0.0.1/api/health/ready
+          printf '\nDeployment verified at %s\n' "$(git rev-parse HEAD)"
+          REMOTE

@@ -117,9 +117,7 @@ credentials.json
 *.key
 .credentials
 
-# but DO allow committed example env templates
-!**/.env.example
-!**/.env.local.example
+# The only tracked environment file is the browser-safe production build config.
 !frontend/.env.production
 !LOCAL_SETUP.md
 

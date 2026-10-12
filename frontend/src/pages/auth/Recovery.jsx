@@ -34,6 +34,7 @@ const fmt = (s) =>
   `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
 function CognitoManagedAuthNotice({ title, message, endpoint = "login" }) {
+  const isCodeFlow = endpoint === "signup" || endpoint === "forgotPassword";
   return (
     <AuthShell cardTestId="cognito-managed-auth">
       <IconBadge icon={Mail} />
@@ -43,6 +44,27 @@ function CognitoManagedAuthNotice({ title, message, endpoint = "login" }) {
       <p className="mt-2 text-center text-sm leading-relaxed text-[#64748B]">
         {message}
       </p>
+      {isCodeFlow && (
+        <div className="mt-6 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">
+            Your secure email code
+          </p>
+          <div className="mt-3 flex justify-center gap-2" aria-hidden="true">
+            {Array.from({ length: 6 }, (_, index) => (
+              <span
+                key={index}
+                className="grid size-9 place-items-center rounded-lg border border-[#CBD5E1] bg-white text-lg font-semibold text-[#CBD5E1] shadow-sm"
+              >
+                •
+              </span>
+            ))}
+          </div>
+          <p className="mt-3 text-xs leading-relaxed text-[#64748B]">
+            Cognito will open the secure verification page. Enter the 6-digit
+            code from your email there; OraOne never reads or stores it.
+          </p>
+        </div>
+      )}
       <div className="mt-8">
         <GradientButton
           type="button"

@@ -135,7 +135,7 @@ if ($LASTEXITCODE -ne 0) {
   Add-Failure "git ls-files failed with exit code $LASTEXITCODE"
 }
 foreach ($path in $tracked) {
-  $approvedTemplate = $path -in @("backend/.env.example", "frontend/.env.example", "frontend/.env.production")
+  $approvedTemplate = $path -eq "frontend/.env.production"
   if (-not $approvedTemplate -and $path -match "(^|/)\.env$|(^|/)\.env\.(?!example$)|(^|/).*\.pem$|(^|/).*\.key$") {
     Add-Failure "Tracked secret-like path: $path"
   }

@@ -126,7 +126,6 @@ cd backend
 python -m venv .venv
 .\\.venv\\Scripts\\Activate.ps1
 python -m pip install -r requirements.txt
-Copy-Item .env.example .env
 $jwt = python -c "import secrets; print(secrets.token_urlsafe(48))"
 @"
 ENVIRONMENT=development

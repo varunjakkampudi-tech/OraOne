@@ -6,15 +6,13 @@ This page is based on the files and loaders present in the repository. Paths are
 
 | Path | Tracked intentionally? | Contents | Handling |
 | --- | --- | --- | --- |
-| backend/.env.example | Yes | Backend variable template with blank or placeholder values | Safe to review and commit; never use placeholder provider credentials in production |
-| frontend/.env.example | Yes | Browser-safe REACT_APP_* development defaults | Safe to review and commit; only public build values belong here |
 | frontend/.env.production | Yes, deliberately | Public frontend build configuration for the same-origin deployment | Contains no backend secrets; values are bundled into the browser and must remain non-sensitive |
-| backend/.env | No | Local backend secrets and local overrides | Ignored; create from the quickstart |
-| frontend/.env | No | Local frontend overrides | Ignored; create from frontend/.env.example |
+| backend/.env | No | Local backend secrets and local overrides | Ignored; generate from the explicit Quick Start values |
+| frontend/.env | No | Local frontend overrides | Ignored; generate from the explicit Quick Start values |
 | .env.production | No | Compose interpolation and deployment secrets | Ignored; never commit |
 | frontend/build/ and test output | No | Generated artifacts | Ignored; never commit |
 
-Verified repository paths include backend/.env.example, frontend/.env.example, frontend/.env.production, backend/app/core/config.py, backend/app/database/session.py, and both Compose files.
+Verified repository paths include frontend/.env.production, backend/app/core/config.py, backend/app/database/session.py, and both Compose files. No `.env.example` templates are tracked; the Quick Start creates local files directly so templates cannot be mistaken for complete production configuration.
 
 ## Local backend values
 
