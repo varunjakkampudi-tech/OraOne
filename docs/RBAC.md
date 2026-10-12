@@ -44,22 +44,19 @@ workspace owner/admin privileges and tenant isolation are preserved.
 
 ## Deployment evidence and production gate
 
-Local verification on 11 October 2026:
+Latest repository verification on 12 October 2026:
 
-- Alembic reports `0045_platform_roles (head) (mergepoint)` after applying the
-  migration to the local development database.
-- Backend suite: `133 passed, 2 warnings`.
-- RBAC, authorization, and tenant-isolation subset: `57 passed`.
-- Frontend Cognito E2E suite: `4 passed`.
-- Frontend production build: passed.
-- ESLint 9: 0 errors; 184 warnings remain, consisting of 179 existing
-  `no-unused-vars` warnings or stale-disable warnings. No active hook or
-  security-rule warnings were reported.
+- Hosted backend suite: `135 passed, 19 skipped`.
+- Hosted API health smoke: passed, including documented safe API route probes.
+- Hosted frontend Cognito E2E suite: `4 passed` serially.
+- Hosted frontend production build, strict ESLint and formatting checks: passed.
+- The earlier local RBAC subset (`57 passed`) is historical evidence, not a
+  current production authorization test.
 
-Production is **not verified** from this checkout. No independently verified
-production backup, production database identity, or live Cognito authorization
-test is available here, so `alembic upgrade head` must not be run against a
-guessed or local connection.
+Production RBAC is **not verified** from this checkout. No independently
+verified production backup, production database identity, or live Cognito
+authorization test is available here, so `alembic upgrade head` must not be
+run against a guessed or local connection.
 
 Before deployment:
 

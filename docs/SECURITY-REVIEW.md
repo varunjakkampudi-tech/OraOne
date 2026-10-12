@@ -10,7 +10,7 @@ This is a repository review, not a penetration test or certification.
 | Legacy EC2/Pages deployment paths | High | Fixed | Workflows and EC2 stack removed |
 | HS256-only authentication | High | Fixed in code / live cutover unverified | Cognito JWKS validation and email-only session flow are implemented; production live cutover remains untested |
 | Documented local admin default | High | Fixed in template | Empty values now required; no DB mutation performed |
-| Unsafe AI fallback in production | High | Open | Disable/isolate and verify provider failure behavior before hosting |
+| Unsafe AI fallback in production | High | Fixed in code / live provider unverified | Production-like environments reject explicit mock inference; credentialed provider failure behavior still needs live verification |
 | Billing, crawler, uploads, prompt injection | High | Open | Independent review and targeted tests remain required |
 | Customer webhook SSRF | High | Fixed in code / infrastructure follow-up | Public-host validation, delivery-time revalidation and redirect blocking are tested; deployment egress policy remains required |
 | API-key idempotency | High | Fixed in code | Public API no longer keeps a process-local replay map; centralized middleware uses the shared idempotency cache and fails closed when unavailable |
@@ -32,10 +32,15 @@ This is a repository review, not a penetration test or certification.
 - Cognito identity provisioning now requires an explicit positive
   `email_verified` signal from claims or the userinfo response.
 
-Hosting, production database migration/backup evidence, live inbox testing,
-external webhook delivery, billing-provider verification and deployment
-verification were intentionally not performed in this cleanup because hosting
-was explicitly deferred.
+The latest hosted CI run (12 October 2026, commit `cf4bd1f`) recorded
+`135 passed, 19 skipped` backend tests, a passing API health smoke job, and
+`4 passed` serial frontend E2E tests. The preceding manual Hostinger run
+verified the Compose deployment and `/api/health/ready` on the VPS, but the
+public domain still requires DNS cutover and an end-to-end HTTPS check.
+
+Production database migration/backup evidence, live inbox testing, external
+webhook delivery, billing-provider verification, provider usage/cost
+reconciliation, and secret-history scanning remain unverified.
 
 No production GO is allowed until Critical and High findings are fixed and
 independently verified or explicitly accepted by the product owner.
