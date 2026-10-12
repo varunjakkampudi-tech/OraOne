@@ -94,6 +94,9 @@ const Step3Channels = lazy(() => import("@/pages/onboarding/Step3Channels"));
 
 // Dashboard — lazy (large, only authenticated users see this)
 const Overview = lazy(() => import("@/pages/dashboard/Overview"));
+const ProductPortfolio = lazy(
+  () => import("@/pages/dashboard/ProductPortfolio"),
+);
 const Agents = lazy(() => import("@/pages/dashboard/Agents"));
 const AgentCreate = lazy(() => import("@/pages/dashboard/AgentCreate"));
 const CreateAgentWizard = lazy(
@@ -344,6 +347,10 @@ function App() {
                       element={<Navigate to="/app/dashboard" replace />}
                     />
                     <Route path="/app/dashboard" element={<Overview />} />
+                    <Route
+                      path="/app/products"
+                      element={<ProductPortfolio />}
+                    />
                     <Route
                       path="/app/overview"
                       element={<Navigate to="/app/dashboard" replace />}

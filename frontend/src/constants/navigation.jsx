@@ -24,6 +24,7 @@ import {
   LifeBuoy,
   Megaphone,
   Activity,
+  Layers3,
 } from "lucide-react";
 import { DASH } from "@/constants/testIds";
 
@@ -40,6 +41,17 @@ export const NAV_GROUPS = [
         label: "Dashboard",
         id: DASH.sidebarOverview,
         end: true,
+      },
+    ],
+  },
+  {
+    label: "Platform",
+    items: [
+      {
+        to: "/app/products",
+        icon: Layers3,
+        label: "Product portfolio",
+        id: "nav-product-portfolio",
       },
     ],
   },

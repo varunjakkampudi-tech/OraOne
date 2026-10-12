@@ -14,6 +14,7 @@ import CommandPalette from "@/components/dashboard/CommandPalette";
 // their title from `@/constants/navigation` so there's one source of truth.
 const TITLES = {
   "/app/dashboard": "Dashboard",
+  "/app/products": "Product portfolio",
   "/app/create-agent": "Create AI Agent",
   "/app/chat": "Chat",
   "/app/conversations": "Conversations",
