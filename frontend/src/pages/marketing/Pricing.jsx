@@ -218,7 +218,7 @@ export default function PricingPage() {
           >
             <div className="flex items-start sm:items-center gap-3">
               <span className="px-2.5 py-1 rounded-md bg-[#2563EB] text-white text-[10px] font-bold tracking-[0.18em]">
-                BETA
+                FREE ACCESS
               </span>
               <p className="text-[13.5px] text-[#0F172A]">
                 <span className="font-semibold">Free access for everyone.</span>{" "}

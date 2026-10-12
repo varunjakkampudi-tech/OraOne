@@ -379,7 +379,7 @@ export default function HomePage() {
                 </button>
                 <span className="text-xs text-[#64748B] inline-flex items-center gap-1">
                   <CheckCircle2 size={14} className="text-[#10B981]" /> Free
-                  during Beta · No credit card
+                  access · No payment method required
                 </span>
               </div>
             </motion.div>
@@ -412,7 +412,7 @@ export default function HomePage() {
             </h2>
             <p className="mt-4 text-[#64748B] leading-relaxed">
               OraOne is designed for reliability, scale and enterprise-grade
-              trust — from day one of your beta.
+              trust — from day one.
             </p>
           </motion.div>
 
@@ -626,7 +626,7 @@ export default function HomePage() {
             className="text-center max-w-2xl mx-auto mb-10"
           >
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFF6FF] text-[11px] font-bold tracking-[0.18em] text-[#2563EB] uppercase">
-              <Sparkles size={11} /> Free During Beta
+              <Sparkles size={11} /> Free Access · Billing Disabled
             </span>
             <h2 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tighter text-[#0F172A]">
               Simple, transparent pricing.
@@ -678,7 +678,7 @@ export default function HomePage() {
                       $0
                     </span>
                     <span className="text-[12px] text-[#64748B]">
-                      / during Beta
+                      / current release
                     </span>
                   </div>
                   <p className="mt-1 text-[11.5px] text-[#64748B]">{p.post}</p>
@@ -757,12 +757,12 @@ export default function HomePage() {
                   Start growing 24/7.
                 </h2>
                 <p className="mt-4 text-white/85 max-w-md leading-relaxed">
-                  Deploy your AI chat agents in days, not months — free during
-                  Beta Access.
+                  Deploy your AI chat agents in days, not months — free in the
+                  current release.
                 </p>
                 <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
                   {[
-                    "Free Beta Access",
+                    "Free access for everyone",
                     "No credit card required",
                     "Cancel anytime",
                   ].map((b) => (
