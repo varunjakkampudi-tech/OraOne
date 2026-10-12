@@ -4,22 +4,22 @@ on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: 'Type DEPLOY to deploy the latest main commit'
+        description: "Type DEPLOY to deploy the latest main commit"
         required: true
         type: string
       product:
-        description: 'OraOne portfolio product being released'
+        description: "OraOne portfolio product being released"
         required: true
         type: choice
         options:
           - product-1-ai-chat
         default: product-1-ai-chat
       release_version:
-        description: 'Semantic release version MAJOR.MINOR.PATCH, without the v prefix'
+        description: "Semantic release version MAJOR.MINOR.PATCH, without the v prefix"
         required: true
         type: string
       publish_tag:
-        description: 'Create an immutable release tag after deployment health checks pass'
+        description: "Create an immutable release tag after deployment health checks pass"
         required: true
         type: boolean
         default: true
@@ -145,8 +145,35 @@ jobs:
           env_path.write_text("\n".join(output) + "\n")
           PY
           docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build --remove-orphans
+          # Caddy's configuration is bind-mounted. Compose does not detect edits
+          # to a bind-mounted file, so recreate only the edge proxy to load the
+          # checked-out Caddyfile while leaving application/data containers up.
+          docker compose --env-file .env.production -f docker-compose.prod.yml up -d --force-recreate --no-deps proxy
           docker compose --env-file .env.production -f docker-compose.prod.yml ps
-          curl --fail --silent --show-error http://127.0.0.1/api/health/ready
+          app_ready=false
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1/api/health/ready >/dev/null; then
+              app_ready=true
+              break
+            fi
+            sleep 1
+          done
+          test "$app_ready" = true
+          edge_headers=""
+          for attempt in {1..30}; do
+            if edge_headers="$(curl --fail --silent --show-error --resolve oraone.in:443:127.0.0.1 --dump-header - --output /dev/null https://oraone.in/)" && grep -Fqi 'Strict-Transport-Security:' <<<"$edge_headers"; then break; fi
+            sleep 1
+          done
+          for expected in \
+            'Strict-Transport-Security:' \
+            'X-Frame-Options: DENY' \
+            'X-Content-Type-Options: nosniff' \
+            'Referrer-Policy: strict-origin-when-cross-origin'; do
+            grep -Fqi "$expected" <<<"$edge_headers" || {
+              echo "Missing production edge security header: $expected" >&2
+              exit 1
+            }
+          done
           printf '\nDeployment verified product=%s version=%s tag=%s commit=%s\n' "$ORAONE_PRODUCT_ID" "$ORAONE_VERSION" "$RELEASE_TAG" "$(git rev-parse HEAD)"
           REMOTE
           } | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o HostKeyAlias=201.18.193.230 "$HOSTINGER_USER@$HOSTINGER_HOST" 'bash -se'

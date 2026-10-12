@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.9 — Reload and verify edge proxy configuration
+
+- Recreate the edge proxy after deployment so bind-mounted Caddy configuration changes are applied.
+- Require HTTPS security-header checks at the edge before publishing the release tag.
+
 ## v1.0.8 — Preserve frontend security headers
 
 - Keep frame, permissions, referrer, and MIME-sniffing protections on the SPA entry point and immutable assets despite Nginx `add_header` inheritance rules.
