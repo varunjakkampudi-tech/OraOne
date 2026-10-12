@@ -36,10 +36,24 @@ jobs:
           test -n "$HOSTINGER_HOST"
           test -n "$HOSTINGER_KNOWN_HOSTS"
           install -d -m 700 "$HOME/.ssh"
-          printf '%s\n' "$HOSTINGER_SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          HOSTINGER_SSH_KEY="$HOSTINGER_SSH_KEY" python3 - <<'PY'
+          from pathlib import Path
+          import os
+
+          value = os.environ["HOSTINGER_SSH_KEY"]
+          # GitHub secrets may arrive with literal escaped newlines or CRLF
+          # after a browser paste. Normalize only the key material in-memory.
+          if "\\n" in value and "\n" not in value:
+              value = value.replace("\\n", "\n")
+          value = value.replace("\r\n", "\n").replace("\r", "\n")
+          if not value.endswith("\n"):
+              value += "\n"
+          Path(os.environ["HOME"], ".ssh", "id_ed25519").write_text(value)
+          PY
           printf '%s\n' "$HOSTINGER_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           test -s "$HOME/.ssh/known_hosts"
           chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_ed25519" > /dev/null
 
       - name: Deploy and verify the stack
         env:
