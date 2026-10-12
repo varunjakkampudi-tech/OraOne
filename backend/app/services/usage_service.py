@@ -65,6 +65,11 @@ METERED_METRICS: dict[str, dict] = {
         "limit_key": "ai_messages_per_day",
         "granularity": "day",
     },
+    "ai_tokens": {
+        "label": "AI Tokens / month",
+        "limit_key": "ai_tokens_per_month",
+        "granularity": "month",
+    },
     "workflow_runs": {
         "label": "Workflow Runs / mo",
         "limit_key": None,

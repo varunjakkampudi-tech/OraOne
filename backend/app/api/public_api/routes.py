@@ -344,6 +344,12 @@ async def chat_v1(
             data={"conversation_id": conversation_id, "message": payload.message[:500]},
         )
         await session.commit()
+        await usage_service.record_usage(
+            session,
+            key.organization_id,
+            "ai_tokens",
+            max(0, total_tokens + (user_msg.token_count or 0)),
+        )
 
     response = {
         "object": "chat.completion",

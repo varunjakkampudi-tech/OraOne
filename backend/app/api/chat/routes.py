@@ -714,6 +714,12 @@ async def send_message(
 
     # Phase 12 Module 2: record one AI message against the daily meter.
     await usage_service.record_usage(session, ctx.organization_id, "ai_messages", 1)
+    await usage_service.record_usage(
+        session,
+        ctx.organization_id,
+        "ai_tokens",
+        max(0, int(ai.usage.total_tokens or 0)),
+    )
 
     _audit(
         "response_generated",

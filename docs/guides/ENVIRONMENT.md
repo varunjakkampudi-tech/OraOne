@@ -46,6 +46,15 @@ The actual values are deployment configuration, not secrets. Do not put database
 | Production-like Compose | Cognito values, explicit database/storage secrets, domain, and provider settings | Preflight and controlled deployment preparation |
 | Actual production | Verified host, DNS, backups, monitoring, live identity and provider evidence | Not established by this repository |
 
+## Free access and usage accounting
+
+OraOne currently grants free access to all users. `ORAONE_FREE_ACCESS_ONLY` is
+`true` by default and paid checkout, portals, invoices, and payment webhooks
+remain disabled. Do not add Stripe or other payment credentials to the
+environment. The backend still records durable PostgreSQL usage counters for
+AI messages, provider-reported AI tokens, API calls, workflows, and documents.
+Usage limits are product controls, not charges.
+
 Generate local JWT_SECRET_KEY with Python secrets. Never reuse it in production or commit it.
 
 ## Storage and provider values

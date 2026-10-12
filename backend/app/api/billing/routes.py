@@ -62,6 +62,8 @@ async def list_plans(
         # Lazily seed on first read so fresh databases work out of the box.
         await billing_service.ensure_plans_seeded(session)
         plans = await repo.list_plans()
+    if billing_service.FREE_ACCESS_ONLY:
+        plans = [p for p in plans if p.code.value == "free"]
     return PlanListResponse(
         items=[PlanRead.model_validate(p) for p in plans], total=len(plans)
     )
@@ -199,8 +201,8 @@ async def stripe_webhook(
     """Verify and process Stripe events (real mode only)."""
     if not billing_service.stripe_enabled():
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Stripe billing is not configured.",
+            status_code=status.HTTP_410_GONE,
+            detail="Paid billing is disabled. OraOne currently provides free access to all users.",
         )
 
     import stripe

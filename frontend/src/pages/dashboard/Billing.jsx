@@ -12,22 +12,16 @@ import {
   Download,
   Receipt,
   Gauge,
-  ArrowUpRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { toast } from "sonner";
-import { api, formatApiError } from "@/lib/api";
-import { usePermissions } from "@/hooks/usePermissions";
+import { api } from "@/lib/api";
 import {
   PageHeader,
   Card,
-  Segmented,
   Badge,
   GhostButton,
   EmptyState,
 } from "@/components/dashboard/kit";
-
-const POPULAR_CODE = "business";
 
 const PLAN_ICONS = {
   free: Sparkles,
@@ -47,14 +41,10 @@ function money(cents, currency = "usd") {
 }
 
 export default function Billing() {
-  const { can } = usePermissions();
-  const canManage = can("billing.manage");
   const [plans, setPlans] = useState([]);
   const [subscription, setSubscription] = useState(null);
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cycle, setCycle] = useState("monthly");
-  const [busyCode, setBusyCode] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -66,7 +56,6 @@ export default function Billing() {
     if (p.status === "fulfilled") setPlans(p.value.data.items || []);
     if (s.status === "fulfilled") {
       setSubscription(s.value.data);
-      if (s.value.data?.billing_cycle) setCycle(s.value.data.billing_cycle);
     }
     if (i.status === "fulfilled") setInvoices(i.value.data.items || []);
     setLoading(false);
@@ -77,57 +66,6 @@ export default function Billing() {
   }, [load]);
 
   const currentCode = subscription?.plan?.code;
-
-  const upgrade = async (plan) => {
-    if (plan.code === "enterprise" && !plan.price_cents) {
-      window.location.href = "mailto:sales@oraone.in?subject=Enterprise%20plan";
-      return;
-    }
-    setBusyCode(plan.code);
-    try {
-      const { data } = await api.post("/billing/checkout", {
-        plan_code: plan.code,
-        billing_cycle: cycle,
-      });
-      if (data.mode === "stripe" && data.checkout_url) {
-        window.location.href = data.checkout_url;
-        return;
-      }
-      toast.success(data.message || `Switched to ${plan.name}.`);
-      await load();
-    } catch (e) {
-      toast.error(formatApiError(e));
-    } finally {
-      setBusyCode(null);
-    }
-  };
-
-  const openPortal = async () => {
-    try {
-      const { data } = await api.post("/billing/portal");
-      if (data.portal_url && data.mode === "stripe") {
-        window.location.href = data.portal_url;
-      } else {
-        toast.info(
-          data.message || "Customer portal not available in mock mode.",
-        );
-      }
-    } catch (e) {
-      toast.error(formatApiError(e));
-    }
-  };
-
-  const cancel = async () => {
-    if (!window.confirm("Cancel your subscription at the end of the period?"))
-      return;
-    try {
-      const { data } = await api.post("/billing/cancel");
-      setSubscription(data);
-      toast.success("Subscription will cancel at period end.");
-    } catch (e) {
-      toast.error(formatApiError(e));
-    }
-  };
 
   const renewal = subscription?.current_period_end
     ? new Date(subscription.current_period_end).toLocaleDateString()
@@ -146,7 +84,7 @@ export default function Billing() {
         eyebrow="Billing"
         icon={CreditCard}
         title="Plans & subscription"
-        subtitle="Choose the plan that fits your team and manage invoices — upgrades apply instantly."
+        subtitle="OraOne is free for every user. This page shows your access tier and real usage accounting."
         actions={
           <>
             <GhostButton as={Link} to="/app/usage">
@@ -184,33 +122,12 @@ export default function Billing() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <GhostButton onClick={openPortal}>Manage billing</GhostButton>
-            {canManage &&
-              currentCode &&
-              currentCode !== "free" &&
-              !subscription?.cancel_at_period_end && (
-                <button
-                  onClick={cancel}
-                  className="rounded-xl border border-[#FECACA] px-4 py-2 text-sm font-semibold text-[#B91C1C] transition-colors hover:bg-[#FEF2F2]"
-                >
-                  Cancel
-                </button>
-              )}
+            <span className="text-sm font-semibold text-[#067647]">
+              No payment required
+            </span>
           </div>
         </div>
       </Card>
-
-      {/* Billing cycle toggle */}
-      <div className="flex items-center justify-center">
-        <Segmented
-          value={cycle}
-          onChange={setCycle}
-          options={[
-            { value: "monthly", label: "Monthly" },
-            { value: "yearly", label: "Yearly", badge: "2 months free" },
-          ]}
-        />
-      </div>
 
       {/* Plan grid */}
       {loading ? (
@@ -222,11 +139,7 @@ export default function Billing() {
           {plans.map((plan, i) => {
             const Icon = PLAN_ICONS[plan.code] || Sparkles;
             const isCurrent = plan.code === currentCode;
-            const isPopular = plan.code === POPULAR_CODE && !isCurrent;
-            const price =
-              cycle === "yearly" ? plan.price_cents_yearly : plan.price_cents;
-            const isEnterprise =
-              plan.code === "enterprise" && !plan.price_cents;
+            const price = plan.price_cents;
             return (
               <motion.div
                 key={plan.id}
@@ -236,20 +149,13 @@ export default function Billing() {
                 className={`relative flex flex-col rounded-2xl border bg-white p-6 transition-all ${
                   isCurrent
                     ? "border-[#2563EB] ring-1 ring-[#2563EB] shadow-[0_16px_36px_-16px_rgba(37,99,235,0.30)]"
-                    : isPopular
-                      ? "border-[#C7D2FE] shadow-[0_16px_36px_-16px_rgba(79,70,229,0.25)]"
-                      : "border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04)] hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-16px_rgba(16,24,40,0.18)]"
+                    : "border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04)] hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-16px_rgba(16,24,40,0.18)]"
                 }`}
               >
-                {isPopular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#2563EB] to-[#4F46E5] px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.7)]">
-                    Most popular
-                  </span>
-                )}
                 <div className="flex items-center justify-between">
                   <div
                     className={`grid size-10 place-items-center rounded-xl ${
-                      isCurrent || isPopular
+                      isCurrent
                         ? "bg-gradient-to-br from-[#2563EB] to-[#4F46E5] text-white"
                         : "bg-[#EFF4FF] text-[#2563EB]"
                     }`}
@@ -265,22 +171,9 @@ export default function Billing() {
                   {plan.description}
                 </p>
                 <div className="mt-3">
-                  {isEnterprise ? (
-                    <span className="text-2xl font-extrabold text-[#0F172A]">
-                      Custom
-                    </span>
-                  ) : (
-                    <>
-                      <span className="text-[32px] font-extrabold tracking-tight text-[#0F172A]">
-                        {money(price, plan.currency)}
-                      </span>
-                      {price > 0 && (
-                        <span className="text-sm text-[#64748B]">
-                          /{cycle === "yearly" ? "yr" : "mo"}
-                        </span>
-                      )}
-                    </>
-                  )}
+                  <span className="text-[32px] font-extrabold tracking-tight text-[#0F172A]">
+                    {money(price, plan.currency)}
+                  </span>
                 </div>
                 <ul className="mt-4 flex-1 space-y-2">
                   {(plan.features || []).map((f) => (
@@ -296,27 +189,10 @@ export default function Billing() {
                   ))}
                 </ul>
                 <button
-                  disabled={isCurrent || busyCode === plan.code || !canManage}
-                  onClick={() => upgrade(plan)}
-                  className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition ${
-                    isCurrent || !canManage
-                      ? "cursor-default bg-[#F1F5F9] text-[#94A3B8]"
-                      : isPopular || isCurrent
-                        ? "bg-gradient-to-r from-[#2563EB] to-[#4F46E5] text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)] hover:opacity-95"
-                        : "bg-[#0F172A] text-white hover:bg-[#1E293B]"
-                  }`}
+                  disabled
+                  className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition ${"cursor-default bg-[#F1F5F9] text-[#94A3B8]"}`}
                 >
-                  {busyCode === plan.code && (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  )}
-                  {isCurrent
-                    ? "Current plan"
-                    : isEnterprise
-                      ? "Contact sales"
-                      : "Choose plan"}
-                  {!isCurrent && !isEnterprise && busyCode !== plan.code && (
-                    <ArrowUpRight className="h-4 w-4" />
-                  )}
+                  {isCurrent ? "Current free access" : "Unavailable"}
                 </button>
               </motion.div>
             );
@@ -342,7 +218,7 @@ export default function Billing() {
             <EmptyState
               icon={Receipt}
               title="No invoices yet"
-              hint="Upgrade to a paid plan and your billing history will appear here."
+              hint="Paid billing is disabled. Real AI token and usage totals are available on the Usage page."
             />
           </div>
         ) : (

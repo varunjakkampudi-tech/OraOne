@@ -33,6 +33,14 @@ from app.database.models.organization import Organization, OrgPlan
 
 log = logging.getLogger("app.billing")
 
+# Free access is the product policy. A secret in the environment must never
+# activate payment processing by itself.
+FREE_ACCESS_ONLY = os.getenv("ORAONE_FREE_ACCESS_ONLY", "true").strip().lower() not in {
+    "0",
+    "false",
+    "no",
+}
+
 # ── plan catalogue (source of truth for seeding) ──
 # limits: -1 means unlimited. storage in MB.
 PLAN_CATALOGUE: list[dict] = [
@@ -46,16 +54,17 @@ PLAN_CATALOGUE: list[dict] = [
         "features": [
             "1 Workspace",
             "2 Users",
-            "2 Agents",
+            "10 Agents",
             "500 MB Storage",
             "100 AI Messages/day",
         ],
         "limits": {
             "users": 2,
-            "agents": 2,
+            "agents": 10,
             "knowledge_bases": 1,
             "storage_mb": 500,
             "ai_messages_per_day": 100,
+            "ai_tokens_per_month": 250000,
             "workflows": 1,
             "integrations": 1,
             "api_rpm": 0,
@@ -150,6 +159,8 @@ _ORG_PLAN_MAP = {
 
 
 def stripe_enabled() -> bool:
+    if FREE_ACCESS_ONLY:
+        return False
     if not os.getenv("STRIPE_SECRET_KEY"):
         return False
     try:
@@ -167,9 +178,15 @@ def _now() -> datetime:
 async def ensure_plans_seeded(session: AsyncSession) -> int:
     """Insert any catalogue plans missing from the DB. Idempotent."""
     created = 0
+    changed = False
     for spec in PLAN_CATALOGUE:
         existing = await session.scalar(select(Plan).where(Plan.code == spec["code"]))
         if existing is not None:
+            if FREE_ACCESS_ONLY and spec["code"] == PlanCode.free:
+                for field in ("name", "description", "price_cents", "price_cents_yearly", "features", "limits"):
+                    if getattr(existing, field) != spec[field]:
+                        setattr(existing, field, spec[field])
+                        changed = True
             continue
         session.add(
             Plan(
@@ -186,9 +203,9 @@ async def ensure_plans_seeded(session: AsyncSession) -> int:
             )
         )
         created += 1
-    if created:
+    if created or changed:
         await session.commit()
-        log.info("seeded %d plans", created)
+        log.info("synchronised billing catalogue: created=%d changed=%s", created, changed)
     return created
 
 
@@ -203,14 +220,30 @@ async def get_or_create_subscription(
     # Until real Stripe billing is integrated, every workspace runs on the
     # Missing Stripe must never grant paid entitlements. Existing paid rows are
     # left intact for reconciliation; new rows always start on Free.
-    environment = os.environ.get("ENVIRONMENT", "development").strip().lower()
-    seed_code = (
-        PlanCode.free
-        if environment in {"production", "prod", "staging"}
-        else PlanCode.starter
-    )
+    seed_code = PlanCode.free
 
     if sub is not None:
+        if FREE_ACCESS_ONLY:
+            await ensure_plans_seeded(session)
+        current_plan = await session.scalar(select(Plan).where(Plan.id == sub.plan_id))
+        if FREE_ACCESS_ONLY and current_plan and current_plan.code != PlanCode.free:
+            free_plan = await session.scalar(
+                select(Plan).where(Plan.code == PlanCode.free)
+            )
+            if free_plan is None:
+                await ensure_plans_seeded(session)
+                free_plan = await session.scalar(
+                    select(Plan).where(Plan.code == PlanCode.free)
+                )
+            if free_plan is not None:
+                sub.plan_id = free_plan.id
+                sub.status = SubscriptionStatus.active
+                sub.cancel_at_period_end = False
+                org = await session.get(Organization, organization_id)
+                if org is not None:
+                    org.plan = OrgPlan.free
+                await session.commit()
+                await session.refresh(sub)
         return sub
 
     base_plan = await session.scalar(select(Plan).where(Plan.code == seed_code))
@@ -305,7 +338,11 @@ async def create_checkout(
     success_url: str,
     cancel_url: str,
 ) -> dict:
-    """Begin a real paid upgrade; unavailable billing fails closed."""
+    """Reject paid upgrades while OraOne is free for every user."""
+    if FREE_ACCESS_ONLY:
+        raise RuntimeError(
+            "Paid billing is disabled. OraOne currently provides free access to all users."
+        )
     plan = await session.scalar(select(Plan).where(Plan.code == plan_code))
     if plan is None:
         raise ValueError(f"Unknown plan '{plan_code}'.")
@@ -369,8 +406,10 @@ async def create_checkout(
 async def cancel_subscription(
     session: AsyncSession, organization_id: uuid.UUID
 ) -> Subscription:
-    """Schedule cancellation at period end (downgrades to Free)."""
+    """Return the active free subscription; there is nothing to cancel."""
     sub = await get_or_create_subscription(session, organization_id)
+    if FREE_ACCESS_ONLY:
+        return sub
     sub.cancel_at_period_end = True
     if stripe_enabled() and sub.stripe_subscription_id:
         import stripe
@@ -393,11 +432,11 @@ async def create_portal(
     *,
     return_url: str,
 ) -> dict:
-    if not stripe_enabled():
+    if FREE_ACCESS_ONLY or not stripe_enabled():
         return {
             "mode": "disabled",
             "portal_url": return_url,
-            "message": "Billing portal is unavailable until Stripe is configured.",
+            "message": "Paid billing is disabled while OraOne is free for all users.",
         }
     import stripe
 
