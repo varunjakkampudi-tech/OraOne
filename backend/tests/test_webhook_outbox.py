@@ -342,7 +342,9 @@ async def test_partial_fanout_retries_only_failed_endpoint(db_session, monkeypat
         assert second_result.succeeded == 0 and second_result.failed == 1
         assert calls.count(first.id) == 1
         assert calls.count(second.id) == 6  # three HTTP attempts per outbox delivery
-        assert len(rows) == 3  # one success plus one failed attempt per delivery run
+        assert len(rows) == 2  # one durable row per endpoint/event identity
+        failed = next(row for row in rows if row.endpoint_id == second.id)
+        assert failed.attempts == 6
     finally:
         await db_session.execute(
             delete(WebhookEndpoint).where(WebhookEndpoint.organization_id == org_id)

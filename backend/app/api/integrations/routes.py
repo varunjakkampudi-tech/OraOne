@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import logging
 import os
+import hashlib
 import time
 import uuid
 from typing import Optional
@@ -78,6 +79,7 @@ from app.schemas.integrations import (
 )
 from app.services import oauth_service
 from app.services.audit import audit
+from app.services.cache import get_shared_cache
 from app.services.sync_service import run_sync
 
 log = logging.getLogger("app.integrations")
@@ -113,11 +115,23 @@ def issue_oauth_state(*, provider: str, organization_id: uuid.UUID, user_id) -> 
         "iat": now,
         "exp": now + _STATE_TTL_SECONDS,
     }
-    return jose_jwt.encode(claims, _state_secret(), algorithm=_STATE_ALG)
+    token = jose_jwt.encode(claims, _state_secret(), algorithm=_STATE_ALG)
+    get_shared_cache("oauth-state").set(
+        f"state:{hashlib.sha256(token.encode()).hexdigest()}",
+        claims,
+        ttl_seconds=_STATE_TTL_SECONDS,
+    )
+    return token
 
 
 def verify_oauth_state(token: str) -> dict:
-    return jose_jwt.decode(token, _state_secret(), algorithms=[_STATE_ALG])
+    claims = jose_jwt.decode(token, _state_secret(), algorithms=[_STATE_ALG])
+    cached = get_shared_cache("oauth-state").consume(
+        f"state:{hashlib.sha256(token.encode()).hexdigest()}"
+    )
+    if cached is None or cached != claims:
+        raise JWTError("OAuth state is missing, expired, or already consumed")
+    return claims
 
 
 def _frontend_url() -> str:
@@ -266,7 +280,17 @@ async def connect_integration(
             raise HTTPException(status_code=502, detail=str(e)) from e
         return ConnectResponse(authorize_url=url)
 
-    # Resolve tokens — real exchange or mock.
+    # Resolve tokens — real exchange or mock. Production never fabricates a
+    # connected provider when credentials are unavailable.
+    if os.getenv("ENVIRONMENT", "development").strip().lower() in {
+        "production",
+        "prod",
+        "staging",
+    } and not use_real:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="This integration is not configured for real production use.",
+        )
     connection_type = ConnectionType.oauth if use_real else ConnectionType.mock
     try:
         if use_real:

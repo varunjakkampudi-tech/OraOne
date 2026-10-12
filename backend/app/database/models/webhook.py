@@ -108,6 +108,12 @@ class WebhookEndpoint(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base
 class WebhookDelivery(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "webhook_deliveries"
     __table_args__ = (
+        Index(
+            "uq_webhook_deliveries_endpoint_event_id",
+            "endpoint_id",
+            "event_id",
+            unique=True,
+        ),
         Index("ix_webhook_deliveries_endpoint_id", "endpoint_id"),
         Index("ix_webhook_deliveries_organization_id", "organization_id"),
         Index("ix_webhook_deliveries_event", "event"),
@@ -124,6 +130,7 @@ class WebhookDelivery(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     event: Mapped[str] = mapped_column(String(60), nullable=False)
+    event_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     success: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default="false"
     )

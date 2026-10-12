@@ -159,3 +159,19 @@ async def test_refresh_fails_safely_when_token_store_unreachable(monkeypatch):
     with pytest.raises(HTTPException) as exc_info:
         await auth_service.refresh_tokens(RefreshTokenRequest(refresh_token="abc"))
     assert exc_info.value.status_code == 503
+
+
+def test_shared_cache_fails_closed_when_configured_redis_is_unreachable(monkeypatch):
+    from app.services import cache
+
+    cache._namespaced_singletons.clear()
+    monkeypatch.setenv("ENVIRONMENT", "production")
+    monkeypatch.setenv("REDIS_URL", "redis://unreachable:6379/0")
+
+    def _broken_backend(*args, **kwargs):
+        raise ConnectionError("redis unreachable")
+
+    monkeypatch.setattr(cache, "RedisCacheBackend", _broken_backend)
+    with pytest.raises(RuntimeError, match="shared Redis cache is unavailable"):
+        cache.get_shared_cache("rate-limit-test")
+    cache._namespaced_singletons.clear()

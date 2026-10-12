@@ -265,18 +265,34 @@ async def _deliver_endpoint(
         if success:
             break
 
-    session.add(
-        WebhookDelivery(
+    event_id = str(payload.get("id") or "")
+    delivery = await session.scalar(
+        select(WebhookDelivery)
+        .where(
+            WebhookDelivery.endpoint_id == endpoint.id,
+            WebhookDelivery.event_id == event_id,
+        )
+        .with_for_update()
+    )
+    if delivery is None:
+        delivery = WebhookDelivery(
             endpoint_id=endpoint.id,
             organization_id=organization_id,
             event=event,
+            event_id=event_id,
             success=success,
             status_code=status_code,
             attempts=attempts,
             error=error,
             payload=payload,
         )
-    )
+        session.add(delivery)
+    else:
+        delivery.success = success
+        delivery.status_code = status_code
+        delivery.attempts = (delivery.attempts or 0) + attempts
+        delivery.error = error
+        delivery.payload = payload
     endpoint.last_delivery_at = _now()
     endpoint.last_status = "success" if success else (error or "failed")[:40]
     if success:
@@ -346,8 +362,8 @@ async def deliver_event(
                 .where(
                     WebhookDelivery.endpoint_id == endpoint.id,
                     WebhookDelivery.event == event,
+                    WebhookDelivery.event_id == payload["id"],
                     WebhookDelivery.success.is_(True),
-                    WebhookDelivery.payload["id"].as_string() == payload["id"],
                 )
                 .limit(1)
             )

@@ -62,6 +62,13 @@ class CacheBackend(ABC):
     @abstractmethod
     def delete(self, key: str) -> None: ...
 
+    def consume(self, key: str) -> Optional[Any]:
+        """Return and remove a value; shared backends make this atomic."""
+        value = self.get(key)
+        if value is not None:
+            self.delete(key)
+        return value
+
     @abstractmethod
     def clear(self) -> None: ...
 
@@ -166,6 +173,10 @@ class RedisCacheBackend(CacheBackend):
     def delete(self, key: str) -> None:  # pragma: no cover — needs redis
         self._redis.delete(self._k(key))
 
+    def consume(self, key: str) -> Optional[Any]:  # pragma: no cover
+        raw = self._redis.getdel(self._k(key))
+        return json.loads(raw) if raw is not None else None
+
     def clear(self) -> None:  # pragma: no cover — needs redis
         for k in self._redis.scan_iter(f"{self._prefix}*"):
             self._redis.delete(k)
@@ -258,8 +269,14 @@ def get_shared_cache(namespace: str) -> CacheBackend:
             backend = RedisCacheBackend(url, prefix=f"oraone:{namespace}:")
             log.info("shared cache [%s]: redis", namespace)
         except Exception as e:  # pragma: no cover — optional dependency
+            if _is_production_like():
+                raise RuntimeError(
+                    f"Configured shared Redis cache is unavailable for namespace "
+                    f"'{namespace}'."
+                ) from e
             log.warning(
-                "Redis unavailable for shared cache [%s] (%s); using in-process.",
+                "Redis unavailable for shared cache [%s] (%s); using in-process "
+                "for local development.",
                 namespace,
                 e,
             )
