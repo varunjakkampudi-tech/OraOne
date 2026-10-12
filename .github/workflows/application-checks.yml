@@ -143,3 +143,54 @@ jobs:
 
       - name: Run serial browser smoke tests
         run: npm run test:e2e -- --workers=1
+
+  frontend-container-security-headers:
+    name: Production frontend security headers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Build production frontend image
+        run: >-
+          docker build --tag oraone-frontend:security-check
+          --build-arg REACT_APP_API_URL=https://oraone.in
+          --build-arg REACT_APP_AUTH_PROVIDER=cognito
+          --build-arg REACT_APP_COGNITO_DOMAIN=https://example.auth.ap-southeast-2.amazoncognito.com
+          --build-arg REACT_APP_COGNITO_CLIENT_ID=ci-public-client-id
+          --build-arg REACT_APP_COGNITO_REDIRECT_URI=https://oraone.in/auth/callback
+          --build-arg REACT_APP_COGNITO_SIGNOUT_URI=https://oraone.in/
+          frontend
+
+      - name: Verify headers on HTML, SPA route, and hashed assets
+        run: |
+          set -euo pipefail
+          container_id="$(docker run --detach --rm -p 127.0.0.1:18080:8080 oraone-frontend:security-check)"
+          trap 'docker stop "$container_id" >/dev/null 2>&1 || true' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:18080/ >/dev/null; then break; fi
+            sleep 1
+          done
+
+          verify_headers() {
+            local path="$1"
+            local headers
+            headers="$(curl --fail --silent --show-error --dump-header - --output /dev/null "http://127.0.0.1:18080${path}")"
+            for expected in \
+              'X-Content-Type-Options: nosniff' \
+              'X-Frame-Options: DENY' \
+              'Referrer-Policy: strict-origin-when-cross-origin' \
+              'Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()'; do
+              if ! grep -Fqi "$expected" <<<"$headers"; then
+                echo "Missing security header on ${path}: ${expected}" >&2
+                return 1
+              fi
+            done
+            echo "Verified frontend security headers: ${path}"
+          }
+
+          verify_headers /
+          verify_headers /auth/login
+          asset="$(curl --fail --silent http://127.0.0.1:18080/ | sed -n 's/.*src="\([^"]*\.js\)".*/\1/p')"
+          test -n "$asset"
+          verify_headers "$asset"
