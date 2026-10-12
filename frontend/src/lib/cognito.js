@@ -6,6 +6,8 @@ const COGNITO_DOMAIN = (process.env.REACT_APP_COGNITO_DOMAIN || "").replace(
   "",
 );
 const CLIENT_ID = process.env.REACT_APP_COGNITO_CLIENT_ID || "";
+const SIGNOUT_URI =
+  process.env.REACT_APP_COGNITO_SIGNOUT_URI || `${window.location.origin}/`;
 const REDIRECT_URI =
   process.env.REACT_APP_COGNITO_REDIRECT_URI ||
   `${window.location.origin}/auth/callback`;
@@ -13,6 +15,18 @@ const PKCE_VERIFIER_KEY = "oraone_cognito_pkce_verifier";
 const OAUTH_STATE_KEY = "oraone_cognito_oauth_state";
 
 export const cognitoEnabled = AUTH_PROVIDER === "cognito";
+
+export function getCognitoLogoutUrl() {
+  if (!cognitoEnabled || !COGNITO_DOMAIN || !CLIENT_ID) {
+    return null;
+  }
+
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID,
+    logout_uri: SIGNOUT_URI,
+  });
+  return `${COGNITO_DOMAIN}/logout?${params.toString()}`;
+}
 
 export function clearCognitoTransaction() {
   sessionStorage.removeItem(PKCE_VERIFIER_KEY);

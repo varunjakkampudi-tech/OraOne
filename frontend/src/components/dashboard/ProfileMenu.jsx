@@ -11,6 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { cognitoEnabled, getCognitoLogoutUrl } from "@/lib/cognito";
 import { useProjects } from "@/lib/projects";
 import { superAdminApi } from "@/lib/superAdmin";
 
@@ -60,9 +61,13 @@ export default function ProfileMenu() {
 
   const onLogout = async () => {
     setOpen(false);
-    const pendingLogout = logout();
+    await logout();
+    const cognitoLogoutUrl = cognitoEnabled ? getCognitoLogoutUrl() : null;
+    if (cognitoLogoutUrl) {
+      window.location.assign(cognitoLogoutUrl);
+      return;
+    }
     nav("/login");
-    await pendingLogout;
   };
 
   const initial = (user?.full_name || "U").slice(0, 1).toUpperCase();

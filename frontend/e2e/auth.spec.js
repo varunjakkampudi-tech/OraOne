@@ -171,6 +171,8 @@ test.describe("email-only Cognito entry points", () => {
     page,
   }) => {
     let logoutCalled = false;
+    let cognitoLogoutVisited = false;
+    const logoutSequence = [];
     await page.route("**/api/auth/me", (route) =>
       route.fulfill({
         status: 200,
@@ -225,17 +227,35 @@ test.describe("email-only Cognito entry points", () => {
     );
     await page.route("**/api/auth/cognito/logout", (route) => {
       logoutCalled = true;
+      logoutSequence.push("oraone-session");
       return route.fulfill({
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({ message: "Logged out." }),
       });
     });
+    await page.route(`${cognitoDomain}/logout?**`, (route) => {
+      cognitoLogoutVisited = true;
+      logoutSequence.push("cognito-hosted-session");
+      return route.fulfill({
+        status: 200,
+        contentType: "text/html",
+        body: "<!doctype html><title>Signed out</title><main>Signed out of Cognito</main>",
+      });
+    });
     await page.goto("/app/dashboard");
     await page.getByRole("button", { name: "Open profile menu" }).click();
     await page.getByTestId("profile-logout").click();
-    await expect(page).toHaveURL(/\/login$/);
+    await expect(page).toHaveURL(/\/logout\?client_id=/);
     expect(logoutCalled).toBe(true);
+    expect(cognitoLogoutVisited).toBe(true);
+    expect(logoutSequence).toEqual([
+      "oraone-session",
+      "cognito-hosted-session",
+    ]);
+    expect(new URL(page.url()).searchParams.get("logout_uri")).toBe(
+      "http://127.0.0.1:3001/",
+    );
   });
 
   test("unified product portfolio presents all products with honest availability", async ({
