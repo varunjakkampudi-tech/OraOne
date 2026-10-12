@@ -87,4 +87,4 @@ jobs:
           curl --fail --silent --show-error http://127.0.0.1/api/health/ready
           printf '\nDeployment verified at %s\n' "$(git rev-parse HEAD)"
           REMOTE
-          } | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTINGER_USER@$HOSTINGER_HOST" 'bash -se'
+          } | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o HostKeyAlias=201.18.193.230 "$HOSTINGER_USER@$HOSTINGER_HOST" 'bash -se'
