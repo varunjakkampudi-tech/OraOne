@@ -61,14 +61,16 @@ services:
     build:
       context: ./backend
       args:
-        APP_VERSION: v1.0.0
-    image: oraone-backend:v1.0.0
+        APP_VERSION: ${ORAONE_VERSION:-v1.0.0}
+    image: oraone-backend:${ORAONE_VERSION:-v1.0.0}
     container_name: oraone-backend
     restart: unless-stopped
     env_file:
       - ./backend/.env
     environment:
       ENVIRONMENT: production
+      ORAONE_VERSION: ${ORAONE_VERSION:-v1.0.0}
+      ORAONE_PRODUCT_ID: ${ORAONE_PRODUCT_ID:-product-1-ai-chat}
       AUTH_PROVIDER: ${AUTH_PROVIDER:?AUTH_PROVIDER is required}
       COGNITO_USER_POOL_ID: ${COGNITO_USER_POOL_ID:?COGNITO_USER_POOL_ID is required}
       COGNITO_REGION: ${COGNITO_REGION:?COGNITO_REGION is required}
@@ -101,13 +103,13 @@ services:
     build:
       context: ./frontend
       args:
-        APP_VERSION: v1.0.0
+        APP_VERSION: ${ORAONE_VERSION:-v1.0.0}
         REACT_APP_API_URL: ${REACT_APP_API_URL:?REACT_APP_API_URL is required}
         REACT_APP_AUTH_PROVIDER: ${AUTH_PROVIDER:?AUTH_PROVIDER is required}
         REACT_APP_COGNITO_DOMAIN: ${COGNITO_DOMAIN:?COGNITO_DOMAIN is required}
         REACT_APP_COGNITO_CLIENT_ID: ${COGNITO_CLIENT_ID:?COGNITO_CLIENT_ID is required}
         REACT_APP_COGNITO_REDIRECT_URI: ${COGNITO_REDIRECT_URI:?COGNITO_REDIRECT_URI is required}
-    image: oraone-frontend:v1.0.0
+    image: oraone-frontend:${ORAONE_VERSION:-v1.0.0}
     container_name: oraone-frontend
     restart: unless-stopped
     depends_on:
@@ -117,14 +119,16 @@ services:
     build:
       context: ./backend
       args:
-        APP_VERSION: v1.0.0
-    image: oraone-backend:v1.0.0
+        APP_VERSION: ${ORAONE_VERSION:-v1.0.0}
+    image: oraone-backend:${ORAONE_VERSION:-v1.0.0}
     container_name: oraone-workers
     restart: unless-stopped
     env_file:
       - ./backend/.env
     environment:
       ENVIRONMENT: production
+      ORAONE_VERSION: ${ORAONE_VERSION:-v1.0.0}
+      ORAONE_PRODUCT_ID: ${ORAONE_PRODUCT_ID:-product-1-ai-chat}
       AUTH_PROVIDER: ${AUTH_PROVIDER:?AUTH_PROVIDER is required}
       COGNITO_USER_POOL_ID: ${COGNITO_USER_POOL_ID:?COGNITO_USER_POOL_ID is required}
       COGNITO_REGION: ${COGNITO_REGION:?COGNITO_REGION is required}

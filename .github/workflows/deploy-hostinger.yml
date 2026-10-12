@@ -7,9 +7,25 @@ on:
         description: 'Type DEPLOY to deploy the latest main commit'
         required: true
         type: string
+      product:
+        description: 'OraOne portfolio product being released'
+        required: true
+        type: choice
+        options:
+          - product-1-ai-chat
+        default: product-1-ai-chat
+      release_version:
+        description: 'Semantic release version MAJOR.MINOR.PATCH, without the v prefix'
+        required: true
+        type: string
+      publish_tag:
+        description: 'Create an immutable release tag after deployment health checks pass'
+        required: true
+        type: boolean
+        default: true
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: hostinger-production
@@ -24,6 +40,29 @@ jobs:
     steps:
       - name: Check out the selected main commit
         uses: actions/checkout@v5
+
+      - name: Validate release identity
+        id: release
+        env:
+          PRODUCT_ID: ${{ inputs.product }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          set -euo pipefail
+          test "$PRODUCT_ID" = "product-1-ai-chat" || {
+            echo "Only Product 1 is deployable until its successor product is implemented."
+            exit 1
+          }
+          [[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "release_version must be MAJOR.MINOR.PATCH, for example 1.0.1"
+            exit 1
+          }
+          release_tag="oraone/${PRODUCT_ID}/v${RELEASE_VERSION}"
+          if git ls-remote --exit-code --refs origin "refs/tags/$release_tag" > /dev/null 2>&1; then
+            echo "Release tag already exists: $release_tag"
+            exit 1
+          fi
+          echo "tag=$release_tag" >> "$GITHUB_OUTPUT"
+          echo "version=v${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Configure deployment SSH
         env:
@@ -60,6 +99,9 @@ jobs:
           HOSTINGER_HOST: ${{ secrets.HOSTINGER_HOST }}
           HOSTINGER_USER: ${{ secrets.HOSTINGER_USER }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ORAONE_PRODUCT_ID: ${{ inputs.product }}
+          ORAONE_VERSION: ${{ steps.release.outputs.version }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
         run: |
           set -euo pipefail
           test -n "$HOSTINGER_HOST"
@@ -67,38 +109,58 @@ jobs:
           test -n "$OPENAI_API_KEY"
           {
             printf 'export OPENAI_API_KEY=%q\n' "$OPENAI_API_KEY"
+            printf 'export ORAONE_PRODUCT_ID=%q\n' "$ORAONE_PRODUCT_ID"
+            printf 'export ORAONE_VERSION=%q\n' "$ORAONE_VERSION"
+            printf 'export RELEASE_TAG=%q\n' "$RELEASE_TAG"
             cat <<'REMOTE'
           set -euo pipefail
           cd /srv/apps/oraone
           git fetch origin main
           git checkout -B main origin/main
           umask 077
-          OPENAI_API_KEY="$OPENAI_API_KEY" python3 - <<'PY'
+          OPENAI_API_KEY="$OPENAI_API_KEY" ORAONE_PRODUCT_ID="$ORAONE_PRODUCT_ID" ORAONE_VERSION="$ORAONE_VERSION" python3 - <<'PY'
           from pathlib import Path
           import os
 
           env_path = Path("backend/.env")
           lines = env_path.read_text().splitlines() if env_path.exists() else []
-          value = os.environ["OPENAI_API_KEY"]
+          values = {
+              "OPENAI_API_KEY": os.environ["OPENAI_API_KEY"],
+              "AI_ALLOW_MOCK": "false",
+              "ORAONE_PRODUCT_ID": os.environ["ORAONE_PRODUCT_ID"],
+              "ORAONE_VERSION": os.environ["ORAONE_VERSION"],
+          }
           output = []
-          replaced = False
+          replaced = set()
           for line in lines:
-              if line.startswith("OPENAI_API_KEY="):
-                  output.append(f"OPENAI_API_KEY={value}")
-                  replaced = True
-              elif line.startswith("AI_ALLOW_MOCK="):
-                  output.append("AI_ALLOW_MOCK=false")
+              key = line.split("=", 1)[0]
+              if key in values:
+                  output.append(f"{key}={values[key]}")
+                  replaced.add(key)
               else:
                   output.append(line)
-          if not replaced:
-              output.append(f"OPENAI_API_KEY={value}")
-          if not any(line.startswith("AI_ALLOW_MOCK=") for line in lines):
-              output.append("AI_ALLOW_MOCK=false")
+          for key, value in values.items():
+              if key not in replaced:
+                  output.append(f"{key}={value}")
           env_path.write_text("\n".join(output) + "\n")
           PY
           docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build --remove-orphans
           docker compose --env-file .env.production -f docker-compose.prod.yml ps
           curl --fail --silent --show-error http://127.0.0.1/api/health/ready
-          printf '\nDeployment verified at %s\n' "$(git rev-parse HEAD)"
+          printf '\nDeployment verified product=%s version=%s tag=%s commit=%s\n' "$ORAONE_PRODUCT_ID" "$ORAONE_VERSION" "$RELEASE_TAG" "$(git rev-parse HEAD)"
           REMOTE
           } | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o HostKeyAlias=201.18.193.230 "$HOSTINGER_USER@$HOSTINGER_HOST" 'bash -se'
+
+      - name: Create immutable release tag
+        if: inputs.publish_tag == true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRODUCT_ID: ${{ inputs.product }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$RELEASE_TAG" "$GITHUB_SHA" -m "OraOne ${PRODUCT_ID} ${RELEASE_VERSION}"
+          git push origin "$RELEASE_TAG"

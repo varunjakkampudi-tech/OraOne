@@ -16,7 +16,9 @@ Caddy terminates TLS and routes /api/* to FastAPI. Other services remain private
 
 ## Manual GitHub deployment
 
-Production deployment is intentionally manual. Run the **Manual Hostinger deployment** workflow from the GitHub Actions UI, select `main`, and type `DEPLOY`. The job rejects every other branch and verifies the exact fetched SHA plus `/api/health/ready` after Compose starts.
+Production deployment is intentionally manual. Run the **Manual Hostinger deployment** workflow from the GitHub Actions UI, select `main`, choose the product identifier, enter a semantic release version such as `1.0.1`, and type `DEPLOY`. Product identifiers and release versions are separate: Product 1 is currently `product-1-ai-chat`; its releases are `v1.0.0`, `v1.0.1`, and so on. Product 2 will have its own identifier when implemented, but it is not deployable through this workflow yet. The job rejects every other branch and verifies the exact fetched SHA plus `/api/health/ready` after Compose starts.
+
+When the health check succeeds, the workflow writes `ORAONE_PRODUCT_ID` and `ORAONE_VERSION` into the operator-managed backend environment, passes the version into Docker image labels/tags, and creates an immutable Git tag in the form `oraone/product-1-ai-chat/v1.0.1` when `publish_tag` is enabled. Existing tags are never overwritten. A failed deployment does not create a release tag.
 
 The protected `production` environment must contain `HOSTINGER_HOST`, `HOSTINGER_USER`, `HOSTINGER_SSH_KEY`, and `HOSTINGER_KNOWN_HOSTS`. The deployment host keeps `.env.production` and `backend/.env` outside Git; the workflow never accepts secrets as workflow inputs and never prints them.
 
