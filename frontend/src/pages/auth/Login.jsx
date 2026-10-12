@@ -19,7 +19,7 @@ export default function Login() {
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(true);
+  const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [otpStep, setOtpStep] = useState(false);
@@ -62,7 +62,7 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setBusy(true);
-    const res = await login({ email, password });
+    const res = await login({ email, password, persistent: remember });
     setBusy(false);
     if (!res?.ok) {
       setError(res?.error || "Login failed.");
@@ -79,7 +79,7 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setBusy(true);
-    const res = await verifyLoginOtp({ email, code });
+    const res = await verifyLoginOtp({ email, code, persistent: remember });
     setBusy(false);
     if (!res?.ok) {
       setError(res?.error || "Incorrect or expired code.");

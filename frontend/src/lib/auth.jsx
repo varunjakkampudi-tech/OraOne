@@ -138,14 +138,12 @@ export function AuthProvider({ children }) {
         clearTokens();
         setUser(false);
         clearIdentity();
-      } else if (getToken() || loadIdentityFromStorage()?.user) {
-        // Transient failure (backend restarting / network blip) but we still
-        // hold a token — DON'T log the user out. Render from cached identity
-        // so a deploy window doesn't kick everyone to the login screen; live
-        // calls recover automatically once the API is back.
-        const cached = loadIdentityFromStorage();
-        if (cached?.user) setUser(normalizeUser(cached.user));
-        else setUser(false);
+      } else if (getToken()) {
+        // A cached identity is display data only. Never establish an
+        // authenticated or authorized UI state from attacker-modifiable
+        // browser storage when the authoritative API is unavailable.
+        setUser(false);
+        clearIdentity();
       } else {
         setUser(false);
         clearIdentity();
@@ -186,7 +184,7 @@ export function AuthProvider({ children }) {
   }, [clearIdentity]);
 
   const login = useCallback(
-    async ({ email, password } = {}) => {
+    async ({ email, password, persistent = false } = {}) => {
       const normalizedEmail = String(email || "")
         .trim()
         .toLowerCase();
@@ -210,7 +208,7 @@ export function AuthProvider({ children }) {
         }
 
         setTokens(data.access_token, data.refresh_token ?? null, {
-          persistent: true,
+          persistent,
         });
         await fetchMe();
         const identityResult = await fetchIdentity();
@@ -257,14 +255,14 @@ export function AuthProvider({ children }) {
   );
 
   const verifyLoginOtp = useCallback(
-    async ({ email, code } = {}) => {
+    async ({ email, code, persistent = false } = {}) => {
       try {
         const { data } = await api.post("/auth/login/verify-otp", {
           email,
           code,
         });
         setTokens(data.access_token, data.refresh_token ?? null, {
-          persistent: true,
+          persistent,
         });
         await fetchMe();
         // Block resolution on identity so the caller can redirect *only after*

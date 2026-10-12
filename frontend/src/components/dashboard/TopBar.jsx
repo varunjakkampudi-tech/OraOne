@@ -48,9 +48,8 @@ const PROJECT_SCOPED = new Set([
 // own modal via location state / the oraone:create event).
 const CONTEXT_ACTIONS = {
   "/app/dashboard": {
-    label: "New Project",
-    to: "/app/projects",
-    state: { openCreate: true },
+    label: "Create Agent",
+    to: "/app/create-agent",
   },
   "/app/projects": {
     label: "New Project",
@@ -132,11 +131,14 @@ export default function TopBar({ onMenuClick = () => {} }) {
           {isProjectScoped && activeProject ? (
             <button
               onClick={() => nav("/app/projects")}
-              className="text-lg sm:text-xl font-bold text-[#0F172A] tracking-tight truncate hover:text-[#2563EB] transition-colors"
+              className="min-w-0 text-left text-lg font-bold tracking-tight text-[#0F172A] transition-colors hover:text-[#2563EB] sm:text-xl"
               title={title}
               data-testid="topbar-workspace-name"
             >
-              {title}
+              <span className="block truncate">{title}</span>
+              <span className="block max-w-[16rem] truncate text-xs font-medium text-[#64748B]">
+                {activeProject.name || "Active workspace"}
+              </span>
             </button>
           ) : (
             <h1 className="text-lg sm:text-xl font-bold text-[#0F172A] tracking-tight truncate">

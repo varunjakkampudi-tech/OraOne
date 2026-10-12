@@ -80,7 +80,7 @@ const FEATURES = [
     icon: ShieldCheck,
     tone: "cyan",
     title: "Enterprise Security",
-    desc: "Your data is safe with us.",
+    desc: "Security controls built into every workspace.",
   },
 ];
 
@@ -95,15 +95,20 @@ const TONES = {
 };
 
 const STATS = [
-  { icon: ShieldCheck, tone: "blue", value: "99.9%", label: "Uptime" },
-  { icon: Zap, tone: "cyan", value: "24/7", label: "AI Availability" },
-  { icon: Crown, tone: "amber", value: "Enterprise", label: "Ready" },
+  { icon: ShieldCheck, tone: "blue", value: "Email", label: "Only sign-in" },
+  { icon: Zap, tone: "cyan", value: "Cognito", label: "Managed auth" },
+  {
+    icon: Crown,
+    tone: "amber",
+    value: "No social",
+    label: "Sign-in providers",
+  },
 ];
 
 const TRUST = [
-  { icon: ShieldCheck, lines: ["Protected by", "Argon2 + JWT"] },
-  { icon: Hexagon, lines: ["SOC 2", "Ready"] },
-  { icon: Lock, lines: ["256-bit", "Encryption"] },
+  { icon: ShieldCheck, lines: ["Email-only", "authentication"] },
+  { icon: Hexagon, lines: ["Cognito", "managed flow"] },
+  { icon: Lock, lines: ["Secure", "session controls"] },
 ];
 
 /* ── Decorative conversation flow ──────────────────────────── */

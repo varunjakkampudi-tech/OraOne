@@ -1062,13 +1062,9 @@ function LeadDrawer({
             <p
               className="text-[12.5px] text-[#475569] leading-relaxed"
               data-testid="lead-ai-summary"
-              dangerouslySetInnerHTML={{
-                __html: aiSummary(lead).replace(
-                  /\*\*(.+?)\*\*/g,
-                  "<strong>$1</strong>",
-                ),
-              }}
-            />
+            >
+              {aiSummary(lead)}
+            </p>
           </div>
 
           {/* Conversation transcript — the whole thread, even for anon visitors */}

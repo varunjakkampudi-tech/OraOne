@@ -215,8 +215,12 @@ export function VerifyEmail() {
             data-testid="verify-resend"
             className="font-semibold text-[#2563EB] hover:underline disabled:cursor-not-allowed disabled:text-[#94A3B8] disabled:no-underline"
           >
-            {resending ? "Sending..." : "Check your spam folder"}
+            {resending ? "Sending..." : "Resend code"}
           </button>
+        </p>
+
+        <p className="mt-2 text-center text-xs text-[#94A3B8]">
+          Check your spam or junk folder if the message is delayed.
         </p>
 
         <p className="mt-2 flex items-center justify-center gap-1.5 text-sm text-[#94A3B8]">
