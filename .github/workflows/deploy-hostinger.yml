@@ -29,15 +29,17 @@ jobs:
         env:
           HOSTINGER_HOST: ${{ secrets.HOSTINGER_HOST }}
           HOSTINGER_SSH_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+          HOSTINGER_KNOWN_HOSTS: ${{ secrets.HOSTINGER_KNOWN_HOSTS }}
           HOSTINGER_HOST_KEY_SHA256: ${{ secrets.HOSTINGER_HOST_KEY_SHA256 }}
         run: |
           set -euo pipefail
           test -n "$HOSTINGER_SSH_KEY"
           test -n "$HOSTINGER_HOST"
+          test -n "$HOSTINGER_KNOWN_HOSTS"
           test -n "$HOSTINGER_HOST_KEY_SHA256"
           install -d -m 700 "$HOME/.ssh"
           printf '%s\n' "$HOSTINGER_SSH_KEY" > "$HOME/.ssh/id_ed25519"
-          ssh-keyscan -T 10 -t ed25519 "$HOSTINGER_HOST" > "$HOME/.ssh/known_hosts" 2>/dev/null
+          printf '%s\n' "$HOSTINGER_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           test -s "$HOME/.ssh/known_hosts"
           actual_host_key="$(ssh-keygen -lf "$HOME/.ssh/known_hosts" -E sha256 | awk 'NR == 1 { print $2 }')"
           test "$actual_host_key" = "$HOSTINGER_HOST_KEY_SHA256"
