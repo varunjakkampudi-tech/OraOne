@@ -1,4 +1,4 @@
-"""Cache backend abstraction (in-process today, Redis-ready tomorrow).
+"""Cache backend abstraction with explicit production Redis requirements.
 
 The entitlement snapshot cache is currently a per-process dict — correct and
 fast for a single API node, but it means a mutation on node A isn't seen by
@@ -12,9 +12,10 @@ pub/sub) can be dropped in without touching call sites.
     :func:`get_cache_backend`      — env-driven factory (defaults to in-process).
 
 Selection is via ``ENTITLEMENTS_CACHE_BACKEND`` (``inprocess`` | ``redis``).
-The Redis path is intentionally **not enabled** — selecting it requires the
-``redis`` package and ``REDIS_URL``; if either is missing the factory logs and
-falls back to in-process so nothing breaks.
+Local development may use the in-process backend. Production-like environments
+must use a reachable Redis backend for shared auth, idempotency, rate-limit,
+and entitlement state; silently falling back to process-local memory would
+break those guarantees across workers.
 
 ``native_ttl`` tells the caller who owns expiry: in-process backends return
 ``False`` (the caller wraps values with its own clock), distributed backends
@@ -30,6 +31,14 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional
 
 log = logging.getLogger("app.cache")
+_PRODUCTION_LIKE = {"production", "prod", "staging"}
+
+
+def _is_production_like() -> bool:
+    return (
+        os.getenv("ENVIRONMENT", "development").strip().lower()
+        in _PRODUCTION_LIKE
+    )
 
 
 class CacheBackend(ABC):
@@ -110,7 +119,7 @@ class InProcessCacheBackend(CacheBackend):
 
 
 class RedisCacheBackend(CacheBackend):
-    """DESIGN STUB — a shared, TTL-native cache for multi-node deployments.
+    """A shared, TTL-native cache for multi-node deployments.
 
     Not enabled by default. When selected it lazily imports ``redis`` and
     stores JSON-serialised snapshots under a namespaced key with a native
@@ -132,6 +141,9 @@ class RedisCacheBackend(CacheBackend):
                 "Install it and set REDIS_URL to enable the distributed cache."
             ) from e
         self._redis = redis.Redis.from_url(url, decode_responses=True)
+        # ``Redis.from_url`` is lazy. Verify reachability here so production
+        # cannot boot with a cache object that will fail only on first use.
+        self._redis.ping()
         self._prefix = prefix
         self._channel = f"{prefix}invalidate"
 
@@ -185,19 +197,22 @@ class RedisCacheBackend(CacheBackend):
 
 
 def get_cache_backend() -> CacheBackend:
-    """Build the configured cache backend (defaults to in-process).
+    """Build the configured cache backend (defaults to in-process locally).
 
     ``ENTITLEMENTS_CACHE_BACKEND=redis`` opts into :class:`RedisCacheBackend`
-    using ``REDIS_URL``. Any failure (missing package / URL) logs a warning and
-    falls back to :class:`InProcessCacheBackend` so the service always starts.
+    using ``REDIS_URL``. Production-like environments fail closed when Redis is
+    selected but missing or unreachable.
     """
     choice = os.getenv("ENTITLEMENTS_CACHE_BACKEND", "inprocess").strip().lower()
     if choice in {"redis", "distributed"}:
         url = os.getenv("REDIS_URL", "").strip()
         if not url:
+            message = "ENTITLEMENTS_CACHE_BACKEND=redis requires REDIS_URL."
+            if _is_production_like():
+                raise RuntimeError(message)
             log.warning(
-                "ENTITLEMENTS_CACHE_BACKEND=redis but REDIS_URL is unset; "
-                "falling back to in-process cache."
+                "%s Falling back to in-process cache for local development.",
+                message,
             )
             return InProcessCacheBackend()
         try:
@@ -205,8 +220,14 @@ def get_cache_backend() -> CacheBackend:
             log.info("entitlement cache backend: redis (%s)", url)
             return backend
         except Exception as e:  # pragma: no cover — optional dependency
+            if _is_production_like():
+                raise RuntimeError(
+                    "Configured Redis entitlement cache is unavailable."
+                ) from e
             log.warning(
-                "Redis cache backend unavailable (%s); falling back to in-process.", e
+                "Redis cache backend unavailable (%s); falling back to in-process "
+                "for local development.",
+                e,
             )
             return InProcessCacheBackend()
     return InProcessCacheBackend()
@@ -218,11 +239,12 @@ _namespaced_singletons: dict[str, CacheBackend] = {}
 def get_shared_cache(namespace: str) -> CacheBackend:
     """A general-purpose namespaced cache for auth/idempotency/rate-limiting.
 
-    Unlike :func:`get_cache_backend` (gated by ``ENTITLEMENTS_CACHE_BACKEND``),
-    this always prefers Redis when ``REDIS_URL`` is set — refresh tokens,
-    idempotency keys, and rate-limit counters all need to be shared across
-    every worker process/node, not just opt-in for one subsystem. Falls back
-    to a process-local in-process store (single-node only) otherwise.
+    Unlike :func:`get_cache_backend` (gated by
+    ``ENTITLEMENTS_CACHE_BACKEND``), this always prefers Redis when
+    ``REDIS_URL`` is set — refresh tokens, idempotency keys, and rate-limit
+    counters all need to be shared across every worker process/node. Local
+    development may fall back to process-local memory; production-like
+    environments raise instead.
 
     One backend instance is cached per ``namespace`` for the process lifetime.
     """
@@ -243,6 +265,11 @@ def get_shared_cache(namespace: str) -> CacheBackend:
             )
             backend = InProcessCacheBackend()
     else:
+        if _is_production_like():
+            raise RuntimeError(
+                f"Shared Redis cache is required in {_PRODUCTION_LIKE} environments "
+                f"for namespace '{namespace}'. Set REDIS_URL."
+            )
         backend = InProcessCacheBackend()
     _namespaced_singletons[namespace] = backend
     return backend

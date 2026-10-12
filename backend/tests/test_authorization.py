@@ -495,3 +495,19 @@ def test_get_cache_backend_redis_without_url_falls_back(monkeypatch):
     monkeypatch.setenv("ENTITLEMENTS_CACHE_BACKEND", "redis")
     monkeypatch.delenv("REDIS_URL", raising=False)
     assert isinstance(cachemod.get_cache_backend(), cachemod.InProcessCacheBackend)
+
+
+def test_get_cache_backend_redis_without_url_fails_closed_in_production(monkeypatch):
+    monkeypatch.setenv("ENTITLEMENTS_CACHE_BACKEND", "redis")
+    monkeypatch.setenv("ENVIRONMENT", "production")
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    with pytest.raises(RuntimeError, match="requires REDIS_URL"):
+        cachemod.get_cache_backend()
+
+
+def test_shared_cache_without_url_fails_closed_in_production(monkeypatch):
+    monkeypatch.setenv("ENVIRONMENT", "production")
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    cachemod._namespaced_singletons.pop("production-test", None)
+    with pytest.raises(RuntimeError, match="Shared Redis cache is required"):
+        cachemod.get_shared_cache("production-test")
