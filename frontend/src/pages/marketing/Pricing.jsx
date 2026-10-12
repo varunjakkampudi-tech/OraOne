@@ -31,8 +31,8 @@ const TIERS = [
     iconBg: "#EFF6FF",
     iconColor: "#2563EB",
     priceColor: "text-[#2563EB]",
-    postPrice: "$29",
-    postPriceUnit: "/mo after launch",
+    postPrice: "Free",
+    postPriceUnit: "while access is open",
     features: [
       "1 AI Agent",
       "500 conversations/mo",
@@ -55,8 +55,8 @@ const TIERS = [
     iconBg: "#2563EB",
     iconColor: "#FFFFFF",
     priceColor: "text-white",
-    postPrice: "Pricing",
-    postPriceUnit: "announced at launch",
+    postPrice: "Free",
+    postPriceUnit: "while access is open",
     features: [
       "5 AI Agents",
       "Usage-based conversation limits",
@@ -81,8 +81,8 @@ const TIERS = [
     iconBg: "#F3E8FF",
     iconColor: "#7C3AED",
     priceColor: "text-[#7C3AED]",
-    postPrice: "Custom",
-    postPriceUnit: "Contact Sales",
+    postPrice: "Free",
+    postPriceUnit: "while access is open",
     features: [
       "Unlimited AI Agents",
       "Unlimited conversations",
@@ -111,21 +111,21 @@ const TRUST = [
   {
     icon: FileText,
     title: "No Hidden Fees",
-    desc: "Transparent pricing — no setup fees, no surprise overages.",
+    desc: "Free access for all users while billing is disabled.",
     color: "#22C55E",
     bg: "#ECFDF5",
   },
   {
     icon: ArrowUpCircle,
     title: "Scale Anytime",
-    desc: "Upgrade, downgrade or pause as your business changes.",
+    desc: "Usage and AI token consumption remain visible in the dashboard.",
     color: "#F59E0B",
     bg: "#FEF3C7",
   },
   {
     icon: Headphones,
     title: "Real Human Support",
-    desc: "Email + chat support on every plan. Dedicated CSM on Enterprise.",
+    desc: "Email support and clear product guidance for every workspace.",
     color: "#8B5CF6",
     bg: "#F3E8FF",
   },
@@ -133,12 +133,12 @@ const TRUST = [
 
 const FAQ_PRICING = [
   {
-    q: "Is OraOne really free during Beta?",
-    a: "Yes — Beta Access is completely free. No credit card required, no overage charges, no commitments. You can stay on Beta until we publicly launch, after which you'll be invited to migrate to the appropriate paid tier with founder pricing.",
+    q: "Is OraOne free right now?",
+    a: "Yes. OraOne is free for all users in the current release. No payment method is required, and billing is disabled. Real AI token and usage consumption is tracked transparently in the dashboard.",
   },
   {
-    q: "What happens to my account after Beta?",
-    a: "You'll get 30 days' notice before pricing kicks in. Beta users get early-adopter pricing — Starter from $29/month. You can keep, change or cancel your plan at that time.",
+    q: "Can I see my usage?",
+    a: "Yes. Your workspace shows real conversation and AI-token usage so you can understand consumption while access remains free.",
   },
   {
     q: "Do you offer custom plans for Enterprise?",
@@ -152,9 +152,9 @@ const FAQ_PRICING = [
 
 export default function PricingPage() {
   useSEO({
-    title: "Pricing — Free during Beta · From $29/mo",
+    title: "Pricing — Free access for all users",
     description:
-      "OraOne is free during Beta Access. From $29/month after launch. Simple, transparent pricing with no hidden fees. Custom plans for Enterprise.",
+      "OraOne is free for all users in the current release. Billing is disabled while real usage and AI-token consumption remain visible.",
   });
 
   return (
@@ -173,7 +173,7 @@ export default function PricingPage() {
             {...fadeUp}
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#2563EB]"
           >
-            <Sparkles size={12} /> BETA ACCESS · FREE DURING BETA
+            <Sparkles size={12} /> FREE ACCESS · BILLING DISABLED
           </motion.span>
           <motion.h1
             {...fadeUp}
@@ -185,10 +185,8 @@ export default function PricingPage() {
             {...fadeUp}
             className="mt-5 text-[#475569] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed"
           >
-            OraOne is free for everyone during our Beta. After launch, pricing
-            starts at{" "}
-            <span className="font-semibold text-[#0F172A]">$29/month</span> —
-            with custom Enterprise plans available.
+            OraOne is free for everyone in the current release. Billing is
+            disabled, while real usage and AI-token consumption remain visible.
           </motion.p>
 
           <motion.div
@@ -196,7 +194,7 @@ export default function PricingPage() {
             className="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm"
           >
             {[
-              "Free during Beta",
+              "Free for everyone",
               "No credit card required",
               "Cancel anytime",
             ].map((t) => (
@@ -223,10 +221,10 @@ export default function PricingPage() {
                 BETA
               </span>
               <p className="text-[13.5px] text-[#0F172A]">
-                <span className="font-semibold">Free during Beta Access.</span>{" "}
+                <span className="font-semibold">Free access for everyone.</span>{" "}
                 <span className="text-[#475569]">
-                  Indicative post-beta pricing starts at $29/mo — Beta users get
-                  early-adopter pricing at launch.
+                  Payment is disabled; usage and AI-token consumption remain
+                  measurable in the workspace.
                 </span>
               </p>
             </div>
@@ -286,7 +284,7 @@ export default function PricingPage() {
                   </div>
                 </div>
 
-                {/* Price block — Beta hero + post-beta line */}
+                {/* Price block — free access and transparent usage */}
                 <div className="mt-7">
                   <div className="flex items-baseline gap-2">
                     <span
@@ -297,7 +295,7 @@ export default function PricingPage() {
                     <span
                       className={`text-sm ${t.dark ? "text-white/65" : "text-[#64748B]"}`}
                     >
-                      during Beta
+                      current release
                     </span>
                   </div>
                   <p
@@ -350,7 +348,7 @@ export default function PricingPage() {
                 <p
                   className={`mt-3 text-center text-xs ${t.dark ? "text-white/55" : "text-[#94A3B8]"}`}
                 >
-                  Free during Beta — no credit card
+                  No payment method required
                 </p>
               </motion.div>
             ))}
@@ -397,8 +395,8 @@ export default function PricingPage() {
               Pricing Questions, Answered
             </h2>
             <p className="mt-3 text-[#64748B]">
-              Everything you need to know about Beta Access and post-launch
-              pricing.
+              Everything you need to know about current free access and usage
+              visibility.
             </p>
           </motion.div>
           <div className="space-y-3">

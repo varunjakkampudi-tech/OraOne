@@ -56,7 +56,7 @@ const FAQ = [
   },
   {
     q: "How much does OraOne cost?",
-    a: "OraOne offers flexible pricing based on conversation volume. Start free during our beta, then scale as you grow.",
+    a: "OraOne is free for all users in the current release. Billing is disabled while real usage and AI-token consumption remain visible.",
   },
   {
     q: "Is there setup required?",
@@ -217,7 +217,7 @@ const PRICING_PEEK = [
   {
     name: "Starter",
     line: "1 AI Agent · 500 conversations/mo",
-    post: "From $29/mo after launch",
+    post: "Free access while billing is disabled",
     icon: Rocket,
     color: "#2563EB",
     bg: "#EFF6FF",
@@ -225,7 +225,7 @@ const PRICING_PEEK = [
   {
     name: "Growth",
     line: "Multiple AI agents · usage-based limits",
-    post: "Indicative post-beta pricing announced at launch",
+    post: "Free access with usage visibility",
     icon: TrendingUp,
     color: "#7C3AED",
     bg: "#F5F3FF",
@@ -234,7 +234,7 @@ const PRICING_PEEK = [
   {
     name: "Enterprise",
     line: "Unlimited agents · SSO · SLA · Dedicated CSM",
-    post: "Custom · Contact Sales",
+    post: "Free access with usage visibility",
     icon: Building2,
     color: "#0F172A",
     bg: "#F1F5F9",
@@ -632,11 +632,8 @@ export default function HomePage() {
               Simple, transparent pricing.
             </h2>
             <p className="mt-4 text-[#64748B] leading-relaxed">
-              Use OraOne free during Beta Access. From{" "}
-              <span className="font-semibold text-[#0F172A]">
-                $29/month after launch
-              </span>{" "}
-              — no hidden fees, cancel anytime.
+              Use OraOne free in the current release. Billing is disabled, while
+              real usage and AI-token consumption remain visible.
             </p>
           </motion.div>
 
