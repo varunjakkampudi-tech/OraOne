@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.7 — Cognito logout build configuration
+
+- Complete Cognito hosted logout after clearing the OraOne session.
+- Pass the Cognito sign-out URI explicitly into the production frontend image build.
+- Verify production sign-out returns to a fresh email sign-in screen.
+
 ## Unreleased — documentation and repository presentation
 
 - Rebuilt the root README around actual product scope, architecture, local setup, security boundaries, and release gates.

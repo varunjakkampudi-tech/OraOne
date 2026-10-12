@@ -1,6 +1,6 @@
 # Authentication and RBAC
 
-Cognito mode uses the existing email-only user pool and authorization-code flow. The backend validates issuer, JWKS signature, expiry, token_use=access, and client binding, then maps the Cognito sub to the PostgreSQL user.
+Cognito mode uses the existing email-only user pool and authorization-code flow. The backend validates issuer, JWKS signature, expiry, token_use=access, and client binding, then maps the Cognito sub to the PostgreSQL user. Logout clears the OraOne cookies, revokes the refresh token when available, and redirects through Cognito hosted logout to clear its browser session.
 
 Self-hosted auth remains useful for local development. Google, phone, and SMS sign-in are not part of the current UI or identity contract.
 
