@@ -237,7 +237,8 @@ export function AuthProvider({ children }) {
           access_token: tokens.access_token,
           refresh_token: tokens.refresh_token,
         });
-        await fetchMe();
+        // A first Cognito login has no application user row until identity
+        // provisioning commits. Loading /me beforehand races that transaction.
         const identityResult = await fetchIdentity();
         if (!identityResult.ok) {
           await clearEstablishedSession();
@@ -246,6 +247,7 @@ export function AuthProvider({ children }) {
             error: identityResult.error || "Could not load account identity.",
           };
         }
+        await fetchMe();
         return { ok: true, identity: identityResult.identity };
       } catch (e) {
         return { ok: false, error: _err(e) };

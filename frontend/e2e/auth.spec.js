@@ -34,13 +34,84 @@ test.describe("email-only Cognito entry points", () => {
     await mockCognitoPage(page);
   });
 
+  test("first Cognito login provisions identity before loading the profile", async ({
+    page,
+  }) => {
+    let sessionEstablished = false;
+    let identityProvisioned = false;
+    let prematureProfileRequests = 0;
+    await page.route("**/api/auth/cognito/session", (route) => {
+      sessionEstablished = true;
+      return route.fulfill({
+        status: 200,
+        body: JSON.stringify({ message: "Signed in." }),
+      });
+    });
+    await page.route("**/api/auth/me", (route) => {
+      if (sessionEstablished && !identityProvisioned)
+        prematureProfileRequests++;
+      return route.fulfill({
+        status: identityProvisioned ? 200 : 404,
+        contentType: "application/json",
+        body: JSON.stringify(
+          identityProvisioned
+            ? {
+                userId: "new-user",
+                email: "new@example.com",
+                role: "user",
+                status: "active",
+              }
+            : { detail: "User profile not found." },
+        ),
+      });
+    });
+    await page.route("**/api/auth/identity", async (route) => {
+      if (!sessionEstablished)
+        return route.fulfill({ status: 401, body: "{}" });
+      // Model first-user provisioning committing after an independent profile read.
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      identityProvisioned = true;
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          user: { id: "new-user", email: "new@example.com", role: "user" },
+          organization: { id: "new-org", name: "New Workspace", plan: "free" },
+          membership: {
+            organization_id: "new-org",
+            user_id: "new-user",
+            role: "owner",
+          },
+          is_new_user: true,
+        }),
+      });
+    });
+    await page.route(`${cognitoDomain}/oauth2/token`, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          access_token: "test-access-token",
+          refresh_token: "test-refresh-token",
+        }),
+      }),
+    );
+    await page.goto("/login");
+    await page.getByRole("button", { name: "Continue with email" }).click();
+    await expect.poll(() => page.url()).toContain(`${cognitoDomain}/login?`);
+    const state = new URL(page.url()).searchParams.get("state");
+    await page.goto(
+      `/auth/callback?code=test-code&state=${encodeURIComponent(state)}`,
+    );
+    await expect(page).toHaveURL(/\/app\/dashboard$/);
+    expect(prematureProfileRequests).toBe(0);
+  });
+
   test("signup opens Cognito registration, not a login-only form", async ({
     page,
   }) => {
     await page.goto("/signup");
-    await page
-      .getByRole("button", { name: "Continue with email" })
-      .click();
+    await page.getByRole("button", { name: "Continue with email" }).click();
     await expect.poll(() => page.url()).toContain(`${cognitoDomain}/signup?`);
     expect(await page.url()).toContain("scope=openid+email+profile");
     expect(await page.url()).not.toContain("phone");
@@ -90,9 +161,7 @@ test.describe("email-only Cognito entry points", () => {
     page,
   }) => {
     await page.goto("/forgot-password");
-    await page
-      .getByRole("button", { name: "Continue with email" })
-      .click();
+    await page.getByRole("button", { name: "Continue with email" }).click();
     await expect
       .poll(() => page.url())
       .toContain(`${cognitoDomain}/forgotPassword?`);
