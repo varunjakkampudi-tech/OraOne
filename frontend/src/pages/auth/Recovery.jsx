@@ -60,8 +60,8 @@ function CognitoManagedAuthNotice({ title, message, endpoint = "login" }) {
             ))}
           </div>
           <p className="mt-3 text-xs leading-relaxed text-[#64748B]">
-            Cognito will open the secure verification page. Enter the 6-digit
-            code from your email there; OraOne never reads or stores it.
+            A secure verification page will open. Enter the 6-digit code from
+            your email there; OraOne never reads or stores it.
           </p>
         </div>
       )}
@@ -71,7 +71,7 @@ function CognitoManagedAuthNotice({ title, message, endpoint = "login" }) {
           trailingIcon={ArrowRight}
           onClick={() => beginCognitoLogin({ endpoint })}
         >
-          Continue to secure account access
+          Continue with email
         </GradientButton>
       </div>
       <p className="mt-6 text-center text-sm text-[#64748B]">
@@ -119,7 +119,7 @@ export function VerifyEmail() {
     return (
       <CognitoManagedAuthNotice
         title="Verify Your Email"
-        message="Email verification is completed securely in the Cognito account flow."
+        message="Email verification is completed securely in the OraOne account flow."
       />
     );
   }
@@ -283,7 +283,7 @@ export function ForgotPassword() {
       <CognitoManagedAuthNotice
         endpoint="forgotPassword"
         title="Recover Your Account"
-        message="Password recovery is completed securely in the Cognito account flow."
+        message="Password recovery is completed securely in the OraOne account flow."
       />
     );
   }
@@ -372,7 +372,7 @@ export function ResetPassword() {
       <CognitoManagedAuthNotice
         endpoint="forgotPassword"
         title="Reset Your Password"
-        message="Password reset is completed securely in the Cognito account flow."
+        message="Password reset is completed securely in the OraOne account flow."
       />
     );
   }

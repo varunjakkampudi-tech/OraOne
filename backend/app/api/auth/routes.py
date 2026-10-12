@@ -58,6 +58,19 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 log = logging.getLogger("app.auth.identity")
 
 
+def _verified_cognito_email(profile: dict) -> str | None:
+    """Accept only positive verification from Cognito's trusted profile data.
+
+    Cognito UserInfo returns verification flags as strings, unlike JWT claims.
+    Do not coerce arbitrary truthy values (including the string "false").
+    """
+    verified = profile.get("email_verified")
+    if verified is not True and verified != "true":
+        return None
+    email = profile.get("email")
+    return email if isinstance(email, str) and email.strip() else None
+
+
 class CognitoSessionRequest(BaseModel):
     access_token: str = Field(min_length=20)
     refresh_token: str | None = Field(default=None, min_length=20)
@@ -350,7 +363,7 @@ async def identity(
         # account. Some token shapes omit email claims, so use userinfo as a
         # second source of verified profile data rather than trusting a
         # missing flag as truth.
-        email = email if claims.get("email_verified") is True else None
+        email = _verified_cognito_email(claims)
         try:
             async with httpx.AsyncClient(timeout=5.0) as client:
                 profile_response = await client.get(
@@ -359,9 +372,12 @@ async def identity(
                 )
                 profile_response.raise_for_status()
                 profile = profile_response.json()
-            email = (
-                profile.get("email") if profile.get("email_verified") is True else None
-            )
+            if profile.get("sub") != sub:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Cognito profile subject does not match the access token.",
+                )
+            email = _verified_cognito_email(profile)
             full_name = full_name or profile.get("name")
             given_name = given_name or profile.get("given_name")
             avatar_url = avatar_url or profile.get("picture")

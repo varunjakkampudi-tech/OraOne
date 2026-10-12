@@ -96,7 +96,7 @@ const TONES = {
 
 const STATS = [
   { icon: ShieldCheck, tone: "blue", value: "Email", label: "Only sign-in" },
-  { icon: Zap, tone: "cyan", value: "Cognito", label: "Managed auth" },
+  { icon: Zap, tone: "cyan", value: "Verified", label: "Email sessions" },
   {
     icon: Crown,
     tone: "amber",
@@ -107,7 +107,7 @@ const STATS = [
 
 const TRUST = [
   { icon: ShieldCheck, lines: ["Email-only", "authentication"] },
-  { icon: Hexagon, lines: ["Cognito", "managed flow"] },
+  { icon: Hexagon, lines: ["Verified", "email flow"] },
   { icon: Lock, lines: ["Secure", "session controls"] },
 ];
 

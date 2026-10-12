@@ -37,7 +37,7 @@ export default function Signup() {
           Create Your Account
         </h1>
         <p className="mt-2 text-center text-sm text-[#64748B]">
-          Sign up with your email through OraOne&apos;s secure Cognito sign-in.
+          Create your OraOne account with a verified email address.
         </p>
         <div className="mt-8">
           <GradientButton
@@ -45,7 +45,7 @@ export default function Signup() {
             trailingIcon={ArrowRight}
             onClick={() => beginCognitoLogin({ endpoint: "signup" })}
           >
-            Continue to secure sign-up
+            Continue with email
           </GradientButton>
         </div>
         <p className="mt-6 text-center text-sm text-[#64748B]">

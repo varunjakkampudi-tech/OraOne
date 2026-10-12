@@ -32,8 +32,8 @@ export default function Login() {
           Welcome Back
         </h1>
         <p className="mt-2 text-center text-sm text-[#64748B]">
-          Sign in securely with your OraOne account. Password recovery is
-          handled by Cognito.
+          Sign in securely with your OraOne account using your email address.
+          Password recovery is handled securely for you.
         </p>
         <div className="mt-8">
           <GradientButton
@@ -41,7 +41,7 @@ export default function Login() {
             trailingIcon={ArrowRight}
             onClick={() => beginCognitoLogin()}
           >
-            Continue with Cognito
+            Continue with email
           </GradientButton>
         </div>
       </AuthShell>

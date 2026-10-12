@@ -39,7 +39,7 @@ test.describe("email-only Cognito entry points", () => {
   }) => {
     await page.goto("/signup");
     await page
-      .getByRole("button", { name: "Continue to secure sign-up" })
+      .getByRole("button", { name: "Continue with email" })
       .click();
     await expect.poll(() => page.url()).toContain(`${cognitoDomain}/signup?`);
     expect(await page.url()).toContain("scope=openid+email+profile");
@@ -49,7 +49,7 @@ test.describe("email-only Cognito entry points", () => {
   test("login uses PKCE and binds the callback to state", async ({ page }) => {
     test.setTimeout(60_000);
     await page.goto("/login");
-    await page.getByRole("button", { name: "Continue with Cognito" }).click();
+    await page.getByRole("button", { name: "Continue with email" }).click();
     await expect.poll(() => page.url()).toContain("code_challenge_method=S256");
     const authorizeUrl = await page.url();
     const transaction = {
@@ -91,7 +91,7 @@ test.describe("email-only Cognito entry points", () => {
   }) => {
     await page.goto("/forgot-password");
     await page
-      .getByRole("button", { name: "Continue to secure account access" })
+      .getByRole("button", { name: "Continue with email" })
       .click();
     await expect
       .poll(() => page.url())
