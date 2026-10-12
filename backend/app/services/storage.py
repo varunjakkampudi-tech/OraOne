@@ -28,6 +28,24 @@ from botocore.exceptions import BotoCoreError, ClientError
 
 log = logging.getLogger("app.storage")
 
+_PRODUCTION_LIKE = {"production", "prod", "staging"}
+
+
+def _is_production_like() -> bool:
+    return (
+        os.environ.get("ENVIRONMENT", "development").strip().lower()
+        in _PRODUCTION_LIKE
+    )
+
+
+def _require_configured_storage() -> None:
+    """Prevent production from silently writing uploads to local disk."""
+    if _is_production_like() and not _bucket():
+        raise RuntimeError(
+            "Object storage is not configured for a production-like environment. "
+            "Set S3_BUCKET and the S3/MinIO connection settings before accepting uploads."
+        )
+
 
 def _bucket() -> str | None:
     return os.environ.get("S3_BUCKET") or None
@@ -113,6 +131,7 @@ def put_object(*, key: str, body: BinaryIO, content_type: str | None) -> str:
 
     Returns the ``s3_key`` string to persist in ``documents.s3_key``.
     """
+    _require_configured_storage()
     bucket = _bucket()
     if bucket:
         client = _client()

@@ -46,8 +46,9 @@ async def readiness() -> dict:
 
     Unlike `/api/health` (pure liveness — always 200 while the process is
     up), this checks every hard dependency the API needs to actually serve
-    requests: Postgres (required) and Redis (optional — degrades to
-    in-process cache, so its absence is reported but doesn't fail readiness).
+    requests: Postgres and Redis in production-like environments. Local
+    development may omit Redis and use the explicitly documented in-process
+    fallback.
     Point your orchestrator's readiness probe here, not at `/api/health`.
     """
     checks: dict[str, str] = {}
@@ -62,9 +63,13 @@ async def readiness() -> dict:
         checks["database"] = f"unreachable: {type(e).__name__}"
         ready = False  # Postgres is a hard dependency — not ready without it.
 
+    environment = os.environ.get("ENVIRONMENT", "development").strip().lower()
+    production_like = environment in {"production", "prod", "staging"}
     redis_url = os.environ.get("REDIS_URL", "").strip()
     if not redis_url:
         checks["redis"] = "not_configured"
+        if production_like:
+            ready = False
     else:
         try:
             import redis as _redis
@@ -72,8 +77,9 @@ async def readiness() -> dict:
             _redis.Redis.from_url(redis_url, socket_connect_timeout=2).ping()
             checks["redis"] = "connected"
         except Exception as e:
-            # Redis is optional (in-process cache fallback) — degrade, don't fail.
             checks["redis"] = f"unreachable: {type(e).__name__}"
+            if production_like:
+                ready = False
 
     if not ready:
         raise HTTPException(

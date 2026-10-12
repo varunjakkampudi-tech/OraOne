@@ -11,10 +11,9 @@ endpoints get an `OrgContext` object holding the verified `user_id`,
 `organization_id`, and `membership_role`. Repositories must scope every
 query by `OrgContext.organization_id`.
 
-This module is also where we will plug Postgres Row-Level Security in
-Phase 6: the `apply_rls_on_session()` helper sets `app.org_id` /
-`app.user_id` as session variables so RLS policies can read them. It is
-called automatically by `get_current_organization()` for every request.
+This module stamps `app.org_id` / `app.user_id` on the transaction so a
+future database-level RLS policy can read them. Application-level tenant
+scoping remains mandatory until RLS policies are deployed and verified.
 """
 
 from __future__ import annotations
@@ -64,12 +63,11 @@ class OrgContext:
 async def apply_rls_on_session(session: AsyncSession, ctx: OrgContext) -> None:
     """Stamp the SQL session with the active tenant.
 
-    Sets two ``SET LOCAL`` variables that future Row-Level Security
-    policies will reference. Safe to call now even though no policies
-    exist yet — Postgres treats unknown ``app.*`` settings as no-ops.
+    Sets two transaction-local variables that Row-Level Security policies
+    can reference.
 
-    Failure is non-fatal in Phase 5 (RLS isn't enforced yet) but is
-    logged. Phase 6 will tighten this to a hard error.
+    Failure is logged and remains non-fatal for local compatibility; the
+    deployment gate must still verify database policies separately.
     """
     try:
         await session.execute(
@@ -82,7 +80,7 @@ async def apply_rls_on_session(session: AsyncSession, ctx: OrgContext) -> None:
                 v=str(ctx.user_id)
             )
         )
-    except Exception as e:  # pragma: no cover — non-fatal in Phase 5
+    except Exception as e:  # pragma: no cover — compatibility fallback
         log.warning(
             "rls_session_stamp_failed org=%s user=%s err=%s: %s",
             ctx.organization_id,

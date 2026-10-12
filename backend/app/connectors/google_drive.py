@@ -16,6 +16,7 @@ usable access token is present, so the UI never hard-fails in dev.
 from __future__ import annotations
 
 import logging
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
@@ -104,8 +105,9 @@ class GoogleDriveConnector(BaseConnector):
 
         token = self._access_token()
         if not token:
-            log.warning("google_drive: no access token; falling back to mock corpus.")
-            return self._mock_documents()
+            raise NotConnectedError(
+                "Google Drive has no usable access token — reconnect required."
+            )
 
         config = self.integration.config or {} if self.integration else {}
         selection = config.get("selection") or {}
@@ -140,7 +142,9 @@ class GoogleDriveConnector(BaseConnector):
             return self._mock_browse(parent_id=parent_id, query=query, recent=recent)
         token = self._access_token()
         if not token:
-            return self._mock_browse(parent_id=parent_id, query=query, recent=recent)
+            raise NotConnectedError(
+                "Google Drive has no usable access token — reconnect required."
+            )
         try:
             return self._browse_drive(
                 token,
@@ -161,6 +165,9 @@ class GoogleDriveConnector(BaseConnector):
     # ── internals ──
     def _is_mock(self) -> bool:
         return (
+            os.environ.get("ENVIRONMENT", "development").strip().lower()
+            not in {"production", "prod", "staging"}
+            and
             self.integration is not None
             and self.integration.connection_type == ConnectionType.mock
         )

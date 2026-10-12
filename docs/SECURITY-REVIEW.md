@@ -14,18 +14,20 @@ This is a repository review, not a penetration test or certification.
 | Billing, crawler, uploads, prompt injection | High | Partially verified | Free-access billing is disabled and targeted SSRF/security tests pass; live provider, egress and adversarial prompt-injection validation remain unverified |
 | Customer webhook SSRF | High | Fixed in code / infrastructure follow-up | Public-host validation, delivery-time revalidation and redirect blocking are tested; deployment egress policy remains required |
 | API-key idempotency | High | Fixed in code | Public API no longer keeps a process-local replay map; centralized middleware uses the shared idempotency cache and fails closed when unavailable |
-| Distributed auth/rate-limit state fallback | High | Fixed in code / runtime unverified | Production-like environments now fail closed when Redis is missing or unreachable; local development may still use in-process state |
+| Distributed auth/rate-limit state fallback | High | Fixed in code / runtime unverified | Production-like environments now fail closed when Redis is missing or unreachable; readiness also fails closed; local development may still use in-process state |
 | Production mock inference | High | Fixed in code | Production-like environments reject `AI_ALLOW_MOCK=true` unconditionally |
 | Payment runtime dependency | High | Disabled by policy | Free-access mode rejects paid checkout and Stripe webhooks; no payment integration is required for the current product policy |
 | Tenant AI spend ceiling | High | Open | Daily AI-message quota exists; monetary/token budget reservation and reconciliation are not yet implemented |
 | Webhook delivery durability | High | Fixed in code / locally tested | Durable outbox worker performs delivery, records one row per endpoint/event identity and retries failures; external endpoint delivery remains untested |
+| Production object-storage fallback | High | Fixed in code / runtime unverified | Production-like uploads now fail closed without configured S3/MinIO; local disk remains development-only |
+| Production connector mock fallback | High | Fixed in code / runtime unverified | Google Drive mock mode and missing-token fallback are disabled in production-like environments |
 | Backend dependency vulnerabilities | High | Fixed locally / hosted install unverified | Dependency floors were raised; current local `pip-audit` reports no known vulnerabilities. Re-run in the production build environment before release |
 | RBAC migration privilege preservation | High | Fixed in code / production unverified | Legacy owner/admin values map to platform admin; production backup, migration and rollback remain unverified |
 | Secrets in repository history | High | Open | Scan history before any public-release decision |
 
 ## Current local evidence
 
-- Backend: `159 passed` from the configured backend test root, including post-fix webhook/OAuth coverage.
+- Backend: `164 passed` from the configured backend test root, including post-fix webhook/OAuth, Redis, storage, readiness and connector coverage.
 - Frontend E2E: `5 passed` covering Cognito entry points, PKCE/state binding,
   recovery navigation, protected API access and logout.
 - Frontend production build: passed.
@@ -35,11 +37,10 @@ This is a repository review, not a penetration test or certification.
 - Cognito identity provisioning now requires an explicit positive
   `email_verified` signal from claims or the userinfo response.
 
-The latest hosted CI evidence before the current working changes recorded
-passing backend, lint/format, build and serial E2E gates. The current source
-also includes durable webhook event identity, one-time OAuth state consumption,
-and the role-preserving migration correction; these changes require a fresh
-hosted run before release.
+The latest hosted CI evidence for `93816e0` recorded passing backend,
+lint/format, build and serial E2E gates. The current working changes add
+production Redis readiness, storage fail-closed behavior, and connector mock
+isolation; they require a fresh hosted run before release.
 
 Production database migration/backup evidence, live inbox testing, external
 webhook delivery, billing-provider verification, provider usage/cost

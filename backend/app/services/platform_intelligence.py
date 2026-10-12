@@ -1197,7 +1197,7 @@ async def tenant_isolation(session: AsyncSession) -> dict[str, Any]:
             "dimension": "Database engine RLS",
             "isolation": "Postgres row-level security",
             "status": "available",
-            "detail": "RLS policies are defined and can be force-enabled per deployment for defense-in-depth.",
+            "detail": "Application tenant scoping is enforced; PostgreSQL RLS remains a separate deployment gate until policies are installed and verified.",
         },
     ]
 

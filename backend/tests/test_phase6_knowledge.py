@@ -92,6 +92,21 @@ def test_storage_local_fallback(tmp_path, monkeypatch):
     assert storage.local_path(s3_key).read_bytes() == b"hello world"
 
 
+def test_storage_fails_closed_in_production_without_bucket(tmp_path, monkeypatch):
+    from app.services import storage
+
+    monkeypatch.setenv("ENVIRONMENT", "production")
+    monkeypatch.delenv("S3_BUCKET", raising=False)
+    monkeypatch.setenv("UPLOAD_DIR", str(tmp_path))
+
+    with pytest.raises(RuntimeError, match="Object storage is not configured"):
+        storage.put_object(
+            key="org/o/kb/k/file.txt",
+            body=io.BytesIO(b"must not hit local disk"),
+            content_type="text/plain",
+        )
+
+
 def test_swagger_documents_all_required_endpoints():
     """OpenAPI must register the spec'd paths + describe their query params."""
     from server import app
