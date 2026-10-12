@@ -42,17 +42,46 @@ jobs:
         env:
           HOSTINGER_HOST: ${{ secrets.HOSTINGER_HOST }}
           HOSTINGER_USER: ${{ secrets.HOSTINGER_USER }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           set -euo pipefail
           test -n "$HOSTINGER_HOST"
           test -n "$HOSTINGER_USER"
-          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTINGER_USER@$HOSTINGER_HOST" 'bash -se' <<'REMOTE'
+          test -n "$OPENAI_API_KEY"
+          {
+            printf 'export OPENAI_API_KEY=%q\n' "$OPENAI_API_KEY"
+            cat <<'REMOTE'
           set -euo pipefail
           cd /srv/apps/oraone
           git fetch origin main
           git checkout -B main origin/main
+          umask 077
+          OPENAI_API_KEY="$OPENAI_API_KEY" python3 - <<'PY'
+          from pathlib import Path
+          import os
+
+          env_path = Path("backend/.env")
+          lines = env_path.read_text().splitlines() if env_path.exists() else []
+          value = os.environ["OPENAI_API_KEY"]
+          output = []
+          replaced = False
+          for line in lines:
+              if line.startswith("OPENAI_API_KEY="):
+                  output.append(f"OPENAI_API_KEY={value}")
+                  replaced = True
+              elif line.startswith("AI_ALLOW_MOCK="):
+                  output.append("AI_ALLOW_MOCK=false")
+              else:
+                  output.append(line)
+          if not replaced:
+              output.append(f"OPENAI_API_KEY={value}")
+          if not any(line.startswith("AI_ALLOW_MOCK=") for line in lines):
+              output.append("AI_ALLOW_MOCK=false")
+          env_path.write_text("\n".join(output) + "\n")
+          PY
           docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build --remove-orphans
           docker compose --env-file .env.production -f docker-compose.prod.yml ps
           curl --fail --silent --show-error http://127.0.0.1/api/health/ready
           printf '\nDeployment verified at %s\n' "$(git rev-parse HEAD)"
           REMOTE
+          } | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTINGER_USER@$HOSTINGER_HOST" 'bash -se'
