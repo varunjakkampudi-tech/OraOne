@@ -82,7 +82,9 @@ async def seed() -> None:
                     "Account already exists with a different password, status, "
                     "verification state, or privilege. Refusing to modify it."
                 )
-            print("Local QA account already exists, credentials match; no changes made.")
+            print(
+                "Local QA account already exists, credentials match; no changes made."
+            )
             return
 
         session.add(
