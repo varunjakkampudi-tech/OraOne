@@ -18,11 +18,11 @@ flowchart TB
   subgraph PrivateNetwork[Private Compose network]
     Caddy --> Frontend[Frontend container]
     Caddy --> Backend[Backend container]
-    Backend --> Worker[Worker container]
+    Backend -. writes durable outbox .-> DB
+    Worker[Independent worker container] --> DB
     Backend --> DB[(PostgreSQL volume)]
     Backend --> Redis[(Redis volume)]
     Backend --> Minio[(MinIO volume)]
-    Worker --> DB
     Worker --> Redis
   end
   Backend -. outbound token/API requests .-> Cognito[External Cognito service]

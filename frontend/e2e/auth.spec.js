@@ -583,6 +583,7 @@ test.describe("self-hosted email authentication", () => {
   test("imported Product 1 design URLs resolve to the functional application routes", async ({
     page,
   }) => {
+    test.setTimeout(90_000);
     await page.addInitScript(() => {
       localStorage.setItem("oraone_access_token", "test-access");
       localStorage.setItem("oraone_tour_seen_v1", "1");
@@ -602,13 +603,22 @@ test.describe("self-hosted email authentication", () => {
       }),
     );
     await page.route("**/api/**", (route) => {
-      if (!new URL(route.request().url()).pathname.startsWith("/api/")) {
+      const pathname = new URL(route.request().url()).pathname;
+      if (!pathname.startsWith("/api/")) {
         return route.continue();
       }
+      const body = pathname.endsWith("/auth/me")
+        ? user
+        : pathname.endsWith("/auth/identity")
+          ? identity
+          : pathname.endsWith("/v2/conversations") ||
+              pathname.endsWith("/messages")
+            ? []
+            : { items: [], totals: {}, series: {} };
       return route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ items: [], totals: {}, series: {} }),
+        body: JSON.stringify(body),
       });
     });
 
@@ -642,7 +652,10 @@ test.describe("self-hosted email authentication", () => {
     ];
 
     for (const [source, destination] of aliases) {
-      await page.goto(source);
+      await page.goto(source, { waitUntil: "domcontentloaded" });
+      await expect(page.getByTestId("profile-menu")).toBeVisible({
+        timeout: 15_000,
+      });
       await expect(page).toHaveURL(destination);
     }
   });

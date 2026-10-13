@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased — unified Product 1 UI and cleanup
+
+- Integrated the approved visual direction into the existing React/FastAPI app,
+  preserving the logo, SDK, widget and real backend contracts.
+- Removed unused legacy screens, demo components, orphaned UI scaffolding and
+  application-side connector demo content. Unconfigured providers fail closed.
+- Fixed unavailable analytics, fabricated lead pagination/dates and inbox access
+  beyond the first backend batch.
+- Normalize audit snapshots for PostgreSQL JSONB; omit local variables from traces.
+- Corrected CI autofix guards, added database-backed backend/SDK gates, and pinned
+  manual deployment and tagging to one dispatch SHA. No deployment was dispatched.
+- Updated setup, architecture, test evidence and repository presentation.
+
 ## v1.0.9 — Reload and verify edge proxy configuration
 
 - Recreate the edge proxy after deployment so bind-mounted Caddy configuration changes are applied.

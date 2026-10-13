@@ -525,9 +525,7 @@ async def agent_analytics(
         & (Conversation.created_at >= since)
     )
     if project_id is not None:
-        conversation_join = conversation_join & (
-            Conversation.project_id == project_id
-        )
+        conversation_join = conversation_join & (Conversation.project_id == project_id)
     stmt = (
         select(
             Agent.id,

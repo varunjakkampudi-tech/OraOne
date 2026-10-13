@@ -3,10 +3,8 @@
 Generic OAuth2 authorization-code helper. Provider endpoints + scopes
 live in :data:`_OAUTH_PROVIDERS`; client credentials come from env vars
 (e.g. ``GOOGLE_CLIENT_ID`` / ``GOOGLE_CLIENT_SECRET`` /
-``GOOGLE_REDIRECT_URI``). When a provider has no configured client
-secret, :func:`is_configured` returns False and the API connects the
-integration in *mock* mode instead — so local dev never needs real
-secrets.
+``GOOGLE_REDIRECT_URI``). When credentials are missing,
+:func:`is_configured` returns False and connection fails closed.
 
 Tokens are returned in plaintext here; the caller encrypts them before
 persisting (see ``app.core.crypto``).

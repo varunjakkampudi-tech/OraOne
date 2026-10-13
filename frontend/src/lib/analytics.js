@@ -17,7 +17,7 @@
 //
 // Consent
 // ───────
-// `setConsent({analytics: true})` is read from the CookieConsent component.
+// Analytics remain opt-in through `setConsent({analytics: true})`.
 // Events are buffered until consent is granted (or rejected → buffer cleared).
 
 const STORAGE_KEY = "oraone_analytics_consent";

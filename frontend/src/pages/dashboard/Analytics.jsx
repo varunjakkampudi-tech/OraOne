@@ -596,35 +596,57 @@ function TabLoading() {
   );
 }
 
+function ModuleUnavailable({ onRetry }) {
+  return (
+    <div className="grid min-h-[40vh] place-items-center rounded-lg border border-dashed border-[#CBD5E1] bg-white p-8 text-center">
+      <div>
+        <p className="font-semibold text-[#0F172A]">Analytics unavailable</p>
+        <p className="mt-1 text-sm text-[#64748B]">
+          We couldn&apos;t load this workspace data.
+        </p>
+        <GhostButton type="button" className="mt-4" onClick={onRetry}>
+          Retry
+        </GhostButton>
+      </div>
+    </div>
+  );
+}
+
 // ── data hook for module tabs ──────────────────────────────────────────
 function useModule(module, days, enabled) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const reload = useCallback(() => {
     if (!enabled) return;
     let on = true;
     setLoading(true);
+    setError(false);
     api
       .get(`/analytics/${module}`, { params: { days } })
       .then(({ data }) => on && setData(data))
-      .catch((e) => toast.error(formatApiError(e)))
+      .catch((e) => {
+        if (on) {
+          setData(null);
+          setError(true);
+          toast.error(formatApiError(e));
+        }
+      })
       .finally(() => on && setLoading(false));
     return () => {
       on = false;
     };
   }, [module, days, enabled]);
 
-  useEffect(() => {
-    reload();
-  }, [reload]);
+  useEffect(() => reload(), [reload]);
 
-  return { data, loading, reload };
+  return { data, loading, error, reload };
 }
 
 // ── Overview tab (preserves the original organization-wide view) ───────
 function OverviewTab({ days }) {
-  const { data, loading } = useModule("overview", days, true);
+  const { data, loading, error, reload } = useModule("overview", days, true);
   const totals = data?.totals;
 
   const timeline = useMemo(() => {
@@ -664,6 +686,7 @@ function OverviewTab({ days }) {
   const maxAgentConvos = Math.max(1, ...topAgents.map((a) => a.conversations));
 
   if (loading && !data) return <TabLoading />;
+  if (error) return <ModuleUnavailable onRetry={reload} />;
 
   return (
     <div className="space-y-5">
@@ -967,9 +990,10 @@ function OverviewTab({ days }) {
 
 // ── Executive tab ──────────────────────────────────────────────────────
 function ExecutiveTab({ days }) {
-  const { data, loading } = useModule("executive", days, true);
+  const { data, loading, error, reload } = useModule("executive", days, true);
   const k = data?.kpis;
   if (loading && !data) return <TabLoading />;
+  if (error) return <ModuleUnavailable onRetry={reload} />;
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1063,9 +1087,10 @@ function ExecutiveTab({ days }) {
 
 // ── Cost tab ───────────────────────────────────────────────────────────
 function CostTab({ days }) {
-  const { data, loading } = useModule("cost", days, true);
+  const { data, loading, error, reload } = useModule("cost", days, true);
   const t = data?.totals;
   if (loading && !data) return <TabLoading />;
+  if (error) return <ModuleUnavailable onRetry={reload} />;
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1120,9 +1145,10 @@ function CostTab({ days }) {
 
 // ── Insights tab (top questions / unanswered / knowledge gaps) ─────────
 function InsightsTab({ days }) {
-  const { data, loading } = useModule("insights", days, true);
+  const { data, loading, error, reload } = useModule("insights", days, true);
   const t = data?.totals;
   if (loading && !data) return <TabLoading />;
+  if (error) return <ModuleUnavailable onRetry={reload} />;
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1191,9 +1217,10 @@ function InsightsTab({ days }) {
 
 // ── Conversations tab ──────────────────────────────────────────────────
 function ConversationsTab({ days }) {
-  const { data, loading } = useModule("chat", days, true);
+  const { data, loading, error, reload } = useModule("chat", days, true);
   const t = data?.totals;
   if (loading && !data) return <TabLoading />;
+  if (error) return <ModuleUnavailable onRetry={reload} />;
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -1253,8 +1280,9 @@ function ConversationsTab({ days }) {
 
 // ── Agents tab ─────────────────────────────────────────────────────────
 function AgentsTab({ days }) {
-  const { data, loading } = useModule("agents", days, true);
+  const { data, loading, error, reload } = useModule("agents", days, true);
   if (loading && !data) return <TabLoading />;
+  if (error) return <ModuleUnavailable onRetry={reload} />;
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1322,9 +1350,10 @@ function AgentsTab({ days }) {
 
 // ── Knowledge tab ──────────────────────────────────────────────────────
 function KnowledgeTab({ days }) {
-  const { data, loading } = useModule("knowledge", days, true);
+  const { data, loading, error, reload } = useModule("knowledge", days, true);
   const t = data?.totals;
   if (loading && !data) return <TabLoading />;
+  if (error) return <ModuleUnavailable onRetry={reload} />;
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -1368,9 +1397,10 @@ function KnowledgeTab({ days }) {
 
 // ── RAG tab ────────────────────────────────────────────────────────────
 function RagTab({ days }) {
-  const { data, loading } = useModule("rag", days, true);
+  const { data, loading, error, reload } = useModule("rag", days, true);
   const t = data?.totals;
   if (loading && !data) return <TabLoading />;
+  if (error) return <ModuleUnavailable onRetry={reload} />;
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1410,9 +1440,10 @@ function RagTab({ days }) {
 
 // ── Widget tab ─────────────────────────────────────────────────────────
 function WidgetTab({ days }) {
-  const { data, loading } = useModule("widget", days, true);
+  const { data, loading, error, reload } = useModule("widget", days, true);
   const t = data?.totals;
   if (loading && !data) return <TabLoading />;
+  if (error) return <ModuleUnavailable onRetry={reload} />;
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -1474,9 +1505,10 @@ function WidgetTab({ days }) {
 
 // ── Workflows tab ──────────────────────────────────────────────────────
 function WorkflowsTab({ days }) {
-  const { data, loading } = useModule("workflows", days, true);
+  const { data, loading, error, reload } = useModule("workflows", days, true);
   const t = data?.totals;
   if (loading && !data) return <TabLoading />;
+  if (error) return <ModuleUnavailable onRetry={reload} />;
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1542,9 +1574,14 @@ function WorkflowsTab({ days }) {
 
 // ── Integrations tab ───────────────────────────────────────────────────
 function IntegrationsTab({ days }) {
-  const { data, loading } = useModule("integrations", days, true);
+  const { data, loading, error, reload } = useModule(
+    "integrations",
+    days,
+    true,
+  );
   const t = data?.totals;
   if (loading && !data) return <TabLoading />;
+  if (error) return <ModuleUnavailable onRetry={reload} />;
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -1581,9 +1618,10 @@ function IntegrationsTab({ days }) {
 
 // ── Team tab ───────────────────────────────────────────────────────────
 function TeamTab({ days }) {
-  const { data, loading } = useModule("users", days, true);
+  const { data, loading, error, reload } = useModule("users", days, true);
   const t = data?.totals;
   if (loading && !data) return <TabLoading />;
+  if (error) return <ModuleUnavailable onRetry={reload} />;
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

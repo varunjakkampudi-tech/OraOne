@@ -92,7 +92,9 @@ class HashingEmbeddings(EmbeddingProvider):
     def _vector(self, text: str) -> list[float]:
         vec = [0.0] * self.dim
         for tok in self._tokens(text):
-            h = hashlib.md5(tok.encode("utf-8")).digest()
+            # Bucket selection, not authentication/integrity. Preserve existing
+            # indexed vectors and allow this non-security use on FIPS builds.
+            h = hashlib.md5(tok.encode("utf-8"), usedforsecurity=False).digest()
             idx = int.from_bytes(h[:4], "big") % self.dim
             sign = 1.0 if (h[4] & 1) else -1.0
             vec[idx] += sign

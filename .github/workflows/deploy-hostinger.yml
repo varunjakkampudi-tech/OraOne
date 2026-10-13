@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: "Type DEPLOY to deploy the latest main commit"
+        description: "Type DEPLOY to deploy the main commit captured by this dispatch"
         required: true
         type: string
       product:
@@ -40,6 +40,9 @@ jobs:
     steps:
       - name: Check out the selected main commit
         uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
 
       - name: Validate release identity
         id: release
@@ -48,6 +51,9 @@ jobs:
           RELEASE_VERSION: ${{ inputs.release_version }}
         run: |
           set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git fetch origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
           test "$PRODUCT_ID" = "product-1-ai-chat" || {
             echo "Only Product 1 is deployable until its successor product is implemented."
             exit 1
@@ -63,6 +69,7 @@ jobs:
           fi
           echo "tag=$release_tag" >> "$GITHUB_OUTPUT"
           echo "version=v${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "sha=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Configure deployment SSH
         env:
@@ -102,6 +109,7 @@ jobs:
           ORAONE_PRODUCT_ID: ${{ inputs.product }}
           ORAONE_VERSION: ${{ steps.release.outputs.version }}
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          DEPLOY_SHA: ${{ steps.release.outputs.sha }}
         run: |
           set -euo pipefail
           test -n "$HOSTINGER_HOST"
@@ -112,11 +120,15 @@ jobs:
             printf 'export ORAONE_PRODUCT_ID=%q\n' "$ORAONE_PRODUCT_ID"
             printf 'export ORAONE_VERSION=%q\n' "$ORAONE_VERSION"
             printf 'export RELEASE_TAG=%q\n' "$RELEASE_TAG"
+            printf 'export DEPLOY_SHA=%q\n' "$DEPLOY_SHA"
             cat <<'REMOTE'
           set -euo pipefail
           cd /srv/apps/oraone
           git fetch origin main
-          git checkout -B main origin/main
+          git cat-file -e "${DEPLOY_SHA}^{commit}"
+          git merge-base --is-ancestor "$DEPLOY_SHA" origin/main
+          git checkout -B main "$DEPLOY_SHA"
+          test "$(git rev-parse HEAD)" = "$DEPLOY_SHA"
           umask 077
           OPENAI_API_KEY="$OPENAI_API_KEY" ORAONE_PRODUCT_ID="$ORAONE_PRODUCT_ID" ORAONE_VERSION="$ORAONE_VERSION" python3 - <<'PY'
           from pathlib import Path
@@ -175,7 +187,8 @@ jobs:
               exit 1
             }
           done
-          printf '\nDeployment verified product=%s version=%s tag=%s commit=%s\n' "$ORAONE_PRODUCT_ID" "$ORAONE_VERSION" "$RELEASE_TAG" "$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "$DEPLOY_SHA"
+          printf '\nDeployment verified product=%s version=%s tag=%s commit=%s\n' "$ORAONE_PRODUCT_ID" "$ORAONE_VERSION" "$RELEASE_TAG" "$DEPLOY_SHA"
           REMOTE
           } | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o HostKeyAlias=201.18.193.230 "$HOSTINGER_USER@$HOSTINGER_HOST" 'bash -se'
 
@@ -186,9 +199,11 @@ jobs:
           PRODUCT_ID: ${{ inputs.product }}
           RELEASE_VERSION: ${{ steps.release.outputs.version }}
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          DEPLOY_SHA: ${{ steps.release.outputs.sha }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "$RELEASE_TAG" "$GITHUB_SHA" -m "OraOne ${PRODUCT_ID} ${RELEASE_VERSION}"
+          test "$(git rev-parse HEAD)" = "$DEPLOY_SHA"
+          git tag -a "$RELEASE_TAG" "$DEPLOY_SHA" -m "OraOne ${PRODUCT_ID} ${RELEASE_VERSION}"
           git push origin "$RELEASE_TAG"

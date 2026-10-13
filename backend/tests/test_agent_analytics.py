@@ -108,7 +108,9 @@ async def test_analytics_module_forwards_agent_filter_only_to_agents(monkeypatch
         calls.append(("knowledge", session, org_id, days))
         return {}
 
-    monkeypatch.setitem(routes.analytics_service.MODULE_FUNCTIONS, "agents", fake_agents)
+    monkeypatch.setitem(
+        routes.analytics_service.MODULE_FUNCTIONS, "agents", fake_agents
+    )
     monkeypatch.setitem(
         routes.analytics_service.MODULE_FUNCTIONS, "knowledge", fake_knowledge
     )

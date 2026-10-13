@@ -5,18 +5,13 @@ become searchable in chat. Supports:
 
 * Real mode — OAuth2 + Drive v3 REST (via ``httpx``). Lists files in the
   selected folder, exports Google Docs to text, downloads PDFs/TXT/MD/CSV.
-* Mock mode — deterministic demo documents (no secrets needed) so the
-  platform is testable locally and in CI.
-
-Mode is chosen by ``integration.connection_type``: ``oauth`` → real,
-``mock`` → demo corpus. Real mode also auto-falls back to mock if no
-usable access token is present, so the UI never hard-fails in dev.
+Missing credentials and legacy simulated connections fail closed. Synthetic
+provider responses belong in isolated tests, not application data.
 """
 
 from __future__ import annotations
 
 import logging
-import os
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
@@ -84,7 +79,7 @@ class GoogleDriveConnector(BaseConnector):
     # ── data ──
     def health(self) -> bool:
         if self._is_mock():
-            return True
+            return False
         token = self._access_token()
         if not token:
             return False
@@ -101,7 +96,9 @@ class GoogleDriveConnector(BaseConnector):
 
     def sync(self) -> list[RemoteDocument]:
         if self._is_mock():
-            return self._mock_documents()
+            raise NotConnectedError(
+                "Legacy simulated connections must reconnect with real OAuth."
+            )
 
         token = self._access_token()
         if not token:
@@ -139,7 +136,9 @@ class GoogleDriveConnector(BaseConnector):
         page_size: int = 100,
     ) -> dict[str, Any]:
         if self._is_mock():
-            return self._mock_browse(parent_id=parent_id, query=query, recent=recent)
+            raise NotConnectedError(
+                "Legacy simulated connections must reconnect with real OAuth."
+            )
         token = self._access_token()
         if not token:
             raise NotConnectedError(
@@ -165,9 +164,7 @@ class GoogleDriveConnector(BaseConnector):
     # ── internals ──
     def _is_mock(self) -> bool:
         return (
-            os.environ.get("ENVIRONMENT", "development").strip().lower()
-            not in {"production", "prod", "staging"}
-            and self.integration is not None
+            self.integration is not None
             and self.integration.connection_type == ConnectionType.mock
         )
 

@@ -18,7 +18,7 @@ Verified repository paths include frontend/.env.production, backend/app/core/con
 
 The development Compose file defines PostgreSQL user oraone_admin, password oraone_dev_password, database oraone, and host mapping 5433:5432. The backend therefore needs a local DATABASE_URL using localhost:5433, plus an ALEMBIC_DATABASE_URL using the same credentials. Redis is redis://localhost:6379/0.
 
-The backend config accepts DATABASE_URL first. The DB_* fallback path expects DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, and DB_NAME. The template also contains a legacy DB_NAME_PG key; prefer the explicit URLs shown in the quickstart so Alembic and the application use the same database.
+The backend config accepts DATABASE_URL first. The DB_* fallback path expects DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, and DB_NAME. Prefer the explicit application and Alembic URLs shown in the quickstart so both use the same database; there is no tracked environment template to complete implicitly.
 
 Local MinIO uses S3_ENDPOINT_URL=http://localhost:9000, bucket oraone-dev, access key oraone_minio, and secret oraone_minio_password. These are disposable Compose development credentials only. If S3_BUCKET is unset, the storage service falls back to UPLOAD_DIR.
 

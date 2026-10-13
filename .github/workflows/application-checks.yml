@@ -17,8 +17,35 @@ jobs:
   backend:
     name: Backend tests
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: oraone
+          POSTGRES_PASSWORD: oraone
+          POSTGRES_DB: oraone_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U oraone -d oraone_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
     env:
       JWT_SECRET_KEY: ci-only-jwt-secret-key-change-me-32-bytes
+      DATABASE_URL: postgresql+asyncpg://oraone:oraone@127.0.0.1:5432/oraone_test
+      ALEMBIC_DATABASE_URL: postgresql+psycopg2://oraone:oraone@127.0.0.1:5432/oraone_test
+      REDIS_URL: redis://127.0.0.1:6379/0
+      RUN_BACKGROUND_WORKERS: "false"
     steps:
       - name: Check out source
         uses: actions/checkout@v5
@@ -37,6 +64,10 @@ jobs:
       - name: Compile Python sources
         working-directory: backend
         run: python -m compileall -q .
+
+      - name: Migrate isolated CI test database
+        working-directory: backend
+        run: alembic upgrade head
 
       - name: Run backend tests from configured test root
         working-directory: backend
@@ -140,6 +171,9 @@ jobs:
 
       - name: Build production frontend
         run: npm run build
+
+      - name: Run widget SDK compatibility tests
+        run: npm run test:sdk
 
       - name: Run serial browser smoke tests
         run: npm run test:e2e -- --workers=1

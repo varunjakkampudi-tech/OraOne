@@ -42,9 +42,9 @@ jobs:
 
       - name: Require auto-fixes to be committed
         run: |
-          if ! git diff --quiet -- frontend/src; then
+          if ! git -C "$GITHUB_WORKSPACE" diff --quiet -- frontend/src; then
             echo "Lint or formatting produced safe fixes. Run 'npm run lint:fix && npm run format' in frontend and commit the result."
-            git diff -- frontend/src
+            git -C "$GITHUB_WORKSPACE" diff -- frontend/src
             exit 1
           fi
 
@@ -81,9 +81,9 @@ jobs:
 
       - name: Require auto-fixes to be committed
         run: |
-          if ! git diff --quiet -- backend; then
+          if ! git -C "$GITHUB_WORKSPACE" diff --quiet -- backend; then
             echo "Ruff produced safe fixes or formatting changes. Run the backend quality commands locally and commit the result."
-            git diff -- backend
+            git -C "$GITHUB_WORKSPACE" diff -- backend
             exit 1
           fi
 

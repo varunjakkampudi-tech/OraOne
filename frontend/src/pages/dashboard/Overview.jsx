@@ -466,7 +466,13 @@ export default function Overview() {
   /* ── Loading skeleton ── */
   if (loading || analyticsLoading) {
     return (
-      <div className="space-y-6" data-testid="dashboard-overview">
+      <div
+        className="space-y-6"
+        data-testid="dashboard-overview"
+        role="status"
+        aria-busy="true"
+        aria-label="Loading dashboard"
+      >
         <div className="h-9 w-72 animate-pulse rounded-lg bg-line motion-reduce:animate-none" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[0, 1, 2, 3].map((i) => (

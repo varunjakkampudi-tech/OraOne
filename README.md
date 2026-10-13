@@ -8,9 +8,22 @@
 
 <p align="center"><a href="https://oraone.in">oraone.in</a> · <a href="docs/README.md">Documentation</a> · <a href="SECURITY.md">Security</a></p>
 
+[![Application checks](https://github.com/varunjakkampudi-tech/OraOne/actions/workflows/application-checks.yml/badge.svg?branch=main)](https://github.com/varunjakkampudi-tech/OraOne/actions/workflows/application-checks.yml)
+[![Code quality](https://github.com/varunjakkampudi-tech/OraOne/actions/workflows/frontend-lint.yml/badge.svg?branch=main)](https://github.com/varunjakkampudi-tech/OraOne/actions/workflows/frontend-lint.yml)
+
 OraOne is a multitenant AI conversation platform for website agents. The current product supports knowledge-grounded chat, lead capture, workflows, integrations, billing primitives, an embeddable widget, and tenant-scoped administration.
 
 This repository is the source of truth for the application and its local, self-hosted operational model. It is a release candidate, not a claim of live production readiness. See the [release checklist](docs/operations/RELEASE-CHECKLIST.md) for the gates that remain external to this checkout.
+
+## Product 1 workspace
+
+![OraOne workspace](docs/assets/screenshots/product1-dashboard-local-2026-10-14.png)
+
+Local browser verification capture, 14 October 2026. The workspace uses synthetic
+test records and the real local API; this is not production customer data.
+
+The unified frontend is `frontend/`. Migration and cleanup evidence, including
+verification limits, is recorded in the [Product 1 closure report](docs/design/PRODUCT1_CLOSURE.md).
 
 ## Product scope
 
@@ -117,7 +130,7 @@ docs/                             Architecture, operations, security, and eviden
 
 ## Local quickstart
 
-Prerequisites: Docker Engine with Compose v2, Python 3.11+, Node.js 20+, and Yarn 1.22.22. The [quickstart](docs/guides/QUICKSTART.md) is authoritative. The guarded bootstrap below establishes the development services, required secret, and both PostgreSQL URLs before Alembic runs:
+Prerequisites: Docker Engine with Compose v2, Python 3.11+, and Node.js 24 with npm. The [quickstart](docs/guides/QUICKSTART.md) is authoritative. The guarded bootstrap below establishes the development services, required secret, and both PostgreSQL URLs before Alembic runs:
 
 ```powershell
 docker compose -f docker-compose.dev.yml up -d
@@ -125,7 +138,7 @@ docker compose -f docker-compose.dev.yml up -d
 cd backend
 python -m venv .venv
 .\\.venv\\Scripts\\Activate.ps1
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 $jwt = python -c "import secrets; print(secrets.token_urlsafe(48))"
 @"
 ENVIRONMENT=development
@@ -178,8 +191,10 @@ Frontend checks run from `frontend`:
 
 ```powershell
 npm run build
-npx eslint "src/**/*.{js,jsx}"
-npx playwright test
+npm run lint:check
+npm run format:check
+npm run test:sdk
+npm run test:e2e
 ```
 
 The repository validation script also checks Compose, migrations, tests, and the production build:
@@ -216,6 +231,7 @@ Use the [deployment guide](docs/operations/DEPLOYMENT.md), [backup and restore g
 | --- | --- |
 | Product portfolio and roadmap | [Product portfolio](docs/PRODUCT-PORTFOLIO.md) · [Roadmap](docs/ROADMAP.md) |
 | Architecture and diagrams | [Architecture index](docs/architecture/README.md) |
+| UI design and integration evidence | [Design index](docs/design/README.md) |
 | Local setup and environments | [Quickstart](docs/guides/QUICKSTART.md) · [Environment](docs/guides/ENVIRONMENT.md) |
 | Testing and troubleshooting | [Testing](docs/guides/TESTING.md) · [Troubleshooting](docs/guides/TROUBLESHOOTING.md) |
 | Deployment and recovery | [Deployment](docs/operations/DEPLOYMENT.md) · [Backup and restore](docs/operations/BACKUP-RESTORE.md) |
@@ -227,4 +243,4 @@ Report vulnerabilities privately using the process in [SECURITY.md](SECURITY.md)
 
 ## Project status
 
-The current branch contains repository and documentation improvements only; hosting is intentionally deferred. Local tests and builds are evidence of checkout health, not independent proof of production operation. See [CHANGELOG.md](CHANGELOG.md) for this branch's documentation changes and [ROADMAP.md](docs/ROADMAP.md) for clearly separated planned work.
+As audited on 14 October 2026, checkpoint `ef6ba4d` includes the unified UI and Product 1 integration. The latest hosted application checks, quality checks, and manual deployment observed in that audit succeeded at the earlier commit `ca4204b`; no hosted runs were found for `ef6ba4d`. This is dated evidence, not a claim about future commits or the current live application. Local UI and integration results are recorded with their scope in [UI integration](docs/design/UI_INTEGRATION.md). See [CHANGELOG.md](CHANGELOG.md) for repository history and [ROADMAP.md](docs/ROADMAP.md) for planned work.

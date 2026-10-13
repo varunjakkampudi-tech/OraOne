@@ -182,9 +182,7 @@ export default function Leads() {
     ...l,
     intent: l.intent || "—",
     tags: Array.isArray(l.tags) ? l.tags : [],
-    date: l.created_at
-      ? new Date(l.created_at).toLocaleDateString()
-      : new Date().toLocaleDateString(),
+    date: l.created_at ? new Date(l.created_at).toLocaleDateString() : "—",
   });
 
   const loadStats = useCallback(async () => {
@@ -703,11 +701,7 @@ export default function Leads() {
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none"
                 />
               </div>
-              <Pager
-                page={page}
-                total={Math.max(totalPages, 5)}
-                onChange={setPage}
-              />
+              <Pager page={page} total={totalPages} onChange={setPage} />
             </div>
           </div>
         </div>
@@ -1365,7 +1359,8 @@ function ScorePill({ score = 0 }) {
 }
 
 function Pager({ page, total, onChange }) {
-  const pages = [1, 2, 3, 4, 5];
+  const start = Math.max(1, Math.min(page - 2, total - 4));
+  const pages = Array.from({ length: Math.min(total, 5) }, (_, i) => start + i);
   return (
     <div className="flex items-center gap-1">
       <button
@@ -1389,17 +1384,21 @@ function Pager({ page, total, onChange }) {
           {n}
         </button>
       ))}
-      <span className="px-1 text-[#94A3B8]">...</span>
-      <button
-        onClick={() => onChange(total)}
-        className={`size-8 rounded-lg font-semibold text-[12.5px] transition-colors ${
-          total === page
-            ? "bg-[#2563EB] text-white"
-            : "text-[#475569] hover:bg-[#F1F5F9]"
-        }`}
-      >
-        {total}
-      </button>
+      {pages[pages.length - 1] < total && (
+        <span className="px-1 text-[#94A3B8]">...</span>
+      )}
+      {pages[pages.length - 1] < total && (
+        <button
+          onClick={() => onChange(total)}
+          className={`size-8 rounded-lg font-semibold text-[12.5px] transition-colors ${
+            total === page
+              ? "bg-[#2563EB] text-white"
+              : "text-[#475569] hover:bg-[#F1F5F9]"
+          }`}
+        >
+          {total}
+        </button>
+      )}
       <button
         onClick={() => page < total && onChange(page + 1)}
         className="size-8 rounded-lg grid place-items-center hover:bg-[#F1F5F9] text-[#64748B] disabled:opacity-40"

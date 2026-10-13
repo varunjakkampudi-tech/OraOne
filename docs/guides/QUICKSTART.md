@@ -6,8 +6,7 @@ This guide is for a first clone of OraOne. It uses the existing development Comp
 
 - Git
 - Python 3.11 or newer
-- Node.js 20 or newer
-- Yarn 1.22.22
+- Node.js 24 with npm
 - Docker Engine with Docker Compose v2
 
 Verify:
@@ -16,7 +15,7 @@ Verify:
 git --version
 python --version
 node --version
-yarn --version
+npm --version
 docker compose version
 ```
 
@@ -85,7 +84,7 @@ cd backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 alembic upgrade head
 python -m compileall -q app server.py
 python -m uvicorn server:app --reload --port 8000
@@ -130,7 +129,7 @@ cd backend
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 alembic upgrade head
 python -m compileall -q app server.py
 python -m uvicorn server:app --reload --port 8000
@@ -190,9 +189,11 @@ powershell -ExecutionPolicy Bypass -File scripts/validate_docs.ps1
 cd backend
 python -m pytest -q
 cd ..\frontend
-npx eslint "src/**/*.{js,jsx}"
+npm run lint:check
+npm run format:check
 npm run build
-npx playwright test
+npm run test:sdk
+npm run test:e2e
 ```
 
 The browser E2E suite starts the frontend itself. A live Cognito inbox test, external webhook, payment provider, or deployed host is not part of this local quickstart.
@@ -220,6 +221,8 @@ Warning: 'docker compose ... down -v' deletes the local PostgreSQL, Redis, and M
 
 
 ## Startup flow
+
+The source-backed diagram below retains its historical prerequisite labels. The current supported setup is Node.js 24 with npm, as specified above; its source is preserved unchanged in this scoped documentation update.
 
 <!-- diagram: docs/diagrams/local-development-startup.mmd -->
 ```mermaid

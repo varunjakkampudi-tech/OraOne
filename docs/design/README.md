@@ -8,5 +8,6 @@ The temporary Lovable export was a design reference, not an application runtime.
 
 - [Design system and shell constraints](DESIGN_SYSTEM.md)
 - [Design migration and UI integration](UI_INTEGRATION.md)
+- [Product 1 cleanup and verification](PRODUCT1_CLOSURE.md)
 
 Visual review and automated checks are implementation evidence, not owner approval of every screen. Future design work must continue to preserve the real service boundary and truthful product availability.

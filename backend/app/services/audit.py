@@ -20,6 +20,8 @@ from collections import deque
 from datetime import datetime, timezone
 from typing import Any, Optional
 
+from fastapi.encoders import jsonable_encoder
+
 log = logging.getLogger("app.audit")
 
 # Bounded buffer of records awaiting DB persistence. Bounded so a flush
@@ -60,9 +62,10 @@ def audit(
         "after": after,
         "meta": meta,
     }
-    # ``json.dumps(default=str)`` so UUIDs / datetimes / Enums don't blow up
-    # the audit pipe if a caller forgets to stringify.
-    log.info("AUDIT %s", json.dumps(record, default=str))
+    # Normalize the buffered snapshot as well as the log representation. JSONB
+    # cannot encode UUIDs/enums/datetimes, and caller mutations must not alter it.
+    record = jsonable_encoder(record)
+    log.info("AUDIT %s", json.dumps(record))
     _PENDING.append(record)
 
 

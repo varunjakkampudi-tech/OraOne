@@ -6,15 +6,14 @@ from app.database.models.integration import ConnectionType
 
 
 @pytest.mark.parametrize("environment", ["development", "dev", "test", "testing"])
-def test_mock_connection_requires_explicit_request_in_nonproduction(environment):
-    assert (
+def test_simulated_connection_is_rejected_in_local_environments(environment):
+    with pytest.raises(HTTPException) as exc_info:
         _connection_mode(
             mock_requested=True,
             real_oauth_ready=False,
             environment=environment,
         )
-        == ConnectionType.mock
-    )
+    assert exc_info.value.status_code == 503
 
 
 def test_unconfigured_integration_fails_closed_for_normal_user_connect():

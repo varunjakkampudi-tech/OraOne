@@ -95,19 +95,12 @@ router = APIRouter(tags=["integrations"])
 _STATE_TTL_SECONDS = 600
 _STATE_ALG = "HS256"
 _PRODUCTION_ENVIRONMENTS = {"production", "prod", "staging"}
-_MOCK_INTEGRATION_ENVIRONMENTS = {"development", "dev", "test", "testing"}
 
 
 def _connection_mode(*, mock_requested: bool, real_oauth_ready: bool, environment: str):
-    """Fail closed unless real OAuth is ready or a mock is explicitly requested
-    in a local/test environment. A missing provider setup must never look like
-    a successful real integration to an application user.
-    """
-    normalized_environment = environment.strip().lower()
+    """Only real configured connections are accepted. Simulations belong in tests."""
     if not mock_requested and real_oauth_ready:
         return ConnectionType.oauth
-    if mock_requested and normalized_environment in _MOCK_INTEGRATION_ENVIRONMENTS:
-        return ConnectionType.mock
     raise HTTPException(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
         detail="This integration is not configured for a real connection.",

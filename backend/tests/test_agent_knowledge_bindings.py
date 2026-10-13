@@ -135,7 +135,9 @@ async def test_runtime_explicit_empty_binding_skips_rag(monkeypatch):
     async def fail_if_called(*_args, **_kwargs):
         raise AssertionError("RAG search must be skipped for an explicit empty binding")
 
-    monkeypatch.setattr("app.services.agent_runtime.rag_service.search_chunks", fail_if_called)
+    monkeypatch.setattr(
+        "app.services.agent_runtime.rag_service.search_chunks", fail_if_called
+    )
     assert await runtime.retrieve_context(agent, "should not search") == []
 
 

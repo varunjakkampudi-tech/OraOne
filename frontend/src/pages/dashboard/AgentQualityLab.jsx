@@ -217,25 +217,31 @@ function SimulatorTab() {
         </Card>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-            <Metric
-              label="Success rate"
-              value={s.success_rate ?? 0}
-              suffix="%"
-            />
-            <Metric label="Accuracy" value={s.accuracy ?? 0} suffix="%" />
-            <Metric
-              label="Hallucination"
-              value={s.hallucination ?? 0}
-              suffix="%"
-            />
-            <Metric
-              label="Knowledge use"
-              value={s.knowledge_usage ?? 0}
-              suffix="%"
-            />
-            <Metric label="Avg latency" value={s.latency_ms ?? 0} suffix="ms" />
-          </div>
+          {result.generated && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+              <Metric
+                label="Success rate"
+                value={s.success_rate ?? 0}
+                suffix="%"
+              />
+              <Metric label="Accuracy" value={s.accuracy ?? 0} suffix="%" />
+              <Metric
+                label="Hallucination"
+                value={s.hallucination ?? 0}
+                suffix="%"
+              />
+              <Metric
+                label="Knowledge use"
+                value={s.knowledge_usage ?? 0}
+                suffix="%"
+              />
+              <Metric
+                label="Avg latency"
+                value={s.latency_ms ?? 0}
+                suffix="ms"
+              />
+            </div>
+          )}
 
           {!result.generated && (
             <Card className="p-4">
@@ -244,8 +250,9 @@ function SimulatorTab() {
                 style={{ color: "#D97706" }}
               >
                 <AlertTriangle className="h-4 w-4" />
-                AI provider is offline — results use a deterministic fallback.
-                Connect a provider for live replies.
+                Simulation preview only. The AI provider is unavailable; these
+                fallback examples are not measured agent quality or live
+                replies.
               </div>
             </Card>
           )}
@@ -261,7 +268,9 @@ function SimulatorTab() {
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      {r.verdict === "pass" ? (
+                      {!result.generated ? (
+                        <Badge tone="slate">Preview</Badge>
+                      ) : r.verdict === "pass" ? (
                         <CheckCircle2
                           className="h-5 w-5"
                           style={{ color: "#16A34A" }}
@@ -276,16 +285,18 @@ function SimulatorTab() {
                         {r.label}
                       </span>
                     </div>
-                    <div
-                      className="flex items-center gap-2 text-xs"
-                      style={{ color: SUB }}
-                    >
-                      <Badge tone="blue">Acc {r.accuracy}%</Badge>
-                      <Badge tone={r.hallucination > 25 ? "red" : "slate"}>
-                        Hall {r.hallucination}%
-                      </Badge>
-                      <span>{r.latency_ms}ms</span>
-                    </div>
+                    {result.generated && (
+                      <div
+                        className="flex items-center gap-2 text-xs"
+                        style={{ color: SUB }}
+                      >
+                        <Badge tone="blue">Acc {r.accuracy}%</Badge>
+                        <Badge tone={r.hallucination > 25 ? "red" : "slate"}>
+                          Hall {r.hallucination}%
+                        </Badge>
+                        <span>{r.latency_ms}ms</span>
+                      </div>
+                    )}
                   </div>
                   <p className="mt-2 text-sm italic" style={{ color: SUB }}>
                     "{r.opening}"

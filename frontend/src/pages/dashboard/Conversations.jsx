@@ -124,21 +124,39 @@ export default function Conversations() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [offset, setOffset] = useState(0);
 
   // Fetch conversations from API
   const loadConversations = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get("/v2/conversations");
+      const response = await api.get("/v2/conversations", {
+        params: { limit: 100, offset: 0 },
+      });
       const data = (response.data || []).map(normalizeConv);
       setConversations(data);
-      const requested = requestedConversationId
+      setOffset(data.length);
+      setHasMore(data.length === 100);
+      let requested = requestedConversationId
         ? data.find(
             (conversation) =>
               String(conversation.id) === requestedConversationId,
           )
         : null;
+      if (requestedConversationId && !requested) {
+        try {
+          const detail = await api.get(
+            `/v2/conversations/${encodeURIComponent(requestedConversationId)}`,
+          );
+          if (String(detail.data?.id) === requestedConversationId)
+            requested = normalizeConv(detail.data);
+        } catch (failure) {
+          if (failure.response?.status !== 404) throw failure;
+        }
+      }
       setActive(
         requested || (requestedConversationId ? null : (data[0] ?? null)),
       );
@@ -153,6 +171,32 @@ export default function Conversations() {
       setLoading(false);
     }
   }, [requestedConversationId]);
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    try {
+      const { data } = await api.get("/v2/conversations", {
+        params: { limit: 100, offset },
+      });
+      const records = data.map(normalizeConv);
+      setConversations((current) => [
+        ...current,
+        ...records.filter(
+          (record) => !current.some((existing) => existing.id === record.id),
+        ),
+      ]);
+      setOffset(offset + records.length);
+      setHasMore(records.length === 100);
+      setPage(Math.floor(offset / 20) + 1);
+    } catch (failure) {
+      toast.error(
+        formatApiError(failure.response?.data?.detail) ||
+          "More conversations could not be loaded. Please retry.",
+      );
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   useEffect(() => {
     loadConversations();
@@ -231,7 +275,7 @@ export default function Conversations() {
                 type="search"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search conversations..."
+                placeholder="Search loaded conversations..."
                 data-testid="conv-search"
                 className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-[#E2E8F0] bg-white text-[13px] placeholder-[#94A3B8] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all"
               />
@@ -414,6 +458,16 @@ export default function Conversations() {
                 );
               })}
           </ul>
+          {hasMore && (
+            <button
+              type="button"
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="min-h-11 w-full border-t border-line px-3 text-sm font-medium text-brand disabled:opacity-50"
+            >
+              {loadingMore ? "Loading more…" : "Load more conversations"}
+            </button>
+          )}
 
           {/* Pagination */}
           {filtered.length > 0 && (

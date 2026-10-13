@@ -62,7 +62,17 @@ def _endpoint_url() -> str | None:
 
 def _local_root() -> Path:
     root = Path(os.environ.get("UPLOAD_DIR", "/tmp/oraone-uploads"))
-    root.mkdir(parents=True, exist_ok=True)
+    if root.is_symlink():
+        raise RuntimeError("Local upload root must not be a symbolic link.")
+    root.mkdir(mode=0o700, parents=True, exist_ok=True)
+    if root.is_symlink():
+        raise RuntimeError("Local upload root must not be a symbolic link.")
+    if os.name == "posix":
+        if root.stat().st_uid != os.getuid():
+            raise RuntimeError(
+                "Local upload root must be owned by the application user."
+            )
+        root.chmod(0o700)
     return root
 
 

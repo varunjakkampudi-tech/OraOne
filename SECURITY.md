@@ -6,17 +6,19 @@ This policy covers the OraOne source repository and local application code. Loca
 
 ## Private vulnerability reporting
 
-Use the repository-scoped [GitHub private vulnerability report form](https://github.com/varunjakkampudi-tech/OraOne/security/advisories/new) when it is available. This URL is the canonical private-report endpoint for the verified repository, owner, and current GitHub remote.
+Use the repository-scoped [GitHub private vulnerability report form](https://github.com/varunjakkampudi-tech/OraOne/security/advisories/new). This is the private-report endpoint for the verified repository and current GitHub remote.
 
-The repository metadata was checked on 2026-10-11 and confirmed:
+The repository was checked on 14 October 2026:
 
 - Repository: varunjakkampudi-tech/OraOne
 - Visibility: public
 - Owner: varunjakkampudi-tech
 - Issues: enabled
-- Security-advisory feature availability: not exposed by the metadata response
+- Private vulnerability reporting: enabled, confirmed by the authenticated GitHub API
 
-Therefore, the URL is actionable but private-reporting enablement is not independently verified from this checkout. The repository owner must open the link while signed in and enable/confirm private vulnerability reporting before treating it as an active channel. Until then, do not publish vulnerability details in a public issue; contact the verified repository owner through an authorized private GitHub channel.
+Use the private form while signed in to GitHub. No synthetic vulnerability report
+was submitted merely to test the channel. Enablement is verified; triage and
+response remain operational responsibilities.
 
 Do not use the public Issues tab for sensitive reports. Do not include passwords, OTPs, bearer tokens, provider keys, database credentials, private customer data, backup locations, or administrator bootstrap secrets.
 

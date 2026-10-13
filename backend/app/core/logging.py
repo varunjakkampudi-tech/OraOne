@@ -63,7 +63,9 @@ def configure_logging() -> None:
     )
 
     renderer = (
-        structlog.dev.ConsoleRenderer(colors=True)
+        structlog.dev.ConsoleRenderer(
+            colors=True, exception_formatter=structlog.dev.plain_traceback
+        )
         if is_dev
         else structlog.processors.JSONRenderer()
     )

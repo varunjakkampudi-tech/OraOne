@@ -216,6 +216,9 @@ async function digits(page, id, code) {
         timeout: 15000,
       });
       await expect(page.locator("main").first()).toBeVisible();
+      await expect(page.locator("main h1").first()).toBeVisible({
+        timeout: 30_000,
+      });
       await expect(page.getByTestId("oraone-loader")).toHaveCount(0, {
         timeout: 15000,
       });

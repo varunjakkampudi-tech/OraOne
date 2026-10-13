@@ -116,7 +116,9 @@ def _sanitize_context(ctx: dict) -> dict:
     }
 
 
-def _effective_knowledge_base_ids(agent: Optional[Agent], widget: Widget) -> Optional[list[uuid.UUID]]:
+def _effective_knowledge_base_ids(
+    agent: Optional[Agent], widget: Widget
+) -> Optional[list[uuid.UUID]]:
     """Resolve public-widget retrieval scope from agent and widget bindings.
 
     A missing agent binding preserves the legacy widget behavior: the widget's

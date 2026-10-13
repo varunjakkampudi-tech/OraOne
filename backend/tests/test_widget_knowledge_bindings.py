@@ -32,15 +32,22 @@ def test_widget_intersects_explicit_agent_binding_with_widget_binding():
 
 
 def test_widget_explicit_empty_agent_binding_fails_closed():
-    assert _effective_knowledge_base_ids(
-        _agent({"knowledge_base_ids": []}), _widget()
-    ) == []
-    assert _effective_knowledge_base_ids(
-        _agent({"knowledge_base_ids": []}), _widget(uuid4())
-    ) == []
+    assert (
+        _effective_knowledge_base_ids(_agent({"knowledge_base_ids": []}), _widget())
+        == []
+    )
+    assert (
+        _effective_knowledge_base_ids(
+            _agent({"knowledge_base_ids": []}), _widget(uuid4())
+        )
+        == []
+    )
 
 
 def test_widget_malformed_explicit_agent_binding_fails_closed():
-    assert _effective_knowledge_base_ids(
-        _agent({"knowledge_base_ids": ["not-a-uuid"]}), _widget()
-    ) == []
+    assert (
+        _effective_knowledge_base_ids(
+            _agent({"knowledge_base_ids": ["not-a-uuid"]}), _widget()
+        )
+        == []
+    )
