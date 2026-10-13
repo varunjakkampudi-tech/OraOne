@@ -34,12 +34,7 @@ const CHAT_CONFIG = {
   h1: "Convert visitors,",
   h1Accent: "not just sessions.",
   sub: "OraOne's AI Chat Agent qualifies leads, answers questions from your knowledge base, books demos and hands off to humans — installed with one line of code.",
-  metrics: [
-    { value: "1-line", label: "Install" },
-    { value: "90+", label: "Languages" },
-    { value: "3×", label: "Lead conversion" },
-    { value: "<1s", label: "First reply" },
-  ],
+
   benefits: [
     {
       icon: Zap,
@@ -64,12 +59,12 @@ const CHAT_CONFIG = {
     {
       icon: Globe2,
       title: "Auto-translate",
-      desc: "Detects visitor language and replies natively — across 90+ languages.",
+      desc: "Language support depends on the configured AI model; test intended languages before publishing.",
     },
     {
       icon: ShieldCheck,
       title: "Privacy-first",
-      desc: "No third-party trackers. Customer PII redacted from logs. GDPR-compliant.",
+      desc: "Review consent, retention and provider data handling before publishing.",
     },
   ],
   features: [
@@ -147,26 +142,7 @@ const CHAT_CONFIG = {
       desc: "Itinerary changes, refund status, lounge access and rebooking.",
     },
   ],
-  socialProof: [
-    {
-      author: "Aarav Kapoor",
-      role: "CMO, Lumen Bank",
-      quote:
-        "Our pricing-page demo bookings went 4× in 6 weeks. The qualification questions are spot on.",
-    },
-    {
-      author: "Tanya Reddy",
-      role: "Head of Support, GreenLeaf Edu",
-      quote:
-        "60% of tier-1 tickets resolved without a human. Our support team is finally happy.",
-    },
-    {
-      author: "Vikram Singh",
-      role: "Founder, Bloom Hotels",
-      quote:
-        "Multilingual chat means we capture international travellers we used to lose.",
-    },
-  ],
+
   faqs: [
     {
       q: "How do I install the chat widget?",
@@ -203,12 +179,7 @@ const LEADS_CONFIG = {
   h1: "Capture every lead,",
   h1Accent: "across every channel.",
   sub: "OraOne's AI agents capture, qualify and score leads from every website conversation — auto-syncing to your CRM with full attribution.",
-  metrics: [
-    { value: "3×", label: "Lead conversion lift" },
-    { value: "92%", label: "Qualification accuracy" },
-    { value: "<1m", label: "CRM sync latency" },
-    { value: "0", label: "Manual entry" },
-  ],
+
   benefits: [
     {
       icon: Users,
@@ -316,26 +287,7 @@ const LEADS_CONFIG = {
       desc: "Cold-lead qualification before SDR engagement.",
     },
   ],
-  socialProof: [
-    {
-      author: "Aman Khurana",
-      role: "VP Sales, Lumen Bank",
-      quote:
-        "Our cost per qualified lead dropped 40% in 90 days. The hand-off to RMs is friction-free now.",
-    },
-    {
-      author: "Pooja Nair",
-      role: "Marketing Director, GreenLeaf Edu",
-      quote:
-        "We finally have a single funnel for every website conversation — with proper attribution.",
-    },
-    {
-      author: "Rajiv Menon",
-      role: "Founder, Brightside Realty",
-      quote:
-        "Hot leads ping our team on Slack with full context — site visits started doubling in week 3.",
-    },
-  ],
+
   faqs: [
     {
       q: "How does scoring work?",
@@ -355,7 +307,7 @@ const LEADS_CONFIG = {
     },
     {
       q: "Is GDPR / DPDP supported?",
-      a: "Yes — consent capture, audit logs, DSR workflows and EU/India data residency are all available.",
+      a: "Compliance and residency depend on deployment, providers and operating procedures; no certification is claimed.",
     },
   ],
 };
@@ -372,12 +324,7 @@ const APPT_CONFIG = {
   h1: "Bookings that close",
   h1Accent: "themselves.",
   sub: "OraOne's AI books, reschedules and reminds customers about appointments — straight into your team's calendars.",
-  metrics: [
-    { value: "60%", label: "Fewer no-shows" },
-    { value: "3×", label: "More bookings" },
-    { value: "0", label: "Double-bookings" },
-    { value: "24/7", label: "Booking window" },
-  ],
+
   benefits: [
     {
       icon: Calendar,
@@ -397,7 +344,7 @@ const APPT_CONFIG = {
     {
       icon: MessageCircle,
       title: "Reminder cadence",
-      desc: "Automated chat and email reminders cut no-shows by 60%.",
+      desc: "Appointment reminders require a configured integration and delivery verification.",
     },
     {
       icon: MapPin,
@@ -407,7 +354,7 @@ const APPT_CONFIG = {
     {
       icon: ShieldCheck,
       title: "Privacy-first",
-      desc: "Customer PII protected with GDPR/DPDP compliance.",
+      desc: "Review customer data handling against applicable privacy requirements.",
     },
   ],
   features: [
@@ -485,26 +432,7 @@ const APPT_CONFIG = {
       desc: "Schedule site visits and broker tours with maps and travel time.",
     },
   ],
-  socialProof: [
-    {
-      author: "Dr. Anil Kapoor",
-      role: "MD, Acme Health",
-      quote:
-        "No-shows dropped from 22% to 8% in two months. The automated reminder flow is gold.",
-    },
-    {
-      author: "Priya Shenoy",
-      role: "Owner, Bloom Salon",
-      quote:
-        "Booking link does 70% of the work. Stylists love that they pick when they're free.",
-    },
-    {
-      author: "Vikrant Joshi",
-      role: "GM, ServPro Auto",
-      quote:
-        "Pickup-drop bookings tripled. Customers love that they can book at midnight if they want.",
-    },
-  ],
+
   faqs: [
     {
       q: "Can it book on multiple calendars?",
@@ -541,17 +469,12 @@ const SUPPORT_CONFIG = {
   h1: "Support that scales",
   h1Accent: "while your team sleeps.",
   sub: "OraOne handles tier-1 customer support on your website 24/7 — and escalates to your team with full context when needed.",
-  metrics: [
-    { value: "60%", label: "Tickets deflected" },
-    { value: "<3s", label: "First response" },
-    { value: "4.8★", label: "Customer rating" },
-    { value: "24/7", label: "Coverage" },
-  ],
+
   benefits: [
     {
       icon: Headphones,
       title: "24/7 multilingual",
-      desc: "Never close, never wait — support across time-zones in 90+ languages.",
+      desc: "Website chat availability depends on your deployment and configured AI provider.",
     },
     {
       icon: Brain,
@@ -654,25 +577,7 @@ const SUPPORT_CONFIG = {
       desc: "Course queries, fee status, exam schedules and parent FAQs.",
     },
   ],
-  socialProof: [
-    {
-      author: "Kiran Joshi",
-      role: "Head of Support, GreenLeaf Edu",
-      quote:
-        "60% tier-1 deflection in 90 days. Our team finally focuses on hard problems and not password resets.",
-    },
-    {
-      author: "Aditi Bhatia",
-      role: "VP CX, Bloom Hotels",
-      quote: "Multilingual website support — guest satisfaction up 12 points.",
-    },
-    {
-      author: "Rohit Nanda",
-      role: "Director, ServPro Auto",
-      quote:
-        "Customers get instant answers on warranty and service queries — repeat business is up.",
-    },
-  ],
+
   faqs: [
     {
       q: "Can it use my existing help center?",
@@ -688,11 +593,11 @@ const SUPPORT_CONFIG = {
     },
     {
       q: "Can I measure deflection?",
-      a: "Yes — per-channel and per-topic. Most teams hit 40–60% deflection on tier-1 within 60 days.",
+      a: "Use real conversation analytics to evaluate outcomes; no deflection rate is guaranteed.",
     },
     {
       q: "Is multilingual support built-in?",
-      a: "Native in 90+ languages with auto-detection — switches mid-conversation if the user does.",
+      a: "Language behavior depends on the selected AI model and should be tested with your knowledge sources.",
     },
   ],
 };

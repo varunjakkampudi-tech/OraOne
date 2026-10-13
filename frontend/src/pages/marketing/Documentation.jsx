@@ -349,33 +349,33 @@ const INTEGRATIONS = [
 const SECURITY = [
   {
     icon: Lock,
-    title: "AES-256 Encryption",
-    desc: "All data at rest encrypted with rotating master keys.",
+    title: "Provider credentials",
+    desc: "AI provider credentials stay on the backend, not in browser builds.",
   },
   {
     icon: ShieldCheck,
-    title: "TLS 1.3",
-    desc: "End-to-end encryption in transit across every endpoint.",
+    title: "Transport configuration",
+    desc: "Configure and verify HTTPS on your deployment; transport settings are operator-managed.",
   },
   {
     icon: FileCheck2,
-    title: "GDPR Compliance",
-    desc: "DPA, DSR workflows and EU data residency available.",
+    title: "Privacy review",
+    desc: "Review consent, retention and provider processing locations for your deployment.",
   },
   {
     icon: Cloud,
-    title: "SOC 2 Roadmap",
-    desc: "Type I in audit, Type II report targeted for Q4 2026.",
+    title: "Deployment assurance",
+    desc: "No independent certification or audit engagement is claimed.",
   },
   {
     icon: KeyRound,
     title: "Audit Logs",
-    desc: "Immutable logs for every admin and API action, 90-day retention.",
+    desc: "Actor and resource audit records support review; coverage and retention require operational verification.",
   },
   {
     icon: Users,
     title: "RBAC Permissions",
-    desc: "Owner, Admin, Manager and Viewer roles with scoped access.",
+    desc: "Database-backed platform roles are separate from tenant memberships.",
   },
 ];
 
@@ -405,7 +405,7 @@ const FAQS = [
   },
   {
     q: "Does OraOne support multiple languages?",
-    a: "Yes — your chat agent auto-detects and replies in 90+ languages.",
+    a: "Language support depends on the configured AI model; test intended languages.",
   },
   {
     q: "How quickly can I go live?",
@@ -587,7 +587,7 @@ export default function DocumentationPage() {
           </aside>
 
           {/* content */}
-          <main className="space-y-20">
+          <div className="space-y-20">
             {/* ===== Quick Start ===== */}
             <section
               id="quickstart"
@@ -1088,14 +1088,14 @@ export default function DocumentationPage() {
                 <SupportCard
                   icon={Ticket}
                   title="Ticket Portal"
-                  desc="Track every ticket, attach logs and get SLA-backed responses."
+                  desc="Include reproduction steps and sanitized logs when requesting support."
                   cta="Visit portal"
                   href="#"
                   testid="support-ticket"
                 />
               </div>
             </section>
-          </main>
+          </div>
         </div>
       </div>
     </div>

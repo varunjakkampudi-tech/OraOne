@@ -14,8 +14,6 @@ import {
   CheckCircle2,
   ArrowRight,
   Sparkles,
-  Star,
-  Quote,
   ShieldCheck,
   Zap,
   Lock,
@@ -32,15 +30,6 @@ const fadeUp = {
   transition: { duration: 0.5 },
 };
 
-const TRUST_LOGOS = [
-  "Acme Health",
-  "Brightside Realty",
-  "ServPro Auto",
-  "Lumen Bank",
-  "Bloom Hotels",
-  "GreenLeaf Edu",
-];
-
 export default function SEOLanding({ config }) {
   const {
     slug,
@@ -54,11 +43,9 @@ export default function SEOLanding({ config }) {
     primaryCTAHref = "/signup",
     secondaryCTA = "Book Demo",
     secondaryCTAHref = "/contact",
-    metrics = [],
     benefits = [],
     features = [],
     industries = [],
-    socialProof = [],
     faqs = [],
   } = config;
 
@@ -150,29 +137,13 @@ export default function SEOLanding({ config }) {
             {...fadeUp}
             className="mt-8 flex flex-wrap items-center justify-center gap-3 text-[11.5px] text-[#64748B]"
           >
-            <Badge icon={ShieldCheck} text="GDPR Compliant" />
-            <Badge icon={Lock} text="AES-256 · TLS 1.3" />
-            <Badge icon={TrendingUp} text="99.9% Uptime" />
-            <Badge icon={Zap} text="Live in 24h" />
+            <Badge icon={ShieldCheck} text="Server-side access control" />
+            <Badge icon={Lock} text="Backend provider credentials" />
+            <Badge icon={TrendingUp} text="Usage visibility" />
+            <Badge icon={Zap} text="Website widget SDK" />
           </motion.div>
         </div>
       </section>
-
-      {/* ═══════════ METRICS BAR ═══════════ */}
-      {metrics.length > 0 && (
-        <section className="border-y border-[#E2E8F0] bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
-            {metrics.map((m) => (
-              <div key={m.label}>
-                <p className="text-3xl sm:text-4xl font-black text-[#0F172A] tracking-tight">
-                  {m.value}
-                </p>
-                <p className="mt-1 text-[12px] text-[#64748B]">{m.label}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* ═══════════ BENEFITS ═══════════ */}
       <section className="py-20 bg-[#F8FAFC]">
@@ -283,7 +254,7 @@ export default function SEOLanding({ config }) {
                 INDUSTRY USE CASES
               </p>
               <h2 className="mt-2 text-3xl sm:text-4xl font-black tracking-tight text-[#0F172A]">
-                Trusted across industries.
+                Explore industry use cases.
               </h2>
             </motion.div>
             <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -311,66 +282,6 @@ export default function SEOLanding({ config }) {
           </div>
         </section>
       )}
-
-      {/* ═══════════ SOCIAL PROOF (Logos + Testimonials) ═══════════ */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeUp} className="text-center">
-            <p className="text-[11px] font-bold tracking-[0.25em] text-[#94A3B8]">
-              TRUSTED BY GROWING TEAMS
-            </p>
-          </motion.div>
-          <div className="mt-6 flex flex-wrap justify-center items-center gap-x-10 gap-y-3 opacity-70">
-            {TRUST_LOGOS.map((l) => (
-              <span
-                key={l}
-                className="text-[#475569] font-bold tracking-tight text-base sm:text-lg"
-              >
-                {l}
-              </span>
-            ))}
-          </div>
-
-          {socialProof.length > 0 && (
-            <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {socialProof.map((s) => (
-                <motion.div
-                  key={s.author}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="p-6 rounded-2xl bg-white border border-[#E2E8F0]"
-                >
-                  <Quote size={18} className="text-[#2563EB]" />
-                  <p className="mt-3 text-[13.5px] text-[#0F172A] leading-relaxed">
-                    &ldquo;{s.quote}&rdquo;
-                  </p>
-                  <div className="mt-4 flex items-center gap-3 pt-4 border-t border-[#E2E8F0]">
-                    <span className="size-9 rounded-full bg-gradient-to-br from-[#2563EB] to-[#7C3AED] text-white grid place-items-center text-[12px] font-bold">
-                      {s.author[0]}
-                    </span>
-                    <div>
-                      <p className="text-[13px] font-semibold text-[#0F172A]">
-                        {s.author}
-                      </p>
-                      <p className="text-[11.5px] text-[#64748B]">{s.role}</p>
-                    </div>
-                    <div className="ml-auto flex gap-0.5">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          size={11}
-                          className="text-[#F59E0B] fill-[#F59E0B]"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* ═══════════ FAQS ═══════════ */}
       {faqs.length > 0 && (

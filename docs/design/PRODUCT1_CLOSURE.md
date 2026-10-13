@@ -113,6 +113,11 @@ ownership/widget licensing and visual approval remain owner decisions.
 
 ## Local review
 
+Final hosted verification at `b928349` passed both workflows: 228 backend tests
+and 26 browser tests. The final marketing pass removes fictional testimonials,
+unused outcome metrics and unsupported certification/uptime claims. Private
+reporting links to the verified GitHub vulnerability reporting channel.
+
 Latest UI: `http://localhost:3001/`; API: `http://127.0.0.1:8000/`.
 Port 3000 can serve an older Docker frontend and is not the authoritative preview.
 PostgreSQL/pgvector, Redis and MinIO are supplied by development Compose. Alembic
