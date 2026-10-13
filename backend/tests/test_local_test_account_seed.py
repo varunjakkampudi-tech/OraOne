@@ -13,7 +13,9 @@ def local_seed_env(monkeypatch):
     monkeypatch.setenv("ENVIRONMENT", "development")
     monkeypatch.setenv("AUTH_PROVIDER", "self_hosted")
     monkeypatch.setenv("ORAONE_LOCAL_TEST_ACK", "I_UNDERSTAND_THIS_IS_LOCAL_ONLY")
-    monkeypatch.setenv("DATABASE_URL", "postgresql+asyncpg://tester:secret@127.0.0.1:5433/oraone")
+    monkeypatch.setenv(
+        "DATABASE_URL", "postgresql+asyncpg://tester:secret@127.0.0.1:5433/oraone"
+    )
     monkeypatch.setenv("ORAONE_LOCAL_TEST_PASSWORD", "test@oraone.in")
 
 
