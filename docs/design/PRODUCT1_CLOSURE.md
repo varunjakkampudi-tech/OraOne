@@ -38,6 +38,11 @@ copy, product metadata and isolated test fixtures are not operational dummy data
 - Non-security embedding bucket hashes are marked explicitly without changing
   existing vectors. No scanner exclusions were introduced.
 - Dashboard loading is exposed as a busy state; live screenshots wait for content.
+- Clean-checkout CI exposed wildcard dashboard CORS when no private environment
+  existed. Defaults now allow only exact loopback development origins; deployment
+  requires explicit origins and wildcard configurations fail closed. Public widget
+  CORS remains a separate domain-checked policy. Ten configuration regressions
+  cover the boundary. Pytest dotenv loading now preserves process overrides.
 
 ## Executed evidence
 
@@ -73,6 +78,12 @@ responses. Correct contract fixtures, a session-ready assertion and a bounded
 90-second budget for fourteen destinations preceded a passing focused recheck.
 The hosted full suite remains the final exact-commit gate; this is not relabeled
 as a single clean local full-suite run.
+
+The first hosted application run at `00d24e9` passed frontend build/browser checks,
+API smoke and frontend security headers, but backend tests reported 217 passed and
+one CORS rejection failure. That failure was retained and corrected, not waived.
+The configuration fix passed thirteen focused CORS tests, including the original
+negative security test, before being published for fresh hosted validation.
 
 ## Repository and deployment controls
 

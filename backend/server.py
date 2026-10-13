@@ -349,21 +349,9 @@ from app.api.super_admin import super_admin_router  # noqa: E402
 
 app.include_router(super_admin_router)
 
-cors_origins_env = os.environ.get("CORS_ORIGINS", "*")
-allow_origins = (
-    ["*"]
-    if cors_origins_env.strip() == "*"
-    else [o.strip() for o in cors_origins_env.split(",") if o.strip()]
-)
-if os.environ.get("ENVIRONMENT", "").strip().lower() in (
-    "production",
-    "prod",
-) and allow_origins == ["*"]:
-    raise RuntimeError(
-        "CORS_ORIGINS is unset (or '*') while ENVIRONMENT=production. "
-        "Set CORS_ORIGINS to a comma-separated list of exact frontend origins "
-        "before starting the server in production."
-    )
+from app.core.cors import dashboard_origins  # noqa: E402
+
+allow_origins = dashboard_origins()
 
 
 class WidgetPublicCORSMiddleware:
@@ -637,7 +625,7 @@ async def api_v1_access_log_mw(request, call_next):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
-    allow_credentials=allow_origins != ["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
