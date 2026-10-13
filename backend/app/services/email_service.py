@@ -143,22 +143,27 @@ def send_email(
         try:
             _send_via_smtp(to=to, subject=subject, html_body=html_body, cfg=smtp_cfg)
             log.info(
-                "email sent via SMTP (%s) → to=%s subject=%r",
+                "email sent via SMTP (%s) → to=%s template=%r",
                 smtp_cfg["host"],
                 to,
-                subject,
+                template,
             )
             return True
         except Exception as exc:  # pragma: no cover - network/credential dependent
-            log.warning("SMTP send failed → to=%s subject=%r err=%s", to, subject, exc)
+            log.warning(
+                "SMTP send failed → to=%s template=%r error_type=%s",
+                to,
+                template,
+                type(exc).__name__,
+            )
             # fall through to SES below, if configured
 
     sender = _from_address()
     if not sender:
         log.info(
-            "email (no SMTP_HOST/EMAIL_FROM configured) → to=%s subject=%r [not sent]",
+            "email (no SMTP_HOST/EMAIL_FROM configured) → to=%s template=%r [not sent]",
             to,
-            subject,
+            template,
         )
         return False
 
@@ -177,10 +182,15 @@ def send_email(
                 "Body": {"Html": {"Data": html_body, "Charset": "UTF-8"}},
             },
         )
-        log.info("email sent via SES → to=%s subject=%r", to, subject)
+        log.info("email sent via SES → to=%s template=%r", to, template)
         return True
     except Exception as exc:  # pragma: no cover - network/credential dependent
-        log.warning("email send failed → to=%s subject=%r err=%s", to, subject, exc)
+        log.warning(
+            "email send failed → to=%s template=%r error_type=%s",
+            to,
+            template,
+            type(exc).__name__,
+        )
         return False
 
 

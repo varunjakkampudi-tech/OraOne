@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   Boxes,
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import {
   PageHeader,
+  Glass,
   Badge,
   Table,
   SearchInput,
@@ -204,14 +205,18 @@ function createdCol() {
   };
 }
 
-export default function ResourcePage({ kind }) {
+export default function ResourcePage({ kind, initialQuery = "" }) {
   const { t } = useAdminTheme();
   const location = useLocation();
   // Resolve kind from prop or from the trailing route segment.
   const resolvedKind =
     kind || location.pathname.split("/").pop().replace(/-/g, "_");
   const desc = RESOURCE_KINDS[resolvedKind] || RESOURCE_KINDS.agents;
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQuery);
+
+  useEffect(() => {
+    setQ(initialQuery);
+  }, [initialQuery]);
 
   const { data, loading, error, reload } = useAdminData(
     () =>
@@ -221,38 +226,54 @@ export default function ResourcePage({ kind }) {
 
   const Icon = desc.icon;
   return (
-    <div>
-      <PageHeader
-        icon={Icon}
-        title={desc.title}
-        subtitle={desc.subtitle}
-        actions={
-          <div className="w-64">
+    <div className="space-y-1">
+      <PageHeader icon={Icon} title={desc.title} subtitle={desc.subtitle} />
+      <Glass className="overflow-hidden">
+        <div
+          className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3.5 sm:px-5"
+          style={{ borderColor: t.line, background: t.tableHead }}
+        >
+          <div>
+            <div
+              className="text-xs font-semibold uppercase tracking-[0.14em]"
+              style={{ color: t.sub }}
+            >
+              Live records
+            </div>
+            <div className="mt-1 text-xs" style={{ color: t.muted }}>
+              {data?.total ?? data?.items?.length ?? 0}{" "}
+              {desc.title.toLowerCase()} returned
+            </div>
+          </div>
+          <div className="w-full sm:w-64">
             <SearchInput
               value={q}
               onChange={setQ}
               placeholder={`Search ${desc.title.toLowerCase()}…`}
             />
           </div>
-        }
-      />
-      {loading ? (
-        <LoadingState />
-      ) : error ? (
-        <ErrorState message={error} onRetry={reload} />
-      ) : (
-        <Table
-          columns={desc.columns(t)}
-          rows={data?.items || []}
-          empty={
-            <EmptyState
-              icon={Search}
-              title={`No ${desc.title.toLowerCase()}`}
-              hint="Nothing matches yet."
+        </div>
+        <div className="p-4 sm:p-5">
+          {loading ? (
+            <LoadingState />
+          ) : error ? (
+            <ErrorState message={error} onRetry={reload} />
+          ) : (
+            <Table
+              contained
+              columns={desc.columns(t)}
+              rows={data?.items || []}
+              empty={
+                <EmptyState
+                  icon={Search}
+                  title={`No ${desc.title.toLowerCase()}`}
+                  hint="Nothing matches yet."
+                />
+              }
             />
-          }
-        />
-      )}
+          )}
+        </div>
+      </Glass>
     </div>
   );
 }

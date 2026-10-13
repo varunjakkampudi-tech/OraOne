@@ -74,6 +74,7 @@ function loadIdentityFromStorage() {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null); // null=checking, false=out, object=in
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState(null);
 
   // Phase 4 — organization + membership context
   const initialIdentity = loadIdentityFromStorage();
@@ -123,6 +124,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const fetchMe = useCallback(async () => {
+    setLoading(true);
+    setAuthError(null);
     try {
       // /auth/me and /auth/identity are independent, token-only calls and the
       // dashboard needs both — fire them together instead of serially so the
@@ -144,6 +147,11 @@ export function AuthProvider({ children }) {
         // browser storage when the authoritative API is unavailable.
         setUser(false);
         clearIdentity();
+        setAuthError(
+          status === 429
+            ? "Too many requests. Wait a moment, then retry your session."
+            : "We could not verify your session. Check your connection and retry.",
+        );
       } else {
         setUser(false);
         clearIdentity();
@@ -440,6 +448,7 @@ export function AuthProvider({ children }) {
       value={{
         user,
         loading,
+        authError,
         isAuthenticated,
         // Phase 4
         identity,

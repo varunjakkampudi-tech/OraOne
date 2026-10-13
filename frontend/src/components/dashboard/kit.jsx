@@ -25,24 +25,29 @@ export const cx = (...c) => c.filter(Boolean).join(" ");
 /* Page header — clean, reference style: soft icon chip + bold title + actions. */
 export function PageHeader({ eyebrow, title, subtitle, actions, icon: Icon }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4">
+    <div
+      className="flex flex-wrap items-start justify-between gap-4"
+      data-ui="page-heading"
+    >
       <div className="min-w-0">
         {eyebrow && (
-          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-faint">
-            {eyebrow}
-          </p>
+          <p className="mb-2 text-xs font-medium text-sub">{eyebrow}</p>
         )}
-        <div className={cx("flex items-center gap-3", eyebrow && "mt-1.5")}>
+        <div className="flex items-center gap-2.5">
           {Icon && (
-            <span className="grid size-10 place-items-center rounded-xl bg-brand-soft text-brand">
-              <Icon size={19} />
+            <span className="text-brand" aria-hidden="true">
+              <Icon size={22} />
             </span>
           )}
-          <h1 className="text-[24px] sm:text-[28px] font-extrabold tracking-tight text-ink truncate">
+          <h1 className="text-2xl sm:text-[28px] font-bold leading-tight tracking-tight text-ink break-words">
             {title}
           </h1>
         </div>
-        {subtitle && <p className="mt-1.5 text-sm text-sub">{subtitle}</p>}
+        {subtitle && (
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-sub">
+            {subtitle}
+          </p>
+        )}
       </div>
       {actions && (
         <div className="flex flex-wrap items-center gap-2">{actions}</div>
@@ -56,8 +61,8 @@ export function Card({ className = "", children, hover = false, ...rest }) {
   return (
     <div
       className={cx(
-        "rounded-2xl border border-line bg-white shadow-card",
-        hover && "transition-all hover:-translate-y-0.5 hover:shadow-cardhover",
+        "rounded-lg border border-line bg-white",
+        hover && "transition-colors hover:border-brand/30",
         className,
       )}
       {...rest}
@@ -243,7 +248,7 @@ export function PrimaryButton({
   return (
     <As
       className={cx(
-        "inline-flex items-center justify-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-hover disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2",
         className,
       )}
       {...rest}

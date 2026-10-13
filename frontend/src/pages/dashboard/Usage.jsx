@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import {
   Gauge,
   Loader2,
@@ -41,10 +40,9 @@ const METRIC_ICONS = {
 
 function barStyle(percent, over) {
   if (over || percent >= 90)
-    return { className: "from-[#F97066] to-[#DC2626]", text: "#B42318" };
-  if (percent >= 75)
-    return { className: "from-[#FDB022] to-[#D97706]", text: "#B45309" };
-  return { className: "from-[#2563EB] to-[#4F46E5]", text: "#2563EB" };
+    return { className: "bg-[#DC2626]", text: "#B42318" };
+  if (percent >= 75) return { className: "bg-[#D97706]", text: "#B45309" };
+  return { className: "bg-brand", text: "#2563EB" };
 }
 
 function UsageCard({ m }) {
@@ -53,10 +51,10 @@ function UsageCard({ m }) {
   const pct = m.unlimited ? 0 : m.percent;
   const tone = barStyle(pct, over);
   return (
-    <Card hover className="p-5">
+    <Card className="rounded-lg p-4 shadow-none">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[#EFF4FF] to-[#F5F3FF] text-[#2563EB] ring-1 ring-[#E0E7FF]">
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-brand-soft text-brand">
             <Icon className="h-5 w-5" />
           </div>
           <div>
@@ -74,7 +72,7 @@ function UsageCard({ m }) {
       </div>
 
       <div className="mt-4 flex items-baseline gap-1">
-        <span className="text-2xl font-extrabold tracking-tight text-[#0F172A]">
+        <span className="text-[28px] font-semibold tracking-tight text-ink">
           {m.used.toLocaleString()}
         </span>
         <span className="text-sm text-[#64748B]">
@@ -93,12 +91,10 @@ function UsageCard({ m }) {
           <InfinityIcon className="h-3.5 w-3.5" /> Unlimited on your plan
         </div>
       ) : (
-        <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-[#F1F5F9]">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.min(100, pct)}%` }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className={`h-full rounded-full bg-gradient-to-r ${tone.className}`}
+        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-subtle">
+          <div
+            style={{ width: `${Math.min(100, pct)}%` }}
+            className={`h-full rounded-full ${tone.className}`}
           />
         </div>
       )}
@@ -166,11 +162,7 @@ export default function Usage() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
-    >
+    <div className="space-y-5">
       <PageHeader
         eyebrow="Usage"
         icon={Gauge}
@@ -197,7 +189,7 @@ export default function Usage() {
       />
 
       {/* Health summary */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {[
           {
             label: "Within limits",
@@ -207,24 +199,20 @@ export default function Usage() {
           { label: "Approaching limit", value: nearCount, tone: "#B45309" },
           { label: "Over limit", value: overCount, tone: "#B42318" },
         ].map((s) => (
-          <Card key={s.label} className="p-4">
+          <Card key={s.label} className="rounded-lg p-4 shadow-none">
             <p
-              className="text-[24px] font-extrabold tracking-tight"
+              className="text-[28px] font-semibold tracking-tight"
               style={{ color: s.tone }}
             >
               {s.value}
             </p>
             <p className="mt-0.5 text-[12px] text-[#64748B]">{s.label}</p>
-            <div
-              className="mt-2 h-1.5 w-10 rounded-full"
-              style={{ background: s.tone }}
-            />
           </Card>
         ))}
       </div>
 
       {overCount > 0 && (
-        <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#FECACA] bg-[#FEF3F2] px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-[#FECACA] bg-[#FEF3F2] px-5 py-4">
           <p className="flex items-center gap-2 text-sm font-semibold text-[#B42318]">
             <TriangleAlert className="h-4 w-4" />
             You've exceeded {overCount} plan limit{overCount > 1 ? "s" : ""}.
@@ -248,6 +236,6 @@ export default function Usage() {
         subtitle="Metered usage that resets each period."
         metrics={metered}
       />
-    </motion.div>
+    </div>
   );
 }

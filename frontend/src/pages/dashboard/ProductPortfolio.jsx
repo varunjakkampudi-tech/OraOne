@@ -1,107 +1,9 @@
 import { ArrowRight, CheckCircle2, Clock3, Eye, Layers3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSEO } from "@/lib/seo";
+import { PRODUCT_CATALOG } from "@/constants/productCatalog";
 
-const PRODUCTS = [
-  {
-    id: 1,
-    name: "OraOne AI Chat Platform",
-    shortName: "AI Chat",
-    scope:
-      "Website agents, grounded knowledge, conversations, leads, widgets, and analytics.",
-    status: "Active product",
-    tone: "active",
-    icon: "✦",
-  },
-  {
-    id: 2,
-    name: "OraOne AI Voice Platform",
-    shortName: "AI Voice",
-    scope:
-      "Voice agents and business communication with the same workspace foundations.",
-    status: "Planned",
-    tone: "planned",
-    icon: "◌",
-  },
-  {
-    id: 3,
-    name: "OraOne WhatsApp Platform",
-    shortName: "WhatsApp",
-    scope:
-      "WhatsApp business messaging, automation, and customer conversations.",
-    status: "Planned",
-    tone: "planned",
-    icon: "◍",
-  },
-  {
-    id: 4,
-    name: "Omnichannel Communication Hub",
-    shortName: "Omnichannel",
-    scope:
-      "Unified conversations and customer context across communication channels.",
-    status: "Planned",
-    tone: "planned",
-    icon: "◎",
-  },
-  {
-    id: 5,
-    name: "Workflow Automation Platform",
-    shortName: "Automation",
-    scope:
-      "Business triggers, actions, orchestration, and repeatable workflows.",
-    status: "Planned",
-    tone: "planned",
-    icon: "↗",
-  },
-  {
-    id: 6,
-    name: "AI Studio & Agent Builder",
-    shortName: "AI Studio",
-    scope: "Tools to build, test, configure, and deploy AI agents.",
-    status: "Planned",
-    tone: "planned",
-    icon: "⌘",
-  },
-  {
-    id: 7,
-    name: "Marketplace",
-    shortName: "Marketplace",
-    scope: "Agents, templates, connectors, and ecosystem extensions.",
-    status: "Planned",
-    tone: "planned",
-    icon: "◇",
-  },
-  {
-    id: 8,
-    name: "Mobile Applications",
-    shortName: "Mobile",
-    scope:
-      "Mobile administration and customer communication for teams on the move.",
-    status: "Planned",
-    tone: "planned",
-    icon: "▣",
-  },
-  {
-    id: 9,
-    name: "Enterprise Edition",
-    shortName: "Enterprise",
-    scope:
-      "Advanced security, governance, integrations, and deployment capabilities.",
-    status: "Planned",
-    tone: "planned",
-    icon: "◆",
-  },
-  {
-    id: 10,
-    name: "OraOne OS",
-    shortName: "OraOne OS",
-    scope:
-      "The long-term vision for a unified AI and business communication operating platform.",
-    status: "Long-term vision",
-    tone: "vision",
-    icon: "◈",
-  },
-];
+const PRODUCTS = PRODUCT_CATALOG;
 
 function StatusPill({ tone, children }) {
   const styles = {
@@ -165,9 +67,14 @@ function ProductCard({ product }) {
           Open active workspace <ArrowRight size={15} />
         </Link>
       ) : (
-        <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-slate-400">
-          <Eye size={15} /> Preview only
-        </span>
+        <Link
+          to={`/app/products/${product.slug}`}
+          className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-blue-600 transition-colors hover:text-blue-800"
+        >
+          <Eye size={15} />
+          Explore design preview
+          <ArrowRight size={15} />
+        </Link>
       )}
     </article>
   );

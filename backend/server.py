@@ -424,17 +424,6 @@ class WidgetPublicCORSMiddleware:
         await self.app(scope, receive, send_wrapper)
 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allow_origins,
-    allow_credentials=True if allow_origins != ["*"] else False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-# Outermost: widget public routes accept any origin (see class docstring).
-app.add_middleware(WidgetPublicCORSMiddleware)
-
-
 # ---------- Structured error envelope ----------
 # Every HTTPException in the codebase raises a bare `detail=` string; this
 # handler wraps them all in one consistent shape at the boundary instead of
@@ -641,3 +630,15 @@ async def api_v1_access_log_mw(request, call_next):
     except Exception:  # noqa: BLE001 — access logging must never break a request
         pass
     return response
+
+
+# Register CORS last so it wraps early rate-limit/idempotency responses too.
+# The outer widget policy still applies only to domain-checked public routes.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allow_origins,
+    allow_credentials=allow_origins != ["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.add_middleware(WidgetPublicCORSMiddleware)

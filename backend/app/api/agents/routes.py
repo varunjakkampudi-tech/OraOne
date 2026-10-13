@@ -31,6 +31,7 @@ from sqlalchemy.orm import selectinload
 
 from app.database.models.agent import Agent, AgentStatus, AgentType
 from app.database.models.agent_config import AgentConfig
+from app.database.models.knowledge_base import KnowledgeBase
 from app.database.session import get_db
 from app.middleware.org_context import (
     OrgContext,
@@ -62,6 +63,53 @@ _DEFAULT_TEMPERATURE = 0.70
 _DEFAULT_LANGUAGE = "en-US"
 
 
+def _stored_knowledge_base_ids(cfg: Optional[AgentConfig]) -> Optional[list[uuid.UUID]]:
+    """Read the optional binding without collapsing missing and empty values."""
+    if not cfg or not isinstance(cfg.config, dict):
+        return None
+    if "knowledge_base_ids" not in cfg.config:
+        return None
+    raw = cfg.config.get("knowledge_base_ids")
+    if not isinstance(raw, list):
+        return []
+    ids: list[uuid.UUID] = []
+    for value in raw:
+        try:
+            ids.append(uuid.UUID(str(value)))
+        except (TypeError, ValueError, AttributeError):
+            continue
+    return ids
+
+
+async def _validate_knowledge_base_ids(
+    session: AsyncSession,
+    *,
+    knowledge_base_ids: list[uuid.UUID],
+    organization_id: uuid.UUID,
+    project_id: uuid.UUID,
+) -> list[uuid.UUID]:
+    """Allow only unique KBs owned by the active organization and project."""
+    normalized = list(dict.fromkeys(knowledge_base_ids))
+    if not normalized:
+        return []
+
+    rows = (
+        await session.scalars(
+            select(KnowledgeBase.id)
+            .where(KnowledgeBase.id.in_(normalized))
+            .where(KnowledgeBase.organization_id == organization_id)
+            .where(KnowledgeBase.project_id == project_id)
+            .where(KnowledgeBase.deleted_at.is_(None))
+        )
+    ).all()
+    if set(rows) != set(normalized):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="All knowledge bases must belong to the active project.",
+        )
+    return normalized
+
+
 def _to_read_model(agent: Agent) -> AgentRead:
     """Flatten Agent + AgentConfig into the single response shape."""
     cfg = agent.config  # 1:1 relationship — may be None on legacy rows
@@ -80,6 +128,7 @@ def _to_read_model(agent: Agent) -> AgentRead:
         language=cfg.language if cfg else _DEFAULT_LANGUAGE,
         greeting=cfg.greeting if cfg else None,
         max_tokens=cfg.max_tokens if cfg else 1024,
+        knowledge_base_ids=_stored_knowledge_base_ids(cfg),
         website_url=(
             cfg.config.get("website_url")
             if cfg and isinstance(cfg.config, dict)
@@ -103,6 +152,7 @@ def _snapshot(agent: Agent) -> dict:
         "temperature": float(cfg.temperature) if cfg else None,
         "voice": cfg.voice if cfg else None,
         "language": cfg.language if cfg else None,
+        "knowledge_base_ids": _stored_knowledge_base_ids(cfg),
     }
 
 
@@ -112,7 +162,7 @@ def _parse_enum(enum_cls, value, *, field: str):
     except ValueError as e:
         valid = ", ".join(repr(m.value) for m in enum_cls)
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid {field} {value!r}. Allowed: {valid}.",
         ) from e
 
@@ -256,6 +306,14 @@ async def create_agent(
         if payload.status
         else AgentStatus.draft
     )
+    knowledge_base_ids = None
+    if payload.knowledge_base_ids is not None:
+        knowledge_base_ids = await _validate_knowledge_base_ids(
+            session,
+            knowledge_base_ids=payload.knowledge_base_ids,
+            organization_id=ctx.organization_id,
+            project_id=pctx.project_id,
+        )
 
     # Phase 12 Module 2: enforce the plan's agent quota before creating.
     await usage_service.enforce_quota(session, ctx.organization_id, "agents")
@@ -284,9 +342,18 @@ async def create_agent(
         language=payload.language or _DEFAULT_LANGUAGE,
         greeting=payload.greeting,
         max_tokens=payload.max_tokens if payload.max_tokens is not None else 1024,
-        config={"website_url": payload.website_url.strip()}
-        if payload.website_url
-        else {},
+        config={
+            **(
+                {"website_url": payload.website_url.strip()}
+                if payload.website_url
+                else {}
+            ),
+            **(
+                {"knowledge_base_ids": [str(value) for value in knowledge_base_ids]}
+                if knowledge_base_ids is not None
+                else {}
+            ),
+        },
     )
     session.add(cfg)
     await session.flush()
@@ -397,15 +464,30 @@ async def update_agent(
     agent_id: uuid.UUID,
     payload: AgentUpdate,
     background: BackgroundTasks,
-    ctx: OrgContext = Depends(get_current_organization),
+    pctx: ProjectContext = Depends(get_current_project),
     session: AsyncSession = Depends(get_db),
 ) -> AgentRead:
+    ctx = pctx.org
     agent = await _load_for_org(
         session, agent_id=agent_id, organization_id=ctx.organization_id
     )
     if agent is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found."
+        )
+
+    knowledge_base_ids = None
+    if payload.knowledge_base_ids is not None:
+        if agent.project_id != pctx.project_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Agent and knowledge bases must belong to the active project.",
+            )
+        knowledge_base_ids = await _validate_knowledge_base_ids(
+            session,
+            knowledge_base_ids=payload.knowledge_base_ids,
+            organization_id=ctx.organization_id,
+            project_id=pctx.project_id,
         )
 
     before = _snapshot(agent)
@@ -442,6 +524,7 @@ async def update_agent(
         or payload.greeting is not None
         or payload.max_tokens is not None
         or payload.website_url is not None
+        or payload.knowledge_base_ids is not None
     )
     if cfg_changed and cfg is None:
         cfg = AgentConfig(agent_id=agent.id)
@@ -466,6 +549,11 @@ async def update_agent(
                 **(cfg.config or {}),
                 "website_url": payload.website_url.strip(),
             }
+        if knowledge_base_ids is not None:
+            cfg.config = {
+                **(cfg.config or {}),
+                "knowledge_base_ids": [str(value) for value in knowledge_base_ids],
+            }
 
     # Apply the requested status now that config reflects this update.
     # An agent can only become Active once it meets the minimum requirements.
@@ -475,7 +563,7 @@ async def update_agent(
         ):
             missing = agent_lifecycle.missing_requirements(agent)
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     "Agent is incomplete — add "
                     + ", ".join(missing)

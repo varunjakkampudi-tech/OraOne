@@ -17,6 +17,16 @@ import pytest
 import pytest_asyncio
 
 
+@pytest.fixture(autouse=True)
+def isolated_rate_limit_cache(monkeypatch):
+    """Exercise real limits without sharing counters with another test or API."""
+    from app.middleware import rate_limit
+    from app.services.cache import get_shared_cache
+
+    cache = get_shared_cache(f"test-auth-cookies-{uuid.uuid4().hex}")
+    monkeypatch.setattr(rate_limit, "_cache", lambda: cache)
+
+
 def _postgres_reachable() -> bool:
     import os
 
@@ -224,6 +234,8 @@ async def test_logout_clears_cookies_and_revokes_refresh(db_session):
         login_resp = await _login_via_otp(client, email=email, password=password)
         assert login_resp.status_code == 200
 
+        original_refresh = client.cookies.get("oraone_refresh_token")
+        assert original_refresh
         logout_resp = await client.post("/api/auth/logout")
         assert logout_resp.status_code == 200
 
@@ -245,5 +257,7 @@ async def test_logout_clears_cookies_and_revokes_refresh(db_session):
         )
 
         # The revoked refresh token must no longer work even if replayed.
-        refresh_resp = await client.post("/api/auth/refresh")
+        refresh_resp = await client.post(
+            "/api/auth/refresh", json={"refresh_token": original_refresh}
+        )
         assert refresh_resp.status_code == 401

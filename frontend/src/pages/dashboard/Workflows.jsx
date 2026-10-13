@@ -266,8 +266,8 @@ export default function Workflows() {
 
 function EmptyState({ onCreate }) {
   return (
-    <div className="rounded-2xl border border-dashed border-[#CBD5E1] bg-white py-16 text-center">
-      <div className="mx-auto w-12 h-12 rounded-2xl bg-[#EFF6FF] flex items-center justify-center">
+    <div className="rounded-lg border border-dashed border-[#CBD5E1] bg-white py-12 text-center">
+      <div className="mx-auto w-12 h-12 rounded-lg bg-[#EFF6FF] flex items-center justify-center">
         <WorkflowIcon className="text-[#2563EB]" size={22} />
       </div>
       <h3 className="mt-4 text-lg font-bold text-[#0F172A]">
@@ -320,7 +320,7 @@ function AnalyticsStrip({ data }) {
       {cards.map((c) => (
         <div
           key={c.label}
-          className="p-4 rounded-2xl border border-[#E2E8F0] bg-white"
+          className="p-4 rounded-lg border border-[#E2E8F0] bg-white"
         >
           <div className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-[#64748B] uppercase">
             <BarChart3 size={12} className="text-[#2563EB]" /> {c.label}
@@ -343,7 +343,7 @@ function WorkflowCard({ workflow, onOpen }) {
   return (
     <button
       onClick={onOpen}
-      className="text-left p-5 rounded-2xl border border-[#E2E8F0] bg-white hover:shadow-premium transition-all"
+      className="text-left p-5 rounded-lg border border-[#E2E8F0] bg-white hover:border-blue-300 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center">

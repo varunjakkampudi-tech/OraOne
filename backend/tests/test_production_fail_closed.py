@@ -23,7 +23,9 @@ async def test_readiness_requires_redis_in_production(monkeypatch):
 
     monkeypatch.setenv("ENVIRONMENT", "production")
     monkeypatch.delenv("REDIS_URL", raising=False)
-    monkeypatch.setattr(health, "init_engine", lambda: SimpleNamespace(connect=lambda: _Conn()))
+    monkeypatch.setattr(
+        health, "init_engine", lambda: SimpleNamespace(connect=lambda: _Conn())
+    )
 
     with pytest.raises(Exception) as exc_info:
         await health.readiness()
@@ -43,7 +45,9 @@ def test_google_drive_real_mode_never_returns_mock_documents(monkeypatch):
         config={},
     )
     connector = GoogleDriveConnector(integration)
-    monkeypatch.setattr("app.connectors.google_drive.crypto.decrypt", lambda value: None)
+    monkeypatch.setattr(
+        "app.connectors.google_drive.crypto.decrypt", lambda value: None
+    )
 
     with pytest.raises(NotConnectedError):
         connector.sync()

@@ -71,7 +71,8 @@
     "lint:fix": "eslint src --ext .js,.jsx --fix",
     "format": "prettier --write \"src/**/*.{js,jsx,json,css}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,json,css}\"",
-    "test": "npm run test:e2e",
+    "test": "npm run test:sdk && npm run test:e2e",
+    "test:sdk": "npm --prefix packages/oraone-widget test",
     "test:e2e": "playwright test"
   },
   "browserslist": {

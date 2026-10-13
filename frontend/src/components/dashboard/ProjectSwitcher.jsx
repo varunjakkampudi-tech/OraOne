@@ -28,11 +28,22 @@ function colorFor(project, index) {
  * active project (workspace > project layer). Switching reloads the app scoped
  * to the chosen project.
  */
-export default function ProjectSwitcher({ onNavigate = () => {} }) {
-  const { projects, activeProject, switchProject, loading } = useProjects();
+export default function ProjectSwitcher({
+  onNavigate = () => {},
+  placement = "sidebar",
+}) {
+  const {
+    projects,
+    activeProject,
+    switchProject,
+    loading,
+    error,
+    refreshProjects,
+  } = useProjects();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const nav = useNavigate();
+  const inHeader = placement === "header";
 
   useEffect(() => {
     if (!open) return undefined;
@@ -65,9 +76,22 @@ export default function ProjectSwitcher({ onNavigate = () => {} }) {
   if (loading && !activeProject) {
     return (
       <div
-        className="mx-3 mt-3 h-11 rounded-xl bg-[#F1F5F9] animate-pulse"
+        className={`${inHeader ? "h-10 w-[min(40vw,220px)]" : "mx-3 mt-3 h-11"} rounded-xl ${inHeader ? "bg-white/10" : "bg-[#F1F5F9]"} animate-pulse`}
         data-testid="project-switcher-loading"
       />
+    );
+  }
+
+  if (error && !activeProject) {
+    return (
+      <button
+        type="button"
+        onClick={refreshProjects}
+        className={`${inHeader ? "w-[min(40vw,220px)]" : "mx-3 mt-3 w-[calc(100%-1.5rem)]"} rounded-xl border px-3 py-2 text-left text-sm font-medium ${inHeader ? "border-white/25 text-white hover:bg-white/10" : "border-[#CBD5E1] text-[#475569] hover:bg-[#F8FAFC]"}`}
+        data-testid="project-switcher-error"
+      >
+        Projects unavailable · Retry
+      </button>
     );
   }
 
@@ -75,7 +99,7 @@ export default function ProjectSwitcher({ onNavigate = () => {} }) {
     return (
       <button
         onClick={goManage}
-        className="mx-3 mt-3 flex w-[calc(100%-1.5rem)] items-center gap-2 rounded-xl border border-dashed border-[#CBD5E1] px-3 py-2.5 text-sm font-medium text-[#475569] hover:bg-[#F8FAFC]"
+        className={`${inHeader ? "w-[min(40vw,220px)]" : "mx-3 mt-3 w-[calc(100%-1.5rem)]"} flex items-center gap-2 rounded-xl border border-dashed ${inHeader ? "border-white/25 px-3 py-2 text-white hover:bg-white/10" : "border-[#CBD5E1] px-3 py-2.5 text-sm font-medium text-[#475569] hover:bg-[#F8FAFC]"}`}
         data-testid="project-switcher-empty"
       >
         <Plus size={16} />
@@ -86,13 +110,15 @@ export default function ProjectSwitcher({ onNavigate = () => {} }) {
 
   return (
     <div
-      className="relative mx-3 mt-3"
+      className={
+        inHeader ? "relative w-[min(40vw,220px)]" : "relative mx-3 mt-3"
+      }
       ref={ref}
       data-testid="project-switcher"
     >
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-2.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2.5 text-left transition-colors hover:bg-[#F8FAFC]"
+        className={`flex w-full items-center gap-2.5 rounded-xl border px-3 text-left transition-colors ${inHeader ? "border-white/15 bg-white/5 py-1.5 text-white hover:bg-white/10" : "border-[#E2E8F0] bg-white py-2.5 hover:bg-[#F8FAFC]"}`}
         aria-haspopup="listbox"
         aria-expanded={open}
         data-testid="project-switcher-trigger"
@@ -104,14 +130,21 @@ export default function ProjectSwitcher({ onNavigate = () => {} }) {
           <FolderKanban size={15} />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+          <span
+            className={`block text-[10px] font-semibold uppercase tracking-wider ${inHeader ? "text-slate-300" : "text-[#94A3B8]"}`}
+          >
             Project
           </span>
-          <span className="block truncate text-sm font-semibold text-[#0F172A]">
+          <span
+            className={`block truncate text-sm font-semibold ${inHeader ? "text-white" : "text-[#0F172A]"}`}
+          >
             {activeProject.name}
           </span>
         </span>
-        <ChevronsUpDown size={15} className="flex-shrink-0 text-[#94A3B8]" />
+        <ChevronsUpDown
+          size={15}
+          className={`flex-shrink-0 ${inHeader ? "text-slate-300" : "text-[#94A3B8]"}`}
+        />
       </button>
 
       {open && (

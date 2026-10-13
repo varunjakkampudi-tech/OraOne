@@ -1,6 +1,13 @@
 import { Suspense, lazy } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 import { MotionConfig } from "framer-motion";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/auth";
@@ -21,6 +28,11 @@ import Home from "@/pages/marketing/Home";
 
 // Marketing — lazy
 const Products = lazy(() => import("@/pages/marketing/Products"));
+const MarketingProductRoute = lazy(() =>
+  import("@/pages/dashboard/PlannedProduct").then((m) => ({
+    default: m.MarketingProductRoute,
+  })),
+);
 const Solutions = lazy(() => import("@/pages/marketing/Solutions"));
 const IntegrationsMkt = lazy(() => import("@/pages/marketing/Integrations"));
 const Templates = lazy(() => import("@/pages/marketing/Templates"));
@@ -97,6 +109,12 @@ const Overview = lazy(() => import("@/pages/dashboard/Overview"));
 const ProductPortfolio = lazy(
   () => import("@/pages/dashboard/ProductPortfolio"),
 );
+const PlannedProductRoute = lazy(() =>
+  import("@/pages/dashboard/PlannedProduct").then((m) => ({
+    default: m.PlannedProductRoute,
+  })),
+);
+const WorkspaceSearch = lazy(() => import("@/pages/dashboard/WorkspaceSearch"));
 const Agents = lazy(() => import("@/pages/dashboard/Agents"));
 const AgentCreate = lazy(() => import("@/pages/dashboard/AgentCreate"));
 const CreateAgentWizard = lazy(
@@ -104,6 +122,15 @@ const CreateAgentWizard = lazy(
 );
 const AgentBuilder = lazy(() => import("@/pages/dashboard/AgentBuilder"));
 const Chat = lazy(() => import("@/pages/dashboard/Chat"));
+const ChatProductOverview = lazy(
+  () => import("@/pages/dashboard/ChatProductOverview"),
+);
+const KnowledgeDocuments = lazy(
+  () => import("@/pages/dashboard/KnowledgeDocuments"),
+);
+const AgentKnowledge = lazy(() => import("@/pages/dashboard/AgentKnowledge"));
+const CustomerProfile = lazy(() => import("@/pages/dashboard/CustomerProfile"));
+const AgentAnalytics = lazy(() => import("@/pages/dashboard/AgentAnalytics"));
 const Conversations = lazy(() => import("@/pages/dashboard/Conversations"));
 
 const Leads = lazy(() => import("@/pages/dashboard/Leads"));
@@ -203,6 +230,94 @@ function RouteFallback() {
   return <OraOneLoader />;
 }
 
+function AgentDesignRoute({ destination = "builder" }) {
+  const { id } = useParams();
+  const target =
+    destination === "deploy"
+      ? `/app/agents/${id}/deploy`
+      : destination === "chat"
+        ? `/app/chat?agent=${encodeURIComponent(id)}`
+        : destination === "quality" || destination === "versions"
+          ? `/app/agents/${destination}?agent=${encodeURIComponent(id)}`
+          : destination === "config"
+            ? `/app/agents/${id}?tab=config`
+            : `/app/agents/${id}`;
+  return <Navigate to={target} replace />;
+}
+
+function ConversationDesignRoute() {
+  const { conversationId } = useParams();
+  return <Navigate to={`/app/conversations/${conversationId}`} replace />;
+}
+
+function CustomerDesignRoute() {
+  return <CustomerProfile />;
+}
+
+function AdminOrganizationDesignRoute() {
+  const { organizationId } = useParams();
+  return (
+    <Navigate
+      to={`/admin/customers?customer=${encodeURIComponent(organizationId)}`}
+      replace
+    />
+  );
+}
+
+function IntegrationDesignRoute() {
+  const { integrationId } = useParams();
+  return (
+    <Navigate
+      to={`/app/integrations?integration=${encodeURIComponent(integrationId)}`}
+      replace
+    />
+  );
+}
+
+function AdminUserDesignRoute() {
+  const { userId } = useParams();
+  return <AdminResourcePage kind="users" initialQuery={userId} />;
+}
+
+function OwnerRouteBridge() {
+  const { pathname, search, hash } = useLocation();
+  const suffix = pathname.replace(/^\/owner\/?/, "");
+  const detail = suffix.match(/^(users|organizations)\/([^/]+)$/);
+  const collectionTargets = {
+    "": "/admin",
+    "ai-models": "/admin/ai-operations",
+    audit: "/admin/audit-logs",
+    billing: "/admin/billing",
+    entitlements: "/admin/products",
+    errors: "/admin/logs",
+    "feature-flags": "/admin/feature-flags",
+    infrastructure: "/admin/infrastructure",
+    monitoring: "/admin/monitoring",
+    organizations: "/admin/workspaces",
+    products: "/admin/products",
+    security: "/admin/security",
+    settings: "/admin/settings",
+    subscriptions: "/admin/subscriptions",
+    support: "/admin/support",
+    usage: "/admin/usage",
+    users: "/admin/users",
+  };
+  const target = detail
+    ? detail[1] === "users"
+      ? `/admin/users/${encodeURIComponent(detail[2])}`
+      : `/admin/organizations/${encodeURIComponent(detail[2])}`
+    : collectionTargets[suffix] || "/admin";
+
+  return <Navigate to={`${target}${search}${hash}`} replace />;
+}
+
+function NavigateToLeadDetail() {
+  const { leadId } = useParams();
+  return (
+    <Navigate to={`/app/leads?lead=${encodeURIComponent(leadId)}`} replace />
+  );
+}
+
 function App() {
   return (
     <div className="App">
@@ -218,6 +333,70 @@ function App() {
                   <Route element={<MarketingLayout />}>
                     <Route path="/" element={<Home />} />
                     <Route path="/products" element={<Products />} />
+                    <Route
+                      path="/products/:productSlug"
+                      element={<MarketingProductRoute />}
+                    />
+                    <Route
+                      path="/features"
+                      element={<Navigate to="/products" replace />}
+                    />
+                    <Route
+                      path="/platform"
+                      element={<Navigate to="/products" replace />}
+                    />
+                    <Route
+                      path="/roadmap"
+                      element={<Navigate to="/products" replace />}
+                    />
+                    <Route
+                      path="/demo"
+                      element={<Navigate to="/products" replace />}
+                    />
+                    <Route
+                      path="/docs"
+                      element={<Navigate to="/documentation" replace />}
+                    />
+                    <Route
+                      path="/docs/*"
+                      element={<Navigate to="/documentation" replace />}
+                    />
+                    <Route
+                      path="/help"
+                      element={<Navigate to="/documentation" replace />}
+                    />
+                    <Route
+                      path="/help/contact"
+                      element={<Navigate to="/contact" replace />}
+                    />
+                    <Route
+                      path="/help/*"
+                      element={<Navigate to="/documentation" replace />}
+                    />
+                    <Route
+                      path="/solutions/:solutionSlug"
+                      element={<Navigate to="/solutions" replace />}
+                    />
+                    <Route
+                      path="/changelog"
+                      element={<Navigate to="/products" replace />}
+                    />
+                    <Route
+                      path="/status"
+                      element={<Navigate to="/contact" replace />}
+                    />
+                    <Route
+                      path="/acceptable-use"
+                      element={<Navigate to="/terms" replace />}
+                    />
+                    <Route
+                      path="/refund-policy"
+                      element={<Navigate to="/terms" replace />}
+                    />
+                    <Route
+                      path="/cookies"
+                      element={<Navigate to="/cookie-policy" replace />}
+                    />
                     <Route path="/solutions" element={<Solutions />} />
                     <Route path="/integrations" element={<IntegrationsMkt />} />
                     <Route path="/templates" element={<Templates />} />
@@ -258,6 +437,54 @@ function App() {
 
                   {/* Legacy Cognito OAuth callback route — now just redirects to /login */}
                   <Route path="/auth/callback" element={<AuthCallback />} />
+                  <Route
+                    path="/auth"
+                    element={<Navigate to="/login" replace />}
+                  />
+                  <Route
+                    path="/auth/error"
+                    element={<Navigate to="/login?reason=auth-error" replace />}
+                  />
+                  <Route
+                    path="/auth/mfa"
+                    element={<Navigate to="/verify-email" replace />}
+                  />
+                  <Route
+                    path="/auth/invitation"
+                    element={<Navigate to="/signup" replace />}
+                  />
+                  <Route
+                    path="/auth/*"
+                    element={<Navigate to="/login" replace />}
+                  />
+
+                  {/* Design-system auth URLs retained as compatibility aliases. */}
+                  <Route
+                    path="/auth/sign-in"
+                    element={<Navigate to="/login" replace />}
+                  />
+                  <Route
+                    path="/auth/sign-up"
+                    element={<Navigate to="/signup" replace />}
+                  />
+                  <Route
+                    path="/auth/verify-email"
+                    element={<Navigate to="/verify-email" replace />}
+                  />
+                  <Route
+                    path="/auth/forgot-password"
+                    element={<Navigate to="/forgot-password" replace />}
+                  />
+                  <Route
+                    path="/auth/reset-password"
+                    element={<Navigate to="/reset-password" replace />}
+                  />
+                  <Route
+                    path="/auth/session-expired"
+                    element={
+                      <Navigate to="/login?reason=session-expired" replace />
+                    }
+                  />
 
                   {/* Public shared conversation transcript (R1) — no auth, no layout */}
                   <Route
@@ -328,13 +555,42 @@ function App() {
                     />
                     <Route path="/onboarding/agent" element={<Step1Agent />} />
                     <Route
+                      path="/onboarding/ai-chat"
+                      element={<Step1Agent />}
+                    />
+                    <Route
+                      path="/onboarding/use-case"
+                      element={<Step1Agent />}
+                    />
+                    <Route
                       path="/onboarding/business"
+                      element={<Step2Business />}
+                    />
+                    <Route
+                      path="/onboarding/profile"
+                      element={<Step2Business />}
+                    />
+                    <Route
+                      path="/onboarding/workspace"
                       element={<Step2Business />}
                     />
                     <Route
                       path="/onboarding/channels"
                       element={<Step3Channels />}
                     />
+                    <Route
+                      path="/onboarding/knowledge"
+                      element={<Step3Channels />}
+                    />
+                    <Route
+                      path="/onboarding/install"
+                      element={<Step3Channels />}
+                    />
+                    <Route
+                      path="/onboarding/test"
+                      element={<Step3Channels />}
+                    />
+                    <Route path="/onboarding/complete" element={<Welcome />} />
                   </Route>
 
                   {/* Dashboard (protected) — simplified, grouped information architecture.
@@ -352,8 +608,311 @@ function App() {
                       element={<ProductPortfolio />}
                     />
                     <Route
+                      path="/app/products/:productSlug/*"
+                      element={<PlannedProductRoute />}
+                    />
+                    <Route
+                      path="/studio/*"
+                      element={
+                        <PlannedProductRoute defaultProductSlug="ai-studio" />
+                      }
+                    />
+                    <Route path="/app/search" element={<WorkspaceSearch />} />
+                    <Route
+                      path="/app/analytics/customer-360"
+                      element={<Navigate to="/app/customer-360" replace />}
+                    />
+                    <Route
+                      path="/app/analytics/optimization"
+                      element={
+                        <Navigate to="/app/optimization-score" replace />
+                      }
+                    />
+                    <Route
+                      path="/app/analytics/revenue"
+                      element={
+                        <Navigate to="/app/revenue-attribution" replace />
+                      }
+                    />
+                    <Route
+                      path="/app/account"
+                      element={<Navigate to="/app/settings" replace />}
+                    />
+                    <Route path="/app/account/profile" element={<Settings />} />
+                    <Route
+                      path="/app/account/preferences"
+                      element={<Settings />}
+                    />
+                    <Route
+                      path="/app/account/notifications"
+                      element={<Settings />}
+                    />
+                    <Route
+                      path="/app/account/security"
+                      element={<Settings />}
+                    />
+                    <Route
+                      path="/app/account/sessions"
+                      element={<Settings />}
+                    />
+                    <Route
+                      path="/app/account/*"
+                      element={<Navigate to="/app/settings" replace />}
+                    />
+                    <Route
+                      path="/app/settings/general"
+                      element={<Settings />}
+                    />
+                    <Route
+                      path="/app/settings/notifications"
+                      element={<Settings />}
+                    />
+                    <Route
+                      path="/app/settings/security"
+                      element={<Settings />}
+                    />
+                    <Route
+                      path="/app/settings/tasks"
+                      element={<Navigate to="/app/activity" replace />}
+                    />
+                    <Route
+                      path="/app/settings/teams"
+                      element={<Navigate to="/app/teams" replace />}
+                    />
+                    <Route path="/app/settings/data" element={<Settings />} />
+                    <Route
+                      path="/app/team/activity"
+                      element={<ActivityCenter defaultTab="activity" />}
+                    />
+                    <Route path="/app/team/invitations" element={<Team />} />
+                    <Route path="/app/team/members" element={<Team />} />
+                    <Route path="/app/team/permissions" element={<Team />} />
+                    <Route path="/app/team/roles" element={<Team />} />
+                    <Route
+                      path="/app/workspaces"
+                      element={<Navigate to="/app/projects" replace />}
+                    />
+                    <Route
+                      path="/app/workspaces/new"
+                      element={<Navigate to="/app/projects" replace />}
+                    />
+                    <Route
+                      path="/app/workspaces/:workspaceId"
+                      element={<Navigate to="/app/projects" replace />}
+                    />
+                    <Route
+                      path="/app/workspaces/:workspaceId/settings"
+                      element={<Navigate to="/app/projects" replace />}
+                    />
+                    <Route
                       path="/app/overview"
                       element={<Navigate to="/app/dashboard" replace />}
+                    />
+
+                    {/* Imported design-route compatibility for Product 1. */}
+                    <Route
+                      path="/app/inbox"
+                      element={<Navigate to="/app/conversations" replace />}
+                    />
+                    <Route
+                      path="/app/inbox/:conversationId"
+                      element={<ConversationDesignRoute />}
+                    />
+                    <Route
+                      path="/app/customers"
+                      element={<Navigate to="/app/leads" replace />}
+                    />
+                    <Route
+                      path="/app/customers/:customerId"
+                      element={<CustomerDesignRoute />}
+                    />
+                    <Route
+                      path="/app/products/chat"
+                      element={<ChatProductOverview />}
+                    />
+                    <Route
+                      path="/app/products/chat/analytics"
+                      element={<Navigate to="/app/analytics" replace />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants"
+                      element={<Navigate to="/app/agents" replace />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/new"
+                      element={<Navigate to="/app/agents/new" replace />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/:id"
+                      element={<AgentDesignRoute />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/:id/editor"
+                      element={<AgentDesignRoute destination="config" />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/:id/behavior"
+                      element={<AgentDesignRoute destination="config" />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/:id/knowledge"
+                      element={<AgentKnowledge />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/:id/analytics"
+                      element={<AgentAnalytics />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/:id/quality"
+                      element={<AgentDesignRoute destination="quality" />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/:id/versions"
+                      element={<AgentDesignRoute destination="versions" />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/:id/install"
+                      element={<AgentDesignRoute destination="deploy" />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/:id/widget"
+                      element={<AgentDesignRoute destination="deploy" />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/:id/playground"
+                      element={<AgentDesignRoute destination="chat" />}
+                    />
+                    <Route
+                      path="/app/products/chat/conversations"
+                      element={<Navigate to="/app/conversations" replace />}
+                    />
+                    <Route
+                      path="/app/products/chat/knowledge"
+                      element={<Navigate to="/app/knowledge-base" replace />}
+                    />
+                    <Route
+                      path="/app/products/chat/knowledge/documents"
+                      element={<KnowledgeDocuments />}
+                    />
+                    <Route
+                      path="/app/products/chat/knowledge/websites"
+                      element={
+                        <Navigate to="/app/knowledge-base/websites" replace />
+                      }
+                    />
+                    <Route
+                      path="/app/products/chat/knowledge/search"
+                      element={
+                        <Navigate to="/app/knowledge-base/search" replace />
+                      }
+                    />
+                    <Route
+                      path="/app/products/chat/knowledge/coverage"
+                      element={
+                        <Navigate to="/app/knowledge-base/coverage" replace />
+                      }
+                    />
+                    <Route
+                      path="/app/products/chat/settings"
+                      element={<Navigate to="/app/settings" replace />}
+                    />
+                    <Route
+                      path="/app/products/chat/templates"
+                      element={<Navigate to="/app/agents/templates" replace />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/demo/instructions"
+                      element={<Navigate to="/app/agents" replace />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/demo/models"
+                      element={<Navigate to="/app/ai-models" replace />}
+                    />
+                    <Route
+                      path="/app/products/chat/assistants/demo/settings"
+                      element={<Navigate to="/app/settings" replace />}
+                    />
+
+                    {/* Design-system account and workspace aliases. */}
+                    <Route
+                      path="/app/account/*"
+                      element={<Navigate to="/app/settings" replace />}
+                    />
+                    <Route
+                      path="/app/billing/usage"
+                      element={<Navigate to="/app/usage" replace />}
+                    />
+                    <Route
+                      path="/app/billing/*"
+                      element={<Navigate to="/app/billing" replace />}
+                    />
+                    <Route
+                      path="/app/integrations/catalog"
+                      element={<Navigate to="/app/integrations" replace />}
+                    />
+                    <Route
+                      path="/app/integrations/connected"
+                      element={<Navigate to="/app/integrations" replace />}
+                    />
+                    <Route
+                      path="/app/integrations/webhooks"
+                      element={<Navigate to="/app/webhooks" replace />}
+                    />
+                    <Route
+                      path="/app/integrations/:integrationId"
+                      element={<IntegrationDesignRoute />}
+                    />
+                    <Route
+                      path="/app/leads/:leadId"
+                      element={<NavigateToLeadDetail />}
+                    />
+                    <Route
+                      path="/app/settings/api-keys"
+                      element={<Navigate to="/app/api-keys" replace />}
+                    />
+                    <Route
+                      path="/app/settings/audit"
+                      element={<Navigate to="/app/audit-logs" replace />}
+                    />
+                    <Route
+                      path="/app/settings/billing"
+                      element={<Navigate to="/app/billing" replace />}
+                    />
+                    <Route
+                      path="/app/settings/branding"
+                      element={<Navigate to="/app/branding" replace />}
+                    />
+                    <Route
+                      path="/app/settings/developers"
+                      element={<Navigate to="/app/developers" replace />}
+                    />
+                    <Route
+                      path="/app/settings/members"
+                      element={<Navigate to="/app/team" replace />}
+                    />
+                    <Route
+                      path="/app/settings/models"
+                      element={<Navigate to="/app/ai-models" replace />}
+                    />
+                    <Route
+                      path="/app/settings/operations"
+                      element={<Navigate to="/app/operations" replace />}
+                    />
+                    <Route
+                      path="/app/settings/projects"
+                      element={<Navigate to="/app/projects" replace />}
+                    />
+                    <Route
+                      path="/app/settings/webhooks"
+                      element={<Navigate to="/app/webhooks" replace />}
+                    />
+                    <Route
+                      path="/app/team/*"
+                      element={<Navigate to="/app/team" replace />}
+                    />
+                    <Route
+                      path="/app/workspaces/*"
+                      element={<Navigate to="/app/projects" replace />}
                     />
 
                     {/* ── AI Agents ── */}
@@ -390,6 +949,10 @@ function App() {
                     />
                     <Route
                       path="/app/conversations"
+                      element={<Conversations />}
+                    />
+                    <Route
+                      path="/app/conversations/:conversationId"
                       element={<Conversations />}
                     />
 
@@ -434,7 +997,9 @@ function App() {
                     />
                     <Route
                       path="/app/automation/*"
-                      element={<Navigate to="/app/dashboard" replace />}
+                      element={
+                        <Navigate to="/app/products/automation" replace />
+                      }
                     />
                     <Route path="/app/settings" element={<Settings />} />
                     <Route
@@ -586,6 +1151,34 @@ function App() {
                   AdminLayout wraps ProtectedRoute + access gate internally. */}
                   <Route element={<AdminLayout />}>
                     <Route path="/admin" element={<AdminDashboard />} />
+                    <Route
+                      path="/admin/ai-models"
+                      element={<Navigate to="/admin/ai-operations" replace />}
+                    />
+                    <Route
+                      path="/admin/audit"
+                      element={<Navigate to="/admin/audit-logs" replace />}
+                    />
+                    <Route
+                      path="/admin/errors"
+                      element={<Navigate to="/admin/logs" replace />}
+                    />
+                    <Route
+                      path="/admin/organizations"
+                      element={<Navigate to="/admin/workspaces" replace />}
+                    />
+                    <Route
+                      path="/admin/organizations/:organizationId"
+                      element={<AdminOrganizationDesignRoute />}
+                    />
+                    <Route
+                      path="/admin/users"
+                      element={<AdminResourcePage kind="users" />}
+                    />
+                    <Route
+                      path="/admin/users/:userId"
+                      element={<AdminUserDesignRoute />}
+                    />
                     <Route
                       path="/admin/search"
                       element={<AdminUniversalSearch />}
@@ -753,6 +1346,7 @@ function App() {
                       path="/admin/developer"
                       element={<AdminModulePage moduleKey="developer" />}
                     />
+                    <Route path="/owner/*" element={<OwnerRouteBridge />} />
                   </Route>
                 </Routes>
               </Suspense>

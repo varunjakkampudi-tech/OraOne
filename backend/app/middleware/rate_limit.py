@@ -70,15 +70,20 @@ def _client_ip(request: Request) -> str:
 
 
 def _caller_id(request: Request) -> str:
-    """Prefer the JWT subject (stable per-user) over raw IP when present."""
+    """Only verified local access tokens may select a per-user bucket.
+
+    Other credentials remain IP-scoped at this pre-authentication boundary.
+    Unverified subjects would let an attacker rotate fabricated identities.
+    """
     auth = request.headers.get("authorization", "")
     if auth.lower().startswith("bearer "):
         try:
-            import jwt as jose_jwt
+            from app.core.config import settings
+            from app.core.security import decode_access_token
 
-            claims = jose_jwt.decode(
-                auth[7:].strip(), options={"verify_signature": False}
-            )
+            if settings.auth_provider != "self_hosted":
+                return f"ip:{_client_ip(request)}"
+            claims = decode_access_token(auth[7:].strip())
             sub = claims.get("sub")
             if sub:
                 return f"user:{sub}"

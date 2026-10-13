@@ -141,13 +141,16 @@ class AgentRuntime:
         """KB ids linked to the agent via ``agent_configs.config``.
 
         Returns ``None`` when no explicit link exists — the caller then
-        falls back to *all* active KBs in the org.
+        falls back to *all* active KBs in the org. An explicitly stored empty
+        list is returned as ``[]`` so it can disable KB retrieval.
         """
         cfg = agent.config
         if not cfg or not isinstance(cfg.config, dict):
             return None
+        if "knowledge_base_ids" not in cfg.config:
+            return None
         raw = cfg.config.get("knowledge_base_ids")
-        if not raw:
+        if not isinstance(raw, list):
             return None
         out: list[uuid.UUID] = []
         for v in raw:
@@ -155,7 +158,7 @@ class AgentRuntime:
                 out.append(uuid.UUID(str(v)))
             except (ValueError, TypeError):
                 continue
-        return out or None
+        return out
 
     async def retrieve_context(
         self, agent: Agent, query: str, *, top_k: int = DEFAULT_TOP_K
@@ -167,6 +170,8 @@ class AgentRuntime:
         a keyword fallback baked into that service.
         """
         kb_ids = self._linked_kb_ids(agent)
+        if kb_ids == []:
+            return []
         return await rag_service.search_chunks(
             self.session,
             query,

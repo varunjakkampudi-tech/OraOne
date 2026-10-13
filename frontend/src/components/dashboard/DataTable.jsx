@@ -279,7 +279,7 @@ export default function DataTable({
       )}
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
+      <div className="overflow-hidden rounded-lg border border-line bg-white">
         <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full border-collapse text-left">
             <thead

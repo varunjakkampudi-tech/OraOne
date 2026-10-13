@@ -10,6 +10,11 @@ from __future__ import annotations
 import asyncio
 import logging
 import signal
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent / ".env", override=False)
 
 from app.database.session import dispose_engine, init_engine
 from app.services.webhook_outbox import start_outbox_worker, stop_outbox_worker
@@ -24,11 +29,17 @@ async def main() -> None:
     stop_event = asyncio.Event()
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGINT, signal.SIGTERM):
-        loop.add_signal_handler(sig, stop_event.set)
-    await stop_event.wait()
-    await stop_scheduler()
-    await stop_outbox_worker()
-    await dispose_engine()
+        try:
+            loop.add_signal_handler(sig, stop_event.set)
+        except NotImplementedError:
+            # Windows event loops do not implement add_signal_handler.
+            signal.signal(sig, lambda *_: loop.call_soon_threadsafe(stop_event.set))
+    try:
+        await stop_event.wait()
+    finally:
+        await stop_scheduler()
+        await stop_outbox_worker()
+        await dispose_engine()
 
 
 if __name__ == "__main__":

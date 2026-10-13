@@ -10,8 +10,7 @@ function resolveBackendUrl() {
   if (explicit) return explicit;
 
   if (typeof window !== "undefined" && window.location) {
-    const { protocol, hostname } = window.location;
-    return `${protocol}//${hostname}`;
+    return window.location.origin;
   }
   return "";
 }

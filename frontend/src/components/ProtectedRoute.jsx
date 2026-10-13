@@ -9,6 +9,8 @@ export function ProtectedRoute({ children }) {
     identityLoading,
     identityError,
     fetchIdentity,
+    authError,
+    fetchMe,
   } = useAuth();
 
   // Initial auth probe in progress.
@@ -25,6 +27,8 @@ export function ProtectedRoute({ children }) {
       </div>
     );
   }
+
+  if (authError) return <SessionRetry message={authError} onRetry={fetchMe} />;
 
   // Not signed in.
   if (!user) return <Navigate to="/login" replace />;
@@ -79,7 +83,7 @@ export function ProtectedRoute({ children }) {
  * sends them straight to the dashboard.
  */
 export function GuestRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { user, loading, authError, fetchMe } = useAuth();
 
   if (loading) {
     return (
@@ -95,7 +99,36 @@ export function GuestRoute({ children }) {
     );
   }
 
+  if (authError) return <SessionRetry message={authError} onRetry={fetchMe} />;
+
   if (user) return <Navigate to="/app/dashboard" replace />;
 
   return children;
+}
+
+function SessionRetry({ message, onRetry }) {
+  return (
+    <div
+      className="min-h-screen grid place-items-center bg-[#F8FAFC] p-6"
+      data-testid="session-verification-error"
+    >
+      <div
+        className="max-w-md rounded-2xl border border-[#E2E8F0] bg-white p-7 text-center space-y-4"
+        role="alert"
+      >
+        <h1 className="text-lg font-semibold text-[#0F172A]">
+          Couldn’t verify your session
+        </h1>
+        <p className="text-sm text-[#64748B]">{message}</p>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-xl bg-[#2563EB] px-5 py-2.5 font-semibold text-white"
+          data-testid="session-verification-retry"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  );
 }

@@ -37,6 +37,11 @@ function scoreColor(v) {
 }
 
 function ScoreRing({ value, grade }) {
+  if (!Number.isFinite(value)) {
+    return (
+      <div className="py-8 text-center text-sm text-sub">Score unavailable</div>
+    );
+  }
   const r = 78;
   const c = 2 * Math.PI * r;
   const off = c - (Math.max(0, Math.min(100, value)) / 100) * c;

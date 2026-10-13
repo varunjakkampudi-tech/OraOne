@@ -123,4 +123,6 @@ credentials.json
 
 /screenshots/scripts/logo-gen/
 frontend/output/
+backend/output/
+frontend/.playwright-cli/
 frontend/test-results/

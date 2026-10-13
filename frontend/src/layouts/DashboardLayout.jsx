@@ -56,7 +56,7 @@ export default function DashboardLayout() {
       <BrandingProvider>
         <ProjectProvider>
           <TourProvider>
-            <div className="h-screen bg-[#F6F8FC] flex overflow-hidden">
+            <div className="workspace-shell h-dvh bg-[#F6F8FC] flex flex-col overflow-hidden">
               {/* Skip-to-content link for keyboard / screen-reader users */}
               <a
                 href="#main-content"
@@ -64,23 +64,25 @@ export default function DashboardLayout() {
               >
                 Skip to main content
               </a>
-              <Sidebar
-                mobileOpen={mobileOpen}
-                onClose={() => setMobileOpen(false)}
-              />
-              <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                <TopBar onMenuClick={() => setMobileOpen(true)} />
-                <MaintenanceBanner />
-                <main
-                  id="main-content"
-                  tabIndex="-1"
-                  className="flex-1 overflow-y-auto scrollbar-thin outline-none"
-                >
-                  <div className="p-4 sm:p-6 lg:p-8 max-w-[1720px] mx-auto">
-                    <Breadcrumbs />
-                    <Outlet />
-                  </div>
-                </main>
+              <TopBar onMenuClick={() => setMobileOpen(true)} />
+              <div className="flex min-h-0 flex-1 overflow-hidden">
+                <Sidebar
+                  mobileOpen={mobileOpen}
+                  onClose={() => setMobileOpen(false)}
+                />
+                <div className="workspace-main flex min-w-0 flex-1 flex-col overflow-hidden">
+                  <MaintenanceBanner />
+                  <main
+                    id="main-content"
+                    tabIndex="-1"
+                    className="flex-1 overflow-y-auto scrollbar-thin outline-none"
+                  >
+                    <div className="mx-auto w-full max-w-[1720px] p-4 sm:p-6 lg:p-8">
+                      <Breadcrumbs />
+                      <Outlet />
+                    </div>
+                  </main>
+                </div>
               </div>
               <SupportLauncher />
               <TourOverlay />

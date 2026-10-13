@@ -116,6 +116,35 @@ def _sanitize_context(ctx: dict) -> dict:
     }
 
 
+def _effective_knowledge_base_ids(agent: Optional[Agent], widget: Widget) -> Optional[list[uuid.UUID]]:
+    """Resolve public-widget retrieval scope from agent and widget bindings.
+
+    A missing agent binding preserves the legacy widget behavior: the widget's
+    optional KB is used, or ``None`` allows the existing org-wide fallback.
+    Once an agent has an explicit binding, the widget can only narrow it. A
+    mismatch or explicit empty binding fails closed with no KB retrieval.
+    """
+    widget_id = widget.knowledge_base_id
+    cfg = agent.config if agent is not None else None
+    config = cfg.config if cfg is not None else None
+    if not isinstance(config, dict) or "knowledge_base_ids" not in config:
+        return [widget_id] if widget_id else None
+
+    raw = config.get("knowledge_base_ids")
+    if not isinstance(raw, list):
+        return []
+    agent_ids: list[uuid.UUID] = []
+    for value in raw:
+        try:
+            agent_ids.append(uuid.UUID(str(value)))
+        except (TypeError, ValueError, AttributeError):
+            return []
+
+    if not widget_id:
+        return agent_ids
+    return [widget_id] if widget_id in agent_ids else []
+
+
 # ─────────────────── config ───────────────────
 
 
@@ -269,6 +298,7 @@ async def _persist_and_answer(
     # model.
     agent_persona: Optional[str] = None
     agent_model: Optional[str] = None
+    agent_row: Optional[Agent] = None
     if agent_id is not None:
         agent_row = await session.scalar(
             select(Agent)
@@ -361,7 +391,7 @@ async def _persist_and_answer(
             source="chat",
         )
 
-    kb_ids = [widget.knowledge_base_id] if widget.knowledge_base_id else None
+    kb_ids = _effective_knowledge_base_ids(agent_row, widget)
     result = await answer_query(
         session,
         text,

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -22,8 +21,8 @@ import {
   Plus,
   BookOpen,
   Rocket,
+  CodeXml,
   Users,
-  Workflow as WorkflowIcon,
   Activity,
 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -43,10 +42,13 @@ import { useAuth } from "@/lib/auth";
 function useOverview(days) {
   const [state, setState] = useState({
     loading: true,
+    analyticsLoading: true,
+    agentsAvailable: false,
+    analyticsAvailable: false,
     overview: null,
     agents: [],
-    knowledgeCount: 0,
-    memberCount: 0,
+    knowledgeCount: null,
+    memberCount: null,
   });
 
   // Static context (agents, knowledge, team) — fetched once.
@@ -71,9 +73,10 @@ function useOverview(days) {
       setState((s) => ({
         ...s,
         loading: false,
+        agentsAvailable: results[0].status === "fulfilled",
         agents: val(results[0])?.items || val(results[0])?.agents || [],
-        knowledgeCount: kb?.total ?? kbList.length ?? 0,
-        memberCount: team?.total ?? teamList.length ?? 0,
+        knowledgeCount: kb ? (kb.total ?? kbList.length) : null,
+        memberCount: team ? (team.total ?? teamList.length) : null,
       }));
     })();
     return () => {
@@ -84,14 +87,27 @@ function useOverview(days) {
   // Analytics — refetched when the range changes.
   useEffect(() => {
     let active = true;
+    setState((s) => ({ ...s, analyticsLoading: true }));
     (async () => {
       try {
         const { data } = await api.get("/analytics/overview", {
           params: { days },
         });
-        if (active) setState((s) => ({ ...s, overview: data }));
+        if (active)
+          setState((s) => ({
+            ...s,
+            overview: data,
+            analyticsAvailable: true,
+            analyticsLoading: false,
+          }));
       } catch {
-        if (active) setState((s) => ({ ...s, overview: s.overview }));
+        if (active)
+          setState((s) => ({
+            ...s,
+            overview: null,
+            analyticsAvailable: false,
+            analyticsLoading: false,
+          }));
       }
     })();
     return () => {
@@ -188,27 +204,22 @@ function Sparkline({ data, color, id }) {
   );
 }
 
-function KpiCard({ kpi, index }) {
+function KpiCard({ kpi }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04 }}
-      className="rounded-2xl border border-line bg-white p-5 shadow-card"
-    >
-      <div className="flex items-center gap-2.5">
+    <div className="metric-card rounded-lg border border-line bg-white px-4 py-5">
+      <div className="metric-top flex items-center justify-between gap-2.5">
         <span
           className="grid size-9 place-items-center rounded-xl"
           style={{ background: kpi.bg }}
         >
           <kpi.icon size={17} style={{ color: kpi.tone }} />
         </span>
-        <span className="text-[13.5px] font-semibold text-[#475569]">
+        <span className="order-first text-[14px] font-semibold text-sub">
           {kpi.label}
         </span>
       </div>
       <div className="mt-4 flex items-end gap-3">
-        <p className="text-[30px] font-extrabold leading-none tracking-tight text-ink">
+        <p className="text-[30px] font-semibold leading-none tracking-tight text-ink">
           {kpi.value}
         </p>
         {kpi.sub ? (
@@ -222,7 +233,7 @@ function KpiCard({ kpi, index }) {
         {kpi.delta ? <DeltaChip delta={kpi.delta} up={kpi.up} /> : null}
         {kpi.foot ? <span>{kpi.foot}</span> : null}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -233,13 +244,13 @@ function RangeToggle({ value, onChange }) {
     { v: 90, label: "90 days" },
   ];
   return (
-    <div className="inline-flex rounded-full bg-hairline p-0.5">
+    <div className="inline-flex flex-wrap rounded-md border border-line bg-subtle p-0.5">
       {opts.map((o) => (
         <button
           key={o.v}
           onClick={() => onChange(o.v)}
           aria-pressed={value === o.v}
-          className={`rounded-full px-3 py-1 text-[12.5px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 ${
+          className={`min-h-9 rounded px-3 py-1 text-[13px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 ${
             value === o.v
               ? "bg-white text-ink shadow-sm"
               : "text-sub hover:text-ink"
@@ -252,7 +263,7 @@ function RangeToggle({ value, onChange }) {
   );
 }
 
-function StatusRow({ icon: Icon, tone, label, healthy, stats }) {
+function StatusRow({ icon: Icon, tone, label, hasItems, stats }) {
   return (
     <li className="flex items-center justify-between gap-4 px-5 py-3.5">
       <div className="flex min-w-0 items-center gap-3">
@@ -266,20 +277,24 @@ function StatusRow({ icon: Icon, tone, label, healthy, stats }) {
           <p className="truncate text-[13px] font-semibold text-ink">{label}</p>
           <span
             className={`inline-flex items-center gap-1 text-[11.5px] font-semibold ${
-              healthy ? "text-success-ink" : "text-faint"
+              hasItems ? "text-success-ink" : "text-faint"
             }`}
           >
             <span
-              className={`size-1.5 rounded-full ${healthy ? "bg-success" : "bg-[#CBD5E1]"}`}
+              className={`size-1.5 rounded-full ${hasItems ? "bg-success" : "bg-[#CBD5E1]"}`}
             />
-            {healthy ? "Healthy" : "Idle"}
+            {hasItems == null
+              ? "Unavailable"
+              : hasItems
+                ? "Added"
+                : "Not added"}
           </span>
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-5 text-right">
         {stats.map((s) => (
           <div key={s.label}>
-            <p className="text-[13px] font-bold text-ink">{s.value}</p>
+            <p className="text-[13px] font-bold text-ink">{s.value ?? "—"}</p>
             <p className="text-[11px] text-faint">{s.label}</p>
           </div>
         ))}
@@ -293,8 +308,16 @@ export default function Overview() {
   const { user } = useAuth();
   const nav = useNavigate();
   const [days, setDays] = useState(7);
-  const { loading, overview, agents, knowledgeCount, memberCount } =
-    useOverview(days);
+  const {
+    loading,
+    analyticsLoading,
+    agentsAvailable,
+    analyticsAvailable,
+    overview,
+    agents,
+    knowledgeCount,
+    memberCount,
+  } = useOverview(days);
 
   const [greeting, setGreeting] = useState("Good morning");
   useEffect(() => {
@@ -306,20 +329,16 @@ export default function Overview() {
 
   const firstName = (user?.full_name || user?.name || "there").split(" ")[0];
 
-  const totals = overview?.totals || null;
+  const totals = analyticsAvailable ? overview?.totals || null : null;
   const conversations =
     totals?.conversations ??
     overview?.total_conversations ??
     overview?.conversations ??
-    0;
+    null;
   const messages = totals?.messages ?? null;
   const resolution =
-    totals?.resolution_rate ??
-    totals?.conversion_rate ??
-    overview?.resolution_rate ??
-    null;
-  const workflowRuns = totals?.workflow_runs ?? null;
-  const documents = totals?.documents ?? knowledgeCount ?? 0;
+    totals?.resolution_rate ?? overview?.resolution_rate ?? null;
+  const documents = totals?.documents ?? knowledgeCount;
   const revenue =
     overview?.attributed_revenue ?? totals?.attributed_revenue ?? null;
 
@@ -327,8 +346,6 @@ export default function Overview() {
   const activeAgents =
     totals?.active_agents ??
     agents.filter((a) => a?.status === "active").length;
-  const workflowFailures =
-    overview?.breakdowns?.workflow_runs_by_status?.failed ?? 0;
 
   const topAgents = useMemo(() => {
     const list = overview?.top_agents;
@@ -391,6 +408,27 @@ export default function Overview() {
   );
 
   const hasActivity = agentCount > 0 || conversations > 0;
+  const setupSteps = [
+    {
+      title: "Create first AI assistant",
+      to: "/app/agents/new",
+      done: agentsAvailable ? agentCount > 0 : null,
+      icon: Bot,
+    },
+    {
+      title: "Add knowledge source",
+      to: "/app/knowledge-base",
+      done: knowledgeCount == null ? null : knowledgeCount > 0,
+      icon: BookOpen,
+    },
+    {
+      title: "Invite teammates",
+      to: "/app/team",
+      done: memberCount == null ? null : memberCount > 1,
+      icon: Users,
+    },
+  ];
+  const setupCompleted = setupSteps.filter((step) => step.done).length;
 
   // Real, actionable suggestions — no invented alerts.
   const attention = [];
@@ -415,7 +453,7 @@ export default function Overview() {
       to: "/app/knowledge-base",
       cta: "Connect",
     });
-  if (memberCount <= 1)
+  if (memberCount != null && memberCount <= 1)
     attention.push({
       icon: Users,
       tone: "#2563EB",
@@ -426,7 +464,7 @@ export default function Overview() {
     });
 
   /* ── Loading skeleton ── */
-  if (loading) {
+  if (loading || analyticsLoading) {
     return (
       <div className="space-y-6" data-testid="dashboard-overview">
         <div className="h-9 w-72 animate-pulse rounded-lg bg-line motion-reduce:animate-none" />
@@ -443,12 +481,37 @@ export default function Overview() {
     );
   }
 
+  if (!hasActivity && (!agentsAvailable || !analyticsAvailable)) {
+    return (
+      <div
+        className="rounded-2xl border border-line bg-white p-6 shadow-card"
+        role="alert"
+        data-testid="dashboard-data-unavailable"
+      >
+        <h1 className="text-lg font-bold text-ink">
+          Workspace data is unavailable
+        </h1>
+        <p className="mt-2 text-sm text-sub">
+          We couldn&apos;t load your agents or analytics. Try again to see your
+          workspace.
+        </p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="mt-4 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   /* ── Mission Control onboarding (empty workspace) ── */
   if (!hasActivity) {
     const steps = [
       {
         key: "agent",
-        title: "Create your first AI Agent",
+        title: "Create first AI assistant",
         desc: "Spin up an agent to answer questions and capture leads automatically.",
         to: "/app/agents/new",
         cta: "Create agent",
@@ -468,49 +531,31 @@ export default function Overview() {
         bg: "#F0F9FF",
         done: knowledgeCount > 0,
       },
-      {
-        key: "deploy",
-        title: "Deploy to a channel",
-        desc: "Put your agent live on your website.",
-        to: "/app/agents",
-        cta: "Deploy",
-        icon: Rocket,
-        tone: "#0891B2",
-        bg: "#ECFEFF",
-        done: false,
-      },
-      {
-        key: "integrations",
-        title: "Connect your tools",
-        desc: "Link the apps your team already uses to keep everything in sync.",
-        to: "/app/integrations",
-        cta: "Connect",
-        icon: Users,
-        tone: "#F59E0B",
-        bg: "#FFF7ED",
-        done: false,
-      },
     ];
     const completed = steps.filter((s) => s.done).length;
     return (
-      <div className="space-y-4" data-testid="dashboard-overview">
+      <div
+        className="dashboard-content space-y-5 [&_.rounded-2xl]:rounded-lg [&_.shadow-card]:shadow-none"
+        data-testid="dashboard-overview"
+      >
         <div className="min-w-0">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-hairline px-2.5 py-1 text-[11px] font-semibold text-sub">
             <Rocket size={12} /> Welcome to OraOne
           </span>
-          <h1 className="mt-2.5 text-[32px] font-extrabold tracking-tight text-ink sm:text-[36px]">
+          <h1 className="mt-2.5 text-[26px] font-semibold tracking-tight text-ink sm:text-[28px]">
             {greeting}, {firstName}
           </h1>
           <p className="mt-1 text-[14px] text-body">
-            Let&apos;s get your AI workspace set up &mdash; you&apos;re about 5
-            minutes from launching your first AI agent.
+            Set up your first AI Chat agent and connect the knowledge it needs.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-line bg-white shadow-card">
+        <div className="setup-panel rounded-lg border border-brand/20 bg-brand-soft/40">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-5 py-4">
             <div>
-              <h2 className="text-[16px] font-bold text-ink">Get started</h2>
+              <h2 className="text-[18px] font-semibold text-ink">
+                Complete your workspace setup
+              </h2>
               <p className="mt-0.5 text-[12.5px] text-sub">
                 {completed} of {steps.length} complete
               </p>
@@ -518,7 +563,7 @@ export default function Overview() {
             <div className="flex items-center gap-2.5">
               <div className="h-2.5 w-44 overflow-hidden rounded-full bg-line">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-brand to-[#06B6D4] transition-all"
+                  className="h-full rounded-full bg-brand"
                   style={{ width: `${(completed / steps.length) * 100}%` }}
                 />
               </div>
@@ -527,11 +572,11 @@ export default function Overview() {
               </span>
             </div>
           </div>
-          <ul className="divide-y divide-hairline">
+          <ul className="grid grid-cols-1 gap-3 p-4 lg:grid-cols-2">
             {steps.map((s) => (
               <li
                 key={s.key}
-                className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-[#F8FBFF]"
+                className="grid grid-cols-[22px_minmax(0,1fr)] items-start gap-3 rounded-md border border-line bg-white p-4 [&>span:nth-child(2)]:hidden"
               >
                 <span className="shrink-0">
                   {s.done ? (
@@ -557,7 +602,7 @@ export default function Overview() {
                 {!s.done && (
                   <Link
                     to={s.to}
-                    className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-brand px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-brand-hover min-w-[132px]"
+                    className="col-start-2 inline-flex min-h-11 w-fit items-center justify-center gap-1.5 rounded-md bg-brand px-4 py-2 text-[13px] font-semibold text-white hover:bg-brand-hover"
                   >
                     {s.cta} <ArrowRight size={14} />
                   </Link>
@@ -574,7 +619,7 @@ export default function Overview() {
             tone="#2563EB"
             bg="#EFF4FF"
             title="Create an AI Agent"
-            desc="Website chat — live in minutes."
+            desc="Build an agent for your website."
           />
           <QuickStart
             to="/app/knowledge-base"
@@ -583,6 +628,14 @@ export default function Overview() {
             bg="#F0F9FF"
             title="Connect Knowledge"
             desc="Ground your agents in your own content."
+          />
+          <QuickStart
+            to="/app/widgets"
+            icon={CodeXml}
+            tone="#0891B2"
+            bg="#ECFEFF"
+            title="Install the Website Widget"
+            desc="Get the script for your site after configuring an agent."
           />
         </div>
       </div>
@@ -594,7 +647,8 @@ export default function Overview() {
     {
       key: "conv",
       label: "Conversations",
-      value: Number(conversations).toLocaleString(),
+      value:
+        conversations == null ? "—" : Number(conversations).toLocaleString(),
       icon: MessagesSquare,
       tone: "#2563EB",
       bg: "#EFF4FF",
@@ -614,16 +668,29 @@ export default function Overview() {
             spark: resSpark,
           },
         ]
-      : []),
+      : [
+          {
+            key: "res",
+            label: "Resolution Rate",
+            value: "—",
+            icon: CheckCircle2,
+            tone: "#0891B2",
+            bg: "#ECFEFF",
+            foot: "Not measured",
+          },
+        ]),
     {
       key: "agents",
       label: "Active Agents",
-      value: `${activeAgents}`,
+      value:
+        agentsAvailable || totals?.active_agents != null
+          ? `${activeAgents}`
+          : "—",
       sub: agentCount ? `/ ${agentCount}` : undefined,
       icon: Bot,
       tone: "#0891B2",
       bg: "#ECFEFF",
-      foot: `${agentCount} total`,
+      foot: agentsAvailable ? `${agentCount} total` : "Unavailable",
       spark: agentsSpark,
     },
     ...(revenue != null
@@ -650,35 +717,62 @@ export default function Overview() {
               spark: msgSpark,
             },
           ]
-        : []),
+        : [
+            {
+              key: "msg",
+              label: "Messages",
+              value: "—",
+              icon: Activity,
+              tone: "#F59E0B",
+              bg: "#FFF7ED",
+              foot: "Not measured",
+            },
+          ]),
   ];
 
   return (
-    <div className="space-y-6" data-testid="dashboard-overview">
+    <div
+      className="dashboard-content flex flex-col gap-5 [&_h2]:text-[18px] [&_h2]:font-semibold [&_.shadow-card]:shadow-none [&_.rounded-2xl]:rounded-lg"
+      data-testid="dashboard-overview"
+    >
+      <div className="flex items-center gap-2 text-xs text-sub">
+        HOME <span>/</span>{" "}
+        <strong className="font-semibold text-ink">DASHBOARD</strong>
+      </div>
+      {(!agentsAvailable || !analyticsAvailable) && (
+        <p
+          className="rounded-xl border border-warning-soft bg-warning-soft px-4 py-3 text-sm text-warning-ink"
+          role="status"
+        >
+          Some workspace information could not be loaded. Refresh this page to
+          try again.
+        </p>
+      )}
       {/* Greeting header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-success-soft px-2.5 py-1 text-[12px] font-semibold text-success-ink">
-            <span className="size-1.5 rounded-full bg-success" /> All systems
-            operational
-          </span>
-          <h1 className="mt-3 text-[30px] font-extrabold tracking-tight text-ink sm:text-[34px]">
+          <h1 className="flex items-center gap-3 text-[26px] font-semibold tracking-tight text-ink sm:text-[28px]">
             {greeting}, {firstName}
+            <span className="size-2 rounded-full bg-brand" aria-hidden="true" />
           </h1>
           <p className="mt-1 text-[14.5px] text-sub">
             Here&apos;s what&apos;s happening in your workspace.
           </p>
 
           {/* Inline stat row */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[13.5px]">
+          <div className="sr-only">
             <span className="text-ink">
-              <span className="font-bold">{activeAgents}</span>{" "}
+              <span className="font-bold">
+                {agentsAvailable ? activeAgents : "Unavailable"}
+              </span>{" "}
               <span className="text-sub">AI agents active</span>
             </span>
             <span className="hidden h-4 w-px bg-stroke sm:block" />
             <span className="text-ink">
               <span className="font-bold">
-                {Number(conversations).toLocaleString()}
+                {conversations == null
+                  ? "Unavailable"
+                  : Number(conversations).toLocaleString()}
               </span>{" "}
               <span className="text-sub">conversations · {days}d</span>
             </span>
@@ -694,7 +788,19 @@ export default function Overview() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 [&_a]:min-h-11 [&_a]:rounded-md">
+          <label className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-3 text-[13px] text-body">
+            <select
+              aria-label="Date range"
+              value={days}
+              onChange={(event) => setDays(Number(event.target.value))}
+              className="bg-transparent py-2 focus-visible:outline-brand"
+            >
+              <option value={7}>Last 7 Days</option>
+              <option value={30}>Last 30 Days</option>
+              <option value={90}>Last 90 Days</option>
+            </select>
+          </label>
           <Link
             to="/app/conversations"
             className="inline-flex items-center gap-2 rounded-full border border-stroke bg-white px-4 py-2.5 text-[13.5px] font-semibold text-body transition-colors hover:bg-wash focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
@@ -711,6 +817,66 @@ export default function Overview() {
         </div>
       </div>
 
+      <section className="setup-panel rounded-lg border border-brand/20 bg-brand-soft/40 p-5">
+        <div className="flex flex-wrap items-center gap-3">
+          <CheckCircle2 size={20} className="text-brand" />
+          <h2>Complete your workspace setup</h2>
+          <span className="rounded border border-brand/20 bg-white px-2 py-1 text-xs text-brand">
+            {setupCompleted} of {setupSteps.length} steps completed
+          </span>
+        </div>
+        <p className="mt-2 text-sm text-sub">
+          Finish essential configuration to get your AI Chat workspace ready.
+        </p>
+        <div
+          className="my-4 h-1.5 overflow-hidden rounded-full bg-brand/10"
+          role="progressbar"
+          aria-label="Workspace setup"
+          aria-valuemin={0}
+          aria-valuemax={setupSteps.length}
+          aria-valuenow={setupCompleted}
+        >
+          <div
+            className="h-full bg-brand"
+            style={{ width: `${(setupCompleted / setupSteps.length) * 100}%` }}
+          />
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {setupSteps.map((step) => (
+            <Link
+              key={step.title}
+              to={step.to}
+              className="flex min-h-[78px] items-start gap-3 rounded-md border border-line bg-white p-4 focus-visible:outline-brand"
+            >
+              {step.done ? (
+                <CheckCircle2 size={18} className="shrink-0 text-success" />
+              ) : (
+                <step.icon size={18} className="shrink-0 text-brand" />
+              )}
+              <div>
+                <strong className="block text-sm font-semibold text-ink">
+                  {step.title}
+                </strong>
+                <span className="mt-1 flex items-center gap-1 text-xs text-sub">
+                  {step.done == null
+                    ? "Status unavailable"
+                    : step.done
+                      ? "Completed"
+                      : "Get started"}
+                  {step.done === false && <ArrowRight size={13} />}
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-sub">
+        <span className="font-semibold">WORKSPACE PERFORMANCE</span>
+        <span>
+          Last {days} days ·{" "}
+          {analyticsAvailable ? "Workspace analytics" : "Analytics unavailable"}
+        </span>
+      </div>
       {/* KPI grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((kpi, i) => (
@@ -718,13 +884,13 @@ export default function Overview() {
         ))}
       </div>
 
-      {/* Trend + System status */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr]">
+      {/* Trend + account setup */}
+      <div className="order-1 grid grid-cols-1 gap-5">
         <div className="rounded-2xl border border-line bg-white p-5 shadow-card">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-[15px] font-bold text-ink">
-                Conversation Trend
+                Operational Performance &amp; Resolution Trends
               </h2>
               <p className="mt-0.5 text-[12.5px] text-faint">
                 {trendHasData
@@ -793,10 +959,14 @@ export default function Overview() {
                     <Activity size={20} />
                   </span>
                   <p className="mt-2 text-[13px] font-semibold text-ink">
-                    No conversations yet
+                    {analyticsAvailable
+                      ? "No conversations yet"
+                      : "Conversation trends unavailable"}
                   </p>
                   <p className="mt-0.5 text-[12px] text-sub">
-                    Trends appear once your agents start chatting.
+                    {analyticsAvailable
+                      ? "Trends appear once your agents start chatting."
+                      : "Refresh this page to try again."}
                   </p>
                 </div>
               </div>
@@ -804,48 +974,42 @@ export default function Overview() {
           </div>
         </div>
 
-        {/* System status */}
+        {/* Workspace setup signals */}
         <div className="rounded-2xl border border-line bg-white shadow-card">
           <div className="flex items-center justify-between border-b border-hairline px-5 py-4">
             <div>
-              <h2 className="text-[15px] font-bold text-ink">System Status</h2>
+              <h2 className="text-[15px] font-bold text-ink">
+                Workspace Setup
+              </h2>
               <p className="mt-0.5 text-[12.5px] text-faint">
-                Live workspace signals
+                Based on your saved agents and knowledge
               </p>
             </div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-success-soft px-2.5 py-1 text-[11.5px] font-semibold text-success-ink">
-              <span className="size-1.5 rounded-full bg-success" /> Operational
-            </span>
           </div>
           <ul className="divide-y divide-hairline">
             <StatusRow
               icon={Bot}
               tone="#2563EB"
               label="AI Agents"
-              healthy={agentCount > 0}
+              hasItems={agentsAvailable ? agentCount > 0 : null}
               stats={[
-                { label: "Online", value: `${activeAgents}/${agentCount}` },
-                { label: "Total", value: agentCount },
+                {
+                  label: "Online",
+                  value: agentsAvailable
+                    ? `${activeAgents}/${agentCount}`
+                    : null,
+                },
+                { label: "Total", value: agentsAvailable ? agentCount : null },
               ]}
             />
             <StatusRow
               icon={BookOpen}
               tone="#0EA5E9"
               label="Knowledge Base"
-              healthy={knowledgeCount > 0}
+              hasItems={knowledgeCount == null ? null : knowledgeCount > 0}
               stats={[
                 { label: "Sources", value: knowledgeCount },
                 { label: "Docs", value: documents },
-              ]}
-            />
-            <StatusRow
-              icon={WorkflowIcon}
-              tone="#0891B2"
-              label="Workflows"
-              healthy={(workflowRuns ?? 0) > 0}
-              stats={[
-                { label: "Runs", value: workflowRuns ?? 0 },
-                { label: "Failures", value: workflowFailures },
               ]}
             />
           </ul>
@@ -854,7 +1018,7 @@ export default function Overview() {
 
       {/* Needs your attention */}
       {attention.length > 0 && (
-        <div className="rounded-2xl border border-line bg-white p-5 shadow-card">
+        <div className="attention-panel rounded-lg border border-warning-soft bg-warning-soft/20 p-5">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-[15px] font-bold text-ink">
@@ -869,7 +1033,7 @@ export default function Overview() {
             {attention.map((a) => (
               <div
                 key={a.title}
-                className="flex flex-col rounded-xl border border-line bg-subtle p-4"
+                className="flex min-h-[190px] flex-col rounded-md border border-line bg-white p-4"
               >
                 <span
                   className="grid size-9 place-items-center rounded-xl"
@@ -894,7 +1058,7 @@ export default function Overview() {
       )}
 
       {/* Top agents + Recent activity */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr]">
+      <div className="order-2 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-line bg-white shadow-card">
           <div className="flex items-center justify-between border-b border-hairline px-5 py-4">
             <div>
@@ -992,7 +1156,9 @@ export default function Overview() {
           ) : (
             <div className="px-5 py-10 text-center">
               <p className="text-[13px] font-semibold text-ink">
-                No agents to rank yet
+                {agentsAvailable
+                  ? "No agents to rank yet"
+                  : "Agent rankings unavailable"}
               </p>
               <p className="mt-0.5 text-[12px] text-sub">
                 Create an agent to see performance here.
@@ -1037,7 +1203,9 @@ export default function Overview() {
           ) : (
             <div className="px-5 py-10 text-center">
               <p className="text-[13px] font-semibold text-ink">
-                Nothing recent
+                {agentsAvailable
+                  ? "Nothing recent"
+                  : "Recent activity unavailable"}
               </p>
               <p className="mt-0.5 text-[12px] text-sub">
                 Activity from your agents shows here.
@@ -1054,7 +1222,7 @@ function QuickStart({ to, icon: Icon, tone, bg, title, desc }) {
   return (
     <Link
       to={to}
-      className="group flex flex-col rounded-2xl border border-[#E5E7EB] bg-white p-7 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.04)] transition-all hover:-translate-y-0.5 hover:border-[#BFD3F5] hover:shadow-cardhover"
+      className="group flex flex-col rounded-lg border border-line bg-white p-5 transition-colors hover:border-brand/40 focus-visible:outline-brand"
     >
       <span
         className="grid size-[52px] place-items-center rounded-xl"

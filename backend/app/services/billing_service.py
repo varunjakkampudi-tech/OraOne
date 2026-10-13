@@ -183,7 +183,14 @@ async def ensure_plans_seeded(session: AsyncSession) -> int:
         existing = await session.scalar(select(Plan).where(Plan.code == spec["code"]))
         if existing is not None:
             if FREE_ACCESS_ONLY and spec["code"] == PlanCode.free:
-                for field in ("name", "description", "price_cents", "price_cents_yearly", "features", "limits"):
+                for field in (
+                    "name",
+                    "description",
+                    "price_cents",
+                    "price_cents_yearly",
+                    "features",
+                    "limits",
+                ):
                     if getattr(existing, field) != spec[field]:
                         setattr(existing, field, spec[field])
                         changed = True
@@ -205,7 +212,9 @@ async def ensure_plans_seeded(session: AsyncSession) -> int:
         created += 1
     if created or changed:
         await session.commit()
-        log.info("synchronised billing catalogue: created=%d changed=%s", created, changed)
+        log.info(
+            "synchronised billing catalogue: created=%d changed=%s", created, changed
+        )
     return created
 
 

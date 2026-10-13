@@ -128,7 +128,7 @@ function Sparkline({ data, color }) {
 
 function KpiCard({ label, value, icon: Icon, tone, spark, hint }) {
   return (
-    <div className="p-5 rounded-2xl bg-white border border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)]">
+    <div className="p-5 rounded-lg bg-white border border-[#E7EAF1] ">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 min-w-0">
           <div
@@ -154,7 +154,7 @@ function KpiCard({ label, value, icon: Icon, tone, spark, hint }) {
 function Panel({ title, action, children, className = "" }) {
   return (
     <div
-      className={`p-6 rounded-2xl bg-white border border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)] ${className}`}
+      className={`p-6 rounded-lg bg-white border border-[#E7EAF1] ${className}`}
     >
       <div className="flex items-center justify-between">
         <h3 className="text-base font-semibold text-[#0F172A]">{title}</h3>
@@ -710,7 +710,7 @@ function OverviewTab({ days }) {
         ].map((s) => (
           <div
             key={s.label}
-            className="p-4 rounded-2xl bg-white border border-[#E2E8F0] flex items-center gap-3"
+            className="p-4 rounded-lg bg-white border border-[#E2E8F0] flex items-center gap-3"
           >
             <div className="size-9 rounded-xl bg-[#EEF2FF] grid place-items-center text-[#4F46E5]">
               <s.icon size={16} />
@@ -1264,7 +1264,7 @@ function AgentsTab({ days }) {
           icon={Bot}
           tone="#2563EB"
         />
-        <div className="p-5 rounded-2xl bg-white border border-[#E2E8F0]">
+        <div className="p-5 rounded-lg bg-white border border-[#E2E8F0]">
           <p className="text-[12px] text-[#64748B] mb-2">By Status</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(data?.breakdowns?.by_status || {}).map(

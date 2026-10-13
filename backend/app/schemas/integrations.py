@@ -71,11 +71,11 @@ class IntegrationListResponse(BaseModel):
 
 class ConnectRequest(BaseModel):
     provider: str = Field(..., min_length=1, max_length=60)
-    # OAuth authorization code (real flow). Absent → mock connect in dev.
+    # OAuth authorization code for the callback leg of a real flow.
     code: Optional[str] = None
     # Non-sensitive settings (e.g. selected Drive folder id).
     config: Optional[dict[str, Any]] = None
-    # Force mock mode regardless of provider config (used by tests/dev).
+    # Explicitly request a mock; the API permits this only in local/test envs.
     mock: bool = False
 
 

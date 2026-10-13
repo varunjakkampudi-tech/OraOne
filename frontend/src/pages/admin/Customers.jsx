@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Users,
   X,
@@ -60,8 +61,17 @@ function CustomerDrawer({ id, onClose }) {
         </div>
         {loading ? (
           <LoadingState />
-        ) : error ? (
-          <ErrorState message={error} onRetry={reload} />
+        ) : error ||
+          (data &&
+            (!data.counts ||
+              !Array.isArray(data.members) ||
+              !Array.isArray(data.recent_conversations))) ? (
+          <ErrorState
+            message={
+              error || "Customer details could not be loaded. Please retry."
+            }
+            onRetry={reload}
+          />
         ) : !data ? (
           <EmptyState />
         ) : (
@@ -185,13 +195,20 @@ function CustomerDrawer({ id, onClose }) {
 }
 
 export default function AdminCustomers() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useAdminTheme();
-  const [q, setQ] = useState("");
-  const [active, setActive] = useState("");
+  const [q, setQ] = useState(searchParams.get("q") || "");
+  const [active, setActive] = useState(
+    () => searchParams.get("customer") || "",
+  );
   const { data, loading, error, reload } = useAdminData(
     () => superAdminApi.customers({ q: q || undefined, limit: 100 }),
     [q],
   );
+
+  useEffect(() => {
+    setActive(searchParams.get("customer") || "");
+  }, [searchParams]);
 
   const columns = [
     {
@@ -250,7 +267,7 @@ export default function AdminCustomers() {
   ];
 
   return (
-    <div>
+    <div className="space-y-1">
       <PageHeader
         icon={Users}
         title="Customers"
@@ -277,7 +294,10 @@ export default function AdminCustomers() {
           <Table
             columns={columns}
             rows={data?.items}
-            onRowClick={(r) => setActive(r.id)}
+            onRowClick={(r) => {
+              setActive(r.id);
+              setSearchParams({ customer: String(r.id) });
+            }}
             empty={
               <EmptyState
                 icon={Search}
@@ -289,7 +309,13 @@ export default function AdminCustomers() {
         </>
       )}
       {active ? (
-        <CustomerDrawer id={active} onClose={() => setActive("")} />
+        <CustomerDrawer
+          id={active}
+          onClose={() => {
+            setActive("");
+            setSearchParams({});
+          }}
+        />
       ) : null}
     </div>
   );

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
 from urllib.parse import urljoin
 
 import requests
@@ -28,6 +29,12 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
     parser.add_argument("--timeout", type=float, default=10)
+    parser.add_argument(
+        "--delay",
+        type=float,
+        default=0.6,
+        help="Seconds between probes to respect shared rate limits",
+    )
     args = parser.parse_args()
 
     base = args.base_url.rstrip("/") + "/"
@@ -52,9 +59,18 @@ def main() -> int:
             urljoin(base, _probe_path(path).lstrip("/")),
             timeout=args.timeout,
         )
+        if response.status_code == 429:
+            wait = min(60, max(1, int(response.headers.get("Retry-After", "60"))))
+            time.sleep(wait)
+            response = requests.request(
+                method,
+                urljoin(base, _probe_path(path).lstrip("/")),
+                timeout=args.timeout,
+            )
         counts[response.status_code] = counts.get(response.status_code, 0) + 1
-        if response.status_code >= 500:
+        if response.status_code >= 500 or response.status_code == 429:
             failures.append(f"{method} {path} -> {response.status_code}")
+        time.sleep(max(0, args.delay))
 
     print(f"Probed {len(probes)} safe API routes; statuses={counts}")
     if failures:

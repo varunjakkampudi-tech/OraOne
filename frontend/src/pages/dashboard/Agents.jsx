@@ -17,6 +17,10 @@ import {
   Cpu,
   Clock,
   Code2,
+  Search,
+  LayoutGrid,
+  List,
+  ArrowRight,
 } from "lucide-react";
 import { formatApiError } from "@/lib/api";
 import { toast } from "sonner";
@@ -99,8 +103,11 @@ const EMPTY_AGENTS = [];
 export default function Agents() {
   const nav = useNavigate();
   const [active, setActive] = useState(null);
+  const [view, setView] = useState("grid");
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
-  const { data, isLoading } = useAgents();
+  const { data, isLoading, error, refetch } = useAgents();
   const agents = data?.items || EMPTY_AGENTS;
 
   const updateAgent = useUpdateAgent();
@@ -332,15 +339,167 @@ export default function Agents() {
   return (
     <>
       <EntityListPage
-        eyebrow="Build"
-        title="AI Agents"
-        subtitle="Manage, customize, and monitor your AI agents."
+        eyebrow="AI Chat"
+        title="AI assistants"
+        subtitle="Create purposeful assistants, connect their knowledge, and manage their website experience."
         icon={Bot}
         loading={isLoading}
+        error={
+          error
+            ? formatApiError(error.response?.data?.detail) ||
+              "Assistants could not be loaded."
+            : null
+        }
+        onRetry={refetch}
+        actions={
+          <>
+            <div
+              className="inline-flex rounded-lg border border-line bg-white p-1"
+              aria-label="Assistant view"
+            >
+              <button
+                type="button"
+                aria-label="Card view"
+                aria-pressed={view === "grid"}
+                onClick={() => setView("grid")}
+                className={cx(
+                  "grid size-9 place-items-center rounded-md",
+                  view === "grid" ? "bg-brand-soft text-brand" : "text-sub",
+                )}
+              >
+                <LayoutGrid size={17} />
+              </button>
+              <button
+                type="button"
+                aria-label="Table view"
+                aria-pressed={view === "table"}
+                onClick={() => setView("table")}
+                className={cx(
+                  "grid size-9 place-items-center rounded-md",
+                  view === "table" ? "bg-brand-soft text-brand" : "text-sub",
+                )}
+              >
+                <List size={17} />
+              </button>
+            </div>
+            <PrimaryButton as={Link} to="/app/agents/new">
+              <Plus size={16} />
+              Create assistant
+            </PrimaryButton>
+          </>
+        }
         rows={agents}
         columns={columns}
         rowKey={(a) => a.id}
-        stats={statStrip}
+        stats={view === "table" ? statStrip : null}
+        renderContent={
+          view === "grid"
+            ? (rows) => {
+                const filtered = rows.filter(
+                  (agent) =>
+                    (!statusFilter || agent.status === statusFilter) &&
+                    [agent.name, agent.description, agent.model].some((value) =>
+                      String(value || "")
+                        .toLowerCase()
+                        .includes(query.toLowerCase()),
+                    ),
+                );
+                return (
+                  <div className="space-y-5">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <label className="relative block w-full sm:max-w-sm">
+                        <span className="sr-only">Search assistants</span>
+                        <Search
+                          size={17}
+                          className="absolute left-3 top-3 text-faint"
+                        />
+                        <input
+                          value={query}
+                          onChange={(event) => setQuery(event.target.value)}
+                          placeholder="Search assistants"
+                          className="h-11 w-full rounded-lg border border-line bg-white pl-10 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                        />
+                      </label>
+                      <select
+                        aria-label="Assistant status"
+                        value={statusFilter}
+                        onChange={(event) =>
+                          setStatusFilter(event.target.value)
+                        }
+                        className="h-11 rounded-lg border border-line bg-white px-3 text-sm"
+                      >
+                        <option value="">All assistants</option>
+                        {["draft", "active", "paused", "archived"].map(
+                          (status) => (
+                            <option key={status} value={status}>
+                              {STATUS_META[status].label}
+                            </option>
+                          ),
+                        )}
+                      </select>
+                    </div>
+                    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                      {filtered.map((agent) => (
+                        <article
+                          key={agent.id}
+                          className="flex min-w-0 flex-col rounded-lg border border-line bg-white p-6"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <span className="grid size-11 place-items-center rounded-lg bg-brand-soft text-brand">
+                              <Bot size={23} />
+                            </span>
+                            <StatusBadge status={agent.status} />
+                          </div>
+                          <h2 className="mt-5 truncate text-lg font-semibold text-ink">
+                            {agent.name}
+                          </h2>
+                          <p className="mt-2 min-h-12 text-sm leading-relaxed text-sub">
+                            {agent.description ||
+                              "Configure this assistant’s purpose, instructions and knowledge."}
+                          </p>
+                          <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-hairline pt-4 text-xs text-sub">
+                            <span className="inline-flex items-center gap-1.5">
+                              <Cpu size={13} />
+                              {agent.model || "Model not selected"}
+                            </span>
+                            <span className="inline-flex items-center gap-1.5">
+                              <Clock size={13} />
+                              {fmtRelative(agent.updated_at)}
+                            </span>
+                          </div>
+                          <div className="mt-5 flex items-center gap-2">
+                            <Link
+                              to={"/app/agents/" + agent.id}
+                              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold text-ink hover:bg-canvas"
+                            >
+                              Manage assistant <ArrowRight size={15} />
+                            </Link>
+                            <button
+                              type="button"
+                              aria-label={"View details for " + agent.name}
+                              onClick={() => setActive(agent)}
+                              className="grid size-11 place-items-center rounded-lg border border-line text-sub hover:bg-canvas"
+                            >
+                              <ExternalLink size={17} />
+                            </button>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                    {filtered.length === 0 && (
+                      <p className="rounded-lg border border-dashed border-line bg-white px-5 py-10 text-center text-sm text-sub">
+                        No assistants match these filters. Change your search or
+                        status.
+                      </p>
+                    )}
+                    <p className="text-xs text-sub">
+                      {filtered.length} shown · {rows.length} loaded assistants
+                    </p>
+                  </div>
+                );
+              }
+            : undefined
+        }
         skeletonCols={6}
         search
         searchKeys={["name", "model"]}

@@ -50,9 +50,9 @@ class ProviderSpec:
     icon: str = "Plug"  # lucide-react icon name for the UI
     color: str = "#2563EB"
     description: str = ""
-    # ``available`` = real connector ready to fully implement; others are
-    # registered + connectable in mock mode (so the platform is complete
-    # end-to-end) and flagged "Coming soon" in the UI for real OAuth.
+    # ``available`` = real connector is implemented for provider auth/sync;
+    # other providers are catalog-only. Explicit mock connections exist only
+    # for isolated local/test workflows and never represent a real connection.
     available: bool = False
 
 

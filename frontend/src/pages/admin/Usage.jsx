@@ -46,8 +46,13 @@ export default function AdminUsage() {
       />
       {loading ? (
         <LoadingState />
-      ) : error ? (
-        <ErrorState message={error} onRetry={reload} />
+      ) : error ||
+        !Array.isArray(data?.totals) ||
+        !Array.isArray(data?.top_organizations) ? (
+        <ErrorState
+          message={error || "Usage data could not be loaded. Please retry."}
+          onRetry={reload}
+        />
       ) : (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           <Glass className="p-5">

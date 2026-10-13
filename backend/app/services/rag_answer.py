@@ -10,6 +10,7 @@ chunks so the endpoint never hard-fails.
 from __future__ import annotations
 
 import logging
+import os
 import re
 import time
 import uuid
@@ -22,6 +23,12 @@ from app.services import rag_service
 from app.services import model_router_service
 
 log = logging.getLogger("app.rag.answer")
+
+
+def _effective_model(model=None):
+    """Honor the operator's model pin for every inference in this flow."""
+    return os.getenv("AI_FORCE_MODEL", "").strip() or model or DEFAULT_MODEL
+
 
 _SYSTEM = (
     "You are OraOne, an enterprise knowledge assistant. Answer the user's "
@@ -72,16 +79,20 @@ async def answer_query(
         log.warning("retrieval config load failed (%s); using defaults.", e)
         _rcfg = {}
 
-    chunks = await rag_service.hybrid_search(
-        session,
-        query,
-        organization_id,
-        knowledge_base_ids=knowledge_base_ids,
-        top_k=top_k,
-        source_types=source_types,
-        rerank=_rcfg.get("hybrid_enabled"),
-        reranker=_rcfg.get("reranker"),
-        rerank_top_n=_rcfg.get("rerank_top_n", rag_service.RERANK_TOP_N),
+    chunks = (
+        []
+        if knowledge_base_ids == []
+        else await rag_service.hybrid_search(
+            session,
+            query,
+            organization_id,
+            knowledge_base_ids=knowledge_base_ids,
+            top_k=top_k,
+            source_types=source_types,
+            rerank=_rcfg.get("hybrid_enabled"),
+            reranker=_rcfg.get("reranker"),
+            rerank_top_n=_rcfg.get("rerank_top_n", rag_service.RERANK_TOP_N),
+        )
     )
     sources = rag_service.dedupe_sources(chunks)
     confidence = rag_service.compute_confidence(chunks, query)
@@ -118,7 +129,7 @@ async def answer_query(
 
     context = rag_service.build_context(chunks, max_chars=6000)
     grounded = True
-    used_model = model or DEFAULT_MODEL
+    used_model = _effective_model(model)
     latency_ms = 0
     prompt_tokens = 0
     completion_tokens = 0
@@ -190,7 +201,7 @@ async def answer_query(
         grounded = False
         used_model = None
 
-    related = await _related_questions(query, chunks, grounded)
+    related = await _related_questions(query, chunks, grounded, model=model)
 
     return {
         "answer": answer,
@@ -253,7 +264,7 @@ async def _persona_only_answer(
         _t0 = time.perf_counter()
         resp = await provider.chat(
             messages,
-            model=model or DEFAULT_MODEL,
+            model=_effective_model(model),
             temperature=temperature,
             max_tokens=max_tokens,
         )
@@ -301,7 +312,7 @@ def _extractive_answer(chunks: list[rag_service.RetrievedChunk]) -> str:
     return "".join(parts)
 
 
-async def _related_questions(query, chunks, grounded) -> list[str]:
+async def _related_questions(query, chunks, grounded, *, model=None) -> list[str]:
     """LLM-suggested follow-ups, with a deterministic fallback."""
     if grounded:
         try:
@@ -321,7 +332,7 @@ async def _related_questions(query, chunks, grounded) -> list[str]:
                         role="user", content=f"Topic: {query}\nSources: {titles}"
                     ),
                 ],
-                model=DEFAULT_MODEL,
+                model=_effective_model(model),
                 temperature=0.5,
                 max_tokens=120,
             )

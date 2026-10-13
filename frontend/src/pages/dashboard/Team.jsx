@@ -106,7 +106,18 @@ export default function Team() {
     ]);
     if (m.status === "fulfilled") setMembers(m.value.data.items || []);
     if (i.status === "fulfilled") setInvitations(i.value.data.items || []);
-    if (x.status === "fulfilled") setMatrix(x.value.data);
+    if (x.status === "fulfilled") {
+      const candidate = x.value.data;
+      const hasRoles =
+        candidate?.roles &&
+        typeof candidate.roles === "object" &&
+        !Array.isArray(candidate.roles);
+      setMatrix(
+        hasRoles && Array.isArray(candidate?.permissions) ? candidate : null,
+      );
+    } else {
+      setMatrix(null);
+    }
     setLoading(false);
   }, []);
 
@@ -241,15 +252,15 @@ export default function Team() {
   };
 
   return (
-    <div className="space-y-8" data-testid="team-page">
+    <div
+      className="space-y-5 [&_.rounded-2xl]:rounded-lg [&_td]:text-sm [&_td]:py-3 [&_select]:min-h-9 [&_button]:focus-visible:outline-brand"
+      data-testid="team-page"
+    >
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[12px] font-semibold tracking-[0.18em] text-[#2563EB] uppercase">
-            Team &amp; Permissions
-          </p>
-          <h1 className="mt-1 text-2xl sm:text-3xl font-black text-[#0F172A]">
-            Manage who can do what.
+          <h1 className="text-[28px] font-semibold tracking-tight text-ink">
+            Team &amp; Access
           </h1>
           <p className="mt-1 text-sm text-[#64748B]">
             Role-based access control, invitations and member management.
@@ -259,7 +270,7 @@ export default function Team() {
           <button
             onClick={() => setShowInvite(true)}
             data-testid="invite-cta"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-semibold shadow-[0_8px_20px_-6px_rgba(37,99,235,0.5)] transition-colors"
+            className="inline-flex min-h-11 items-center gap-2 px-4 py-2 rounded-md bg-brand hover:bg-brand-hover text-white text-sm font-semibold transition-colors"
           >
             <UserPlus size={15} /> Invite Member
           </button>
@@ -271,30 +282,27 @@ export default function Team() {
         className="grid grid-cols-2 lg:grid-cols-4 gap-4"
         data-testid="team-stats"
       >
-        {stats.map((s, i) => (
-          <motion.div
+        {stats.map((s) => (
+          <div
             key={s.key}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="p-5 rounded-2xl border border-[#E2E8F0] bg-white hover:shadow-premium transition-all"
+            className="p-4 rounded-lg border border-line bg-white"
             data-testid={`team-stat-${s.key}`}
           >
             <div className="flex items-center justify-between">
               <span
-                className="size-10 rounded-xl grid place-items-center"
+                className="size-8 rounded-md grid place-items-center"
                 style={{ background: s.bg }}
               >
                 <s.icon size={17} style={{ color: s.tone }} />
               </span>
             </div>
-            <p className="mt-3 text-3xl font-black text-[#0F172A] tabular-nums">
+            <p className="mt-3 text-[28px] font-semibold text-ink tabular-nums">
               {s.value}
             </p>
             <p className="text-[12.5px] text-[#0F172A] font-semibold mt-1">
               {s.label}
             </p>
-          </motion.div>
+          </div>
         ))}
       </div>
 
@@ -304,7 +312,7 @@ export default function Team() {
         subtitle="Everyone with access to your workspace"
         icon={Users}
       >
-        <div className="rounded-2xl border border-[#E2E8F0] bg-white overflow-hidden">
+        <div className="data-table team-table rounded-lg border border-line bg-white overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3.5 border-b border-[#E2E8F0] bg-[#F8FAFC]">
             <div className="relative max-w-xs w-full">
               <Search
@@ -317,18 +325,18 @@ export default function Team() {
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search by name or email…"
                 data-testid="team-search"
-                className="w-full pl-8 pr-3 py-2 rounded-lg border border-[#E2E8F0] bg-white text-sm placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10"
+                className="min-h-11 w-full pl-8 pr-3 py-2 rounded-md border border-line bg-white text-sm placeholder:text-faint focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
               />
             </div>
-            <p className="text-[11.5px] text-[#64748B]">
+            <p className="text-xs text-sub">
               {filtered.length} of {members.length} members
             </p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="border-b border-[#E2E8F0]">
+              <thead className="border-b border-line bg-subtle">
                 <tr>
-                  <Th>Member</Th>
+                  <Th>Team member</Th>
                   <Th>Role</Th>
                   <Th>Status</Th>
                   <Th>Joined</Th>
@@ -368,7 +376,7 @@ export default function Team() {
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
                             <span
-                              className="size-9 rounded-full grid place-items-center text-white text-[12px] font-bold"
+                              className="size-9 shrink-0 rounded-lg grid place-items-center text-white text-xs font-semibold"
                               style={{ background: colorFor(m.user_id) }}
                             >
                               {initialsOf(m.full_name, m.email)}
@@ -394,7 +402,7 @@ export default function Team() {
                               value={m.role}
                               onChange={(e) => changeRole(m, e.target.value)}
                               data-testid={`member-role-${m.id}`}
-                              className="px-2 py-1 rounded-lg border border-[#E2E8F0] text-[12.5px] font-semibold text-[#0F172A] focus:border-[#2563EB] focus:outline-none"
+                              className="px-2 py-1 rounded-md border border-line bg-white text-sm font-medium text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
                             >
                               {ASSIGNABLE.map((r) => (
                                 <option key={r} value={r}>
@@ -427,7 +435,7 @@ export default function Team() {
                             <button
                               onClick={() => removeMember(m)}
                               data-testid={`member-remove-${m.id}`}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-semibold text-[#DC2626] hover:bg-[#FEE2E2]"
+                              className="inline-flex min-h-9 items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold text-[#DC2626] hover:bg-[#FEE2E2]"
                             >
                               <Trash2 size={12} /> Remove
                             </button>
@@ -554,7 +562,7 @@ export default function Team() {
                     return (
                       <th
                         key={r}
-                        className="px-5 py-3 text-center text-[11px] font-bold tracking-wider text-[#64748B] uppercase"
+                        className="px-5 py-3 text-center text-sm font-medium text-sub"
                       >
                         <span className="inline-flex items-center gap-1.5 justify-center">
                           <I size={12} />
@@ -582,7 +590,9 @@ export default function Team() {
             </table>
           ) : (
             <div className="px-5 py-8 text-center text-[13px] text-[#64748B]">
-              Loading permissions…
+              {loading
+                ? "Loading permissions…"
+                : "Permission data is unavailable. Refresh to try again."}
             </div>
           )}
         </div>
@@ -612,7 +622,8 @@ export default function Team() {
                 </h3>
                 <button
                   onClick={() => setShowInvite(false)}
-                  className="text-[#94A3B8] hover:text-[#0F172A]"
+                  aria-label="Close invitation"
+                  className="grid size-9 place-items-center rounded-md text-sub hover:bg-subtle hover:text-ink"
                 >
                   <X size={18} />
                 </button>
@@ -674,7 +685,7 @@ export default function Team() {
                   onClick={sendInvite}
                   disabled={sending}
                   data-testid="invite-submit"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-60 text-white text-sm font-semibold"
+                  className="inline-flex min-h-11 items-center gap-1.5 px-4 py-2 rounded-md bg-brand hover:bg-brand-hover disabled:opacity-60 text-white text-sm font-semibold"
                 >
                   {sending ? (
                     <Loader2 size={13} className="animate-spin" />
@@ -741,15 +752,13 @@ function PermCell({ on }) {
 function Section({ title, subtitle, icon: Icon, children }) {
   return (
     <section>
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-3">
         <span className="size-7 rounded-lg bg-[#EFF6FF] grid place-items-center">
           <Icon size={14} className="text-[#2563EB]" />
         </span>
         <div>
-          <h2 className="text-[15px] font-bold text-[#0F172A]">{title}</h2>
-          {subtitle && (
-            <p className="text-[11.5px] text-[#64748B]">{subtitle}</p>
-          )}
+          <h2 className="text-[18px] font-semibold text-ink">{title}</h2>
+          {subtitle && <p className="text-sm text-sub">{subtitle}</p>}
         </div>
       </div>
       {children}
@@ -759,7 +768,10 @@ function Section({ title, subtitle, icon: Icon, children }) {
 
 function Th({ children }) {
   return (
-    <th className="px-5 py-3 text-left text-[11px] font-bold tracking-wider text-[#64748B] uppercase whitespace-nowrap">
+    <th
+      scope="col"
+      className="px-5 py-3 text-left text-sm font-medium text-sub whitespace-nowrap"
+    >
       {children}
     </th>
   );

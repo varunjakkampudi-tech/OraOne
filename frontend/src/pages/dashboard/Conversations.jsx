@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   MessageSquare,
   MessageCircle,
@@ -110,6 +111,10 @@ const FILTERS = [
 /* ---------- Page ---------- */
 
 export default function Conversations() {
+  const { conversationId } = useParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedConversationId = conversationId || searchParams.get("c");
   const [conversations, setConversations] = useState([]);
   const [active, setActive] = useState(null);
   const [filter, setFilter] = useState("all");
@@ -121,14 +126,22 @@ export default function Conversations() {
   const [error, setError] = useState(null);
 
   // Fetch conversations from API
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await api.get("/v2/conversations");
       const data = (response.data || []).map(normalizeConv);
       setConversations(data);
-      if (data.length > 0) setActive(data[0]);
+      const requested = requestedConversationId
+        ? data.find(
+            (conversation) =>
+              String(conversation.id) === requestedConversationId,
+          )
+        : null;
+      setActive(
+        requested || (requestedConversationId ? null : (data[0] ?? null)),
+      );
     } catch (err) {
       const message =
         formatApiError(err.response?.data?.detail) ||
@@ -139,11 +152,11 @@ export default function Conversations() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [requestedConversationId]);
 
   useEffect(() => {
     loadConversations();
-  }, []);
+  }, [loadConversations]);
 
   // Distinct statuses present in the data, for the status filter menu.
   const statuses = useMemo(() => {
@@ -173,13 +186,15 @@ export default function Conversations() {
       <PageHeader
         eyebrow="Inbox"
         icon={MessageSquare}
-        title="Conversations"
+        title="Unified Inbox"
         subtitle="Live transcripts and conversation history across all channels."
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[428px_1fr] gap-6">
+      <div
+        className={`grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)] ${active ? "xl:grid-cols-[300px_minmax(0,1fr)_240px]" : ""}`}
+      >
         {/* ============ LEFT — list ============ */}
-        <div className="rounded-2xl bg-white border border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)] flex flex-col overflow-hidden">
+        <div className="rounded-lg bg-white border border-[#E2E8F0] flex flex-col overflow-hidden">
           {/* Channel filter chips */}
           <div className="p-3 border-b border-[#E2E8F0]">
             <div className="flex gap-2 overflow-x-auto scrollbar-thin">
@@ -320,83 +335,150 @@ export default function Conversations() {
                 </li>
               )
             ) : null}
-            {filtered.map((c) => {
-              const meta = CHANNEL[c.channel];
-              const Icon = meta.icon;
-              const sel = active?.id === c.id;
-              return (
-                <li
-                  key={c.id}
-                  onClick={() => setActive(c)}
-                  data-testid={`conv-${c.id}`}
-                  className={`relative p-4 cursor-pointer transition-colors border-b border-[#F1F5F9] ${
-                    sel ? "bg-[#EFF6FF]" : "hover:bg-[#F8FAFC]"
-                  }`}
-                >
-                  {sel && (
-                    <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#2563EB] rounded-r-full" />
-                  )}
-                  <div className="flex items-start gap-3">
-                    <div
-                      className="size-10 rounded-xl grid place-items-center shrink-0"
-                      style={{ background: meta.bg }}
-                    >
-                      <Icon size={16} style={{ color: meta.color }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-[13.5px] font-semibold text-[#0F172A] truncate">
-                          {c.name}
+            {filtered
+              .slice(
+                (Math.min(page, Math.max(1, Math.ceil(filtered.length / 20))) -
+                  1) *
+                  20,
+                Math.min(page, Math.max(1, Math.ceil(filtered.length / 20))) *
+                  20,
+              )
+              .map((c) => {
+                const meta = CHANNEL[c.channel];
+                const Icon = meta.icon;
+                const sel = active?.id === c.id;
+                return (
+                  <li
+                    key={c.id}
+                    onClick={() => {
+                      setActive(c);
+                      navigate(
+                        `/app/conversations/${encodeURIComponent(c.id)}`,
+                      );
+                    }}
+                    data-testid={`conv-${c.id}`}
+                    className={`relative p-4 cursor-pointer transition-colors border-b border-[#F1F5F9] ${
+                      sel ? "bg-[#EFF6FF]" : "hover:bg-[#F8FAFC]"
+                    }`}
+                  >
+                    {sel && (
+                      <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#2563EB] rounded-r-full" />
+                    )}
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="size-10 rounded-xl grid place-items-center shrink-0"
+                        style={{ background: meta.bg }}
+                      >
+                        <Icon size={16} style={{ color: meta.color }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-[13.5px] font-semibold text-[#0F172A] truncate">
+                            {c.name}
+                          </p>
+                          <span className="text-[11px] text-[#94A3B8] whitespace-nowrap">
+                            {c.time}
+                          </span>
+                        </div>
+                        <p className="text-[11.5px] text-[#64748B] mt-0.5 truncate">
+                          {c.phone} <span className="text-[#CBD5E1]">·</span>{" "}
+                          {meta.label}
                         </p>
-                        <span className="text-[11px] text-[#94A3B8] whitespace-nowrap">
-                          {c.time}
-                        </span>
-                      </div>
-                      <p className="text-[11.5px] text-[#64748B] mt-0.5 truncate">
-                        {c.phone} <span className="text-[#CBD5E1]">·</span>{" "}
-                        {meta.label}
-                      </p>
-                      <div className="mt-2 flex items-center gap-2 flex-wrap">
-                        <span
-                          className={`inline-block text-[10.5px] px-2 py-0.5 rounded-full border font-medium ${statusCls(
-                            c.statusRaw,
-                          )}`}
-                        >
-                          {c.statusLabel}
-                        </span>
-                        {c.msgCount > 0 && (
-                          <span className="inline-flex items-center gap-1 text-[10.5px] text-[#94A3B8]">
-                            <MessageSquare size={11} /> {c.msgCount}
+                        <div className="mt-2 flex items-center gap-2 flex-wrap">
+                          <span
+                            className={`inline-block text-[10.5px] px-2 py-0.5 rounded-full border font-medium ${statusCls(
+                              c.statusRaw,
+                            )}`}
+                          >
+                            {c.statusLabel}
                           </span>
-                        )}
-                        {c.tokens > 0 && (
-                          <span className="inline-flex items-center gap-1 text-[10.5px] text-[#94A3B8]">
-                            <Zap size={11} /> {fmtTokens(c.tokens)}
-                          </span>
-                        )}
-                        {c.cost > 0 && (
-                          <span className="inline-flex items-center gap-1 text-[10.5px] text-[#94A3B8]">
-                            {fmtCost(c.cost)}
-                          </span>
-                        )}
+                          {c.msgCount > 0 && (
+                            <span className="inline-flex items-center gap-1 text-[10.5px] text-[#94A3B8]">
+                              <MessageSquare size={11} /> {c.msgCount}
+                            </span>
+                          )}
+                          {c.tokens > 0 && (
+                            <span className="inline-flex items-center gap-1 text-[10.5px] text-[#94A3B8]">
+                              <Zap size={11} /> {fmtTokens(c.tokens)}
+                            </span>
+                          )}
+                          {c.cost > 0 && (
+                            <span className="inline-flex items-center gap-1 text-[10.5px] text-[#94A3B8]">
+                              {fmtCost(c.cost)}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </li>
-              );
-            })}
+                  </li>
+                );
+              })}
           </ul>
 
           {/* Pagination */}
           {filtered.length > 0 && (
             <div className="p-3 border-t border-[#E2E8F0] flex items-center justify-center gap-1 text-[12.5px]">
-              <Pager page={page} total={12} onChange={setPage} />
+              <Pager
+                page={Math.min(
+                  page,
+                  Math.max(1, Math.ceil(filtered.length / 20)),
+                )}
+                total={Math.max(1, Math.ceil(filtered.length / 20))}
+                onChange={setPage}
+              />
             </div>
           )}
         </div>
 
         {/* ============ RIGHT — conversation detail ============ */}
-        <ConversationPanel conv={active} />
+        {requestedConversationId && !active && !loading && !error ? (
+          <div
+            className="rounded-lg bg-white border border-[#E2E8F0] grid place-items-center min-h-[520px] p-6 text-sm text-[#64748B]"
+            data-testid="conversation-not-found"
+          >
+            This conversation is unavailable in the current workspace.
+          </div>
+        ) : (
+          <ConversationPanel conv={active} />
+        )}
+        {active && (
+          <aside
+            className="hidden min-w-0 self-start rounded-lg border border-[#E2E8F0] bg-white p-5 xl:block"
+            aria-label="Customer context"
+          >
+            <div className="grid size-12 place-items-center rounded-full bg-[#EFF6FF] text-[#2563EB]">
+              <User size={23} />
+            </div>
+            <h2 className="mt-4 break-words text-base font-semibold text-[#0F172A]">
+              {active.name}
+            </h2>
+            <p className="mt-1 break-all text-sm text-[#64748B]">
+              {active.customer_email ||
+                active.customer_phone ||
+                "Contact information not provided"}
+            </p>
+            <dl className="mt-6 space-y-4 text-sm">
+              {[
+                ["Status", active.statusLabel],
+                [
+                  "Channel",
+                  CHANNEL[active.channel]?.label ||
+                    active.channel ||
+                    "Not recorded",
+                ],
+                ["Started", active.date || "Not recorded"],
+                ["Assistant", active.agent_name || "Not recorded"],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <dt className="text-xs text-[#64748B]">{label}</dt>
+                  <dd className="mt-1 break-words font-medium text-[#334155]">
+                    {value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </aside>
+        )}
       </div>
     </div>
   );
@@ -405,48 +487,26 @@ export default function Conversations() {
 /* ---------- Pager ---------- */
 
 function Pager({ page, total, onChange }) {
-  const pages = [1, 2, 3, 4, 5];
   return (
     <>
       <button
-        onClick={() => page > 1 && onChange(page - 1)}
-        className="size-8 rounded-lg grid place-items-center hover:bg-[#F1F5F9] text-[#64748B] disabled:opacity-40"
-        disabled={page === 1}
+        onClick={() => onChange(page - 1)}
+        disabled={page <= 1}
         aria-label="Previous page"
+        className="grid size-9 place-items-center rounded-md border border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC] disabled:opacity-40"
       >
-        <ChevronLeft size={14} />
+        <ChevronLeft size={15} />
       </button>
-      {pages.map((n) => (
-        <button
-          key={n}
-          onClick={() => onChange(n)}
-          className={`size-8 rounded-lg font-semibold transition-colors ${
-            n === page
-              ? "bg-[#2563EB] text-white"
-              : "text-[#475569] hover:bg-[#F1F5F9]"
-          }`}
-        >
-          {n}
-        </button>
-      ))}
-      <span className="px-1 text-[#94A3B8]">...</span>
+      <span className="px-3 text-sm text-[#64748B]">
+        Page {page} of {total}
+      </span>
       <button
-        onClick={() => onChange(total)}
-        className={`size-8 rounded-lg font-semibold transition-colors ${
-          total === page
-            ? "bg-[#2563EB] text-white"
-            : "text-[#475569] hover:bg-[#F1F5F9]"
-        }`}
-      >
-        {total}
-      </button>
-      <button
-        onClick={() => page < total && onChange(page + 1)}
-        className="size-8 rounded-lg grid place-items-center hover:bg-[#F1F5F9] text-[#64748B] disabled:opacity-40"
-        disabled={page === total}
+        onClick={() => onChange(page + 1)}
+        disabled={page >= total}
         aria-label="Next page"
+        className="grid size-9 place-items-center rounded-md border border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC] disabled:opacity-40"
       >
-        <ChevronRight size={14} />
+        <ChevronRight size={15} />
       </button>
     </>
   );
@@ -461,6 +521,7 @@ function ConversationPanel({ conv }) {
   const [msgError, setMsgError] = useState(null);
 
   useEffect(() => {
+    setNote("");
     if (!conv?.id) {
       setMessages([]);
       return;
@@ -492,7 +553,7 @@ function ConversationPanel({ conv }) {
 
   if (!conv) {
     return (
-      <div className="rounded-2xl bg-white border border-[#E2E8F0] grid place-items-center min-h-[520px] p-6">
+      <div className="rounded-lg bg-white border border-[#E2E8F0] grid place-items-center min-h-[520px] p-6">
         <EmptyState
           testId="conv-panel-empty"
           dashed={false}
@@ -508,7 +569,7 @@ function ConversationPanel({ conv }) {
   const Icon = meta.icon;
 
   return (
-    <div className="rounded-2xl bg-white border border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)] flex flex-col overflow-hidden">
+    <div className="rounded-lg bg-white border border-[#E2E8F0] flex flex-col overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-[#E2E8F0] flex items-center gap-3">
         <div
@@ -624,15 +685,18 @@ function ConversationPanel({ conv }) {
           type="text"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Type a note..."
+          placeholder="Draft a note (not saved)..."
+          aria-label="Local draft note, not saved"
           data-testid="conv-note-input"
           className="flex-1 px-4 py-2.5 rounded-xl border border-[#E2E8F0] bg-white text-[13px] placeholder-[#94A3B8] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10"
         />
         <button
+          disabled
+          title="Saving conversation notes is not yet connected. This is a local draft."
           className="px-4 py-2.5 rounded-xl bg-[#EFF6FF] text-[#2563EB] text-[13px] font-semibold hover:bg-[#DBEAFE]"
           data-testid="conv-note-add"
         >
-          Add Note
+          Draft only
         </button>
       </div>
     </div>

@@ -593,10 +593,12 @@ async def _step_kb_query(
     query = _render(str(cfg.get("query", "")), context).strip()
     if not query:
         raise ValueError("kb_query step requires a 'query'.")
-    kb_ids_raw = cfg.get("knowledge_base_ids") or []
-    kb_ids: Optional[list[uuid.UUID]] = None
-    if kb_ids_raw:
-        kb_ids = [uuid.UUID(str(k)) for k in kb_ids_raw]
+    kb_ids_raw = cfg.get("knowledge_base_ids")
+    kb_ids: Optional[list[uuid.UUID]] = (
+        None
+        if kb_ids_raw is None
+        else [uuid.UUID(str(k)) for k in kb_ids_raw]
+    )
     top_k = int(cfg.get("top_k", 5))
 
     chunks = await rag_service.search_chunks(

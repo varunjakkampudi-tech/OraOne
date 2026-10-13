@@ -27,6 +27,13 @@ def configure_logging() -> None:
         return
     _configured = True
 
+    # Windows consoles can retain a legacy encoding; diagnostic Unicode must
+    # never prevent a log record from being emitted.
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(errors="backslashreplace")
+
     level_name = os.environ.get("LOG_LEVEL", "INFO").upper()
     level = getattr(logging, level_name, logging.INFO)
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -78,6 +79,7 @@ function ProviderGlyph({ entry, size = 20 }) {
 }
 
 export default function Integrations() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -103,12 +105,36 @@ export default function Integrations() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    const requestedProvider = searchParams.get("provider");
+    const requestedIntegration = searchParams.get("integration");
+    const requested = requestedProvider || requestedIntegration;
+    if (
+      requested &&
+      entries.some(
+        (entry) =>
+          entry.catalog.provider === requested ||
+          String(entry.integration?.id) === requested,
+      )
+    ) {
+      const match = entries.find(
+        (entry) =>
+          entry.catalog.provider === requested ||
+          String(entry.integration?.id) === requested,
+      );
+      setSelected(match.catalog.provider);
+      const params = new URLSearchParams(searchParams);
+      params.delete("integration");
+      params.delete("provider");
+      setSearchParams(params, { replace: true });
+    }
+  }, [entries, searchParams, setSearchParams]);
+
   // Handle the OAuth round-trip: the provider callback bounces the browser
   // back here with ?connected=<provider> or ?error=<reason>.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const connected = params.get("connected");
-    const error = params.get("error");
+    const connected = searchParams.get("connected");
+    const error = searchParams.get("error");
     if (!connected && !error) return;
     if (connected) {
       toast.success("Connected — start a sync to import documents.");
@@ -123,9 +149,12 @@ export default function Integrations() {
       toast.error(labels[error] || `Connection failed (${error}).`);
     }
     // Strip the query params so a refresh doesn't re-fire the toast.
-    window.history.replaceState({}, "", window.location.pathname);
+    const params = new URLSearchParams(searchParams);
+    params.delete("connected");
+    params.delete("error");
+    setSearchParams(params, { replace: true });
     load();
-  }, [load]);
+  }, [load, searchParams, setSearchParams]);
 
   const setProviderBusy = (provider, v) =>
     setBusy((p) => ({ ...p, [provider]: v }));
@@ -227,8 +256,8 @@ export default function Integrations() {
       <PageHeader
         eyebrow="Integrations"
         icon={Plug}
-        title="The AI layer over your business apps."
-        subtitle="Connect your tools, sync their content into your Knowledge Base, and let AI answer from everything."
+        title="Integrations"
+        subtitle="Connect your business tools and manage the sources available to your assistants."
         actions={
           <GhostButton onClick={load} data-testid="refresh-status">
             <RefreshCw size={13} /> Refresh
@@ -251,7 +280,7 @@ export default function Integrations() {
               return (
                 <div
                   key={e.catalog.provider}
-                  className="p-4 rounded-2xl border border-[#E7EAF1] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)] hover:shadow-premium transition-all cursor-pointer"
+                  className="p-4 rounded-lg border border-[#E7EAF1] bg-white hover:border-[#2563EB]/30 transition-colors cursor-pointer"
                   onClick={() => setSelected(e.catalog.provider)}
                   data-testid={`health-${e.catalog.provider}`}
                 >
@@ -283,7 +312,7 @@ export default function Integrations() {
         subtitle={`${entries.length} integrations · ${connected.length} connected`}
         icon={Plug}
       >
-        <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 sm:p-5">
+        <div className="rounded-lg border border-[#E2E8F0] bg-white p-4 sm:p-5">
           <div className="flex flex-wrap items-center gap-3 mb-5">
             <div className="relative flex-1 min-w-[220px]">
               <Search
@@ -336,11 +365,11 @@ export default function Integrations() {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     data-testid={`int-card-${e.catalog.provider}`}
-                    className="text-left p-5 rounded-2xl border border-[#E7EAF1] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)] hover:border-[#2563EB]/40 hover:shadow-premium transition-all relative"
+                    className="text-left p-5 rounded-lg border border-[#E7EAF1] bg-white hover:border-[#2563EB]/40 hover:border-[#2563EB]/30 transition-colors relative"
                   >
                     {!e.catalog.available && (
                       <span className="absolute top-3 right-3 text-[10px] font-bold tracking-wider text-[#92400E] bg-[#FEF3C7] px-1.5 py-0.5 rounded-full">
-                        DEMO MODE
+                        COMING SOON
                       </span>
                     )}
                     <div className="flex items-center justify-between">
@@ -572,8 +601,8 @@ function DetailDrawer({
             </p>
             {!catalog.available && (
               <p className="mt-3 text-[12px] text-[#92400E] bg-[#FEF3C7] rounded-lg px-3 py-2">
-                Runs in demo mode — connecting imports a small sample document
-                set so you can test end-to-end retrieval. Real OAuth ships next.
+                Live connection is not available yet. No sample documents or
+                connected status will be created for this provider.
               </p>
             )}
           </div>
@@ -607,7 +636,7 @@ function DetailDrawer({
           {!isConnected ? (
             <button
               onClick={onConnect}
-              disabled={busy}
+              disabled={busy || !catalog.available}
               data-testid="int-connect-cta"
               className="w-full px-4 py-3 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-60 text-white text-sm font-semibold inline-flex items-center justify-center gap-1.5"
             >
@@ -616,7 +645,7 @@ function DetailDrawer({
               ) : (
                 <Plug size={14} />
               )}
-              Connect {catalog.name}
+              {catalog.available ? `Connect ${catalog.name}` : "Coming soon"}
             </button>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -968,7 +997,7 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.96, y: 10 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-2xl max-h-[88vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        className="w-full max-w-2xl max-h-[88vh] bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden"
       >
         {/* Header */}
         <div className="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">

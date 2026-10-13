@@ -145,7 +145,7 @@ function metaFor(n) {
   );
 }
 
-export default function NotificationsMenu() {
+export default function NotificationsMenu({ dark = false }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [unread, setUnread] = useState(0);
@@ -233,7 +233,7 @@ export default function NotificationsMenu() {
     <div className="relative" ref={ref} data-testid="notifications-menu">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="relative p-2.5 rounded-xl text-[#64748B] hover:bg-[#F1F5F9]"
+        className={`relative rounded-xl p-2.5 ${dark ? "text-slate-200 hover:bg-white/10" : "text-[#64748B] hover:bg-[#F1F5F9]"}`}
         aria-label="Notifications"
         aria-haspopup="menu"
         aria-expanded={open}

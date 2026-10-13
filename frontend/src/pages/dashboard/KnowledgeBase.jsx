@@ -21,6 +21,11 @@ const STATUS_BADGE = {
   archived: "bg-amber-50 text-amber-700",
 };
 
+const safeCount = (value) => {
+  const count = Number(value);
+  return Number.isFinite(count) && count >= 0 ? count : 0;
+};
+
 export default function KnowledgeBase() {
   const [items, setItems] = useState([]);
   const [stats, setStats] = useState({
@@ -57,7 +62,15 @@ export default function KnowledgeBase() {
       setItems(
         listRes.status === "fulfilled" ? listRes.value.data.items || [] : [],
       );
-      if (statsRes.status === "fulfilled") setStats(statsRes.value.data);
+      if (statsRes.status === "fulfilled") {
+        const next = statsRes.value.data || {};
+        setStats({
+          total_knowledge_bases: safeCount(next.total_knowledge_bases),
+          total_documents: safeCount(next.total_documents),
+          total_chunks: safeCount(next.total_chunks),
+          total_embeddings: safeCount(next.total_embeddings),
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -118,8 +131,8 @@ export default function KnowledgeBase() {
       <PageHeader
         eyebrow="Knowledge"
         icon={BookOpen}
-        title="Knowledge Base"
-        subtitle="Train your agents with documents, manuals, and policies."
+        title="Knowledge base"
+        subtitle="Organize the business knowledge your assistants use for grounded answers."
       />
 
       {/* KPI cards */}
@@ -127,7 +140,7 @@ export default function KnowledgeBase() {
         {kpis.map((k) => (
           <div
             key={k.key}
-            className="p-5 rounded-2xl bg-white border border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)]"
+            className="p-5 rounded-lg bg-white border border-[#E2E8F0]"
             data-testid={`kb-kpi-${k.key}`}
           >
             <div className="flex items-center gap-3">
@@ -196,7 +209,7 @@ export default function KnowledgeBase() {
               key={kb.id}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-5 rounded-2xl bg-white border border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)] hover:shadow-premium hover:-translate-y-0.5 transition-all flex flex-col"
+              className="p-5 rounded-lg bg-white border border-[#E2E8F0] hover:border-[#2563EB]/30 transition-colors flex flex-col"
               data-testid={`kb-card-${kb.id}`}
             >
               <div className="flex items-start gap-3">

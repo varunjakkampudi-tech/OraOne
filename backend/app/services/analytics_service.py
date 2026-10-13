@@ -497,16 +497,37 @@ async def chat_analytics(
 
 
 async def agent_analytics(
-    session: AsyncSession, org_id: uuid.UUID, days: int = DEFAULT_DAYS
+    session: AsyncSession,
+    org_id: uuid.UUID,
+    days: int = DEFAULT_DAYS,
+    *,
+    agent_id: Optional[uuid.UUID] = None,
+    project_id: Optional[uuid.UUID] = None,
 ) -> dict:
     days = _clamp_days(days)
-    total_agents = await _count(session, Agent, Agent.organization_id == org_id)
+    agent_filters = [Agent.organization_id == org_id, Agent.deleted_at.is_(None)]
+    if project_id is not None:
+        agent_filters.append(Agent.project_id == project_id)
+    if agent_id is not None:
+        agent_filters.append(Agent.id == agent_id)
+
+    total_agents = await _count(session, Agent, *agent_filters)
     by_status = await _grouped(
         session,
         Agent.status,
-        Agent.organization_id == org_id,
-        Agent.deleted_at.is_(None),
+        *agent_filters,
     )
+    since = _now() - timedelta(days=days - 1)
+    conversation_join = (
+        (Conversation.agent_id == Agent.id)
+        & (Conversation.organization_id == org_id)
+        & (Conversation.deleted_at.is_(None))
+        & (Conversation.created_at >= since)
+    )
+    if project_id is not None:
+        conversation_join = conversation_join & (
+            Conversation.project_id == project_id
+        )
     stmt = (
         select(
             Agent.id,
@@ -525,9 +546,9 @@ async def agent_analytics(
         )
         .outerjoin(
             Conversation,
-            (Conversation.agent_id == Agent.id) & (Conversation.deleted_at.is_(None)),
+            conversation_join,
         )
-        .where(Agent.organization_id == org_id, Agent.deleted_at.is_(None))
+        .where(*agent_filters)
         .group_by(Agent.id, Agent.name, Agent.status)
         .order_by(func.count(Conversation.id).desc())
         .limit(25)

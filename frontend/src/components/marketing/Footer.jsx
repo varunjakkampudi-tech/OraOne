@@ -2,15 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Logo } from "./Logo";
 import { api, formatApiError } from "@/lib/api";
-import SimpleIcon from "@/components/ui/SimpleIcon";
 import { toast } from "sonner";
-
-const socialLinks = [
-  { label: "LinkedIn", slug: "linkedin" },
-  { label: "X", slug: "x" },
-  { label: "YouTube", slug: "youtube" },
-  { label: "GitHub", slug: "github" },
-];
 
 const columns = [
   {
@@ -73,7 +65,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-[#0F172A] text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-10">
+      <div className="max-w-[1184px] mx-auto px-5 sm:px-8 pt-12 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           <div className="lg:col-span-4">
             <Logo light className="h-10" />
@@ -100,23 +92,6 @@ export default function Footer() {
                 {busy ? "..." : "Subscribe"}
               </button>
             </form>
-            <div className="mt-6 flex items-center gap-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href="#"
-                  aria-label={social.label}
-                  className="size-9 grid place-items-center rounded-full bg-white/5 hover:bg-white/10 transition-colors"
-                >
-                  <SimpleIcon
-                    slug={social.slug}
-                    size={16}
-                    color="#FFFFFF"
-                    title={social.label}
-                  />
-                </a>
-              ))}
-            </div>
           </div>
 
           <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-8">

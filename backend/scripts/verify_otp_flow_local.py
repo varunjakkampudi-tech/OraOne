@@ -1,98 +1,180 @@
-"""One-off local verification script (not part of the test suite):
-signup -> verify-email -> login -> otp -> verify-otp -> /me, for two dummy
-users, then delete them from the DB. Talks to the real running backend on
-:8001 over HTTP, exactly like the frontend would.
+"""Safely smoke-test local email/password + verification/login OTP auth.
+
+This script only targets a loopback OraOne API, refuses configured email
+delivery, creates unique synthetic users, keeps OTPs/tokens out of output, and
+deletes only those exact users when finished. It does not verify real inbox
+delivery or Cognito.
 """
 
+from __future__ import annotations
+
+import argparse
 import asyncio
 import os
 import secrets
 import sys
 import uuid
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
+from dotenv import load_dotenv
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
 
-BASE = "http://127.0.0.1:8001"
-# Ephemeral password for throwaway dummy users — never hardcode a secret.
-PASSWORD = os.environ.get("OTP_TEST_PASSWORD") or ("Aa1!" + secrets.token_urlsafe(12))
+load_dotenv(BACKEND_ROOT / ".env", override=False)
+
+from app.core.config import settings  # noqa: E402
+from app.services import auth_service  # noqa: E402
+
+EMAIL_DELIVERY_KEYS = ("SMTP_HOST", "EMAIL_FROM", "SES_FROM_EMAIL")
 
 
-def run_user(n: int):
-    email = f"dummy-otp-{n}-{uuid.uuid4().hex[:8]}@example.com"
-    print(f"\n=== user {n}: {email} ===")
-
-    r = requests.post(
-        f"{BASE}/api/auth/signup",
-        json={"email": email, "password": PASSWORD, "name": f"Dummy {n}"},
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--base-url",
+        default="http://127.0.0.1:8000",
+        help="Loopback URL for the local OraOne API (default: %(default)s)",
     )
-    print("signup:", r.status_code, r.json())
-    assert r.status_code == 200
+    parser.add_argument("--timeout", type=float, default=10)
+    return parser.parse_args()
 
-    # Fetch the email-verification code the same way the real inbox would show it
-    from app.services import auth_service
 
+def _validate_local_only(base_url: str) -> str:
+    parsed = urlparse(base_url)
+    if parsed.scheme != "http" or parsed.hostname not in {
+        "127.0.0.1",
+        "localhost",
+        "::1",
+    }:
+        raise SystemExit("Refusing auth smoke test: --base-url must be loopback HTTP.")
+    if settings.auth_provider != "self_hosted":
+        raise SystemExit(
+            "Refusing auth smoke test: the backend must use local self_hosted auth."
+        )
+    configured_delivery = [key for key in EMAIL_DELIVERY_KEYS if os.environ.get(key)]
+    if configured_delivery:
+        raise SystemExit(
+            "Refusing auth smoke test because real email delivery is configured: "
+            + ", ".join(configured_delivery)
+        )
+    return base_url.rstrip("/")
+
+
+def _require_status(response: requests.Response, expected: int, operation: str) -> None:
+    if response.status_code != expected:
+        raise RuntimeError(f"{operation} failed with HTTP {response.status_code}.")
+
+
+def run_user(base_url: str, timeout: float, created_emails: list[str]) -> None:
+    email = f"oraone-local-otp-{uuid.uuid4().hex}@example.com"
+    password = "Aa1!" + secrets.token_urlsafe(18)
+    created_emails.append(email)
+
+    signup = requests.post(
+        f"{base_url}/api/auth/signup",
+        json={"email": email, "password": password, "name": "Local Auth Smoke"},
+        timeout=timeout,
+    )
+    _require_status(signup, 200, "Signup")
     verify_code = auth_service._cache().get(auth_service._verify_code_key(email))
-    assert verify_code, "verification code missing from cache"
-    r = requests.post(
-        f"{BASE}/api/auth/verify", json={"email": email, "code": verify_code}
+    if not verify_code:
+        raise RuntimeError("Signup did not create a verification code in shared cache.")
+
+    verification = requests.post(
+        f"{base_url}/api/auth/verify",
+        json={"email": email, "code": verify_code},
+        timeout=timeout,
     )
-    print("verify:", r.status_code, r.json())
-    assert r.status_code == 200
+    _require_status(verification, 200, "Email verification")
 
-    r = requests.post(
-        f"{BASE}/api/auth/login", json={"email": email, "password": PASSWORD}
+    login = requests.post(
+        f"{base_url}/api/auth/login",
+        json={"email": email, "password": password},
+        timeout=timeout,
     )
-    print("login (expect otp_required):", r.status_code, r.json())
-    assert r.status_code == 200
-    assert r.json().get("otp_required") is True
+    _require_status(login, 200, "Password login")
+    if not login.json().get("otp_required"):
+        raise RuntimeError("Password login did not require the expected OTP step.")
 
-    otp_code = auth_service._cache().get(auth_service._login_otp_key(email))
-    assert otp_code, "login OTP missing from cache (email OTP was not generated!)"
-    print("login OTP retrieved from cache:", otp_code)
+    login_code = auth_service._cache().get(auth_service._login_otp_key(email))
+    if not login_code:
+        raise RuntimeError("Login did not create an OTP in shared cache.")
 
-    r = requests.post(
-        f"{BASE}/api/auth/login/verify-otp", json={"email": email, "code": otp_code}
+    verified_login = requests.post(
+        f"{base_url}/api/auth/login/verify-otp",
+        json={"email": email, "code": login_code},
+        timeout=timeout,
     )
-    print("verify-otp:", r.status_code)
-    assert r.status_code == 200
-    tokens = r.json()
-    assert tokens.get("access_token"), "no access token returned after OTP verification"
+    _require_status(verified_login, 200, "Login OTP verification")
+    tokens = verified_login.json()
+    access_token = tokens.get("access_token")
+    refresh_token = tokens.get("refresh_token")
+    if not access_token or not refresh_token:
+        raise RuntimeError("OTP verification did not issue the expected session.")
 
-    r = requests.get(
-        f"{BASE}/api/auth/me",
-        headers={"Authorization": f"Bearer {tokens['access_token']}"},
+    profile = requests.get(
+        f"{base_url}/api/auth/me",
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=timeout,
     )
-    print("me:", r.status_code, r.json())
-    assert r.status_code == 200
-    assert r.json()["email"] == email
+    _require_status(profile, 200, "Authenticated profile")
+    if profile.json().get("email") != email:
+        raise RuntimeError("Authenticated profile did not match the synthetic user.")
 
-    print(f"user {n}: FULL OTP LOGIN FLOW OK")
-    return email
+    logout = requests.post(
+        f"{base_url}/api/auth/logout",
+        json={"refresh_token": refresh_token},
+        timeout=timeout,
+    )
+    _require_status(logout, 200, "Logout")
 
 
-async def cleanup():
-    """Delete every dummy-otp-* test user, including any left over from a
-    previously interrupted run of this script."""
+async def cleanup_exact_users(emails: list[str]) -> int:
+    if not emails:
+        return 0
+
     from sqlalchemy import select
 
     from app.database import session as db_session_module
     from app.database.models.user import User
 
     db_session_module.init_engine()
-    async with db_session_module.AsyncSessionLocal() as s:
-        rows = (
-            await s.scalars(select(User).where(User.email.like("dummy-otp-%")))
-        ).all()
-        for u in rows:
-            await s.delete(u)
-        await s.commit()
-    print(f"\ncleanup: deleted {len(rows)} dummy user(s)")
+    deleted = 0
+    async with db_session_module.AsyncSessionLocal() as session:
+        rows = (await session.scalars(select(User).where(User.email.in_(emails)))).all()
+        for user in rows:
+            await session.delete(user)
+            deleted += 1
+        await session.commit()
+    for email in emails:
+        auth_service._cache().delete(auth_service._verify_code_key(email))
+        auth_service._cache().delete(auth_service._login_otp_key(email))
+        auth_service._cache().delete(auth_service._reset_code_key(email))
+    return deleted
+
+
+def main() -> int:
+    args = _parse_args()
+    base_url = _validate_local_only(args.base_url)
+    created_emails: list[str] = []
+    succeeded = False
+    try:
+        run_user(base_url, args.timeout, created_emails)
+        succeeded = True
+        print(
+            "Local email/password + verification OTP + login OTP + profile + logout: PASS"
+        )
+        return 0
+    finally:
+        deleted = asyncio.run(cleanup_exact_users(created_emails))
+        print(f"Synthetic accounts created={len(created_emails)} cleaned={deleted}")
+        if succeeded and deleted != len(created_emails):
+            raise RuntimeError("Cleanup did not remove every synthetic test account.")
 
 
 if __name__ == "__main__":
-    run_user(1)
-    run_user(2)
-    asyncio.run(cleanup())
+    raise SystemExit(main())

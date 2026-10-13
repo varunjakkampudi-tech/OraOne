@@ -44,8 +44,8 @@ export default function MaintenanceBanner() {
     <div className="sticky top-0 z-[60] flex items-center justify-center gap-2 bg-amber-50 px-4 py-2 text-[13px] font-medium text-amber-800 border-b border-amber-200">
       <AlertTriangle size={15} className="shrink-0" />
       <span>
-        OraOne is updating — some actions may pause for a moment. Your live AI
-        agents keep running. Reconnecting…
+        Connection temporarily unavailable. Some actions may pause while OraOne
+        reconnects. Your account has not been signed out.
       </span>
     </div>
   );

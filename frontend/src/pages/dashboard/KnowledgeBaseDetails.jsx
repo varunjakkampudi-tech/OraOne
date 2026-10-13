@@ -437,7 +437,7 @@ export default function KnowledgeBaseDetails() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search across this knowledge base…"
           data-testid="kb-search-input"
-          className="w-full pl-10 pr-28 py-3 rounded-2xl border border-[#E2E8F0] bg-white text-sm placeholder-[#94A3B8] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10"
+          className="w-full pl-10 pr-28 py-3 rounded-lg border border-[#E2E8F0] bg-white text-sm placeholder-[#94A3B8] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10"
         />
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
           {(query || searchResults) && (
@@ -462,7 +462,7 @@ export default function KnowledgeBaseDetails() {
 
       {searchResults && (
         <div
-          className="rounded-2xl border border-[#E2E8F0] bg-white overflow-hidden"
+          className="rounded-lg border border-[#E2E8F0] bg-white overflow-hidden"
           data-testid="kb-search-results"
         >
           <div className="px-5 py-3 border-b border-[#E2E8F0] flex items-center justify-between">
@@ -589,7 +589,7 @@ export default function KnowledgeBaseDetails() {
       <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-5">
         {/* Folders sidebar */}
         <aside
-          className="rounded-2xl border border-[#E2E8F0] bg-white p-2 h-max"
+          className="rounded-lg border border-[#E2E8F0] bg-white p-2 h-max"
           data-testid="kb-folders"
         >
           <div className="flex items-center justify-between px-2 py-1.5">
@@ -643,7 +643,7 @@ export default function KnowledgeBaseDetails() {
         </aside>
 
         {/* Documents */}
-        <div className="rounded-2xl border border-[#E2E8F0] bg-white overflow-hidden">
+        <div className="rounded-lg border border-[#E2E8F0] bg-white overflow-hidden">
           <div className="px-5 py-3 border-b border-[#E2E8F0] flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <button
@@ -892,7 +892,7 @@ export default function KnowledgeBaseDetails() {
           role="dialog"
           aria-modal="true"
         >
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-[#0F172A] flex items-center gap-2">
                 <Type size={18} className="text-[#2563EB]" /> Add text / FAQ

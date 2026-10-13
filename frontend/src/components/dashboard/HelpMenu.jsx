@@ -21,7 +21,7 @@ const LINKS = [
   { icon: Activity, label: "Product status", to: "/app/status" },
 ];
 
-export default function HelpMenu() {
+export default function HelpMenu({ dark = false }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const nav = useNavigate();
@@ -57,7 +57,7 @@ export default function HelpMenu() {
     <div className="relative" ref={ref} data-testid="help-menu">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="grid size-9 place-items-center rounded-full text-[#64748B] hover:bg-[#F1F5F9] transition-colors"
+        className={`grid size-9 place-items-center rounded-full transition-colors ${dark ? "text-slate-200 hover:bg-white/10" : "text-[#64748B] hover:bg-[#F1F5F9]"}`}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Help and product tour"

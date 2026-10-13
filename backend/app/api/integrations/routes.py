@@ -94,6 +94,24 @@ router = APIRouter(tags=["integrations"])
 # verify its signature in the callback.
 _STATE_TTL_SECONDS = 600
 _STATE_ALG = "HS256"
+_PRODUCTION_ENVIRONMENTS = {"production", "prod", "staging"}
+_MOCK_INTEGRATION_ENVIRONMENTS = {"development", "dev", "test", "testing"}
+
+
+def _connection_mode(*, mock_requested: bool, real_oauth_ready: bool, environment: str):
+    """Fail closed unless real OAuth is ready or a mock is explicitly requested
+    in a local/test environment. A missing provider setup must never look like
+    a successful real integration to an application user.
+    """
+    normalized_environment = environment.strip().lower()
+    if not mock_requested and real_oauth_ready:
+        return ConnectionType.oauth
+    if mock_requested and normalized_environment in _MOCK_INTEGRATION_ENVIRONMENTS:
+        return ConnectionType.mock
+    raise HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail="This integration is not configured for a real connection.",
+    )
 
 
 def _state_secret() -> str:
@@ -261,11 +279,14 @@ async def connect_integration(
             detail=f"Unknown provider {payload.provider!r}.",
         )
 
-    use_real = (
-        not payload.mock
-        and spec.available
-        and oauth_service.is_configured(payload.provider)
+    environment = os.getenv("ENVIRONMENT", "development").strip().lower()
+    real_oauth_ready = spec.available and oauth_service.is_configured(payload.provider)
+    connection_type = _connection_mode(
+        mock_requested=payload.mock,
+        real_oauth_ready=real_oauth_ready,
+        environment=environment,
     )
+    use_real = connection_type == ConnectionType.oauth
 
     # Real OAuth, first leg: hand back an authorize URL for the browser.
     if use_real and not payload.code:
@@ -280,18 +301,7 @@ async def connect_integration(
             raise HTTPException(status_code=502, detail=str(e)) from e
         return ConnectResponse(authorize_url=url)
 
-    # Resolve tokens — real exchange or mock. Production never fabricates a
-    # connected provider when credentials are unavailable.
-    if os.getenv("ENVIRONMENT", "development").strip().lower() in {
-        "production",
-        "prod",
-        "staging",
-    } and not use_real:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="This integration is not configured for real production use.",
-        )
-    connection_type = ConnectionType.oauth if use_real else ConnectionType.mock
+    # Resolve tokens — real OAuth or explicitly requested local/test mock.
     try:
         if use_real:
             result = oauth_service.complete_connect(payload.provider, code=payload.code)

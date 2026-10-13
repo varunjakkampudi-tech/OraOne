@@ -39,6 +39,7 @@ export default function EntityListPage({
   stats, // optional KPI strip rendered between header and table
   skeletonCols = 4,
   children, // e.g. mounted <Drawer/>
+  renderContent,
   ...tableProps
 }) {
   const emptyNode = empty ? <EmptyState {...empty} /> : null;
@@ -64,6 +65,8 @@ export default function EntityListPage({
         />
       ) : rows.length === 0 ? (
         emptyNode
+      ) : renderContent ? (
+        renderContent(rows)
       ) : (
         <DataTable
           rows={rows}

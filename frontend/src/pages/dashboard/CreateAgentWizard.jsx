@@ -303,6 +303,13 @@ export default function CreateAgentWizard() {
       toast.error("Pick an app to connect.");
       return false;
     }
+    if (sourceKind === "integration") {
+      toast.info(
+        "Connect and sync this app from Integrations first. Then choose its knowledge source when setting up your assistant.",
+      );
+      nav(`/app/integrations?provider=${encodeURIComponent(provider)}`);
+      return false;
+    }
 
     setCommittingSource(true);
     try {
@@ -344,11 +351,6 @@ export default function CreateAgentWizard() {
           headers: { "Content-Type": "multipart/form-data" },
         });
         toast.success("Text added to knowledge.");
-      } else if (sourceKind === "integration") {
-        await api.post("/integrations/connect", { provider, mock: true });
-        toast.success(
-          `${PROVIDERS.find((p) => p.id === provider)?.label || "App"} connected.`,
-        );
       }
       return true;
     } catch (err) {

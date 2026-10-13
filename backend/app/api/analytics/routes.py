@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import csv
 import io
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
@@ -88,7 +89,9 @@ async def analytics_export(
 async def analytics_module(
     module: str,
     days: int = Query(30, ge=1, le=90),
+    agent_id: uuid.UUID | None = Query(default=None),
     ctx: OrgContext = Depends(require_permission("analytics.read")),
+    pctx: ProjectContext = Depends(get_current_project),
     session: AsyncSession = Depends(get_db),
 ) -> dict:
     fn = analytics_service.MODULE_FUNCTIONS.get(module)
@@ -96,5 +99,13 @@ async def analytics_module(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Unknown analytics module '{module}'.",
+        )
+    if module == "agents":
+        return await fn(
+            session,
+            ctx.organization_id,
+            days,
+            agent_id=agent_id,
+            project_id=pctx.project_id,
         )
     return await fn(session, ctx.organization_id, days)

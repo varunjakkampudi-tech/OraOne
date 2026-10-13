@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   User,
   Lock,
@@ -206,60 +206,101 @@ const ADMIN_GROUP = {
 export default function Settings() {
   const [active, setActive] = useState("profile");
   const nav = useNavigate();
+  const { pathname } = useLocation();
   const { membershipRole, user } = useAuth();
   const role = (membershipRole || user?.role || "").toLowerCase();
   const isAdmin = role === "owner" || role === "admin";
+
+  useEffect(() => {
+    const pathTabs = {
+      "/app/account/profile": "profile",
+      "/app/account/preferences": "appearance",
+      "/app/account/notifications": "notifications",
+      "/app/account/security": "sessions",
+      "/app/account/sessions": "sessions",
+      "/app/settings/notifications": "notifications",
+      "/app/settings/security": "sessions",
+    };
+    setActive(pathTabs[pathname] || "profile");
+  }, [pathname]);
 
   const groups = isAdmin
     ? [...WORKSPACE_GROUPS, ADMIN_GROUP]
     : WORKSPACE_GROUPS;
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl bg-white border border-[#E2E8F0] grid grid-cols-1 lg:grid-cols-[300px_1fr] overflow-hidden">
+    <div className="space-y-5 [&_.rounded-xl]:rounded-md">
+      <header>
+        <h1 className="text-[28px] font-semibold tracking-tight text-ink">
+          Settings
+        </h1>
+        <p className="mt-1 text-sm text-sub">
+          Manage your personal account and workspace preferences.
+        </p>
+      </header>
+      <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
         {/* Tabs (left) */}
-        <nav
-          className="border-b lg:border-b-0 lg:border-r border-[#F1F5F9] p-3 space-y-1"
-          aria-label="Settings sections"
-        >
-          <p className="px-3 pt-2 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#94A3B8]">
-            Account
-          </p>
-          {ACCOUNT_TABS.map((t) => {
-            const sel = active === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => setActive(t.id)}
-                data-testid={`settings-tab-${t.id}`}
-                className={`w-full flex items-start gap-3 px-3 py-3 rounded-xl text-left transition-colors ${
-                  sel ? "bg-[#EFF6FF]" : "hover:bg-[#F8FAFC]"
-                }`}
-                aria-current={sel ? "true" : undefined}
-              >
-                <t.icon
-                  size={16}
-                  className={
-                    sel ? "text-[#2563EB] mt-0.5" : "text-[#64748B] mt-0.5"
-                  }
-                />
-                <div className="min-w-0">
-                  <p
-                    className={`text-[13.5px] font-semibold ${sel ? "text-[#2563EB]" : "text-[#0F172A]"}`}
+        <nav className="contents" aria-label="Settings sections">
+          <div className="min-w-0 lg:col-span-2">
+            <p className="mb-2 text-xs font-semibold text-sub">Account</p>
+            <div
+              className="flex max-w-full gap-1 overflow-x-auto border-b border-line"
+              aria-label="Account settings"
+            >
+              {ACCOUNT_TABS.map((t) => {
+                const sel = active === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setActive(t.id)}
+                    data-testid={`settings-tab-${t.id}`}
+                    className={`relative flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-3 py-2 text-left transition-colors focus-visible:outline-brand ${
+                      sel
+                        ? "border-brand text-brand"
+                        : "border-transparent text-sub hover:bg-subtle"
+                    }`}
+                    aria-current={sel ? "true" : undefined}
                   >
-                    {t.label}
-                  </p>
-                  <p className="text-[11.5px] text-[#94A3B8] mt-0.5 leading-snug">
-                    {t.desc}
-                  </p>
-                </div>
-              </button>
-            );
-          })}
+                    <t.icon
+                      size={16}
+                      className={
+                        sel ? "text-[#2563EB] mt-0.5" : "text-[#64748B] mt-0.5"
+                      }
+                    />
+                    <div className="min-w-0">
+                      <p
+                        className={`text-[13.5px] font-semibold ${sel ? "text-[#2563EB]" : "text-[#0F172A]"}`}
+                      >
+                        {t.label}
+                      </p>
+                      <p className="sr-only">{t.desc}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </nav>
 
+        <div className="settings-form min-w-0 rounded-lg border border-line bg-white p-5 sm:p-6 lg:col-start-1 lg:row-start-2">
+          {active === "profile" && <ProfileSection />}
+          {active === "password" && <PasswordSection />}
+          {active === "notifications" && <NotificationsSection />}
+          {active === "appearance" && <AppearanceSection />}
+          {active === "sessions" && <SessionsSection />}
+          {active === "activity" && <ActivitySection />}
+        </div>
+        <aside className="context-aside min-w-0 rounded-lg border border-line bg-white p-4 lg:col-start-2 lg:row-start-2">
+          <h2 className="text-base font-semibold text-ink">
+            Your workspace, your way.
+          </h2>
+          <p className="mt-2 text-sm text-sub">
+            Workspace settings are shared by permitted team members. Personal
+            settings apply only to your account.
+          </p>
           {groups.map((g) => (
             <div key={g.title} className="pt-2">
-              <p className="px-3 pt-2 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+              <p className="px-2 pt-3 pb-1 text-xs font-semibold text-sub">
                 {g.title}
               </p>
               {g.links.map((l) => (
@@ -267,14 +308,14 @@ export default function Settings() {
                   key={l.to}
                   onClick={() => nav(l.to)}
                   data-testid={`settings-link-${l.to.split("/").pop()}`}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-colors hover:bg-[#F8FAFC] group"
+                  className="group flex min-h-11 w-full items-center gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-subtle focus-visible:outline-brand"
                 >
                   <l.icon size={16} className="text-[#64748B] shrink-0" />
                   <div className="min-w-0 flex-1">
                     <p className="text-[13.5px] font-semibold text-[#0F172A]">
                       {l.label}
                     </p>
-                    <p className="text-[11.5px] text-[#94A3B8] mt-0.5 leading-snug">
+                    <p className="text-xs text-[#94A3B8] mt-0.5 leading-snug">
                       {l.desc}
                     </p>
                   </div>
@@ -286,17 +327,7 @@ export default function Settings() {
               ))}
             </div>
           ))}
-        </nav>
-
-        {/* Panel (right) */}
-        <div className="p-6 sm:p-8">
-          {active === "profile" && <ProfileSection />}
-          {active === "password" && <PasswordSection />}
-          {active === "notifications" && <NotificationsSection />}
-          {active === "appearance" && <AppearanceSection />}
-          {active === "sessions" && <SessionsSection />}
-          {active === "activity" && <ActivitySection />}
-        </div>
+        </aside>
       </div>
     </div>
   );
@@ -336,7 +367,7 @@ function SaveStatus({ state }) {
 
 function SectionHeader({ title, desc }) {
   return (
-    <div className="mb-6">
+    <div className="mb-5">
       <h3 className="text-lg font-semibold text-[#0F172A]">{title}</h3>
       <p className="text-[13px] text-[#64748B] mt-1">{desc}</p>
     </div>
@@ -346,7 +377,7 @@ function SectionHeader({ title, desc }) {
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="block text-[13px] font-semibold text-[#0F172A] mb-2">
+      <span className="block text-xs font-semibold text-ink mb-1.5">
         {label}
       </span>
       {children}
@@ -355,14 +386,14 @@ function Field({ label, children }) {
 }
 
 const inputCls =
-  "w-full px-4 py-3 rounded-xl border border-[#E2E8F0] bg-white text-[14px] text-[#0F172A] placeholder-[#94A3B8] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all";
+  "min-h-11 w-full px-3 py-2 rounded-md border border-line bg-white text-[14px] text-ink placeholder:text-faint focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 transition-colors";
 
 function SaveBtn({ label = "Save Changes", onClick }) {
   return (
     <button
       onClick={onClick}
       data-testid="settings-save-btn"
-      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[13.5px] font-semibold shadow-[0_8px_24px_-8px_rgba(37,99,235,0.5)]"
+      className="inline-flex min-h-11 items-center gap-2 px-4 py-2 rounded-md bg-brand hover:bg-brand-hover text-white text-sm font-semibold focus-visible:outline-brand focus-visible:outline-offset-2"
     >
       <Save size={14} /> {label}
     </button>
@@ -417,8 +448,8 @@ function ProfileSection() {
         <SaveStatus state={status} />
       </div>
 
-      <div className="flex items-center gap-5 mb-7">
-        <div className="size-20 rounded-full bg-[#2563EB] grid place-items-center text-white text-2xl font-bold">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="size-12 rounded-lg bg-brand-soft grid place-items-center text-brand text-lg font-semibold">
           {initials}
         </div>
         <div>
@@ -780,7 +811,7 @@ function SessionsSection() {
             </p>
           </div>
         </div>
-        <p className="text-[11.5px] text-[#94A3B8] px-1">
+        <p className="text-xs text-[#94A3B8] px-1">
           Sessions use short-lived tokens that refresh automatically. To end
           access on a lost or shared device, sign out of all devices below.
         </p>
@@ -964,7 +995,7 @@ function ActivitySection() {
         {facts.map((f) => (
           <div key={f.label} className="rounded-xl border border-[#E2E8F0] p-4">
             <f.icon size={16} className="text-[#2563EB]" />
-            <p className="text-[11.5px] text-[#94A3B8] mt-2.5 font-medium">
+            <p className="text-xs text-[#94A3B8] mt-2.5 font-medium">
               {f.label}
             </p>
             <p className="text-[13.5px] font-semibold text-[#0F172A] mt-0.5">
@@ -1013,9 +1044,7 @@ function ActivitySection() {
                 <p className="text-[13px] text-[#0F172A]">
                   <span className="font-semibold">{l.actor}</span> {l.text}
                 </p>
-                <p className="text-[11.5px] text-[#94A3B8] mt-0.5">
-                  {relTime(l.at)}
-                </p>
+                <p className="text-xs text-[#94A3B8] mt-0.5">{relTime(l.at)}</p>
               </div>
             </li>
           ))}

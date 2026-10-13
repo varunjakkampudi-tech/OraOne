@@ -12,70 +12,111 @@
  *   OraOne.startChat('I need pricing help');
  */
 
-const DEFAULT_CDN = 'https://oraone.in/widget.js';
+const DEFAULT_CDN = "https://oraone.in/widget.js";
 
 // Public method surface — mirrors window.OraOne defined by widget.js.
 const METHODS = [
-  'identifyUser',
-  'updateContext',
-  'sendEvent',
-  'trackEvent',
-  'setLeadData',
-  'trackPurchase',
-  'open',
-  'close',
-  'toggle',
-  'openChat',
-  'closeChat',
-  'toggleChat',
-  'startChat',
+  "identifyUser",
+  "updateContext",
+  "sendEvent",
+  "trackEvent",
+  "setLeadData",
+  "trackPurchase",
+  "open",
+  "close",
+  "toggle",
+  "openChat",
+  "closeChat",
+  "toggleChat",
+  "startChat",
 ];
 
 let _injected = false;
 const _pre = []; // calls buffered before window.OraOne exists
+let _flushTimer = null;
+let _flushDeadline = 0;
+const LOAD_TIMEOUT_MS = 30_000;
 
 function isBrowser() {
-  return typeof window !== 'undefined' && typeof document !== 'undefined';
+  return typeof window !== "undefined" && typeof document !== "undefined";
 }
 
 function ensureScript(opts) {
   if (!isBrowser() || _injected) return;
   _injected = true;
-  const src = opts.src || DEFAULT_CDN;
   // Reuse an existing tag if the host already embedded the loader.
-  if (document.querySelector('script[data-oraone-loader]')) return;
-  const s = document.createElement('script');
-  s.src = src;
-  s.setAttribute('data-oraone-loader', '1');
-  if (opts.agentId) s.setAttribute('data-widget-id', opts.agentId);
-  if (opts.apiBase) s.setAttribute('data-api', opts.apiBase);
-  s.async = true;
-  document.head.appendChild(s);
-  flushWhenReady();
+  let script = document.querySelector("script[data-oraone-loader]");
+  if (!script) {
+    script = document.createElement("script");
+    script.src = opts.src || DEFAULT_CDN;
+    script.setAttribute("data-oraone-loader", "1");
+    if (opts.agentId) script.setAttribute("data-widget-id", opts.agentId);
+    if (opts.apiBase) script.setAttribute("data-api", opts.apiBase);
+    script.async = true;
+    script.addEventListener("load", flushWhenReady, { once: true });
+    script.addEventListener("error", handleLoadError, { once: true });
+    document.head.appendChild(script);
+  } else if (!window.OraOne) {
+    // The host may have added its embed tag but the loader has not finished.
+    script.addEventListener("load", flushWhenReady, { once: true });
+  }
 }
 
 function flushWhenReady() {
-  if (!isBrowser()) return;
-  const tick = () => {
-    const w = window.OraOne;
-    if (w && _pre.length) {
-      while (_pre.length) {
-        const [m, args] = _pre.shift();
-        if (typeof w[m] === 'function') w[m].apply(null, args);
+  if (!isBrowser() || !_pre.length) return;
+  const widget = window.OraOne;
+  if (widget) {
+    if (_flushTimer) clearTimeout(_flushTimer);
+    _flushTimer = null;
+    while (_pre.length) {
+      const [method, args] = _pre.shift();
+      if (typeof widget[method] === "function") {
+        widget[method].apply(null, args);
       }
     }
-    if (_pre.length) setTimeout(tick, 50);
-  };
-  tick();
+    return;
+  }
+  if (_flushTimer) return;
+  if (!_flushDeadline) _flushDeadline = Date.now() + LOAD_TIMEOUT_MS;
+  _flushTimer = setTimeout(() => {
+    _flushTimer = null;
+    if (!_pre.length) {
+      _flushDeadline = 0;
+      return;
+    }
+    if (window.OraOne) {
+      flushWhenReady();
+    } else if (Date.now() < _flushDeadline) {
+      flushWhenReady();
+    } else {
+      _pre.length = 0;
+      _flushDeadline = 0;
+      console.error(
+        "[OraOne] Widget loader did not become ready; queued calls were discarded.",
+      );
+    }
+  }, 50);
+}
+
+function handleLoadError() {
+  _injected = false;
+  if (_flushTimer) clearTimeout(_flushTimer);
+  _flushTimer = null;
+  _flushDeadline = 0;
+  _pre.length = 0;
+  console.error(
+    "[OraOne] Widget loader failed to load; queued calls were discarded.",
+  );
 }
 
 function call(method, args) {
   if (!isBrowser()) return OraOne; // SSR no-op
   const w = window.OraOne;
-  if (w && typeof w[method] === 'function') {
+  if (w && typeof w[method] === "function") {
     w[method].apply(null, args);
   } else {
     _pre.push([method, args]);
+    flushWhenReady();
   }
   return OraOne;
 }
@@ -87,11 +128,12 @@ function call(method, args) {
 function init(options) {
   options = options || {};
   ensureScript(options);
-  if (options.user || options.identify) call('identifyUser', [options.user || options.identify]);
-  if (options.context) call('updateContext', [options.context]);
-  if (options.autoOpen) call('open', []);
+  if (options.user || options.identify)
+    call("identifyUser", [options.user || options.identify]);
+  if (options.context) call("updateContext", [options.context]);
+  if (options.autoOpen) call("open", []);
   // Forward to the loader's own init once available (idempotent).
-  call('init', [options]);
+  call("init", [options]);
   return OraOne;
 }
 

@@ -35,10 +35,7 @@ _PRODUCTION_LIKE = {"production", "prod", "staging"}
 
 
 def _is_production_like() -> bool:
-    return (
-        os.getenv("ENVIRONMENT", "development").strip().lower()
-        in _PRODUCTION_LIKE
-    )
+    return os.getenv("ENVIRONMENT", "development").strip().lower() in _PRODUCTION_LIKE
 
 
 class CacheBackend(ABC):

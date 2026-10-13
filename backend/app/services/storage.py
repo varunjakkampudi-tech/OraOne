@@ -33,8 +33,7 @@ _PRODUCTION_LIKE = {"production", "prod", "staging"}
 
 def _is_production_like() -> bool:
     return (
-        os.environ.get("ENVIRONMENT", "development").strip().lower()
-        in _PRODUCTION_LIKE
+        os.environ.get("ENVIRONMENT", "development").strip().lower() in _PRODUCTION_LIKE
     )
 
 

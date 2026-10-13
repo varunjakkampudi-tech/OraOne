@@ -115,7 +115,7 @@ function Toggle({ checked, onChange, disabled }) {
 
 function SectionCard({ title, subtitle, icon: Icon, right, children }) {
   return (
-    <section className="rounded-2xl border border-[#E2E8F0] bg-white">
+    <section className="rounded-lg border border-[#E2E8F0] bg-white">
       <header className="flex items-start justify-between gap-4 px-5 py-4 border-b border-[#F1F5F9]">
         <div className="flex items-start gap-3">
           {Icon ? (
@@ -363,19 +363,19 @@ export default function Deploy() {
     DEPLOY_STATUS[deploy?.deploy_status] || DEPLOY_STATUS.draft;
 
   return (
-    <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-6 space-y-5">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-2xl bg-[#0F172A] text-white grid place-items-center">
+          <div className="h-9 w-9 rounded-lg bg-blue-50 text-blue-700 grid place-items-center">
             <Rocket size={20} />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-[#0F172A]">
+            <h1 className="text-2xl sm:text-[28px] font-bold tracking-tight text-[#0F172A]">
               Channels &amp; Deploy
             </h1>
             <p className="text-[13px] text-[#64748B]">
-              One agent, every channel. Ship it to your site in minutes.
+              Configure your website widget and SDK installation.
             </p>
           </div>
         </div>

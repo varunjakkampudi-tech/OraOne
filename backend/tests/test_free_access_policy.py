@@ -9,7 +9,9 @@ def test_paid_billing_is_disabled_by_default():
 
 
 def test_free_plan_has_real_token_meter():
-    free = next(plan for plan in billing_service.PLAN_CATALOGUE if plan["code"].value == "free")
+    free = next(
+        plan for plan in billing_service.PLAN_CATALOGUE if plan["code"].value == "free"
+    )
     assert free["price_cents"] == 0
     assert free["price_cents_yearly"] == 0
     assert free["limits"]["ai_tokens_per_month"] == 250000

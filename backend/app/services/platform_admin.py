@@ -1323,7 +1323,13 @@ async def list_resource(
             .limit(limit)
         )
         if like:
-            stmt = stmt.where(or_(User.email.ilike(like), User.full_name.ilike(like)))
+            stmt = stmt.where(
+                or_(
+                    User.email.ilike(like),
+                    User.full_name.ilike(like),
+                    cast(User.id, String) == q.strip(),
+                )
+            )
         rows = await _rows(stmt)
         items = [
             {

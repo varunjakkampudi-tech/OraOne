@@ -28,7 +28,7 @@ import {
   Sparkles,
   ExternalLink,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { api, formatApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -161,6 +161,8 @@ function toCSV(rows) {
 
 export default function Leads() {
   const nav = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedLeadId = searchParams.get("lead");
   const [leads, setLeads] = useState([]);
   const [stats, setStats] = useState(EMPTY_STATS);
   const [page, setPage] = useState(1);
@@ -223,6 +225,22 @@ export default function Leads() {
     const t = setTimeout(loadLeads, 300);
     return () => clearTimeout(t);
   }, [loadLeads]);
+
+  useEffect(() => {
+    if (!requestedLeadId || loading) return;
+    const lead = leads.find((item) => String(item.id) === requestedLeadId);
+    if (lead) setSelected(lead);
+  }, [leads, loading, requestedLeadId]);
+
+  const openLead = (lead) => {
+    setSelected(lead);
+    if (lead?.id) setSearchParams({ lead: String(lead.id) });
+  };
+
+  const closeLead = () => {
+    setSelected(null);
+    if (searchParams.has("lead")) setSearchParams({});
+  };
 
   const activeFilters =
     (statusFilter ? 1 : 0) + (tempFilter ? 1 : 0) + (q.trim() ? 1 : 0);
@@ -382,7 +400,7 @@ export default function Leads() {
       {/* Filter bar */}
       {showFilter && (
         <div
-          className="rounded-2xl bg-white border border-[#E7EAF1] p-4 flex flex-wrap items-center gap-3"
+          className="rounded-lg bg-white border border-[#E7EAF1] p-4 flex flex-wrap items-center gap-3"
           data-testid="leads-filter-bar"
         >
           <div className="relative flex-1 min-w-[200px]">
@@ -435,7 +453,7 @@ export default function Leads() {
         {KPI_CARDS.map((k) => (
           <div
             key={k.key}
-            className="p-4 rounded-2xl bg-white border border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)] hover:shadow-premium hover:-translate-y-0.5 transition-all"
+            className="p-4 rounded-lg bg-white border border-[#E7EAF1] hover:border-[#2563EB]/30 transition-colors"
             data-testid={`leads-kpi-${k.key}`}
           >
             <div className="flex items-start gap-3">
@@ -544,10 +562,10 @@ export default function Leads() {
         <PipelineBoard
           leads={visibleLeads}
           onMove={changeStatus}
-          onOpen={setSelected}
+          onOpen={openLead}
         />
       ) : (
-        <div className="rounded-2xl bg-white border border-[#E7EAF1] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)] overflow-hidden">
+        <div className="rounded-lg bg-white border border-[#E7EAF1] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-[13px]">
               <thead className="bg-white">
@@ -570,7 +588,7 @@ export default function Leads() {
                   return (
                     <tr
                       key={l.id || l.name}
-                      onClick={() => setSelected(l)}
+                      onClick={() => openLead(l)}
                       className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC]/60 transition-colors cursor-pointer"
                     >
                       <td className="px-6 py-4">
@@ -618,14 +636,14 @@ export default function Leads() {
                           <IconBtn
                             ariaLabel="View"
                             testId={`lead-view-${l.id || l.name}`}
-                            onClick={() => setSelected(l)}
+                            onClick={() => openLead(l)}
                           >
                             <Eye size={14} className="text-[#64748B]" />
                           </IconBtn>
                           <IconBtn
                             ariaLabel="Edit"
                             testId={`lead-edit-${l.id || l.name}`}
-                            onClick={() => setSelected(l)}
+                            onClick={() => openLead(l)}
                           >
                             <Pencil size={14} className="text-[#64748B]" />
                           </IconBtn>
@@ -695,16 +713,28 @@ export default function Leads() {
         </div>
       )}
 
+      {requestedLeadId && !loading && leads.length > 0 && !selected && (
+        <div
+          role="status"
+          className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+          data-testid="lead-not-found"
+        >
+          This lead is unavailable in the current project.
+        </div>
+      )}
+
       {/* Lead detail drawer */}
       <LeadDrawer
         lead={selected}
-        onClose={() => setSelected(null)}
+        onClose={closeLead}
         onMove={changeStatus}
         onSaved={applyLeadUpdate}
         onDelete={(l) => {
           handleDelete(l);
         }}
-        onOpenConversation={(cid) => nav(`/app/conversations?c=${cid}`)}
+        onOpenConversation={(cid) =>
+          nav(`/app/conversations/${encodeURIComponent(cid)}`)
+        }
       />
     </div>
   );

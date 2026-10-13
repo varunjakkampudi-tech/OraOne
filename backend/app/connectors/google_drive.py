@@ -167,8 +167,7 @@ class GoogleDriveConnector(BaseConnector):
         return (
             os.environ.get("ENVIRONMENT", "development").strip().lower()
             not in {"production", "prod", "staging"}
-            and
-            self.integration is not None
+            and self.integration is not None
             and self.integration.connection_type == ConnectionType.mock
         )
 

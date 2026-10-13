@@ -170,12 +170,12 @@ export default function Websites() {
   }, [items]);
 
   return (
-    <div className="space-y-6" data-testid="websites-page">
+    <div className="space-y-5" data-testid="websites-page">
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0F172A]">
+          <h1 className="text-[28px] font-semibold tracking-tight text-ink">
             Website Crawling
-          </h2>
+          </h1>
           <p className="text-sm text-[#64748B] mt-1">
             Turn any website into searchable knowledge for your agents.
           </p>
@@ -184,7 +184,7 @@ export default function Websites() {
           onClick={() => setCreating(true)}
           data-testid="website-create-btn"
           disabled={kbs.length === 0}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 text-white text-sm font-semibold shadow-[0_8px_24px_-8px_rgba(37,99,235,0.5)]"
+          className="inline-flex min-h-11 items-center gap-2 px-4 py-2 rounded-lg bg-brand hover:bg-brand-hover disabled:opacity-50 text-white text-sm font-semibold"
           title={
             kbs.length === 0 ? "Create a knowledge base first" : "Add a website"
           }
@@ -194,21 +194,21 @@ export default function Websites() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((k) => (
           <div
             key={k.label}
-            className="bg-white border border-[#E2E8F0] rounded-2xl p-4"
+            className="bg-white border border-line rounded-lg p-4"
           >
             <div className="flex items-center gap-3">
               <div
-                className="h-10 w-10 rounded-xl flex items-center justify-center"
+                className="h-9 w-9 rounded-lg flex items-center justify-center"
                 style={{ background: `${k.color}14`, color: k.color }}
               >
                 <k.icon size={18} />
               </div>
               <div>
-                <div className="text-2xl font-bold text-[#0F172A]">
+                <div className="text-[28px] font-semibold text-ink">
                   {k.value}
                 </div>
                 <div className="text-xs text-[#64748B]">{k.label}</div>
@@ -229,7 +229,7 @@ export default function Websites() {
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search websites…"
           aria-label="Search websites"
-          className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-[#E2E8F0] text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
+          className="min-h-11 w-full pl-9 pr-3 py-2 rounded-lg border border-line bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand/20"
         />
       </div>
 
@@ -239,7 +239,7 @@ export default function Websites() {
           <Loader2 className="animate-spin" />
         </div>
       ) : items.length === 0 ? (
-        <div className="bg-white border border-dashed border-[#CBD5E1] rounded-2xl p-12 text-center">
+        <div className="bg-white border border-line rounded-lg px-5 py-8 text-center">
           <Globe size={40} className="mx-auto text-[#CBD5E1]" />
           <h3 className="mt-3 text-lg font-semibold text-[#0F172A]">
             No websites yet
@@ -293,7 +293,7 @@ export default function Websites() {
 function WebsiteCard({ website: w, onOpen, onAct, onRemove }) {
   const job = w.status === "crawling";
   return (
-    <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 hover:shadow-[0_8px_30px_-12px_rgba(15,23,42,0.15)] transition-shadow">
+    <div className="bg-white border border-line rounded-lg p-5">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
@@ -314,7 +314,7 @@ function WebsiteCard({ website: w, onOpen, onAct, onRemove }) {
           >
             {w.base_url} <ExternalLink size={11} />
           </a>
-          <div className="flex items-center gap-4 mt-3 text-xs text-[#64748B]">
+          <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-[#64748B]">
             <span className="inline-flex items-center gap-1">
               <FileText size={13} /> {w.pages_count || 0} pages
             </span>
@@ -441,7 +441,7 @@ function CreateModal({ kbs, onClose, onCreated }) {
         exit={{ scale: 0.96, y: 8 }}
         onClick={(e) => e.stopPropagation()}
         onSubmit={submit}
-        className="bg-white rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-lg border border-line w-full max-w-lg max-h-[90vh] overflow-y-auto [&_.input]:rounded-lg [&_.input]:min-h-11"
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0]">
           <h3 className="text-lg font-semibold text-[#0F172A]">Add Website</h3>
@@ -493,7 +493,7 @@ function CreateModal({ kbs, onClose, onCreated }) {
                   type="button"
                   key={m.value}
                   onClick={() => set("crawl_mode", m.value)}
-                  className={`text-left px-3 py-2 rounded-xl border text-sm ${
+                  className={`text-left px-3 py-2 rounded-lg border text-sm ${
                     form.crawl_mode === m.value
                       ? "border-[#2563EB] bg-[#EFF6FF]"
                       : "border-[#E2E8F0] hover:bg-[#F8FAFC]"
@@ -550,7 +550,7 @@ function CreateModal({ kbs, onClose, onCreated }) {
           </label>
 
           {/* Distributed engine tuning */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 space-y-3">
+          <div className="rounded-lg border border-line bg-subtle p-3 space-y-3">
             <div className="text-xs font-semibold text-[#475569] uppercase tracking-wide">
               Crawler performance
             </div>
@@ -593,14 +593,14 @@ function CreateModal({ kbs, onClose, onCreated }) {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-[#E2E8F0] text-sm font-medium text-[#475569] hover:bg-[#F8FAFC]"
+            className="min-h-11 px-4 py-2 rounded-lg border border-line text-sm font-medium text-[#475569] hover:bg-subtle"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 text-white text-sm font-semibold"
+            className="inline-flex min-h-11 items-center gap-2 px-4 py-2 rounded-lg bg-brand hover:bg-brand-hover disabled:opacity-50 text-white text-sm font-semibold"
           >
             {submitting && <Loader2 size={15} className="animate-spin" />} Start
             Crawl
@@ -700,7 +700,7 @@ function DetailDrawer({ website, onClose, onChanged }) {
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: 40, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-[#F8FAFC] w-full max-w-2xl h-full overflow-y-auto shadow-2xl"
+        className="bg-subtle border-l border-line w-full max-w-2xl h-full overflow-y-auto"
       >
         <div className="sticky top-0 bg-white border-b border-[#E2E8F0] px-6 py-4 flex items-center justify-between z-10">
           <div className="min-w-0">
@@ -782,7 +782,7 @@ function DetailDrawer({ website, onClose, onChanged }) {
               {pages.map((p) => (
                 <div
                   key={p.id}
-                  className="bg-white border border-[#E2E8F0] rounded-xl px-4 py-3"
+                  className="bg-white border border-line rounded-lg px-4 py-3"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
@@ -813,7 +813,7 @@ function DetailDrawer({ website, onClose, onChanged }) {
               ))}
             </div>
           ) : tab === "logs" ? (
-            <div className="bg-[#0F172A] rounded-xl p-3 font-mono text-xs max-h-[60vh] overflow-y-auto">
+            <div className="bg-[#0F172A] rounded-lg p-3 font-mono text-xs max-h-[60vh] overflow-y-auto">
               {logs.length === 0 && (
                 <div className="text-[#64748B]">No logs.</div>
               )}
@@ -836,7 +836,7 @@ function DetailDrawer({ website, onClose, onChanged }) {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="bg-white border border-[#E2E8F0] rounded-xl p-4">
+              <div className="bg-white border border-line rounded-lg p-4">
                 <h4 className="text-sm font-semibold text-[#0F172A] mb-3">
                   Pages by type
                 </h4>
@@ -876,7 +876,7 @@ function DetailDrawer({ website, onClose, onChanged }) {
               </div>
               {lastJob && (
                 <div
-                  className="bg-white border border-[#E2E8F0] rounded-xl p-4 text-sm"
+                  className="bg-white border border-line rounded-lg p-4 text-sm"
                   data-testid="crawl-job-panel"
                 >
                   <h4 className="text-sm font-semibold text-[#0F172A] mb-2">

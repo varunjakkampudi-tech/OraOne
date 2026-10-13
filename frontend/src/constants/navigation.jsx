@@ -13,133 +13,168 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import {
   LayoutDashboard,
-  Bot,
   MessagesSquare,
-  BookOpen,
   Plug,
   Users,
+  ChartNoAxesCombined,
+  MessageSquare,
+  Mic,
   Phone,
-  MessageCircle,
-  Rocket,
-  LifeBuoy,
-  Megaphone,
-  Activity,
-  Layers3,
+  Mail,
+  Workflow,
+  Lightbulb,
+  CreditCard,
+  Settings,
 } from "lucide-react";
 import { DASH } from "@/constants/testIds";
 
 // Grouped sidebar navigation — the single source of truth for the primary nav.
 // Each group may carry a `label` rendered as a small section header. Items are
-// gated declaratively via `product`/`feature`; `disabled` renders a muted
-// “coming soon” row (used to signal future agent channels like voice/Call).
+// gated declaratively via `product`/`feature`; future products remain real
+// preview links and use a truthful `Planned` label until their services ship.
 export const NAV_GROUPS = [
   {
     items: [
       {
         to: "/app/dashboard",
         icon: LayoutDashboard,
-        label: "Dashboard",
+        label: "Overview",
         id: DASH.sidebarOverview,
         end: true,
       },
-    ],
-  },
-  {
-    label: "Platform",
-    items: [
-      {
-        to: "/app/products",
-        icon: Layers3,
-        label: "Product portfolio",
-        id: "nav-product-portfolio",
-      },
-    ],
-  },
-  {
-    label: "AI Agents",
-    items: [
-      {
-        to: "/app/agents",
-        icon: Bot,
-        label: "Chat Agents",
-        id: DASH.sidebarAgents,
-        tour: "nav-agents",
-      },
-      {
-        to: "/app/agents/whatsapp",
-        icon: MessageCircle,
-        label: "WhatsApp Agents",
-        id: "nav-whatsapp-agents",
-        disabled: true,
-        badge: "Soon",
-      },
-      {
-        to: "/app/agents/call",
-        icon: Phone,
-        label: "Call Agents",
-        id: "nav-call-agents",
-        disabled: true,
-        badge: "Soon",
-      },
-    ],
-  },
-  {
-    label: "Engage",
-    items: [
       {
         to: "/app/conversations",
         icon: MessagesSquare,
-        label: "Conversations",
+        label: "Unified Inbox",
         id: DASH.sidebarConversations,
-        tour: "nav-conversations",
       },
-      { to: "/app/leads", icon: Users, label: "Leads", id: DASH.sidebarLeads },
+      {
+        to: "/app/leads",
+        icon: Users,
+        label: "Customers & Leads",
+        id: DASH.sidebarLeads,
+      },
+      {
+        to: "/app/analytics",
+        icon: ChartNoAxesCombined,
+        label: "Analytics",
+        id: DASH.sidebarAnalytics,
+      },
     ],
   },
   {
-    label: "Knowledge & Apps",
+    label: "AI Products",
     items: [
       {
-        to: "/app/knowledge-base",
-        icon: BookOpen,
-        label: "Knowledge Base",
-        id: DASH.sidebarKnowledge,
-        tour: "nav-knowledge",
+        to: "/app/products/chat",
+        icon: MessageSquare,
+        label: "AI Chat",
+        id: DASH.sidebarChat,
+        activePaths: [
+          "/app/products/chat",
+          "/app/agents",
+          "/app/knowledge-base",
+          "/app/widgets",
+        ],
+        children: [
+          {
+            to: "/app/products/chat",
+            label: "Overview",
+            end: true,
+            activePaths: ["/app/products/chat"],
+          },
+          {
+            to: "/app/products/chat/assistants",
+            label: "Agents",
+            id: DASH.sidebarAgents,
+            activePaths: ["/app/products/chat/assistants", "/app/agents"],
+          },
+          {
+            to: "/app/products/chat/knowledge",
+            label: "Knowledge",
+            id: DASH.sidebarKnowledge,
+            activePaths: [
+              "/app/products/chat/knowledge",
+              "/app/knowledge-base",
+            ],
+          },
+          {
+            to: "/app/widgets",
+            label: "Widget",
+            id: "nav-widgets",
+            activePaths: ["/app/widgets"],
+          },
+          {
+            to: "/app/products/chat/conversations",
+            label: "Conversations",
+            id: DASH.sidebarConversations,
+            activePaths: ["/app/products/chat/conversations"],
+          },
+        ],
       },
+      {
+        to: "/app/products/voice",
+        icon: Mic,
+        label: "AI Voice",
+        id: "nav-product-voice",
+        badge: "Planned",
+      },
+      {
+        to: "/app/products/whatsapp",
+        icon: Phone,
+        label: "WhatsApp",
+        id: "nav-product-whatsapp",
+        badge: "Planned",
+      },
+      {
+        to: "/app/products/omnichannel",
+        icon: Mail,
+        label: "Omnichannel",
+        id: "nav-product-omnichannel",
+        badge: "Planned",
+      },
+      {
+        to: "/app/products/automation",
+        icon: Workflow,
+        label: "Automation",
+        id: "nav-product-automation",
+        badge: "Planned",
+      },
+      {
+        to: "/app/products/ai-studio",
+        icon: Lightbulb,
+        label: "AI Studio",
+        id: "nav-product-ai-studio",
+        badge: "Planned",
+      },
+    ],
+  },
+  {
+    label: "Management",
+    items: [
       {
         to: "/app/integrations",
         icon: Plug,
         label: "Integrations",
         id: DASH.sidebarIntegrations,
       },
-    ],
-  },
-  {
-    label: "Resources",
-    items: [
       {
-        to: "/app/getting-started",
-        icon: Rocket,
-        label: "Getting Started",
-        id: "nav-getting-started",
+        to: "/app/team",
+        icon: Users,
+        label: "Team & Access",
+        id: "nav-team",
       },
       {
-        to: "/app/guide",
-        icon: LifeBuoy,
-        label: "Help & Docs",
-        id: "nav-guide",
+        to: "/app/usage",
+        icon: CreditCard,
+        label: "Free access & Usage",
+        id: "nav-usage",
       },
       {
-        to: "/app/changelog",
-        icon: Megaphone,
-        label: "What's New",
-        id: "nav-changelog",
-      },
-      {
-        to: "/app/status",
-        icon: Activity,
-        label: "Product Status",
-        id: "nav-status",
+        to: "/app/settings",
+        icon: Settings,
+        label: "Workspace Settings",
+        id: "nav-settings",
       },
     ],
   },
@@ -147,9 +182,9 @@ export const NAV_GROUPS = [
 
 // Flat list of navigable (non-disabled) destinations — used for tab-title
 // resolution and simple lookups. Derived from NAV_GROUPS so it never drifts.
-export const PRIMARY_NAV = NAV_GROUPS.flatMap((g) => g.items).filter(
-  (i) => !i.disabled,
-);
+export const PRIMARY_NAV = NAV_GROUPS.flatMap((g) =>
+  g.items.flatMap((item) => [item, ...(item.children || [])]),
+).filter((i) => !i.disabled);
 
 // Retained for back-compat with importers; the sidebar now renders NAV_GROUPS.
 export const SECONDARY_NAV = [];
@@ -160,7 +195,7 @@ export const SECONDARY_NAV = [];
 // `end: true` marks the index tab (active only on an exact match).
 export const SECTIONS = {
   "/app/agents": {
-    label: "AI Agents",
+    label: "AI Assistants",
     tabs: [
       { to: "/app/agents", label: "Overview", end: true },
       {
@@ -173,19 +208,155 @@ export const SECTIONS = {
   "/app/knowledge-base": {
     label: "Knowledge",
     tabs: [
-      { to: "/app/knowledge-base", label: "Knowledge Bases", end: true },
-      { to: "/app/knowledge-base/websites", label: "Websites" },
-      { to: "/app/knowledge-base/search", label: "Ask Knowledge" },
-      { to: "/app/knowledge-base/coverage", label: "Coverage" },
+      {
+        to: "/app/knowledge-base",
+        label: "Overview",
+        end: true,
+        activePaths: ["/app/knowledge-base"],
+      },
+      {
+        to: "/app/products/chat/knowledge/documents",
+        label: "Documents",
+        activePaths: ["/app/products/chat/knowledge/documents"],
+      },
+      {
+        to: "/app/knowledge-base/websites",
+        label: "Websites",
+        activePaths: [
+          "/app/knowledge-base/websites",
+          "/app/products/chat/knowledge/websites",
+        ],
+      },
+      {
+        to: "/app/knowledge-base/search",
+        label: "Search",
+        activePaths: [
+          "/app/knowledge-base/search",
+          "/app/products/chat/knowledge/search",
+        ],
+      },
+      {
+        to: "/app/knowledge-base/coverage",
+        label: "Coverage",
+        activePaths: [
+          "/app/knowledge-base/coverage",
+          "/app/products/chat/knowledge/coverage",
+        ],
+      },
     ],
   },
 };
 
+const ASSISTANT_ROUTE_SEGMENTS = new Set([
+  "new",
+  "templates",
+  "assistants",
+  "versions",
+  "quality",
+]);
+
+function getAssistantId(pathname, search = "") {
+  const designMatch = pathname.match(
+    /^\/app\/products\/chat\/assistants\/([^/]+)/,
+  );
+  if (designMatch && !ASSISTANT_ROUTE_SEGMENTS.has(designMatch[1])) {
+    return designMatch[1];
+  }
+
+  const canonicalMatch = pathname.match(/^\/app\/agents\/([^/]+)/);
+  if (canonicalMatch && !ASSISTANT_ROUTE_SEGMENTS.has(canonicalMatch[1])) {
+    return canonicalMatch[1];
+  }
+
+  if (
+    pathname === "/app/agents/versions" ||
+    pathname === "/app/agents/quality"
+  ) {
+    return new URLSearchParams(search).get("agent")?.trim() || "";
+  }
+
+  return "";
+}
+
+function assistantSection(pathname, search) {
+  const id = getAssistantId(pathname, search);
+  if (!id) return null;
+
+  const base = `/app/products/chat/assistants/${encodeURIComponent(id)}`;
+  const canonicalBase = `/app/agents/${encodeURIComponent(id)}`;
+
+  return {
+    root: "/app/agents",
+    label: "Assistant",
+    tabs: [
+      {
+        to: canonicalBase,
+        label: "Edit",
+        end: true,
+        activePaths: [canonicalBase],
+        activeSearch: (value) => !new URLSearchParams(value).has("tab"),
+      },
+      {
+        to: `${base}/behavior`,
+        label: "Behavior",
+        activePaths: [canonicalBase],
+        activeSearch: (value) =>
+          new URLSearchParams(value).get("tab") === "config",
+      },
+      {
+        to: `${base}/knowledge`,
+        label: "Knowledge",
+        activePaths: [`${base}/knowledge`],
+      },
+      {
+        to: `${base}/quality`,
+        label: "Quality",
+        activePaths: ["/app/agents/quality"],
+        activeSearch: (value) => new URLSearchParams(value).get("agent") === id,
+      },
+      {
+        to: `${base}/versions`,
+        label: "Versions",
+        activePaths: ["/app/agents/versions"],
+        activeSearch: (value) => new URLSearchParams(value).get("agent") === id,
+      },
+      {
+        to: `${base}/analytics`,
+        label: "Analytics",
+        activePaths: [`${base}/analytics`],
+      },
+      {
+        to: `${base}/install`,
+        label: "Install",
+        activePaths: [`${base}/install`, `${canonicalBase}/deploy`],
+      },
+      {
+        to: `${base}/playground`,
+        label: "Playground",
+        activePaths: ["/app/chat"],
+        activeSearch: (value) => new URLSearchParams(value).get("agent") === id,
+      },
+    ],
+  };
+}
+
 // Resolve the section config for a given pathname (longest-prefix match so
 // `/app/agents/versions` resolves to the `/app/agents` section).
-export function resolveSection(pathname) {
+export function resolveSection(pathname, search = "") {
+  const assistant = assistantSection(pathname, search);
+  if (assistant) return assistant;
+
   const root = Object.keys(SECTIONS)
-    .filter((r) => pathname === r || pathname.startsWith(r + "/"))
+    .filter((r) => {
+      if (pathname === r || pathname.startsWith(r + "/")) return true;
+      if (r === "/app/knowledge-base") {
+        return (
+          pathname === "/app/products/chat/knowledge" ||
+          pathname.startsWith("/app/products/chat/knowledge/")
+        );
+      }
+      return false;
+    })
     .sort((a, b) => b.length - a.length)[0];
   return root ? { root, ...SECTIONS[root] } : null;
 }

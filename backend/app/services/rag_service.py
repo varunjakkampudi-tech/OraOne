@@ -227,6 +227,10 @@ async def hybrid_search(
     query = (query or "").strip()
     if not query or top_k <= 0:
         return []
+    # ``None`` means the legacy all-active-KB fallback. An explicit empty
+    # allowlist means the caller intentionally selected no knowledge bases.
+    if knowledge_base_ids == []:
+        return []
 
     base = _base_query(organization_id, knowledge_base_ids, project_id)
     if source_types:

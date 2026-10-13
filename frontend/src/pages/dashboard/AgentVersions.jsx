@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   History,
   Loader2,
@@ -123,6 +124,8 @@ function DiffViewer({ diff }) {
 }
 
 export default function AgentVersions() {
+  const [searchParams] = useSearchParams();
+  const requestedAgentId = searchParams.get("agent")?.trim() || "";
   const [agents, setAgents] = useState([]);
   const [agentId, setAgentId] = useState("");
   const [data, setData] = useState(null);
@@ -132,22 +135,60 @@ export default function AgentVersions() {
   const [label, setLabel] = useState("");
   const [compare, setCompare] = useState({ from: null, to: 0 });
   const [diff, setDiff] = useState(null);
+  const [selectionError, setSelectionError] = useState("");
 
   useEffect(() => {
-    api
-      .get("/agents")
-      .then(({ data }) => {
+    let mounted = true;
+    const resolveAgent = async () => {
+      setSelectionError("");
+      try {
+        const { data } = await api.get("/agents", { params: { limit: 100 } });
         const list = Array.isArray(data) ? data : data?.items || [];
+        let selected = requestedAgentId
+          ? list.find((agent) => String(agent.id) === requestedAgentId)
+          : list[0];
+
+        if (requestedAgentId && !selected) {
+          try {
+            const direct = await api.get(`/agents/${requestedAgentId}`);
+            selected = direct.data;
+            if (String(selected?.id) !== requestedAgentId) {
+              throw new Error("The requested agent is unavailable.");
+            }
+            list.push(selected);
+          } catch {
+            if (!mounted) return;
+            setAgents(list);
+            setAgentId("");
+            setSelectionError("The requested agent is unavailable.");
+            return;
+          }
+        }
+
+        if (!mounted) return;
         setAgents(list);
-        if (list[0]) setAgentId(list[0].id);
-      })
-      .catch(() => setAgents([]));
-  }, []);
+        setAgentId(selected?.id ? String(selected.id) : "");
+      } catch (error) {
+        if (!mounted) return;
+        setAgents([]);
+        setAgentId("");
+        setSelectionError(
+          formatApiError(error?.response?.data?.detail) ||
+            "Could not load agents.",
+        );
+      }
+    };
+    resolveAgent();
+    return () => {
+      mounted = false;
+    };
+  }, [requestedAgentId]);
 
   const load = (id) => {
     if (!id) return;
     setLoading(true);
     setError("");
+    setData(null);
     setDiff(null);
     agentVersionsApi
       .list(id)
@@ -231,7 +272,10 @@ export default function AgentVersions() {
             </label>
             <select
               value={agentId}
-              onChange={(e) => setAgentId(e.target.value)}
+              onChange={(e) => {
+                if (!requestedAgentId) setAgentId(e.target.value);
+              }}
+              disabled={Boolean(requestedAgentId)}
               className="mt-1.5 w-full rounded-xl border py-2.5 px-3 text-sm outline-none"
               style={{ borderColor: LINE, color: INK }}
             >
@@ -267,9 +311,27 @@ export default function AgentVersions() {
             Publish version
           </PrimaryButton>
         </div>
+        {requestedAgentId && (
+          <p className="mt-3 text-xs" style={{ color: SUB }}>
+            This view is locked to the agent from the current assistant context.
+          </p>
+        )}
       </Card>
 
-      {loading ? (
+      {selectionError ? (
+        <Card className="mt-6 p-8">
+          <EmptyState
+            icon={AlertTriangle}
+            title="Agent unavailable"
+            hint={selectionError}
+            action={
+              <GhostButton as={Link} to="/app/agents">
+                Back to agents
+              </GhostButton>
+            }
+          />
+        </Card>
+      ) : loading ? (
         <div className="grid place-items-center py-16" style={{ color: SUB }}>
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>

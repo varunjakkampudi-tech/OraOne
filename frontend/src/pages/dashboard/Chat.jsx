@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import {
   Plus,
   Sparkles,
@@ -29,6 +34,7 @@ import {
 import { toast } from "sonner";
 import { api, API_BASE, getToken } from "@/lib/api";
 import { CHAT } from "@/constants/testIds";
+import { PageHeader } from "@/components/dashboard/kit";
 
 /* ----------------------------- helpers ----------------------------- */
 
@@ -243,6 +249,8 @@ function parseSSE(buffer) {
 
 export default function Chat() {
   const { conversationId } = useParams();
+  const [searchParams] = useSearchParams();
+  const requestedAgent = searchParams.get("agent");
   const nav = useNavigate();
 
   const [conversations, setConversations] = useState([]);
@@ -291,13 +299,21 @@ export default function Chat() {
 
   const loadAgents = useCallback(async () => {
     try {
-      const { data } = await api.get("/agents");
-      const list = Array.isArray(data) ? data : data?.items || [];
+      const { data } = await api.get(
+        requestedAgent
+          ? `/agents/${encodeURIComponent(requestedAgent)}`
+          : "/agents",
+      );
+      const list = requestedAgent
+        ? [data]
+        : Array.isArray(data)
+          ? data
+          : data?.items || [];
       setAgents(list);
     } catch {
       setAgents([]);
     }
-  }, []);
+  }, [requestedAgent]);
 
   const loadThread = useCallback(
     async (id) => {
@@ -366,16 +382,22 @@ export default function Chat() {
           agent_id: agent.id,
         });
         setConversations((prev) => [data, ...prev]);
-        nav(`/app/chat/${data.id}`);
+        nav(
+          `/app/chat/${data.id}${requestedAgent ? "?agent=" + encodeURIComponent(requestedAgent) : ""}`,
+        );
       } catch {
         toast.error("Could not start a conversation.");
       }
     },
-    [nav],
+    [nav, requestedAgent],
   );
 
   const onNewChat = () => {
     if (agents.length === 0) {
+      if (requestedAgent) {
+        toast.error("This assistant is unavailable in the active workspace.");
+        return;
+      }
       toast.error("Create an agent first to start chatting.");
       nav("/app/agents/new");
       return;
@@ -760,135 +782,151 @@ export default function Chat() {
   /* ------------------------------ render ------------------------------ */
 
   return (
-    <div className="h-[calc(100vh-7rem)] min-h-[520px]" data-testid={CHAT.page}>
-      <div className="h-full grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-5">
+    <div
+      className="flex h-[calc(100vh-7rem)] min-h-[600px] flex-col gap-4"
+      data-testid={CHAT.page}
+    >
+      {requestedAgent && (
+        <PageHeader
+          title="Assistant playground"
+          subtitle="Test this assistant’s instructions and knowledge in a real conversation."
+        />
+      )}
+      <div
+        className={`grid min-h-0 flex-1 grid-cols-1 gap-5 ${requestedAgent ? "lg:grid-cols-[minmax(0,1fr)_280px]" : "lg:grid-cols-[320px_minmax(0,1fr)]"}`}
+      >
         {/* ============ LEFT — conversation list ============ */}
-        <div className="hidden lg:flex rounded-2xl bg-white border border-[#E2E8F0] flex-col overflow-hidden">
-          <div className="p-3 border-b border-[#E2E8F0] space-y-2.5">
-            <button
-              onClick={onNewChat}
-              data-testid={CHAT.newChatBtn}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-semibold shadow-[0_8px_24px_-8px_rgba(37,99,235,0.5)] transition-colors"
-            >
-              <Plus size={16} /> New Chat
-            </button>
-            <div className="relative">
-              <Search
-                size={14}
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#94A3B8]"
-              />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search conversations…"
-                data-testid="chat-search"
-                className="w-full pl-8 pr-7 py-2 rounded-lg border border-[#E2E8F0] text-[13px] placeholder-[#94A3B8] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10"
-              />
-              {search && (
-                <button
-                  onClick={() => setSearch("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-[#94A3B8] hover:text-[#0F172A]"
-                  aria-label="Clear search"
-                >
-                  <X size={13} />
-                </button>
-              )}
-            </div>
-            <div className="flex items-center gap-1 text-[12px]">
-              {[
-                { k: "active", label: "All" },
-                { k: "favorites", label: "Favorites" },
-                { k: "archived", label: "Archived" },
-              ].map((t) => (
-                <button
-                  key={t.k}
-                  onClick={() => setFilter(t.k)}
-                  data-testid={`chat-filter-${t.k}`}
-                  className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
-                    filter === t.k
-                      ? "bg-[#EFF6FF] text-[#2563EB]"
-                      : "text-[#64748B] hover:bg-[#F8FAFC]"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto scrollbar-thin p-2 space-y-1">
-            {loadingConvs ? (
-              [1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-14 rounded-xl skeleton" />
-              ))
-            ) : conversations.length === 0 ? (
-              <div className="px-3 py-10 text-center">
-                <MessageSquarePlus
-                  size={28}
-                  className="mx-auto text-[#94A3B8]"
+        {!requestedAgent && (
+          <div className="hidden lg:flex rounded-lg bg-white border border-[#E2E8F0] flex-col overflow-hidden">
+            <div className="p-3 border-b border-[#E2E8F0] space-y-2.5">
+              <button
+                onClick={onNewChat}
+                data-testid={CHAT.newChatBtn}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-semibold shadow-[0_8px_24px_-8px_rgba(37,99,235,0.5)] transition-colors"
+              >
+                <Plus size={16} /> New Chat
+              </button>
+              <div className="relative">
+                <Search
+                  size={14}
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#94A3B8]"
                 />
-                <p className="mt-2 text-sm text-[#64748B]">
-                  {search
-                    ? "No matches found."
-                    : filter === "archived"
-                      ? "No archived chats."
-                      : filter === "favorites"
-                        ? "No favorites yet."
-                        : "No conversations yet."}
-                </p>
-                {!search && filter === "active" && (
-                  <p className="text-xs text-[#94A3B8]">
-                    Start a new chat to begin.
-                  </p>
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search conversations…"
+                  data-testid="chat-search"
+                  className="w-full pl-8 pr-7 py-2 rounded-lg border border-[#E2E8F0] text-[13px] placeholder-[#94A3B8] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10"
+                />
+                {search && (
+                  <button
+                    onClick={() => setSearch("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-[#94A3B8] hover:text-[#0F172A]"
+                    aria-label="Clear search"
+                  >
+                    <X size={13} />
+                  </button>
                 )}
               </div>
-            ) : (
-              (() => {
-                const pinned = conversations.filter((c) => c.is_pinned);
-                const others = conversations.filter((c) => !c.is_pinned);
-                const rowProps = {
-                  conversationId,
-                  nav,
-                  menuFor,
-                  setMenuFor,
-                  togglePin,
-                  toggleFavorite,
-                  toggleArchive,
-                  shareConversation,
-                  exportConversation,
-                  deleteConversation,
-                };
-                return (
-                  <>
-                    {pinned.length > 0 && (
-                      <>
-                        <div className="px-2 pt-1 pb-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-[#94A3B8] flex items-center gap-1">
-                          <Pin size={10} /> Pinned
-                        </div>
-                        {pinned.map((c) => (
-                          <ConversationRow key={c.id} c={c} {...rowProps} />
-                        ))}
-                        {others.length > 0 && (
-                          <div className="px-2 pt-2 pb-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-[#94A3B8]">
-                            Recent
+              <div className="flex items-center gap-1 text-[12px]">
+                {[
+                  { k: "active", label: "All" },
+                  { k: "favorites", label: "Favorites" },
+                  { k: "archived", label: "Archived" },
+                ].map((t) => (
+                  <button
+                    key={t.k}
+                    onClick={() => setFilter(t.k)}
+                    data-testid={`chat-filter-${t.k}`}
+                    className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                      filter === t.k
+                        ? "bg-[#EFF6FF] text-[#2563EB]"
+                        : "text-[#64748B] hover:bg-[#F8FAFC]"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto scrollbar-thin p-2 space-y-1">
+              {loadingConvs ? (
+                [1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-14 rounded-xl skeleton" />
+                ))
+              ) : conversations.length === 0 ? (
+                <div className="px-3 py-10 text-center">
+                  <MessageSquarePlus
+                    size={28}
+                    className="mx-auto text-[#94A3B8]"
+                  />
+                  <p className="mt-2 text-sm text-[#64748B]">
+                    {search
+                      ? "No matches found."
+                      : filter === "archived"
+                        ? "No archived chats."
+                        : filter === "favorites"
+                          ? "No favorites yet."
+                          : "No conversations yet."}
+                  </p>
+                  {!search && filter === "active" && (
+                    <p className="text-xs text-[#94A3B8]">
+                      Start a new chat to begin.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                (() => {
+                  const pinned = conversations.filter((c) => c.is_pinned);
+                  const others = conversations.filter((c) => !c.is_pinned);
+                  const rowProps = {
+                    conversationId,
+                    nav,
+                    menuFor,
+                    setMenuFor,
+                    togglePin,
+                    toggleFavorite,
+                    toggleArchive,
+                    shareConversation,
+                    exportConversation,
+                    deleteConversation,
+                  };
+                  return (
+                    <>
+                      {pinned.length > 0 && (
+                        <>
+                          <div className="px-2 pt-1 pb-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-[#94A3B8] flex items-center gap-1">
+                            <Pin size={10} /> Pinned
                           </div>
-                        )}
-                      </>
-                    )}
-                    {others.map((c) => (
-                      <ConversationRow key={c.id} c={c} {...rowProps} />
-                    ))}
-                  </>
-                );
-              })()
-            )}
+                          {pinned.map((c) => (
+                            <ConversationRow key={c.id} c={c} {...rowProps} />
+                          ))}
+                          {others.length > 0 && (
+                            <div className="px-2 pt-2 pb-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-[#94A3B8]">
+                              Recent
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {others.map((c) => (
+                        <ConversationRow key={c.id} c={c} {...rowProps} />
+                      ))}
+                    </>
+                  );
+                })()
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* ============ RIGHT — chat area ============ */}
-        <div className="rounded-2xl bg-white border border-[#E2E8F0] flex flex-col overflow-hidden">
+        <div className="rounded-lg bg-white border border-[#E2E8F0] flex flex-col overflow-hidden">
           {!conversationId ? (
-            <EmptyChat onNewChat={onNewChat} />
+            <EmptyChat
+              onNewChat={onNewChat}
+              agent={requestedAgent ? agents[0] : null}
+            />
           ) : (
             <>
               {/* header */}
@@ -1146,6 +1184,44 @@ export default function Chat() {
             </>
           )}
         </div>
+        {requestedAgent && (
+          <aside className="hidden min-w-0 self-start rounded-lg border border-[#E2E8F0] bg-white p-5 lg:block">
+            <h2 className="text-base font-semibold text-[#0F172A]">
+              Test configuration
+            </h2>
+            <dl className="mt-5 space-y-4 text-sm">
+              {[
+                ["Assistant", agents[0]?.name || "Unavailable"],
+                ["Configured model", agents[0]?.model || "Not selected"],
+                [
+                  "Knowledge",
+                  Array.isArray(agents[0]?.knowledge_base_ids)
+                    ? agents[0].knowledge_base_ids.length +
+                      " selected knowledge bases"
+                    : "Workspace default",
+                ],
+                ["Status", agents[0]?.status || "Unavailable"],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <dt className="text-xs text-[#64748B]">{label}</dt>
+                  <dd className="mt-1 break-words font-medium text-[#334155]">
+                    {value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <Link
+              to={
+                "/app/agents/" +
+                encodeURIComponent(requestedAgent) +
+                "?tab=config"
+              }
+              className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-[#E2E8F0] px-3 text-sm font-semibold text-[#334155] hover:bg-[#F8FAFC]"
+            >
+              Configure behavior
+            </Link>
+          </aside>
+        )}
       </div>
 
       {/* agent picker modal */}
@@ -1444,7 +1520,7 @@ function SourcesPanel({ sources }) {
   );
 }
 
-function EmptyChat({ onNewChat }) {
+function EmptyChat({ onNewChat, agent }) {
   return (
     <div className="h-full grid place-items-center p-8 text-center">
       <div className="max-w-sm">
@@ -1452,7 +1528,7 @@ function EmptyChat({ onNewChat }) {
           <Sparkles size={24} />
         </div>
         <h2 className="mt-4 text-xl font-bold text-[#0F172A]">
-          Chat with your AI agents
+          {agent ? "Test " + agent.name : "Chat with your AI agents"}
         </h2>
         <p className="mt-1.5 text-sm text-[#64748B]">
           Start a conversation to test your agent live. Responses use the

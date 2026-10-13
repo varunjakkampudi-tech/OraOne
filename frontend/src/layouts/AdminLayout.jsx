@@ -5,6 +5,7 @@ import {
   Search,
   Sun,
   Moon,
+  ChevronRight,
   ShieldAlert,
   Loader2,
   LogOut,
@@ -21,14 +22,22 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import CommandPalette from "@/components/admin/CommandPalette";
 import { superAdminApi } from "@/lib/superAdmin";
 
-function TopBar({ onMenu, onSearch, admin }) {
+function pageTitle(pathname) {
+  if (pathname === "/admin") return "Dashboard";
+  const segment = pathname.replace(/^\/admin\/?/, "").split("/")[0];
+  return (segment || "Dashboard")
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function TopBar({ onMenu, onSearch, admin, pathname }) {
   const { t, dark, toggle } = useAdminTheme();
   return (
     <header
-      className="sticky top-0 z-30 flex items-center gap-3 px-4 py-3 sm:px-6"
+      className="sticky top-0 z-30 flex min-h-16 items-center gap-3 px-4 sm:px-7"
       style={{
-        background: t.sidebar,
-        backdropFilter: "blur(16px)",
+        background: t.topbar,
+        backdropFilter: "blur(12px)",
         borderBottom: `1px solid ${t.line}`,
       }}
     >
@@ -40,9 +49,18 @@ function TopBar({ onMenu, onSearch, admin }) {
       >
         <Menu className="h-5 w-5" />
       </button>
+      <div className="hidden min-w-0 items-center gap-2 text-sm sm:flex">
+        <span className="shrink-0" style={{ color: t.sub }}>
+          Platform administration
+        </span>
+        <ChevronRight className="h-4 w-4 shrink-0" style={{ color: t.muted }} />
+        <strong className="truncate font-semibold" style={{ color: t.ink }}>
+          {pageTitle(pathname)}
+        </strong>
+      </div>
       <button
         onClick={onSearch}
-        className="flex flex-1 items-center gap-2 rounded-xl px-3 py-2 text-sm sm:max-w-md"
+        className="flex flex-1 items-center gap-2 rounded-lg px-3 py-2 text-sm sm:max-w-md"
         style={{
           background: t.glassSolid,
           border: `1px solid ${t.line}`,
@@ -64,7 +82,7 @@ function TopBar({ onMenu, onSearch, admin }) {
         <button
           onClick={toggle}
           aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
-          className="grid h-9 w-9 place-items-center rounded-xl"
+          className="grid h-9 w-9 place-items-center rounded-lg"
           style={{
             background: t.glassSolid,
             border: `1px solid ${t.line}`,
@@ -74,7 +92,7 @@ function TopBar({ onMenu, onSearch, admin }) {
           {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
         <div
-          className="hidden items-center gap-2 rounded-xl px-3 py-1.5 sm:flex"
+          className="hidden items-center gap-2 rounded-lg px-3 py-1.5 sm:flex"
           style={{ background: t.glassSolid, border: `1px solid ${t.line}` }}
         >
           <div
@@ -213,13 +231,14 @@ function Shell() {
           onMenu={() => setMobileOpen(true)}
           onSearch={() => setPaletteOpen(true)}
           admin={admin}
+          pathname={pathname}
         />
         <main
           id="main-content"
           tabIndex="-1"
           className="flex-1 overflow-y-auto scrollbar-thin outline-none"
         >
-          <div className="mx-auto max-w-[1600px] p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto w-full max-w-[1600px] p-5 sm:p-7 lg:p-9">
             <Outlet context={{ admin }} />
           </div>
         </main>

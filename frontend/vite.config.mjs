@@ -16,13 +16,18 @@ const clientEnvKeys = [
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const define = {
-    "process.env.NODE_ENV": JSON.stringify(mode === "production" ? "production" : "development"),
+    "process.env.NODE_ENV": JSON.stringify(
+      mode === "production" ? "production" : "development",
+    ),
   };
   for (const key of clientEnvKeys) {
     define[`process.env.${key}`] = JSON.stringify(env[key] || "");
   }
 
-  const backendTarget = env.REACT_APP_API_URL || env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
+  const backendTarget =
+    env.REACT_APP_API_URL ||
+    env.REACT_APP_BACKEND_URL ||
+    "http://127.0.0.1:8000";
 
   return {
     plugins: [tailwindcss(), react({ include: /\.[jt]sx?$/ })],
@@ -47,8 +52,16 @@ export default defineConfig(({ mode }) => {
     server: {
       port: Number(process.env.PORT) || 5173,
       strictPort: true,
+      watch: {
+        ignored: [
+          "**/output/**",
+          "**/test-results/**",
+          "**/.playwright-cli/**",
+          "**/build/**",
+        ],
+      },
       proxy: {
-        "/api/integrations/google/callback": {
+        "/api": {
           target: backendTarget,
           changeOrigin: true,
         },

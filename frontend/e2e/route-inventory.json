@@ -1,0 +1,1417 @@
+[
+  {
+    "path": "/",
+    "type": "content",
+    "source": "src/routes/index.tsx"
+  },
+  {
+    "path": "/about",
+    "type": "content",
+    "source": "src/routes/about.tsx"
+  },
+  {
+    "path": "/acceptable-use",
+    "type": "content",
+    "source": "src/routes/acceptable-use.tsx"
+  },
+  {
+    "path": "/app",
+    "type": "content",
+    "source": "src/routes/app.index.tsx"
+  },
+  {
+    "path": "/app/account",
+    "type": "content",
+    "source": "src/routes/app.account.index.tsx"
+  },
+  {
+    "path": "/app/account/notifications",
+    "type": "content",
+    "source": "src/routes/app.account.notifications.tsx"
+  },
+  {
+    "path": "/app/account/preferences",
+    "type": "content",
+    "source": "src/routes/app.account.preferences.tsx"
+  },
+  {
+    "path": "/app/account/profile",
+    "type": "content",
+    "source": "src/routes/app.account.profile.tsx"
+  },
+  {
+    "path": "/app/account/security",
+    "type": "content",
+    "source": "src/routes/app.account.security.tsx"
+  },
+  {
+    "path": "/app/account/sessions",
+    "type": "content",
+    "source": "src/routes/app.account.sessions.tsx"
+  },
+  {
+    "path": "/app/activity",
+    "type": "content",
+    "source": "src/routes/app.activity.tsx"
+  },
+  {
+    "path": "/app/analytics",
+    "type": "content",
+    "source": "src/routes/app.analytics.index.tsx"
+  },
+  {
+    "path": "/app/analytics/customer-360",
+    "type": "content",
+    "source": "src/routes/app.analytics.customer-360.tsx"
+  },
+  {
+    "path": "/app/analytics/optimization",
+    "type": "content",
+    "source": "src/routes/app.analytics.optimization.tsx"
+  },
+  {
+    "path": "/app/analytics/revenue",
+    "type": "content",
+    "source": "src/routes/app.analytics.revenue.tsx"
+  },
+  {
+    "path": "/app/billing",
+    "type": "content",
+    "source": "src/routes/app.billing.index.tsx"
+  },
+  {
+    "path": "/app/billing/invoices",
+    "type": "content",
+    "source": "src/routes/app.billing.invoices.tsx"
+  },
+  {
+    "path": "/app/billing/payment-methods",
+    "type": "content",
+    "source": "src/routes/app.billing.payment-methods.tsx"
+  },
+  {
+    "path": "/app/billing/plans",
+    "type": "content",
+    "source": "src/routes/app.billing.plans.tsx"
+  },
+  {
+    "path": "/app/billing/subscription",
+    "type": "content",
+    "source": "src/routes/app.billing.subscription.tsx"
+  },
+  {
+    "path": "/app/billing/usage",
+    "type": "content",
+    "source": "src/routes/app.billing.usage.tsx"
+  },
+  {
+    "path": "/app/customers",
+    "type": "content",
+    "source": "src/routes/app.customers.index.tsx"
+  },
+  {
+    "path": "/app/customers/$customerId",
+    "type": "content",
+    "source": "src/routes/app.customers.$customerId.tsx"
+  },
+  {
+    "path": "/app/inbox",
+    "type": "content",
+    "source": "src/routes/app.inbox.index.tsx"
+  },
+  {
+    "path": "/app/inbox/$conversationId",
+    "type": "content",
+    "source": "src/routes/app.inbox.$conversationId.tsx"
+  },
+  {
+    "path": "/app/integrations",
+    "type": "content",
+    "source": "src/routes/app.integrations.index.tsx"
+  },
+  {
+    "path": "/app/integrations/$id",
+    "type": "content",
+    "source": "src/routes/app.integrations.$id.tsx"
+  },
+  {
+    "path": "/app/integrations/catalog",
+    "type": "content",
+    "source": "src/routes/app.integrations.catalog.tsx"
+  },
+  {
+    "path": "/app/integrations/connected",
+    "type": "content",
+    "source": "src/routes/app.integrations.connected.tsx"
+  },
+  {
+    "path": "/app/integrations/webhooks",
+    "type": "content",
+    "source": "src/routes/app.integrations.webhooks.tsx"
+  },
+  {
+    "path": "/app/leads",
+    "type": "content",
+    "source": "src/routes/app.leads.index.tsx"
+  },
+  {
+    "path": "/app/leads/$leadId",
+    "type": "content",
+    "source": "src/routes/app.leads.$leadId.tsx"
+  },
+  {
+    "path": "/app/notifications",
+    "type": "content",
+    "source": "src/routes/app.notifications.tsx"
+  },
+  {
+    "path": "/app/products",
+    "type": "content",
+    "source": "src/routes/app.products.index.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.index.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/agents",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.agents.index.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/agents/$id",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.agents.$id.index.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/agents/$id/builder",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.agents.$id.builder.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/agents/new",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.agents.new.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/analytics",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.analytics.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/evaluations",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.evaluations.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/knowledge",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.knowledge.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/models",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.models.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/overview",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.overview.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/playground",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.playground.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/prompts",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.prompts.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/publishing",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.publishing.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/settings",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.settings.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/tools",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.tools.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/traces",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.traces.tsx"
+  },
+  {
+    "path": "/app/products/ai-studio/versions",
+    "type": "content",
+    "source": "src/routes/app.products.ai-studio.versions.tsx"
+  },
+  {
+    "path": "/app/products/automation",
+    "type": "content",
+    "source": "src/routes/app.products.automation.index.tsx"
+  },
+  {
+    "path": "/app/products/automation/actions",
+    "type": "content",
+    "source": "src/routes/app.products.automation.actions.tsx"
+  },
+  {
+    "path": "/app/products/automation/analytics",
+    "type": "content",
+    "source": "src/routes/app.products.automation.analytics.tsx"
+  },
+  {
+    "path": "/app/products/automation/errors",
+    "type": "content",
+    "source": "src/routes/app.products.automation.errors.tsx"
+  },
+  {
+    "path": "/app/products/automation/executions",
+    "type": "content",
+    "source": "src/routes/app.products.automation.executions.index.tsx"
+  },
+  {
+    "path": "/app/products/automation/executions/$id",
+    "type": "content",
+    "source": "src/routes/app.products.automation.executions.$id.tsx"
+  },
+  {
+    "path": "/app/products/automation/overview",
+    "type": "content",
+    "source": "src/routes/app.products.automation.overview.tsx"
+  },
+  {
+    "path": "/app/products/automation/settings",
+    "type": "content",
+    "source": "src/routes/app.products.automation.settings.tsx"
+  },
+  {
+    "path": "/app/products/automation/templates",
+    "type": "content",
+    "source": "src/routes/app.products.automation.templates.tsx"
+  },
+  {
+    "path": "/app/products/automation/triggers",
+    "type": "content",
+    "source": "src/routes/app.products.automation.triggers.tsx"
+  },
+  {
+    "path": "/app/products/automation/workflows",
+    "type": "content",
+    "source": "src/routes/app.products.automation.workflows.index.tsx"
+  },
+  {
+    "path": "/app/products/automation/workflows/$id",
+    "type": "content",
+    "source": "src/routes/app.products.automation.workflows.$id.index.tsx"
+  },
+  {
+    "path": "/app/products/automation/workflows/$id/builder",
+    "type": "content",
+    "source": "src/routes/app.products.automation.workflows.$id.builder.tsx"
+  },
+  {
+    "path": "/app/products/automation/workflows/new",
+    "type": "content",
+    "source": "src/routes/app.products.automation.workflows.new.tsx"
+  },
+  {
+    "path": "/app/products/chat",
+    "type": "content",
+    "source": "src/routes/app.products.chat.index.tsx"
+  },
+  {
+    "path": "/app/products/chat/analytics",
+    "type": "content",
+    "source": "src/routes/app.products.chat.analytics.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.index.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/$id",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.$id.index.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/$id/analytics",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.$id.analytics.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/$id/behavior",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.$id.behavior.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/$id/editor",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.$id.editor.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/$id/install",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.$id.install.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/$id/knowledge",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.$id.knowledge.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/$id/playground",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.$id.playground.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/$id/quality",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.$id.quality.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/$id/versions",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.$id.versions.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/$id/widget",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.$id.widget.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/demo",
+    "type": "layout",
+    "source": "src/routes/app.products.chat.assistants.demo.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/demo/instructions",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.demo.instructions.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/demo/models",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.demo.models.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/demo/settings",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.demo.settings.tsx"
+  },
+  {
+    "path": "/app/products/chat/assistants/new",
+    "type": "content",
+    "source": "src/routes/app.products.chat.assistants.new.tsx"
+  },
+  {
+    "path": "/app/products/chat/conversations",
+    "type": "content",
+    "source": "src/routes/app.products.chat.conversations.tsx"
+  },
+  {
+    "path": "/app/products/chat/knowledge",
+    "type": "content",
+    "source": "src/routes/app.products.chat.knowledge.index.tsx"
+  },
+  {
+    "path": "/app/products/chat/knowledge/coverage",
+    "type": "content",
+    "source": "src/routes/app.products.chat.knowledge.coverage.tsx"
+  },
+  {
+    "path": "/app/products/chat/knowledge/documents",
+    "type": "content",
+    "source": "src/routes/app.products.chat.knowledge.documents.tsx"
+  },
+  {
+    "path": "/app/products/chat/knowledge/search",
+    "type": "content",
+    "source": "src/routes/app.products.chat.knowledge.search.tsx"
+  },
+  {
+    "path": "/app/products/chat/knowledge/websites",
+    "type": "content",
+    "source": "src/routes/app.products.chat.knowledge.websites.tsx"
+  },
+  {
+    "path": "/app/products/chat/settings",
+    "type": "content",
+    "source": "src/routes/app.products.chat.settings.tsx"
+  },
+  {
+    "path": "/app/products/chat/templates",
+    "type": "content",
+    "source": "src/routes/app.products.chat.templates.tsx"
+  },
+  {
+    "path": "/app/products/enterprise",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.index.tsx"
+  },
+  {
+    "path": "/app/products/enterprise/access",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.access.tsx"
+  },
+  {
+    "path": "/app/products/enterprise/audit",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.audit.tsx"
+  },
+  {
+    "path": "/app/products/enterprise/compliance",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.compliance.tsx"
+  },
+  {
+    "path": "/app/products/enterprise/governance",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.governance.tsx"
+  },
+  {
+    "path": "/app/products/enterprise/overview",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.overview.tsx"
+  },
+  {
+    "path": "/app/products/enterprise/provisioning",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.provisioning.tsx"
+  },
+  {
+    "path": "/app/products/enterprise/reports",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.reports.tsx"
+  },
+  {
+    "path": "/app/products/enterprise/security",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.security.tsx"
+  },
+  {
+    "path": "/app/products/enterprise/settings",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.settings.tsx"
+  },
+  {
+    "path": "/app/products/enterprise/sso",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.sso.tsx"
+  },
+  {
+    "path": "/app/products/enterprise/support",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.support.tsx"
+  },
+  {
+    "path": "/app/products/enterprise/teams",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.teams.tsx"
+  },
+  {
+    "path": "/app/products/enterprise/usage",
+    "type": "content",
+    "source": "src/routes/app.products.enterprise.usage.tsx"
+  },
+  {
+    "path": "/app/products/marketplace",
+    "type": "content",
+    "source": "src/routes/app.products.marketplace.index.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/categories",
+    "type": "content",
+    "source": "src/routes/app.products.marketplace.categories.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/developer",
+    "type": "content",
+    "source": "src/routes/app.products.marketplace.developer.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/explore",
+    "type": "content",
+    "source": "src/routes/app.products.marketplace.explore.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/installed",
+    "type": "content",
+    "source": "src/routes/app.products.marketplace.installed.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/integrations",
+    "type": "layout",
+    "source": "src/routes/app.products.marketplace.integrations.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/integrations/$id",
+    "type": "content",
+    "source": "src/routes/app.products.marketplace.integrations.$id.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/items",
+    "type": "layout",
+    "source": "src/routes/app.products.marketplace.items.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/items/$id",
+    "type": "content",
+    "source": "src/routes/app.products.marketplace.items.$id.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/publishers",
+    "type": "layout",
+    "source": "src/routes/app.products.marketplace.publishers.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/publishers/$id",
+    "type": "content",
+    "source": "src/routes/app.products.marketplace.publishers.$id.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/settings",
+    "type": "content",
+    "source": "src/routes/app.products.marketplace.settings.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/submissions",
+    "type": "content",
+    "source": "src/routes/app.products.marketplace.submissions.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/templates",
+    "type": "layout",
+    "source": "src/routes/app.products.marketplace.templates.tsx"
+  },
+  {
+    "path": "/app/products/marketplace/templates/$id",
+    "type": "content",
+    "source": "src/routes/app.products.marketplace.templates.$id.tsx"
+  },
+  {
+    "path": "/app/products/mobile",
+    "type": "content",
+    "source": "src/routes/app.products.mobile.index.tsx"
+  },
+  {
+    "path": "/app/products/mobile/availability",
+    "type": "content",
+    "source": "src/routes/app.products.mobile.availability.tsx"
+  },
+  {
+    "path": "/app/products/mobile/features",
+    "type": "content",
+    "source": "src/routes/app.products.mobile.features.tsx"
+  },
+  {
+    "path": "/app/products/omnichannel",
+    "type": "content",
+    "source": "src/routes/app.products.omnichannel.index.tsx"
+  },
+  {
+    "path": "/app/products/omnichannel/analytics",
+    "type": "content",
+    "source": "src/routes/app.products.omnichannel.analytics.tsx"
+  },
+  {
+    "path": "/app/products/omnichannel/assignments",
+    "type": "content",
+    "source": "src/routes/app.products.omnichannel.assignments.tsx"
+  },
+  {
+    "path": "/app/products/omnichannel/channels",
+    "type": "content",
+    "source": "src/routes/app.products.omnichannel.channels.index.tsx"
+  },
+  {
+    "path": "/app/products/omnichannel/channels/connect",
+    "type": "content",
+    "source": "src/routes/app.products.omnichannel.channels.connect.tsx"
+  },
+  {
+    "path": "/app/products/omnichannel/conversations",
+    "type": "content",
+    "source": "src/routes/app.products.omnichannel.conversations.tsx"
+  },
+  {
+    "path": "/app/products/omnichannel/customers",
+    "type": "content",
+    "source": "src/routes/app.products.omnichannel.customers.tsx"
+  },
+  {
+    "path": "/app/products/omnichannel/overview",
+    "type": "content",
+    "source": "src/routes/app.products.omnichannel.overview.tsx"
+  },
+  {
+    "path": "/app/products/omnichannel/routing",
+    "type": "content",
+    "source": "src/routes/app.products.omnichannel.routing.tsx"
+  },
+  {
+    "path": "/app/products/omnichannel/segments",
+    "type": "content",
+    "source": "src/routes/app.products.omnichannel.segments.tsx"
+  },
+  {
+    "path": "/app/products/omnichannel/settings",
+    "type": "content",
+    "source": "src/routes/app.products.omnichannel.settings.tsx"
+  },
+  {
+    "path": "/app/products/omnichannel/sla",
+    "type": "content",
+    "source": "src/routes/app.products.omnichannel.sla.tsx"
+  },
+  {
+    "path": "/app/products/omnichannel/team-inbox",
+    "type": "content",
+    "source": "src/routes/app.products.omnichannel.team-inbox.tsx"
+  },
+  {
+    "path": "/app/products/oraone-os",
+    "type": "content",
+    "source": "src/routes/app.products.oraone-os.index.tsx"
+  },
+  {
+    "path": "/app/products/oraone-os/business-graph",
+    "type": "content",
+    "source": "src/routes/app.products.oraone-os.business-graph.tsx"
+  },
+  {
+    "path": "/app/products/oraone-os/command-center",
+    "type": "content",
+    "source": "src/routes/app.products.oraone-os.command-center.tsx"
+  },
+  {
+    "path": "/app/products/oraone-os/customer-lifecycle",
+    "type": "content",
+    "source": "src/routes/app.products.oraone-os.customer-lifecycle.tsx"
+  },
+  {
+    "path": "/app/products/oraone-os/governance",
+    "type": "content",
+    "source": "src/routes/app.products.oraone-os.governance.tsx"
+  },
+  {
+    "path": "/app/products/oraone-os/intelligence",
+    "type": "content",
+    "source": "src/routes/app.products.oraone-os.intelligence.tsx"
+  },
+  {
+    "path": "/app/products/oraone-os/operations",
+    "type": "content",
+    "source": "src/routes/app.products.oraone-os.operations.tsx"
+  },
+  {
+    "path": "/app/products/oraone-os/orchestration",
+    "type": "content",
+    "source": "src/routes/app.products.oraone-os.orchestration.tsx"
+  },
+  {
+    "path": "/app/products/oraone-os/overview",
+    "type": "content",
+    "source": "src/routes/app.products.oraone-os.overview.tsx"
+  },
+  {
+    "path": "/app/products/oraone-os/reports",
+    "type": "content",
+    "source": "src/routes/app.products.oraone-os.reports.tsx"
+  },
+  {
+    "path": "/app/products/oraone-os/settings",
+    "type": "content",
+    "source": "src/routes/app.products.oraone-os.settings.tsx"
+  },
+  {
+    "path": "/app/products/oraone-os/workflows",
+    "type": "content",
+    "source": "src/routes/app.products.oraone-os.workflows.tsx"
+  },
+  {
+    "path": "/app/products/voice",
+    "type": "content",
+    "source": "src/routes/app.products.voice.index.tsx"
+  },
+  {
+    "path": "/app/products/voice/agents",
+    "type": "content",
+    "source": "src/routes/app.products.voice.agents.index.tsx"
+  },
+  {
+    "path": "/app/products/voice/agents/$id",
+    "type": "content",
+    "source": "src/routes/app.products.voice.agents.$id.tsx"
+  },
+  {
+    "path": "/app/products/voice/agents/new",
+    "type": "content",
+    "source": "src/routes/app.products.voice.agents.new.tsx"
+  },
+  {
+    "path": "/app/products/voice/analytics",
+    "type": "content",
+    "source": "src/routes/app.products.voice.analytics.tsx"
+  },
+  {
+    "path": "/app/products/voice/calls",
+    "type": "content",
+    "source": "src/routes/app.products.voice.calls.index.tsx"
+  },
+  {
+    "path": "/app/products/voice/calls/$id",
+    "type": "content",
+    "source": "src/routes/app.products.voice.calls.$id.tsx"
+  },
+  {
+    "path": "/app/products/voice/campaigns",
+    "type": "content",
+    "source": "src/routes/app.products.voice.campaigns.tsx"
+  },
+  {
+    "path": "/app/products/voice/numbers",
+    "type": "content",
+    "source": "src/routes/app.products.voice.numbers.tsx"
+  },
+  {
+    "path": "/app/products/voice/overview",
+    "type": "content",
+    "source": "src/routes/app.products.voice.overview.tsx"
+  },
+  {
+    "path": "/app/products/voice/playground",
+    "type": "content",
+    "source": "src/routes/app.products.voice.playground.tsx"
+  },
+  {
+    "path": "/app/products/voice/settings",
+    "type": "content",
+    "source": "src/routes/app.products.voice.settings.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.index.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp/accounts",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.accounts.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp/agents",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.agents.index.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp/agents/new",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.agents.new.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp/analytics",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.analytics.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp/automation",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.automation.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp/campaigns",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.campaigns.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp/connect",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.connect.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp/contacts",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.contacts.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp/conversations",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.conversations.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp/overview",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.overview.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp/settings",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.settings.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp/templates",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.templates.index.tsx"
+  },
+  {
+    "path": "/app/products/whatsapp/templates/new",
+    "type": "content",
+    "source": "src/routes/app.products.whatsapp.templates.new.tsx"
+  },
+  {
+    "path": "/app/search",
+    "type": "content",
+    "source": "src/routes/app.search.tsx"
+  },
+  {
+    "path": "/app/settings",
+    "type": "content",
+    "source": "src/routes/app.settings.index.tsx"
+  },
+  {
+    "path": "/app/settings/api-keys",
+    "type": "content",
+    "source": "src/routes/app.settings.api-keys.tsx"
+  },
+  {
+    "path": "/app/settings/audit",
+    "type": "content",
+    "source": "src/routes/app.settings.audit.tsx"
+  },
+  {
+    "path": "/app/settings/billing",
+    "type": "content",
+    "source": "src/routes/app.settings.billing.tsx"
+  },
+  {
+    "path": "/app/settings/branding",
+    "type": "content",
+    "source": "src/routes/app.settings.branding.tsx"
+  },
+  {
+    "path": "/app/settings/data",
+    "type": "content",
+    "source": "src/routes/app.settings.data.tsx"
+  },
+  {
+    "path": "/app/settings/developers",
+    "type": "content",
+    "source": "src/routes/app.settings.developers.tsx"
+  },
+  {
+    "path": "/app/settings/general",
+    "type": "content",
+    "source": "src/routes/app.settings.general.tsx"
+  },
+  {
+    "path": "/app/settings/members",
+    "type": "content",
+    "source": "src/routes/app.settings.members.tsx"
+  },
+  {
+    "path": "/app/settings/models",
+    "type": "content",
+    "source": "src/routes/app.settings.models.tsx"
+  },
+  {
+    "path": "/app/settings/notifications",
+    "type": "content",
+    "source": "src/routes/app.settings.notifications.tsx"
+  },
+  {
+    "path": "/app/settings/operations",
+    "type": "content",
+    "source": "src/routes/app.settings.operations.tsx"
+  },
+  {
+    "path": "/app/settings/projects",
+    "type": "content",
+    "source": "src/routes/app.settings.projects.tsx"
+  },
+  {
+    "path": "/app/settings/security",
+    "type": "content",
+    "source": "src/routes/app.settings.security.tsx"
+  },
+  {
+    "path": "/app/settings/tasks",
+    "type": "content",
+    "source": "src/routes/app.settings.tasks.tsx"
+  },
+  {
+    "path": "/app/settings/teams",
+    "type": "content",
+    "source": "src/routes/app.settings.teams.tsx"
+  },
+  {
+    "path": "/app/settings/webhooks",
+    "type": "content",
+    "source": "src/routes/app.settings.webhooks.tsx"
+  },
+  {
+    "path": "/app/team",
+    "type": "content",
+    "source": "src/routes/app.team.index.tsx"
+  },
+  {
+    "path": "/app/team/activity",
+    "type": "content",
+    "source": "src/routes/app.team.activity.tsx"
+  },
+  {
+    "path": "/app/team/invitations",
+    "type": "content",
+    "source": "src/routes/app.team.invitations.tsx"
+  },
+  {
+    "path": "/app/team/members",
+    "type": "content",
+    "source": "src/routes/app.team.members.tsx"
+  },
+  {
+    "path": "/app/team/permissions",
+    "type": "content",
+    "source": "src/routes/app.team.permissions.tsx"
+  },
+  {
+    "path": "/app/team/roles",
+    "type": "content",
+    "source": "src/routes/app.team.roles.tsx"
+  },
+  {
+    "path": "/app/workspaces",
+    "type": "content",
+    "source": "src/routes/app.workspaces.index.tsx"
+  },
+  {
+    "path": "/app/workspaces/$id",
+    "type": "layout",
+    "source": "src/routes/app.workspaces.$id.tsx"
+  },
+  {
+    "path": "/app/workspaces/$id/settings",
+    "type": "content",
+    "source": "src/routes/app.workspaces.$id.settings.tsx"
+  },
+  {
+    "path": "/app/workspaces/new",
+    "type": "content",
+    "source": "src/routes/app.workspaces.new.tsx"
+  },
+  {
+    "path": "/auth",
+    "type": "layout",
+    "source": "src/routes/auth.tsx"
+  },
+  {
+    "path": "/auth/callback",
+    "type": "content",
+    "source": "src/routes/auth.callback.tsx"
+  },
+  {
+    "path": "/auth/error",
+    "type": "content",
+    "source": "src/routes/auth.error.tsx"
+  },
+  {
+    "path": "/auth/forgot-password",
+    "type": "redirect",
+    "source": "src/routes/auth.forgot-password.tsx"
+  },
+  {
+    "path": "/auth/invitation",
+    "type": "content",
+    "source": "src/routes/auth.invitation.tsx"
+  },
+  {
+    "path": "/auth/mfa",
+    "type": "content",
+    "source": "src/routes/auth.mfa.tsx"
+  },
+  {
+    "path": "/auth/reset-password",
+    "type": "redirect",
+    "source": "src/routes/auth.reset-password.tsx"
+  },
+  {
+    "path": "/auth/session-expired",
+    "type": "content",
+    "source": "src/routes/auth.session-expired.tsx"
+  },
+  {
+    "path": "/auth/sign-in",
+    "type": "content",
+    "source": "src/routes/auth.sign-in.tsx"
+  },
+  {
+    "path": "/auth/sign-up",
+    "type": "content",
+    "source": "src/routes/auth.sign-up.tsx"
+  },
+  {
+    "path": "/auth/verify-email",
+    "type": "content",
+    "source": "src/routes/auth.verify-email.tsx"
+  },
+  {
+    "path": "/changelog",
+    "type": "content",
+    "source": "src/routes/changelog.tsx"
+  },
+  {
+    "path": "/contact",
+    "type": "content",
+    "source": "src/routes/contact.tsx"
+  },
+  {
+    "path": "/cookies",
+    "type": "content",
+    "source": "src/routes/cookies.tsx"
+  },
+  {
+    "path": "/demo",
+    "type": "content",
+    "source": "src/routes/demo.tsx"
+  },
+  {
+    "path": "/docs",
+    "type": "content",
+    "source": "src/routes/docs.index.tsx"
+  },
+  {
+    "path": "/docs/ai-chat",
+    "type": "content",
+    "source": "src/routes/docs.ai-chat.tsx"
+  },
+  {
+    "path": "/docs/api",
+    "type": "content",
+    "source": "src/routes/docs.api.tsx"
+  },
+  {
+    "path": "/docs/getting-started",
+    "type": "content",
+    "source": "src/routes/docs.getting-started.tsx"
+  },
+  {
+    "path": "/docs/integrations",
+    "type": "content",
+    "source": "src/routes/docs.integrations.tsx"
+  },
+  {
+    "path": "/docs/webhooks",
+    "type": "content",
+    "source": "src/routes/docs.webhooks.tsx"
+  },
+  {
+    "path": "/features",
+    "type": "content",
+    "source": "src/routes/features.tsx"
+  },
+  {
+    "path": "/help",
+    "type": "content",
+    "source": "src/routes/help.index.tsx"
+  },
+  {
+    "path": "/help/contact",
+    "type": "content",
+    "source": "src/routes/help.contact.tsx"
+  },
+  {
+    "path": "/integrations",
+    "type": "content",
+    "source": "src/routes/integrations.tsx"
+  },
+  {
+    "path": "/onboarding",
+    "type": "content",
+    "source": "src/routes/onboarding.index.tsx"
+  },
+  {
+    "path": "/onboarding/ai-chat",
+    "type": "content",
+    "source": "src/routes/onboarding.ai-chat.tsx"
+  },
+  {
+    "path": "/onboarding/complete",
+    "type": "content",
+    "source": "src/routes/onboarding.complete.tsx"
+  },
+  {
+    "path": "/onboarding/install",
+    "type": "content",
+    "source": "src/routes/onboarding.install.tsx"
+  },
+  {
+    "path": "/onboarding/knowledge",
+    "type": "content",
+    "source": "src/routes/onboarding.knowledge.tsx"
+  },
+  {
+    "path": "/onboarding/profile",
+    "type": "content",
+    "source": "src/routes/onboarding.profile.tsx"
+  },
+  {
+    "path": "/onboarding/test",
+    "type": "content",
+    "source": "src/routes/onboarding.test.tsx"
+  },
+  {
+    "path": "/onboarding/use-case",
+    "type": "content",
+    "source": "src/routes/onboarding.use-case.tsx"
+  },
+  {
+    "path": "/onboarding/workspace",
+    "type": "content",
+    "source": "src/routes/onboarding.workspace.tsx"
+  },
+  {
+    "path": "/owner",
+    "type": "content",
+    "source": "src/routes/owner.index.tsx"
+  },
+  {
+    "path": "/owner/ai-models",
+    "type": "content",
+    "source": "src/routes/owner.ai-models.tsx"
+  },
+  {
+    "path": "/owner/audit",
+    "type": "content",
+    "source": "src/routes/owner.audit.tsx"
+  },
+  {
+    "path": "/owner/billing",
+    "type": "content",
+    "source": "src/routes/owner.billing.tsx"
+  },
+  {
+    "path": "/owner/entitlements",
+    "type": "content",
+    "source": "src/routes/owner.entitlements.tsx"
+  },
+  {
+    "path": "/owner/errors",
+    "type": "content",
+    "source": "src/routes/owner.errors.tsx"
+  },
+  {
+    "path": "/owner/feature-flags",
+    "type": "content",
+    "source": "src/routes/owner.feature-flags.tsx"
+  },
+  {
+    "path": "/owner/infrastructure",
+    "type": "content",
+    "source": "src/routes/owner.infrastructure.tsx"
+  },
+  {
+    "path": "/owner/monitoring",
+    "type": "content",
+    "source": "src/routes/owner.monitoring.tsx"
+  },
+  {
+    "path": "/owner/organizations",
+    "type": "content",
+    "source": "src/routes/owner.organizations.index.tsx"
+  },
+  {
+    "path": "/owner/organizations/$id",
+    "type": "content",
+    "source": "src/routes/owner.organizations.$id.tsx"
+  },
+  {
+    "path": "/owner/products",
+    "type": "content",
+    "source": "src/routes/owner.products.tsx"
+  },
+  {
+    "path": "/owner/security",
+    "type": "content",
+    "source": "src/routes/owner.security.tsx"
+  },
+  {
+    "path": "/owner/settings",
+    "type": "content",
+    "source": "src/routes/owner.settings.tsx"
+  },
+  {
+    "path": "/owner/subscriptions",
+    "type": "content",
+    "source": "src/routes/owner.subscriptions.tsx"
+  },
+  {
+    "path": "/owner/support",
+    "type": "content",
+    "source": "src/routes/owner.support.tsx"
+  },
+  {
+    "path": "/owner/usage",
+    "type": "content",
+    "source": "src/routes/owner.usage.tsx"
+  },
+  {
+    "path": "/owner/users",
+    "type": "content",
+    "source": "src/routes/owner.users.index.tsx"
+  },
+  {
+    "path": "/owner/users/$id",
+    "type": "content",
+    "source": "src/routes/owner.users.$id.tsx"
+  },
+  {
+    "path": "/platform",
+    "type": "content",
+    "source": "src/routes/platform.tsx"
+  },
+  {
+    "path": "/pricing",
+    "type": "content",
+    "source": "src/routes/pricing.tsx"
+  },
+  {
+    "path": "/privacy",
+    "type": "content",
+    "source": "src/routes/privacy.tsx"
+  },
+  {
+    "path": "/products",
+    "type": "content",
+    "source": "src/routes/products.index.tsx"
+  },
+  {
+    "path": "/products/ai-chat",
+    "type": "content",
+    "source": "src/routes/products.ai-chat.tsx"
+  },
+  {
+    "path": "/products/ai-studio",
+    "type": "content",
+    "source": "src/routes/products.ai-studio.tsx"
+  },
+  {
+    "path": "/products/ai-voice",
+    "type": "content",
+    "source": "src/routes/products.ai-voice.tsx"
+  },
+  {
+    "path": "/products/automation",
+    "type": "content",
+    "source": "src/routes/products.automation.tsx"
+  },
+  {
+    "path": "/products/enterprise",
+    "type": "content",
+    "source": "src/routes/products.enterprise.tsx"
+  },
+  {
+    "path": "/products/marketplace",
+    "type": "content",
+    "source": "src/routes/products.marketplace.tsx"
+  },
+  {
+    "path": "/products/mobile",
+    "type": "content",
+    "source": "src/routes/products.mobile.tsx"
+  },
+  {
+    "path": "/products/omnichannel",
+    "type": "content",
+    "source": "src/routes/products.omnichannel.tsx"
+  },
+  {
+    "path": "/products/oraone-os",
+    "type": "content",
+    "source": "src/routes/products.oraone-os.tsx"
+  },
+  {
+    "path": "/products/whatsapp",
+    "type": "content",
+    "source": "src/routes/products.whatsapp.tsx"
+  },
+  {
+    "path": "/refund-policy",
+    "type": "content",
+    "source": "src/routes/refund-policy.tsx"
+  },
+  {
+    "path": "/reset-password",
+    "type": "redirect",
+    "source": "src/routes/reset-password.tsx"
+  },
+  {
+    "path": "/roadmap",
+    "type": "content",
+    "source": "src/routes/roadmap.tsx"
+  },
+  {
+    "path": "/security",
+    "type": "content",
+    "source": "src/routes/security.tsx"
+  },
+  {
+    "path": "/solutions",
+    "type": "content",
+    "source": "src/routes/solutions.index.tsx"
+  },
+  {
+    "path": "/solutions/customer-support",
+    "type": "content",
+    "source": "src/routes/solutions.customer-support.tsx"
+  },
+  {
+    "path": "/solutions/enterprise",
+    "type": "content",
+    "source": "src/routes/solutions.enterprise.tsx"
+  },
+  {
+    "path": "/solutions/lead-generation",
+    "type": "content",
+    "source": "src/routes/solutions.lead-generation.tsx"
+  },
+  {
+    "path": "/solutions/sales",
+    "type": "content",
+    "source": "src/routes/solutions.sales.tsx"
+  },
+  {
+    "path": "/solutions/small-business",
+    "type": "content",
+    "source": "src/routes/solutions.small-business.tsx"
+  },
+  {
+    "path": "/status",
+    "type": "content",
+    "source": "src/routes/status.tsx"
+  },
+  {
+    "path": "/studio",
+    "type": "content",
+    "source": "src/routes/_authenticated/studio.index.tsx"
+  },
+  {
+    "path": "/studio/assistants/$id",
+    "type": "content",
+    "source": "src/routes/_authenticated/studio.assistants.$id.tsx"
+  },
+  {
+    "path": "/terms",
+    "type": "content",
+    "source": "src/routes/terms.tsx"
+  }
+]

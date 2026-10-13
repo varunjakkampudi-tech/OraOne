@@ -15,7 +15,7 @@ import { cognitoEnabled, getCognitoLogoutUrl } from "@/lib/cognito";
 import { useProjects } from "@/lib/projects";
 import { superAdminApi } from "@/lib/superAdmin";
 
-export default function ProfileMenu() {
+export default function ProfileMenu({ dark = false }) {
   const { user, logout, organizationName, membershipRole } = useAuth();
   const { activeProject } = useProjects();
   const [open, setOpen] = useState(false);
@@ -76,7 +76,7 @@ export default function ProfileMenu() {
     <div className="relative" ref={ref} data-testid="profile-menu">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 rounded-xl p-1 pl-1.5 hover:bg-[#F1F5F9] transition-colors"
+        className={`flex items-center gap-1.5 rounded-xl p-1 pl-1.5 transition-colors ${dark ? "hover:bg-white/10" : "hover:bg-[#F1F5F9]"}`}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Open profile menu"
@@ -85,7 +85,10 @@ export default function ProfileMenu() {
         <span className="size-8 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] grid place-items-center text-white text-sm font-semibold">
           {initial}
         </span>
-        <ChevronDown size={15} className="text-[#94A3B8]" />
+        <ChevronDown
+          size={15}
+          className={dark ? "text-slate-300" : "text-[#94A3B8]"}
+        />
       </button>
 
       {open && (
@@ -104,7 +107,7 @@ export default function ProfileMenu() {
                 {user?.full_name || "User"}
               </p>
               <p className="truncate text-xs capitalize text-[#64748B]">
-                {membershipRole || user?.role || "owner"}
+                {membershipRole || "Member"}
               </p>
             </div>
           </div>
@@ -133,7 +136,7 @@ export default function ProfileMenu() {
                   Project
                 </p>
                 <p className="truncate text-[13px] font-medium text-[#0F172A]">
-                  {activeProject?.name || "First Project"}
+                  {activeProject?.name || "No project selected"}
                 </p>
               </div>
               <span className="text-[11px] font-semibold text-[#2563EB]">

@@ -26,6 +26,13 @@ import { formatApiError } from "@/lib/api";
 const SEV = { high: "red", medium: "amber", low: "slate" };
 
 function Donut({ value, label }) {
+  if (!Number.isFinite(value)) {
+    return (
+      <div className="py-8 text-center text-sm text-sub">
+        {label}: unavailable
+      </div>
+    );
+  }
   const r = 52;
   const c = 2 * Math.PI * r;
   const off = c - (Math.max(0, Math.min(100, value)) / 100) * c;

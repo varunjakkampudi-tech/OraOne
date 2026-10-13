@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
@@ -67,6 +67,8 @@ function buildPayload(a, overrides = {}) {
 export default function AgentBuilder() {
   const { id } = useParams();
   const nav = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab");
   const [tab, setTab] = useState("basic");
   const [agent, setAgent] = useState(null);
   const [saveState, setSaveState] = useState("idle"); // idle | saving | saved
@@ -105,8 +107,14 @@ export default function AgentBuilder() {
     const configured =
       Boolean((agent.name || "").trim()) &&
       Boolean((agent.system_prompt || "").trim());
-    if (agent.status === "active" || configured) setTab("review");
-  }, [agent]);
+    if (
+      ["basic", "config", "knowledge", "integrations", "review"].includes(
+        requestedTab,
+      )
+    )
+      setTab(requestedTab);
+    else if (agent.status === "active" || configured) setTab("review");
+  }, [agent, requestedTab]);
 
   // Keep a live ref so the debounced autosave always reads the latest edits.
   useEffect(() => {
@@ -267,51 +275,43 @@ export default function AgentBuilder() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Side tabs */}
-        <aside className="lg:col-span-3">
-          <div className="p-3 rounded-2xl bg-white border border-[#E2E8F0]">
-            <nav className="space-y-1">
-              {TABS.map((t, idx) => {
-                const reachable = canReach(t.key);
-                const isActive = tab === t.key;
-                const completed =
-                  stepValid(t.key) && STEP_ORDER.indexOf(tab) > idx;
-                return (
-                  <button
-                    key={t.key}
-                    onClick={() => onTab(t.key)}
-                    data-tour={
-                      t.key === "review" ? "builder-tab-review" : undefined
-                    }
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${
-                      isActive
-                        ? "bg-[#EFF6FF] text-[#2563EB]"
-                        : reachable
-                          ? "text-[#475569] hover:bg-[#F8FAFC]"
-                          : "text-[#CBD5E1] cursor-not-allowed"
-                    }`}
-                    data-testid={`builder-tab-${t.key}`}
-                  >
-                    <span
-                      className={`size-6 rounded-full grid place-items-center text-xs font-semibold ${completed ? "bg-[#16A34A] text-white" : isActive ? "bg-[#2563EB] text-white" : reachable ? "bg-[#F1F5F9] text-[#64748B]" : "bg-[#F1F5F9] text-[#CBD5E1]"}`}
-                    >
-                      {completed ? <Check size={14} /> : idx + 1}
-                    </span>
-                    {t.label}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-        </aside>
+        <nav
+          className="flex flex-wrap gap-1 border-b border-[#E2E8F0] lg:col-span-12"
+          aria-label="Assistant configuration"
+        >
+          {TABS.map((t) => {
+            const reachable = canReach(t.key);
+            return (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => onTab(t.key)}
+                data-tour={
+                  t.key === "review" ? "builder-tab-review" : undefined
+                }
+                data-testid={"builder-tab-" + t.key}
+                disabled={!reachable}
+                aria-current={tab === t.key ? "page" : undefined}
+                className={
+                  "min-h-11 border-b-2 px-4 py-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:text-[#94A3B8] " +
+                  (tab === t.key
+                    ? "border-[#2563EB] text-[#2563EB]"
+                    : "border-transparent text-[#64748B] hover:text-[#0F172A]")
+                }
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </nav>
 
         {/* Form panel */}
-        <div className="lg:col-span-9">
+        <div className="min-w-0 lg:col-span-12">
           <motion.div
             key={tab}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E2E8F0]"
+            className="p-5 sm:p-6 rounded-lg bg-white border border-[#E2E8F0]"
           >
             {tab === "basic" && (
               <div className="space-y-5">

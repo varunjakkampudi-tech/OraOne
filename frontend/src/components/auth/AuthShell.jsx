@@ -1,27 +1,20 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { OraMark } from "@/components/marketing/Logo";
+import WorkspaceIllustration from "@/components/marketing/WorkspaceIllustration";
 import {
-  Headset,
-  BookOpen,
-  Users,
-  ShieldCheck,
-  Zap,
-  Crown,
-  MessagesSquare,
-  BarChart3,
-  Bot,
   Check,
-  Lock,
   ArrowRight,
+  ArrowUpRight,
+  ShieldCheck,
+  LockKeyhole,
 } from "lucide-react";
 
 /* ── Auth brand mark (swirl + ORAONE wordmark, matches design) ── */
 export function AuthBrand() {
   return (
     <div className="flex items-center gap-2.5">
-      <OraMark size={38} />
-      <span className="text-[21px] font-extrabold uppercase leading-none tracking-[0.04em]">
+      <OraMark size={32} />
+      <span className="text-xl font-bold leading-none tracking-tight">
         <span className="text-[#0F172A]">Ora</span>
         <span className="text-[#1E293B]">One</span>
       </span>
@@ -50,237 +43,51 @@ export function Hexagon({ size = 16 }) {
   );
 }
 
-/* ── Left-panel data ───────────────────────────────────────── */
-const FEATURES = [
-  {
-    icon: Headset,
-    tone: "blue",
-    title: "AI Chat Agents",
-    desc: "Human-like conversations that convert.",
-  },
-  {
-    icon: MessagesSquare,
-    tone: "green",
-    title: "Website Widget",
-    desc: "Drop it on any site in one line.",
-  },
-  {
-    icon: BookOpen,
-    tone: "cyan",
-    title: "Knowledge Base AI",
-    desc: "Instant answers from your data.",
-  },
-  {
-    icon: Users,
-    tone: "blue",
-    title: "Lead Intelligence",
-    desc: "Capture, qualify & convert leads.",
-  },
-  {
-    icon: ShieldCheck,
-    tone: "cyan",
-    title: "Enterprise Security",
-    desc: "Security controls built into every workspace.",
-  },
-];
-
-const TONES = {
-  violet: "bg-[#EFF6FF] text-[#2563EB]",
-  green: "bg-[#ECFDF5] text-[#16A34A]",
-  blue: "bg-[#EFF4FF] text-[#2563EB]",
-  cyan: "bg-[#ECFEFF] text-[#0891B2]",
-  pink: "bg-[#ECFEFF] text-[#0891B2]",
-  amber: "bg-[#FFF7ED] text-[#F59E0B]",
-  indigo: "bg-[#EFF4FF] text-[#2563EB]",
-};
-
-const STATS = [
-  { icon: ShieldCheck, tone: "blue", value: "Email", label: "Only sign-in" },
-  { icon: Zap, tone: "cyan", value: "Verified", label: "Email sessions" },
-  {
-    icon: Crown,
-    tone: "amber",
-    value: "No social",
-    label: "Sign-in providers",
-  },
-];
-
-const TRUST = [
-  { icon: ShieldCheck, lines: ["Email-only", "authentication"] },
-  { icon: Hexagon, lines: ["Verified", "email flow"] },
-  { icon: Lock, lines: ["Secure", "session controls"] },
-];
-
-/* ── Decorative conversation flow ──────────────────────────── */
-function ChatFlow() {
-  return (
-    <div className="relative h-[300px] w-[300px]" aria-hidden="true">
-      <svg
-        className="absolute inset-0 h-full w-full"
-        viewBox="0 0 300 300"
-        fill="none"
-      >
-        <path
-          d="M250 40 C250 90 120 90 120 130"
-          stroke="#CBD5E1"
-          strokeWidth="2"
-          strokeDasharray="4 5"
-        />
-        <path
-          d="M210 150 C260 160 260 210 220 220"
-          stroke="#CBD5E1"
-          strokeWidth="2"
-          strokeDasharray="4 5"
-        />
-      </svg>
-
-      <div className="absolute right-6 top-0 grid size-10 place-items-center rounded-xl bg-white text-[#2563EB] shadow-[0_10px_30px_-12px_rgba(15,23,42,0.35)]">
-        <MessagesSquare size={18} />
-      </div>
-
-      <div className="absolute left-4 top-16 w-[190px] rounded-2xl border border-[#EEF0F6] bg-white p-3 shadow-[0_16px_40px_-20px_rgba(15,23,42,0.35)]">
-        <div className="flex items-start gap-2.5">
-          <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[#EFF6FF] text-[#2563EB]">
-            <Bot size={15} />
-          </span>
-          <div>
-            <p className="text-xs font-bold text-[#0F172A]">AI Agent</p>
-            <p className="mt-0.5 text-[11px] leading-snug text-[#64748B]">
-              Hello! How can I help you today?
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="absolute right-1 top-[150px] flex items-center gap-2">
-        <span className="rounded-xl border border-[#EEF0F6] bg-white px-3 py-2 text-[11px] font-medium text-[#334155] shadow-[0_12px_30px_-18px_rgba(15,23,42,0.4)]">
-          Book a demo please
-        </span>
-        <span className="grid size-7 place-items-center rounded-full bg-[#E2E8F0] text-[#64748B]">
-          <Users size={14} />
-        </span>
-      </div>
-
-      <div className="absolute left-8 top-[210px] flex items-center gap-2.5 rounded-2xl border border-[#EEF0F6] bg-white p-3 shadow-[0_16px_40px_-20px_rgba(15,23,42,0.35)]">
-        <div>
-          <p className="text-[11px] font-semibold leading-snug text-[#0F172A]">
-            Demo scheduled
-          </p>
-          <p className="text-[11px] leading-snug text-[#64748B]">
-            for tomorrow at 11:00 AM
-          </p>
-        </div>
-        <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[#16A34A] text-white">
-          <Check size={13} strokeWidth={3} />
-        </span>
-      </div>
-
-      <div className="absolute bottom-0 right-10 grid size-10 place-items-center rounded-xl bg-white text-[#0891B2] shadow-[0_10px_30px_-12px_rgba(15,23,42,0.35)]">
-        <BarChart3 size={18} />
-      </div>
-    </div>
-  );
+/* ── Auth-side product illustration ───────────────────────── */
+function WorkspacePreview() {
+  return <WorkspaceIllustration compact />;
 }
 
-/* ── Left marketing panel ──────────────────────────────────── */
+/* ── Editorial panel based on the approved Lovable direction ─ */
 function MarketingPanel() {
   return (
-    <div className="relative hidden flex-col px-8 py-8 lg:flex xl:px-16 xl:py-10">
-      <AuthBrand />
-
-      <div className="flex flex-1 flex-col justify-center gap-12">
-        <div className="relative">
-          <div className="max-w-lg">
-            <span className="inline-block rounded-full bg-[#EFF6FF] px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#2563EB]">
-              One AI. Every Conversation
-            </span>
-            <h1 className="mt-4 text-[42px] font-extrabold leading-[1.04] tracking-tight text-[#0F172A] xl:text-[46px]">
-              Build.
-              <br />
-              Automate.
-              <br />
-              <span className="bg-gradient-to-r from-[#2563EB] to-[#06B6D4] bg-clip-text text-transparent">
-                Scale.
-              </span>
-            </h1>
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-[#475569]">
-              OraOne helps businesses automate conversations, capture leads, and
-              scale operations with advanced AI agents.
-            </p>
-          </div>
-
-          <div className="pointer-events-none absolute right-0 top-0 hidden origin-top-right scale-[0.82] lg:block xl:scale-90">
-            <ChatFlow />
-          </div>
-        </div>
-
-        <div className="space-y-3.5">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {FEATURES.map((f) => (
-              <div
-                key={f.title}
-                className="rounded-2xl border border-[#EEF0F6] bg-white p-4 shadow-[0_10px_30px_-22px_rgba(15,23,42,0.4)]"
-              >
-                <span
-                  className={`grid size-10 place-items-center rounded-xl ${TONES[f.tone]}`}
-                >
-                  <f.icon size={20} />
-                </span>
-                <p className="mt-3 text-[13px] font-bold leading-tight text-[#0F172A]">
-                  {f.title}
-                </p>
-                <p className="mt-1 text-[11px] leading-snug text-[#475569]">
-                  {f.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex items-center justify-between gap-2 rounded-2xl border border-[#EEF0F6] bg-white px-5 py-4">
-            {STATS.map((s, i) => (
-              <React.Fragment key={s.label}>
-                {i > 0 && <span className="h-9 w-px bg-[#EEF0F6]" />}
-                <div className="flex items-center gap-2.5">
-                  <span
-                    className={`grid size-9 place-items-center rounded-xl ${TONES[s.tone]}`}
-                  >
-                    <s.icon size={18} />
-                  </span>
-                  <div>
-                    <p className="text-[15px] font-extrabold leading-none text-[#0F172A]">
-                      {s.value}
-                    </p>
-                    <p className="mt-1 text-[11px] text-[#475569]">{s.label}</p>
-                  </div>
-                </div>
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
+    <aside className="relative hidden flex-col justify-center overflow-hidden border-r border-[#E2E8F0] bg-[#F8FAFC] px-8 py-10 lg:flex xl:px-12">
+      <div
+        className="pointer-events-none absolute -right-24 -top-24 size-[26rem] rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.10),transparent_68%)]"
+        aria-hidden="true"
+      />
+      <div className="relative w-full max-w-xl py-6">
+        <p className="mb-4 text-sm font-semibold text-[#2563EB]">
+          Your OraOne workspace
+        </p>
+        <h2 className="max-w-lg text-3xl font-bold leading-[1.25] tracking-tight text-[#0F172A] xl:text-4xl">
+          More context.
+          <br />
+          Better conversations.
+        </h2>
+        <p className="mt-5 max-w-md text-base leading-relaxed text-[#475569]">
+          Bring your assistant, the knowledge it uses, and customer
+          conversations together in one place.
+        </p>
+        <WorkspacePreview />
       </div>
-    </div>
+      <p className="relative text-xs text-[#64748B]">
+        A clear view of the work behind every conversation.
+      </p>
+    </aside>
   );
 }
 
 /* ── Trust badges footer (inside each card) ────────────────── */
 export function TrustBadges() {
   return (
-    <div className="mt-5 grid grid-cols-3 gap-2 border-t border-[#F1F5F9] pt-4">
-      {TRUST.map((t) => (
-        <div
-          key={t.lines[1]}
-          className="flex flex-col items-center gap-1.5 text-center"
-        >
-          <span className="grid size-6 place-items-center rounded-lg bg-[#F5F7FA] text-[#64748B]">
-            <t.icon size={13} />
-          </span>
-          <p className="text-[10px] leading-tight text-[#64748B]">
-            {t.lines[0]}
-            <br />
-            {t.lines[1]}
-          </p>
-        </div>
-      ))}
+    <div className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-[#EEF0F6] pt-5 text-xs text-[#64748B]">
+      <span className="inline-flex items-center gap-1.5">
+        <LockKeyhole size={14} aria-hidden="true" /> Email-only access
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <ShieldCheck size={14} aria-hidden="true" /> No social sign-in
+      </span>
     </div>
   );
 }
@@ -288,8 +95,8 @@ export function TrustBadges() {
 /* ── Shared right-side UI primitives ───────────────────────── */
 export function IconBadge({ icon: Icon, check = false }) {
   return (
-    <div className="relative mx-auto grid size-20 place-items-center rounded-full bg-gradient-to-br from-[#EFF6FF] to-[#ECFEFF]">
-      <Icon size={34} className="text-[#2563EB]" />
+    <div className="relative mb-5 grid size-12 place-items-center rounded-lg bg-[#EFF6FF]">
+      <Icon size={23} className="text-[#2563EB]" />
       {check && (
         <span className="absolute -bottom-0.5 right-1 grid size-7 place-items-center rounded-full bg-[#16A34A] text-white ring-4 ring-white">
           <Check size={14} strokeWidth={3} />
@@ -310,7 +117,7 @@ export function GradientButton({
     <button
       {...props}
       disabled={busy || props.disabled}
-      className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2563EB] to-[#06B6D4] py-3.5 text-sm font-semibold text-white shadow-[0_12px_30px_-12px_rgba(37,99,235,0.7)] transition-all hover:brightness-[1.05] disabled:cursor-not-allowed disabled:opacity-60"
+      className="group flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#2563EB] py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-60"
     >
       {busy ? busyLabel || "Please wait..." : children}
       {!busy && TrailingIcon && (
@@ -374,20 +181,51 @@ export function TipBox({ icon: Icon = ShieldCheck, title, children }) {
 /* ── Shell wrapper ─────────────────────────────────────────── */
 export function AuthShell({ children, cardMaxWidth = "max-w-lg", cardTestId }) {
   return (
-    <div className="min-h-screen bg-[#F6F7FB]" data-testid="auth-page">
-      <div className="mx-auto grid min-h-screen w-full max-w-[1500px] lg:grid-cols-[1.15fr_0.85fr]">
+    <div
+      className="oraone-auth flex min-h-dvh flex-col bg-white"
+      data-testid="auth-page"
+    >
+      <header className="mx-auto flex w-full max-w-[1440px] items-center justify-between border-b border-[#E2E8F0] px-5 py-5 sm:px-8">
+        <Link to="/" aria-label="OraOne home">
+          <AuthBrand />
+        </Link>
+        <Link
+          to="/contact"
+          className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[#475569]"
+        >
+          Need help? <ArrowUpRight size={15} />
+        </Link>
+      </header>
+      <div className="mx-auto grid min-h-[640px] w-full max-w-[1440px] flex-1 lg:grid-cols-2">
         <MarketingPanel />
 
-        <div className="flex items-center justify-center p-6 sm:p-8 lg:border-l lg:border-[#E9ECF3] lg:shadow-[-24px_0_60px_-48px_rgba(15,23,42,0.25)]">
+        <div className="flex min-w-0 flex-col justify-center bg-white px-5 py-8 sm:px-8 lg:px-12">
           <main
             data-testid={cardTestId}
-            className={`w-full ${cardMaxWidth} rounded-3xl border border-[#EEF0F6] bg-white px-6 py-5 shadow-[0_40px_90px_-50px_rgba(15,23,42,0.4)] sm:px-7 sm:py-6`}
+            className={`oraone-auth-main my-auto w-full ${cardMaxWidth} self-center py-2 sm:py-4`}
           >
             {children}
             <TrustBadges />
           </main>
         </div>
       </div>
+      <footer className="flex flex-wrap items-center justify-between gap-4 bg-[#0F172A] px-5 py-5 text-sm text-white sm:px-8">
+        <span>© {new Date().getFullYear()} OraOne</span>
+        <div className="flex items-center gap-5">
+          <Link className="hover:underline" to="/privacy">
+            Privacy
+          </Link>
+          <Link className="hover:underline" to="/terms">
+            Terms
+          </Link>
+          <Link
+            className="inline-flex items-center gap-1 hover:underline"
+            to="/contact"
+          >
+            Get help <ArrowUpRight size={13} aria-hidden="true" />
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 }

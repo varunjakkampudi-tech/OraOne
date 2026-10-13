@@ -31,6 +31,14 @@ class AgentCreate(BaseModel):
     language: Optional[str] = Field(default=None, max_length=16)
     greeting: Optional[str] = None
     max_tokens: Optional[int] = Field(default=None, ge=1, le=32000)
+    knowledge_base_ids: Optional[list[uuid.UUID]] = Field(
+        default=None,
+        max_length=100,
+        description=(
+            "Knowledge bases explicitly bound to this agent. Omitted means no "
+            "explicit binding; an empty list is preserved as an explicit selection."
+        ),
+    )
 
 
 class AgentUpdate(BaseModel):
@@ -50,6 +58,14 @@ class AgentUpdate(BaseModel):
     language: Optional[str] = Field(default=None, max_length=16)
     greeting: Optional[str] = None
     max_tokens: Optional[int] = Field(default=None, ge=1, le=32000)
+    knowledge_base_ids: Optional[list[uuid.UUID]] = Field(
+        default=None,
+        max_length=100,
+        description=(
+            "Knowledge bases explicitly bound to this agent. Omitted leaves the "
+            "existing binding unchanged."
+        ),
+    )
 
 
 class AgentRead(BaseModel):
@@ -73,6 +89,7 @@ class AgentRead(BaseModel):
     language: str
     greeting: Optional[str] = None
     max_tokens: int
+    knowledge_base_ids: Optional[list[uuid.UUID]] = None
 
     # Lifecycle: True when the agent meets the minimum requirements to serve
     # traffic (currently: a non-empty system prompt). The UI uses this to warn

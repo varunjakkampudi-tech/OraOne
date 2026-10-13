@@ -17,45 +17,49 @@ import {
 /**
  * Self-contained design kit for the Super Admin Control Center.
  *
- * OraOne language: glassmorphism, white backgrounds, blue/cyan gradients,
- * rounded cards — plus a first-class dark mode. Theme is driven by an inline
+ * OraOne language: a calm operator workspace, a dark control rail, crisp
+ * surfaces, blue/cyan accents, and a first-class dark mode. Theme is driven by an inline
  * palette (not tailwind's darkMode config) so it is fully portable.
  */
 
 const LIGHT = {
   dark: false,
-  appBg: "linear-gradient(180deg,#F6F8FF 0%,#FBFCFF 40%,#F4F6FE 100%)",
-  glass: "rgba(255,255,255,0.72)",
+  appBg: "#F5F7FB",
+  glass: "rgba(255,255,255,0.96)",
   glassSolid: "#FFFFFF",
-  line: "#E7EAF1",
+  line: "#E2E8F0",
   ink: "#0F172A",
   sub: "#64748B",
   muted: "#94A3B8",
-  brand: "#2563EB",
-  brand2: "#06B6D4",
-  sidebar: "rgba(255,255,255,0.85)",
-  sidebarInk: "#334155",
-  hover: "#F1F5F9",
-  chipBg: "#F1F5FF",
-  shadow: "0 10px 30px -12px rgba(15,23,42,0.18)",
+  brand: "#315CFF",
+  brand2: "#16B8D4",
+  sidebar: "#101A33",
+  sidebarInk: "#B8C4DD",
+  topbar: "rgba(255,255,255,0.92)",
+  tableHead: "#F8FAFC",
+  hover: "#F3F6FA",
+  chipBg: "#EEF3FF",
+  shadow: "0 12px 30px -18px rgba(15,23,42,0.35)",
 };
 
 const DARK = {
   dark: true,
   appBg:
-    "radial-gradient(1200px 600px at 80% -10%,rgba(6,182,212,0.18),transparent),radial-gradient(900px 500px at -10% 10%,rgba(37,99,235,0.18),transparent),#0A0F1E",
-  glass: "rgba(19,26,42,0.66)",
-  glassSolid: "#111827",
-  line: "#1E293B",
+    "radial-gradient(900px 500px at 90% -10%,rgba(22,184,212,0.12),transparent),#0A1020",
+  glass: "rgba(16,26,48,0.88)",
+  glassSolid: "#111A30",
+  line: "#24314D",
   ink: "#E2E8F0",
   sub: "#94A3B8",
   muted: "#64748B",
-  brand: "#60A5FA",
-  brand2: "#22D3EE",
-  sidebar: "rgba(11,17,30,0.82)",
-  sidebarInk: "#CBD5E1",
+  brand: "#6C8BFF",
+  brand2: "#28C5DA",
+  sidebar: "#0B1226",
+  sidebarInk: "#C0CBE2",
+  topbar: "rgba(15,23,42,0.94)",
+  tableHead: "rgba(148,163,184,0.06)",
   hover: "rgba(148,163,184,0.10)",
-  chipBg: "rgba(96,165,250,0.12)",
+  chipBg: "rgba(108,139,255,0.14)",
   shadow: "0 16px 40px -16px rgba(0,0,0,0.6)",
 };
 
@@ -113,11 +117,11 @@ export function Glass({
       onClick={onClick}
       onMouseEnter={() => setH(true)}
       onMouseLeave={() => setH(false)}
-      className={`rounded-2xl ${className}`}
+      className={`rounded-xl ${className}`}
       style={{
         background: t.glass,
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
         border: `1px solid ${t.line}`,
         boxShadow: hover && h ? t.shadow : "none",
         transform: hover && h ? "translateY(-2px)" : "none",
@@ -134,11 +138,11 @@ export function Glass({
 export function PageHeader({ title, subtitle, icon: Icon, actions }) {
   const { t } = useAdminTheme();
   return (
-    <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <div className="mb-8 flex flex-wrap items-start justify-between gap-5">
       <div className="flex items-start gap-3">
         {Icon ? (
           <div
-            className="grid h-11 w-11 place-items-center rounded-xl"
+            className="grid h-10 w-10 place-items-center rounded-lg"
             style={{
               background: `linear-gradient(135deg,${t.brand},${t.brand2})`,
             }}
@@ -147,8 +151,14 @@ export function PageHeader({ title, subtitle, icon: Icon, actions }) {
           </div>
         ) : null}
         <div>
+          <div
+            className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em]"
+            style={{ color: t.muted }}
+          >
+            Platform administration
+          </div>
           <h1
-            className="text-2xl font-semibold tracking-tight"
+            className="text-[26px] font-semibold tracking-[-0.02em]"
             style={{ color: t.ink }}
           >
             {title}
@@ -223,7 +233,7 @@ export function Btn({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center gap-1.5 rounded-xl font-medium transition disabled:opacity-50 ${pad} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-lg font-medium transition disabled:opacity-50 ${pad} ${className}`}
       style={styles}
     >
       {children}
@@ -422,60 +432,64 @@ export function Sparkline({ data = [], width = 120, height = 36, color }) {
   );
 }
 
-export function Table({ columns, rows, onRowClick, empty }) {
+export function Table({ columns, rows, onRowClick, empty, contained = false }) {
   const { t } = useAdminTheme();
   if (!rows || rows.length === 0) return empty || <EmptyState />;
-  return (
-    <Glass className="overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr style={{ borderBottom: `1px solid ${t.line}` }}>
+  const table = (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr
+            style={{
+              borderBottom: `1px solid ${t.line}`,
+              background: t.tableHead,
+            }}
+          >
+            {columns.map((c) => (
+              <th
+                key={c.key}
+                className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
+                style={{ color: t.sub }}
+              >
+                {c.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr
+              key={row.id || i}
+              onClick={() => onRowClick?.(row)}
+              className="transition"
+              style={{
+                borderBottom:
+                  i < rows.length - 1 ? `1px solid ${t.line}` : "none",
+                cursor: onRowClick ? "pointer" : "default",
+              }}
+              onMouseEnter={(e) => {
+                if (onRowClick) e.currentTarget.style.background = t.hover;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
+            >
               {columns.map((c) => (
-                <th
+                <td
                   key={c.key}
-                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
-                  style={{ color: t.sub }}
+                  className="px-4 py-3.5"
+                  style={{ color: t.ink }}
                 >
-                  {c.label}
-                </th>
+                  {c.render ? c.render(row) : (row[c.key] ?? "—")}
+                </td>
               ))}
             </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, i) => (
-              <tr
-                key={row.id || i}
-                onClick={() => onRowClick?.(row)}
-                className="transition"
-                style={{
-                  borderBottom:
-                    i < rows.length - 1 ? `1px solid ${t.line}` : "none",
-                  cursor: onRowClick ? "pointer" : "default",
-                }}
-                onMouseEnter={(e) => {
-                  if (onRowClick) e.currentTarget.style.background = t.hover;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "transparent";
-                }}
-              >
-                {columns.map((c) => (
-                  <td
-                    key={c.key}
-                    className="px-4 py-3"
-                    style={{ color: t.ink }}
-                  >
-                    {c.render ? c.render(row) : (row[c.key] ?? "—")}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Glass>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
+  return contained ? table : <Glass className="overflow-hidden">{table}</Glass>;
 }
 
 export function SearchInput({ value, onChange, placeholder = "Search…" }) {
@@ -485,7 +499,8 @@ export function SearchInput({ value, onChange, placeholder = "Search…" }) {
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full rounded-xl px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40"
+      aria-label={placeholder}
+      className="w-full rounded-lg px-3 py-2.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#315CFF]/40"
       style={{
         background: t.glassSolid,
         border: `1px solid ${t.line}`,

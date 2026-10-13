@@ -79,8 +79,11 @@ function ActivityFeed() {
       </SectionTitle>
       {loading ? (
         <LoadingState />
-      ) : error ? (
-        <ErrorState message={error} onRetry={reload} />
+      ) : error || !Array.isArray(data) ? (
+        <ErrorState
+          message={error || "Activity is unavailable. Refresh to try again."}
+          onRetry={reload}
+        />
       ) : (data || []).length === 0 ? (
         <p className="py-8 text-center text-sm" style={{ color: t.sub }}>
           No recent activity.
@@ -119,6 +122,30 @@ function ActivityFeed() {
   );
 }
 
+function SecondaryMetricSection({ title, hint, children }) {
+  const { t } = useAdminTheme();
+  const headingId = `${title.toLowerCase().replace(/\s+/g, "-")}-heading`;
+  return (
+    <section aria-labelledby={headingId}>
+      <div className="mb-3">
+        <h2
+          id={headingId}
+          className="text-sm font-semibold uppercase tracking-[0.14em]"
+          style={{ color: t.sub }}
+        >
+          {title}
+        </h2>
+        <p className="mt-1 text-xs" style={{ color: t.muted }}>
+          {hint}
+        </p>
+      </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        {children}
+      </div>
+    </section>
+  );
+}
+
 export default function AdminDashboard() {
   const { t } = useAdminTheme();
   const { data, loading, error, reload } = useAdminData(
@@ -127,7 +154,7 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div>
+    <div className="space-y-1">
       <PageHeader
         icon={LayoutDashboard}
         title="Platform Dashboard"
@@ -144,155 +171,203 @@ export default function AdminDashboard() {
 
       {loading ? (
         <LoadingState label="Loading platform metrics…" />
-      ) : error ? (
-        <ErrorState message={error} onRetry={reload} />
+      ) : error ||
+        ![
+          "customers",
+          "revenue",
+          "live",
+          "reliability",
+          "system",
+          "storage",
+          "counts",
+        ].every((key) => data?.[key] && typeof data[key] === "object") ? (
+        <ErrorState
+          message={
+            error || "Platform metrics are unavailable. Refresh to try again."
+          }
+          onRetry={reload}
+        />
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-            <StatCard
-              label="Total Customers"
-              value={fmtNum(data.customers.total)}
-              icon={Users}
-              tone="blue"
-            />
-            <StatCard
-              label="Active"
-              value={fmtNum(data.customers.active)}
-              icon={Building2}
-              tone="green"
-              sub="30-day active"
-            />
-            <StatCard
-              label="Enterprise"
-              value={fmtNum(data.customers.enterprise)}
-              icon={Crown}
-              tone="purple"
-            />
-            <StatCard
-              label="Trials"
-              value={fmtNum(data.customers.trial)}
-              icon={FlaskConical}
-              tone="amber"
-            />
-            <StatCard
-              label="New Signups"
-              value={fmtNum(data.customers.new_signups_7d)}
-              icon={UserPlus}
-              tone="blue"
-              sub="last 7 days"
-            />
-            <StatCard
-              label="MRR"
-              value={fmtMoney(data.revenue.mrr)}
-              icon={DollarSign}
-              tone="green"
-            />
-            <StatCard
-              label="ARR"
-              value={fmtMoney(data.revenue.arr)}
-              icon={TrendingUp}
-              tone="green"
-            />
-            <StatCard
-              label="Online Users"
-              value={fmtNum(data.live.online_users)}
-              icon={Radio}
-              tone="blue"
-              sub="last 15 min"
-            />
-            <StatCard
-              label="Concurrent Chats"
-              value={fmtNum(data.live.concurrent_chats)}
-              icon={MessagesSquare}
-              tone="indigo"
-            />
-            <StatCard
-              label="API req/sec"
-              value={fmtNum(data.live.api_requests_per_sec)}
-              icon={Activity}
-              tone="blue"
-            />
-            <StatCard
-              label="LLM Tokens"
-              value={fmtNum(data.live.llm_tokens_24h)}
-              icon={Sparkles}
-              tone="purple"
-              sub="last 24h"
-            />
-            <StatCard
-              label="Error Rate"
-              value={`${data.reliability.error_rate}%`}
-              icon={AlertTriangle}
-              tone={data.reliability.error_rate >= 1 ? "red" : "green"}
-              sub="24h"
-            />
-            <StatCard
-              label="Success Rate"
-              value={`${data.reliability.success_rate}%`}
-              icon={CheckCircle2}
-              tone="green"
-              sub="24h"
-            />
-            <StatCard
-              label="CPU"
-              value={data.system.cpu == null ? "—" : `${data.system.cpu}%`}
-              icon={Cpu}
-              tone="slate"
-            />
-            <StatCard
-              label="RAM"
-              value={data.system.ram == null ? "—" : `${data.system.ram}%`}
-              icon={MemoryStick}
-              tone="slate"
-            />
-            <StatCard
-              label="Disk"
-              value={data.system.disk == null ? "—" : `${data.system.disk}%`}
-              icon={HardDrive}
-              tone="slate"
-            />
-            <StatCard
-              label="Storage"
-              value={fmtBytes(data.storage.bytes)}
-              icon={Database}
-              tone="blue"
-            />
-            <StatCard
-              label="Agents"
-              value={fmtNum(data.counts.agents)}
-              icon={Bot}
-              tone="indigo"
-            />
-            <StatCard
-              label="Conversations"
-              value={fmtNum(data.counts.conversations)}
-              icon={MessagesSquare}
-              tone="blue"
-            />
-            <StatCard
-              label="Leads"
-              value={fmtNum(data.counts.leads)}
-              icon={Users}
-              tone="green"
-            />
-            <StatCard
-              label="Documents"
-              value={fmtNum(data.counts.documents)}
-              icon={Database}
-              tone="slate"
-            />
-            <StatCard
-              label="Workflows"
-              value={fmtNum(data.counts.workflows)}
-              icon={Activity}
-              tone="purple"
-            />
-            <StatCard
-              label="Users"
-              value={fmtNum(data.counts.users)}
-              icon={Users}
-              tone="blue"
-            />
+          <section aria-labelledby="primary-snapshot-heading">
+            <div className="mb-3">
+              <h2
+                id="primary-snapshot-heading"
+                className="text-sm font-semibold uppercase tracking-[0.14em]"
+                style={{ color: t.sub }}
+              >
+                Primary snapshot
+              </h2>
+              <p className="mt-1 text-xs" style={{ color: t.muted }}>
+                The quickest view of customer activity, revenue, and live load.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              <StatCard
+                label="Total Customers"
+                value={fmtNum(data.customers.total)}
+                icon={Users}
+                tone="blue"
+              />
+              <StatCard
+                label="Active"
+                value={fmtNum(data.customers.active)}
+                icon={Building2}
+                tone="green"
+                sub="30-day active"
+              />
+              <StatCard
+                label="MRR"
+                value={fmtMoney(data.revenue.mrr)}
+                icon={DollarSign}
+                tone="green"
+              />
+              <StatCard
+                label="Online Users"
+                value={fmtNum(data.live.online_users)}
+                icon={Radio}
+                tone="blue"
+                sub="last 15 min"
+              />
+              <StatCard
+                label="Concurrent Chats"
+                value={fmtNum(data.live.concurrent_chats)}
+                icon={MessagesSquare}
+                tone="indigo"
+              />
+              <StatCard
+                label="Error Rate"
+                value={`${data.reliability.error_rate}%`}
+                icon={AlertTriangle}
+                tone={data.reliability.error_rate >= 1 ? "red" : "green"}
+                sub="24h"
+              />
+            </div>
+          </section>
+
+          <div className="mt-8 space-y-7">
+            <SecondaryMetricSection
+              title="Growth and revenue"
+              hint="Supporting customer and commercial indicators from the platform overview."
+            >
+              <StatCard
+                label="Enterprise"
+                value={fmtNum(data.customers.enterprise)}
+                icon={Crown}
+                tone="purple"
+              />
+              <StatCard
+                label="Trials"
+                value={fmtNum(data.customers.trial)}
+                icon={FlaskConical}
+                tone="amber"
+              />
+              <StatCard
+                label="New Signups"
+                value={fmtNum(data.customers.new_signups_7d)}
+                icon={UserPlus}
+                tone="blue"
+                sub="last 7 days"
+              />
+              <StatCard
+                label="ARR"
+                value={fmtMoney(data.revenue.arr)}
+                icon={TrendingUp}
+                tone="green"
+              />
+            </SecondaryMetricSection>
+
+            <SecondaryMetricSection
+              title="Live operations"
+              hint="Runtime, reliability, and host capacity metrics."
+            >
+              <StatCard
+                label="API req/sec"
+                value={fmtNum(data.live.api_requests_per_sec)}
+                icon={Activity}
+                tone="blue"
+              />
+              <StatCard
+                label="LLM Tokens"
+                value={fmtNum(data.live.llm_tokens_24h)}
+                icon={Sparkles}
+                tone="purple"
+                sub="last 24h"
+              />
+              <StatCard
+                label="Success Rate"
+                value={`${data.reliability.success_rate}%`}
+                icon={CheckCircle2}
+                tone="green"
+                sub="24h"
+              />
+              <StatCard
+                label="CPU"
+                value={data.system.cpu == null ? "—" : `${data.system.cpu}%`}
+                icon={Cpu}
+                tone="slate"
+              />
+              <StatCard
+                label="RAM"
+                value={data.system.ram == null ? "—" : `${data.system.ram}%`}
+                icon={MemoryStick}
+                tone="slate"
+              />
+              <StatCard
+                label="Disk"
+                value={data.system.disk == null ? "—" : `${data.system.disk}%`}
+                icon={HardDrive}
+                tone="slate"
+              />
+              <StatCard
+                label="Storage"
+                value={fmtBytes(data.storage.bytes)}
+                icon={Database}
+                tone="blue"
+              />
+            </SecondaryMetricSection>
+
+            <SecondaryMetricSection
+              title="Platform inventory"
+              hint="Counts across the current platform footprint."
+            >
+              <StatCard
+                label="Agents"
+                value={fmtNum(data.counts.agents)}
+                icon={Bot}
+                tone="indigo"
+              />
+              <StatCard
+                label="Conversations"
+                value={fmtNum(data.counts.conversations)}
+                icon={MessagesSquare}
+                tone="blue"
+              />
+              <StatCard
+                label="Leads"
+                value={fmtNum(data.counts.leads)}
+                icon={Users}
+                tone="green"
+              />
+              <StatCard
+                label="Documents"
+                value={fmtNum(data.counts.documents)}
+                icon={Database}
+                tone="slate"
+              />
+              <StatCard
+                label="Workflows"
+                value={fmtNum(data.counts.workflows)}
+                icon={Activity}
+                tone="purple"
+              />
+              <StatCard
+                label="Users"
+                value={fmtNum(data.counts.users)}
+                icon={Users}
+                tone="blue"
+              />
+            </SecondaryMetricSection>
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-3">

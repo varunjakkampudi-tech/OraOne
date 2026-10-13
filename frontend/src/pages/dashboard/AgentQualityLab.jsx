@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   FlaskConical,
   Loader2,
@@ -49,24 +50,70 @@ function Metric({ label, value, suffix = "" }) {
   );
 }
 
-// ── Simulator tab ─────────────────────────────────────────────────────────
-function SimulatorTab() {
+function useAgentSelection() {
+  const [searchParams] = useSearchParams();
+  const requestedAgentId = searchParams.get("agent")?.trim() || "";
   const [agents, setAgents] = useState([]);
   const [agentId, setAgentId] = useState("");
+  const [selectionError, setSelectionError] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    const resolveAgent = async () => {
+      setSelectionError("");
+      try {
+        const { data } = await api.get("/agents", { params: { limit: 100 } });
+        const list = Array.isArray(data) ? data : data?.items || [];
+        let selected = requestedAgentId
+          ? list.find((agent) => String(agent.id) === requestedAgentId)
+          : list[0];
+
+        if (requestedAgentId && !selected) {
+          try {
+            const direct = await api.get(`/agents/${requestedAgentId}`);
+            selected = direct.data;
+            if (String(selected?.id) !== requestedAgentId) {
+              throw new Error("The requested agent is unavailable.");
+            }
+            list.push(selected);
+          } catch {
+            if (!mounted) return;
+            setAgents(list);
+            setAgentId("");
+            setSelectionError("The requested agent is unavailable.");
+            return;
+          }
+        }
+
+        if (!mounted) return;
+        setAgents(list);
+        setAgentId(selected?.id ? String(selected.id) : "");
+      } catch (error) {
+        if (!mounted) return;
+        setAgents([]);
+        setAgentId("");
+        setSelectionError(
+          formatApiError(error?.response?.data?.detail) ||
+            "Could not load agents.",
+        );
+      }
+    };
+    resolveAgent();
+    return () => {
+      mounted = false;
+    };
+  }, [requestedAgentId]);
+
+  return { agents, agentId, setAgentId, requestedAgentId, selectionError };
+}
+
+// ── Simulator tab ─────────────────────────────────────────────────────────
+function SimulatorTab() {
+  const { agents, agentId, setAgentId, requestedAgentId, selectionError } =
+    useAgentSelection();
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    api
-      .get("/agents")
-      .then(({ data }) => {
-        const list = Array.isArray(data) ? data : data?.items || [];
-        setAgents(list);
-        if (list[0]) setAgentId(list[0].id);
-      })
-      .catch(() => setAgents([]));
-  }, []);
 
   const run = () => {
     if (!agentId) return;
@@ -98,7 +145,10 @@ function SimulatorTab() {
             </label>
             <select
               value={agentId}
-              onChange={(e) => setAgentId(e.target.value)}
+              onChange={(e) => {
+                if (!requestedAgentId) setAgentId(e.target.value);
+              }}
+              disabled={Boolean(requestedAgentId)}
               className="mt-1.5 w-full rounded-xl border py-2.5 px-3 text-sm outline-none"
               style={{ borderColor: LINE, color: INK }}
             >
@@ -124,9 +174,27 @@ function SimulatorTab() {
           pricing, refund, booking, multilingual, invalid input…) and scores
           each.
         </p>
+        {requestedAgentId && (
+          <p className="mt-3 text-xs" style={{ color: SUB }}>
+            This view is locked to the agent from the current assistant context.
+          </p>
+        )}
       </Card>
 
-      {error ? (
+      {selectionError ? (
+        <Card className="p-8">
+          <EmptyState
+            icon={AlertTriangle}
+            title="Agent unavailable"
+            hint={selectionError}
+            action={
+              <PrimaryButton as={Link} to="/app/agents">
+                Back to agents
+              </PrimaryButton>
+            }
+          />
+        </Card>
+      ) : error ? (
         <Card className="p-8">
           <EmptyState
             icon={AlertTriangle}
