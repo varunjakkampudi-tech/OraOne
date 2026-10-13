@@ -56,3 +56,50 @@ async def test_rate_limit_response_has_cors_for_allowed_browser_origin(monkeypat
             "/api/auth/me", headers={"Origin": "https://unauthorized.example"}
         )
         assert "access-control-allow-origin" not in denied.headers
+
+
+@pytest.mark.asyncio
+async def test_widget_management_preflight_uses_strict_credentialed_cors():
+    import server
+
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=server.app), base_url="http://test"
+    ) as client:
+        headers = {
+            "Origin": server.allow_origins[0],
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "authorization",
+        }
+        response = await client.options("/api/widgets?limit=100", headers=headers)
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-credentials"] == "true"
+        assert (
+            response.headers["access-control-allow-origin"] == server.allow_origins[0]
+        )
+        headers["Origin"] = "https://unauthorized.example"
+        denied = await client.options("/api/widgets", headers=headers)
+        assert denied.status_code == 400
+        assert "access-control-allow-origin" not in denied.headers
+
+
+@pytest.mark.asyncio
+async def test_public_widget_preflight_remains_cookie_free_for_customer_origins():
+    import server
+
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=server.app), base_url="http://test"
+    ) as client:
+        response = await client.options(
+            "/api/widget/session",
+            headers={
+                "Origin": "https://customer.example",
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "content-type",
+            },
+        )
+        assert response.status_code == 204
+        assert (
+            response.headers["access-control-allow-origin"]
+            == "https://customer.example"
+        )
+        assert "access-control-allow-credentials" not in response.headers

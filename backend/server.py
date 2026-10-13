@@ -370,8 +370,9 @@ class WidgetPublicCORSMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        if scope.get("type") != "http" or not scope.get("path", "").startswith(
-            self.WIDGET_PREFIX
+        path = scope.get("path", "")
+        if scope.get("type") != "http" or not (
+            path == self.WIDGET_PREFIX or path.startswith(self.WIDGET_PREFIX + "/")
         ):
             return await self.app(scope, receive, send)
         headers = dict(scope.get("headers") or [])

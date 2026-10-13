@@ -294,6 +294,9 @@ async function digits(page, id, code) {
     await expect(page).toHaveURL(/\/login/);
     outcomes.push("Logout and anonymous protected-route rejection");
     expect(errors).toEqual([]);
+    expect(
+      failedRequests.filter((request) => request.error === "net::ERR_FAILED"),
+    ).toEqual([]);
     console.log(`Real local browser checks passed: ${outcomes.length}`);
   } catch (error) {
     if (page)
