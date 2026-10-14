@@ -98,8 +98,8 @@ is still FAIL.
 | Object-storage persistence and restart | PASS (local) | S3 + API restart, re-process reads stored bytes |
 | Load (local, 4 vCPU, 4 gunicorn workers) | PASS (indicative) | 60 s × 40 conc: ~64 rps, 0 errors, p95 1.3–2.4 s (generator on the same host) |
 | Soak through Caddy with retry policy | PASS | 180 s × 10 conc, 19,177 req, 39 forced worker recycles, 0 errors. Without Caddy, recycling dropped 23 of ~21k requests, so `lb_try_duration` was added |
-| Accessibility (WCAG 2.2 AA) | FAIL | axe `color-contrast` on most dashboard routes (`#94A3B8` text, 2.56:1). Shared sidebar and toggles fixed; page-level fixes remain |
-| Responsive layout | See route report | 390 / 768 / 1440 px horizontal-overflow audit |
+| Accessibility (WCAG 2.2 AA) | FAIL (improving) | axe critical/serious: 74 → 42 of 276 routes after token, contrast and label fixes. Remaining: mostly `#64748B` on tinted chips and status pills |
+| Responsive layout | PASS | 0 of 276 routes overflow horizontally at 390, 768 or 1440 px; 0 API 5xx; 0 navigation timeouts ([ROUTE-ACCEPTANCE.md](ROUTE-ACCEPTANCE.md)) |
 | Production identity (Cognito) | BLOCKED | External gate: live pool, hosted UI, logout, refresh, user migration |
 | Production deploy, TLS, DNS, monitoring, rollback | BLOCKED | No release authorization; public deployment untouched |
 | Real email delivery (OTP, invites, escalation) | BLOCKED | SMTP/SES credentials not provided |

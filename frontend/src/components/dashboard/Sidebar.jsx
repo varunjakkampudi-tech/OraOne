@@ -63,7 +63,7 @@ const isPathActive = (pathname, item) =>
   ) || false;
 
 const linkClass = ({ isActive }) =>
-  `flex min-h-[42px] items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+  `flex min-h-[36px] items-center gap-2.5 px-3 py-1.5 rounded-lg text-[13.5px] font-medium transition-colors ${
     isActive
       ? "bg-[#F0F6FF] text-[#2563EB]"
       : "text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
@@ -81,12 +81,12 @@ function NavItem({ item, onItemClick }) {
   if (item.disabled) {
     return (
       <div
-        className="flex min-h-[42px] items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-[#5B6B82] cursor-not-allowed select-none"
+        className="flex min-h-[36px] items-center gap-2.5 px-3 py-1.5 rounded-lg text-[13.5px] font-medium text-[#5B6B82] cursor-not-allowed select-none"
         data-testid={item.id}
         aria-disabled="true"
         title="Planned"
       >
-        <Icon size={18} />
+        <Icon size={17} />
         <span className="flex-1">{item.label}</span>
         {item.badge && (
           <span className="rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[10px] font-bold text-[#475569]">
@@ -111,7 +111,7 @@ function NavItem({ item, onItemClick }) {
         isPathActive(pathname, item) && !childSelected ? "page" : undefined
       }
     >
-      <Icon size={18} />
+      <Icon size={17} />
       <span className="flex-1">{item.label}</span>
       {item.badge && (
         <span className="rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[10px] font-bold text-[#475569]">
@@ -209,7 +209,7 @@ function SidebarContent({ onItemClick, showClose, onClose, closeButtonRef }) {
                           data-testid={child.id}
                           onClick={onItemClick}
                           className={({ isActive }) =>
-                            `flex min-h-[42px] items-center rounded-lg px-3 py-2 text-sm transition-colors ${
+                            `flex min-h-[32px] items-center rounded-md px-3 py-1 text-[13px] transition-colors ${
                               isActive || isPathActive(pathname, child)
                                 ? "bg-[#F0F6FF] font-semibold text-[#2563EB]"
                                 : "text-[#5B6B82] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
