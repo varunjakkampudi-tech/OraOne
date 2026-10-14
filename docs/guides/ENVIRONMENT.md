@@ -62,3 +62,13 @@ Generate local JWT_SECRET_KEY with Python secrets. Never reuse it in production 
 Required backend secrets stay server-side: database credentials, MinIO/S3 credentials, OpenRouter/API credentials, payment credentials, SMTP/SES credentials, and any SMS credentials. Optional integrations should remain blank until separately authorized and tested. This repository does not create AWS S3 buckets.
 
 Cognito production uses the configured email-only user pool. Google, phone, and SMS authentication are not part of the current UI contract.
+
+## Reverse-proxy client IPs
+
+Rate limits key anonymous callers (and all callers in Cognito mode) by client
+IP. Behind Caddy, the API only sees Caddy's container address unless
+`TRUSTED_PROXY_IPS` lists the proxy network. Then the first `X-Forwarded-For`
+hop is used. `docker-compose.prod.yml` defaults this to
+`172.16.0.0/12,192.168.0.0/16` (Docker bridge ranges). The backend port is not
+published, so only in-network peers can reach it. Override it if your Docker
+address pool differs. Never include public ranges.

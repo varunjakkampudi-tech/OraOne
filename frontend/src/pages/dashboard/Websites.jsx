@@ -28,7 +28,7 @@ import { api, formatApiError } from "@/lib/api";
 const STATUS = {
   pending: {
     label: "Pending",
-    cls: "bg-[#F1F5F9] text-[#64748B]",
+    cls: "bg-[#F1F5F9] text-[#5B6B82]",
     icon: Clock,
   },
   crawling: {
@@ -176,7 +176,7 @@ export default function Websites() {
           <h1 className="text-[28px] font-semibold tracking-tight text-ink">
             Website Crawling
           </h1>
-          <p className="text-sm text-[#64748B] mt-1">
+          <p className="text-sm text-[#5B6B82] mt-1">
             Turn any website into searchable knowledge for your agents.
           </p>
         </div>
@@ -211,7 +211,7 @@ export default function Websites() {
                 <div className="text-[28px] font-semibold text-ink">
                   {k.value}
                 </div>
-                <div className="text-xs text-[#64748B]">{k.label}</div>
+                <div className="text-xs text-[#5B6B82]">{k.label}</div>
               </div>
             </div>
           </div>
@@ -222,7 +222,7 @@ export default function Websites() {
       <div className="relative max-w-md">
         <Search
           size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5B6B82]"
         />
         <input
           value={search}
@@ -235,7 +235,7 @@ export default function Websites() {
 
       {/* List */}
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-[#94A3B8]">
+        <div className="flex items-center justify-center py-20 text-[#5B6B82]">
           <Loader2 className="animate-spin" />
         </div>
       ) : items.length === 0 ? (
@@ -244,7 +244,7 @@ export default function Websites() {
           <h3 className="mt-3 text-lg font-semibold text-[#0F172A]">
             No websites yet
           </h3>
-          <p className="text-sm text-[#64748B] mt-1">
+          <p className="text-sm text-[#5B6B82] mt-1">
             {kbs.length === 0
               ? "Create a knowledge base first, then add a website to crawl."
               : "Add a website and we'll crawl, extract and embed its pages."}
@@ -301,7 +301,7 @@ function WebsiteCard({ website: w, onOpen, onAct, onRemove }) {
               {w.name}
             </h3>
             <StatusBadge status={w.status} />
-            <span className="text-[11px] px-2 py-0.5 rounded-md bg-[#F1F5F9] text-[#64748B] capitalize">
+            <span className="text-[11px] px-2 py-0.5 rounded-md bg-[#F1F5F9] text-[#5B6B82] capitalize">
               {w.crawl_mode}
             </span>
           </div>
@@ -314,7 +314,7 @@ function WebsiteCard({ website: w, onOpen, onAct, onRemove }) {
           >
             {w.base_url} <ExternalLink size={11} />
           </a>
-          <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-[#64748B]">
+          <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-[#5B6B82]">
             <span className="inline-flex items-center gap-1">
               <FileText size={13} /> {w.pages_count || 0} pages
             </span>
@@ -448,7 +448,7 @@ function CreateModal({ kbs, onClose, onCreated }) {
           <button
             type="button"
             onClick={onClose}
-            className="text-[#94A3B8] hover:text-[#475569]"
+            className="text-[#5B6B82] hover:text-[#475569]"
           >
             <X size={18} />
           </button>
@@ -500,7 +500,7 @@ function CreateModal({ kbs, onClose, onCreated }) {
                   }`}
                 >
                   <div className="font-medium text-[#0F172A]">{m.label}</div>
-                  <div className="text-[11px] text-[#64748B]">{m.hint}</div>
+                  <div className="text-[11px] text-[#5B6B82]">{m.hint}</div>
                 </button>
               ))}
             </div>
@@ -721,7 +721,7 @@ function DetailDrawer({ website, onClose, onChanged }) {
           </div>
           <button
             onClick={onClose}
-            className="text-[#94A3B8] hover:text-[#475569]"
+            className="text-[#5B6B82] hover:text-[#475569]"
           >
             <X size={18} />
           </button>
@@ -740,7 +740,7 @@ function DetailDrawer({ website, onClose, onChanged }) {
                 <div className="text-xl font-bold text-[#0F172A]">
                   {s.value}
                 </div>
-                <div className="text-[11px] text-[#64748B]">{s.label}</div>
+                <div className="text-[11px] text-[#5B6B82]">{s.label}</div>
               </div>
             ))}
           </div>
@@ -759,7 +759,7 @@ function DetailDrawer({ website, onClose, onChanged }) {
               className={`inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 -mb-px ${
                 tab === t.id
                   ? "border-[#2563EB] text-[#2563EB]"
-                  : "border-transparent text-[#64748B] hover:text-[#475569]"
+                  : "border-transparent text-[#5B6B82] hover:text-[#475569]"
               }`}
             >
               <t.icon size={14} /> {t.label}
@@ -769,13 +769,13 @@ function DetailDrawer({ website, onClose, onChanged }) {
 
         <div className="p-4">
           {loading ? (
-            <div className="flex justify-center py-16 text-[#94A3B8]">
+            <div className="flex justify-center py-16 text-[#5B6B82]">
               <Loader2 className="animate-spin" />
             </div>
           ) : tab === "pages" ? (
             <div className="space-y-2">
               {pages.length === 0 && (
-                <p className="text-sm text-[#64748B] text-center py-8">
+                <p className="text-sm text-[#5B6B82] text-center py-8">
                   No pages indexed yet.
                 </p>
               )}
@@ -800,11 +800,11 @@ function DetailDrawer({ website, onClose, onChanged }) {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {p.classification && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-[#F1F5F9] text-[#64748B] capitalize">
+                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-[#F1F5F9] text-[#5B6B82] capitalize">
                           {p.classification}
                         </span>
                       )}
-                      <span className="text-xs text-[#64748B] inline-flex items-center gap-1">
+                      <span className="text-xs text-[#5B6B82] inline-flex items-center gap-1">
                         <Layers size={12} /> {p.chunk_count || 0}
                       </span>
                     </div>
@@ -825,7 +825,7 @@ function DetailDrawer({ website, onClose, onChanged }) {
                         ? "text-red-400"
                         : l.level === "warn"
                           ? "text-amber-400"
-                          : "text-[#64748B]"
+                          : "text-[#5B6B82]"
                     }
                   >
                     [{l.status || l.level}]
@@ -842,7 +842,7 @@ function DetailDrawer({ website, onClose, onChanged }) {
                 </h4>
                 {analytics &&
                 Object.keys(analytics.by_classification || {}).length === 0 ? (
-                  <p className="text-sm text-[#64748B]">
+                  <p className="text-sm text-[#5B6B82]">
                     No classified pages yet.
                   </p>
                 ) : (
@@ -865,7 +865,7 @@ function DetailDrawer({ website, onClose, onChanged }) {
                               }}
                             />
                           </div>
-                          <span className="text-xs text-[#64748B] w-8 text-right">
+                          <span className="text-xs text-[#5B6B82] w-8 text-right">
                             {v}
                           </span>
                         </div>
@@ -900,7 +900,7 @@ function DetailDrawer({ website, onClose, onChanged }) {
                       <>
                         {running && (
                           <div className="mb-3">
-                            <div className="flex items-center justify-between text-[11px] text-[#64748B] mb-1">
+                            <div className="flex items-center justify-between text-[11px] text-[#5B6B82] mb-1">
                               <span>
                                 {done} / {total || "?"} pages
                               </span>

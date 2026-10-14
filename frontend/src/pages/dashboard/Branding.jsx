@@ -40,7 +40,7 @@ function Field({ label, hint, children }) {
         {label}
       </label>
       {children}
-      {hint && <p className="text-xs text-[#94A3B8]">{hint}</p>}
+      {hint && <p className="text-xs text-[#5B6B82]">{hint}</p>}
     </div>
   );
 }
@@ -106,8 +106,8 @@ function LogoUploader({
             className={`${wide ? "max-h-16" : "max-h-16 max-w-16"} object-contain`}
           />
         ) : (
-          <div className="flex flex-col items-center gap-1 text-[#64748B]">
-            <ImageIcon size={20} className="text-[#94A3B8]" />
+          <div className="flex flex-col items-center gap-1 text-[#5B6B82]">
+            <ImageIcon size={20} className="text-[#5B6B82]" />
             <span className="text-xs font-medium">
               Drag &amp; drop or <span className="text-[#2563EB]">browse</span>
             </span>
@@ -267,7 +267,7 @@ export default function Branding() {
 
   if (loading) {
     return (
-      <div className="grid h-64 place-items-center text-[#64748B]">
+      <div className="grid h-64 place-items-center text-[#5B6B82]">
         <Loader2 className="animate-spin" />
       </div>
     );
@@ -281,7 +281,7 @@ export default function Branding() {
           <h1 className="flex items-center gap-2 text-2xl font-bold text-[#0F172A]">
             <Palette size={24} /> Branding
           </h1>
-          <p className="mt-1 text-sm text-[#64748B]">
+          <p className="mt-1 text-sm text-[#5B6B82]">
             White-label your workspace with your own brand identity.
           </p>
         </div>
@@ -391,6 +391,7 @@ export default function Branding() {
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
+                    aria-label="Primary colour picker"
                     value={
                       primaryValid ? form.primary_color.slice(0, 7) : "#4F46E5"
                     }
@@ -414,6 +415,7 @@ export default function Branding() {
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
+                    aria-label="Accent colour picker"
                     value={
                       accentValid ? form.accent_color.slice(0, 7) : "#06B6D4"
                     }
@@ -503,7 +505,7 @@ export default function Branding() {
           </fieldset>
 
           {!canManage && (
-            <p className="rounded-lg bg-[#F1F5F9] px-3 py-2 text-xs text-[#64748B]">
+            <p className="rounded-lg bg-[#F1F5F9] px-3 py-2 text-xs text-[#5B6B82]">
               You have read-only access to branding. Ask an admin to make
               changes.
             </p>
@@ -545,7 +547,7 @@ export default function Branding() {
               <p className="mt-3 text-base font-bold text-[#0F172A]">
                 {previewName}
               </p>
-              <p className="text-xs text-[#64748B]">Live preview</p>
+              <p className="text-xs text-[#5B6B82]">Live preview</p>
               <div className="mt-4 space-y-2">
                 <button
                   className="w-full rounded-xl py-2 text-sm font-semibold text-white"
@@ -569,7 +571,7 @@ export default function Branding() {
                 </button>
               </div>
               {!form.hide_powered_by && (
-                <p className="mt-4 text-center text-[11px] text-[#94A3B8]">
+                <p className="mt-4 text-center text-[11px] text-[#5B6B82]">
                   Powered by Ora One
                 </p>
               )}
@@ -586,7 +588,7 @@ export default function Branding() {
               <span className="flex items-center gap-2">
                 <Globe size={15} /> {server.custom_domain}
               </span>
-              <ExternalLink size={14} className="text-[#94A3B8]" />
+              <ExternalLink size={14} className="text-[#5B6B82]" />
             </a>
           )}
         </div>

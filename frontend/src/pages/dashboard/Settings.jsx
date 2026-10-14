@@ -264,7 +264,7 @@ export default function Settings() {
                     <t.icon
                       size={16}
                       className={
-                        sel ? "text-[#2563EB] mt-0.5" : "text-[#64748B] mt-0.5"
+                        sel ? "text-[#2563EB] mt-0.5" : "text-[#5B6B82] mt-0.5"
                       }
                     />
                     <div className="min-w-0">
@@ -310,12 +310,12 @@ export default function Settings() {
                   data-testid={`settings-link-${l.to.split("/").pop()}`}
                   className="group flex min-h-11 w-full items-center gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-subtle focus-visible:outline-brand"
                 >
-                  <l.icon size={16} className="text-[#64748B] shrink-0" />
+                  <l.icon size={16} className="text-[#5B6B82] shrink-0" />
                   <div className="min-w-0 flex-1">
                     <p className="text-[13.5px] font-semibold text-[#0F172A]">
                       {l.label}
                     </p>
-                    <p className="text-xs text-[#94A3B8] mt-0.5 leading-snug">
+                    <p className="text-xs text-[#5B6B82] mt-0.5 leading-snug">
                       {l.desc}
                     </p>
                   </div>
@@ -341,7 +341,7 @@ function SaveStatus({ state }) {
   if (state === "saving")
     return (
       <span
-        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#64748B]"
+        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#5B6B82]"
         data-testid="save-status-saving"
       >
         <Loader2 size={13} className="animate-spin" /> Saving…
@@ -369,7 +369,7 @@ function SectionHeader({ title, desc }) {
   return (
     <div className="mb-5">
       <h3 className="text-lg font-semibold text-[#0F172A]">{title}</h3>
-      <p className="text-[13px] text-[#64748B] mt-1">{desc}</p>
+      <p className="text-[13px] text-[#5B6B82] mt-1">{desc}</p>
     </div>
   );
 }
@@ -474,27 +474,27 @@ function ProfileSection() {
         <Field label="Email Address">
           <div className="relative">
             <input
-              className={`${inputCls} pr-10 bg-[#F8FAFC] text-[#64748B]`}
+              className={`${inputCls} pr-10 bg-[#F8FAFC] text-[#5B6B82]`}
               value={user?.email || ""}
               readOnly
               data-testid="settings-email"
             />
             <Lock
               size={14}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5B6B82]"
             />
           </div>
         </Field>
         <Field label="Role">
           <div className="relative">
             <input
-              className={`${inputCls} pr-10 bg-[#F8FAFC] text-[#64748B] capitalize`}
+              className={`${inputCls} pr-10 bg-[#F8FAFC] text-[#5B6B82] capitalize`}
               value={user?.role || "Owner"}
               readOnly
             />
             <Lock
               size={14}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5B6B82]"
             />
           </div>
         </Field>
@@ -576,7 +576,7 @@ function PasswordSection() {
               <button
                 type="button"
                 onClick={() => setShow((s) => !s)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#475569]"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#5B6B82] hover:text-[#475569]"
                 aria-label="Toggle visibility"
               >
                 {show ? <Eye size={16} /> : <EyeOff size={16} />}
@@ -649,7 +649,7 @@ function NotificationsSection() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <SectionHeader
           title="Notifications"
-          desc="Choose what you want to be notified about."
+          desc="Saved in this browser only. These choices do not yet change emails sent to your account."
         />
         <SaveStatus state={status} />
       </div>
@@ -663,9 +663,13 @@ function NotificationsSection() {
               <p className="text-[14px] font-semibold text-[#0F172A]">
                 {o.label}
               </p>
-              <p className="text-[12px] text-[#64748B] mt-0.5">{o.desc}</p>
+              <p className="text-[12px] text-[#5B6B82] mt-0.5">{o.desc}</p>
             </div>
-            <Toggle on={state[o.id]} onChange={() => toggle(o.id)} />
+            <Toggle
+              on={state[o.id]}
+              onChange={() => toggle(o.id)}
+              label={o.label}
+            />
           </label>
         ))}
       </div>
@@ -673,12 +677,13 @@ function NotificationsSection() {
   );
 }
 
-function Toggle({ on, onChange }) {
+function Toggle({ on, onChange, label }) {
   return (
     <button
       type="button"
       onClick={onChange}
       aria-pressed={on}
+      aria-label={label}
       className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${on ? "bg-[#2563EB]" : "bg-[#CBD5E1]"}`}
     >
       <span
@@ -719,16 +724,16 @@ function AppearanceSection() {
                   Active
                 </span>
               ) : (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#94A3B8] font-medium">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#5B6B82] font-medium">
                   Soon
                 </span>
               )}
             </div>
-            <p className="text-[12px] text-[#64748B] mt-1">{t.desc}</p>
+            <p className="text-[12px] text-[#5B6B82] mt-1">{t.desc}</p>
           </div>
         ))}
       </div>
-      <p className="text-[12px] text-[#94A3B8] mt-5">
+      <p className="text-[12px] text-[#5B6B82] mt-5">
         More appearance options are coming soon.
       </p>
     </>
@@ -738,7 +743,6 @@ function AppearanceSection() {
 function SessionsSection() {
   const { identity, user, logoutAll } = useAuth();
   const u = identity?.user || {};
-  const [enabled, setEnabled] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
   const browser = /Edg/.test(ua)
@@ -803,7 +807,7 @@ function SessionsSection() {
                 This device
               </span>
             </p>
-            <p className="text-[12px] text-[#64748B] mt-0.5">
+            <p className="text-[12px] text-[#5B6B82] mt-0.5">
               Active now
               {lastLogin
                 ? ` · signed in ${relTime(lastLogin)}`
@@ -811,7 +815,7 @@ function SessionsSection() {
             </p>
           </div>
         </div>
-        <p className="text-xs text-[#94A3B8] px-1">
+        <p className="text-xs text-[#5B6B82] px-1">
           Sessions use short-lived tokens that refresh automatically. To end
           access on a lost or shared device, sign out of all devices below.
         </p>
@@ -823,18 +827,19 @@ function SessionsSection() {
             <ShieldCheck size={15} className="text-[#2563EB]" /> Two-factor
             authentication
           </p>
-          <p className="text-[12px] text-[#64748B] mt-0.5">
-            Require a 6-digit code on sign-in. Use Google Authenticator,
-            1Password, Authy, etc.
+          <p className="text-[12px] text-[#5B6B82] mt-0.5">
+            Authenticator-app codes are not available yet.
+            {process.env.REACT_APP_AUTH_PROVIDER === "cognito"
+              ? " Sign-in verification is managed by your identity provider."
+              : " Every password sign-in already requires a one-time code sent to your email."}
           </p>
         </div>
-        <Toggle
-          on={enabled}
-          onChange={() => {
-            setEnabled((v) => !v);
-            toast.success(`2FA ${!enabled ? "enabled" : "disabled"}`);
-          }}
-        />
+        <span
+          data-testid="two-factor-status"
+          className="shrink-0 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[12px] font-medium text-[#475569]"
+        >
+          Planned
+        </span>
       </div>
 
       <div className="mt-6">
@@ -995,7 +1000,7 @@ function ActivitySection() {
         {facts.map((f) => (
           <div key={f.label} className="rounded-xl border border-[#E2E8F0] p-4">
             <f.icon size={16} className="text-[#2563EB]" />
-            <p className="text-xs text-[#94A3B8] mt-2.5 font-medium">
+            <p className="text-xs text-[#5B6B82] mt-2.5 font-medium">
               {f.label}
             </p>
             <p className="text-[13.5px] font-semibold text-[#0F172A] mt-0.5">
@@ -1027,7 +1032,7 @@ function ActivitySection() {
       )}
 
       {!error && Array.isArray(logs) && logs.length === 0 && (
-        <p className="max-w-2xl text-[13px] text-[#64748B]">
+        <p className="max-w-2xl text-[13px] text-[#5B6B82]">
           No recent activity yet.
         </p>
       )}

@@ -182,7 +182,7 @@ export default function Status() {
                     ? "Partial Degradation"
                     : "Active Outage"}
               </h2>
-              <p className="mt-0.5 text-[13px] text-[#64748B]">
+              <p className="mt-0.5 text-[13px] text-[#5B6B82]">
                 {updatedAt
                   ? `Last checked ${updatedAt.toLocaleTimeString()}`
                   : "Checking services…"}
@@ -211,12 +211,12 @@ export default function Status() {
                   <p className="text-[14px] font-semibold text-[#0F172A]">
                     {c.label}
                   </p>
-                  <p className="text-[12px] text-[#94A3B8]">{c.desc}</p>
+                  <p className="text-[12px] text-[#5B6B82]">{c.desc}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 {c.result?.latency != null && c.status === "operational" && (
-                  <span className="text-[11.5px] font-medium text-[#94A3B8]">
+                  <span className="text-[11.5px] font-medium text-[#5B6B82]">
                     {c.result.latency} ms
                   </span>
                 )}
@@ -233,7 +233,7 @@ export default function Status() {
         })}
       </Card>
 
-      <p className="px-1 text-center text-[12px] text-[#94A3B8]">
+      <p className="px-1 text-center text-[12px] text-[#5B6B82]">
         Status refreshes automatically every 30 seconds.
       </p>
     </div>

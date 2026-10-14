@@ -271,6 +271,7 @@ export default function AgentVersions() {
               Agent
             </label>
             <select
+              aria-label="Agent"
               value={agentId}
               onChange={(e) => {
                 if (!requestedAgentId) setAgentId(e.target.value);
@@ -354,6 +355,7 @@ export default function AgentVersions() {
                     From
                   </label>
                   <select
+                    aria-label="Compare from version"
                     value={compare.from ?? 0}
                     onChange={(e) =>
                       setCompare((c) => ({
@@ -376,6 +378,7 @@ export default function AgentVersions() {
                     To
                   </label>
                   <select
+                    aria-label="Compare to version"
                     value={compare.to ?? 0}
                     onChange={(e) =>
                       setCompare((c) => ({ ...c, to: Number(e.target.value) }))

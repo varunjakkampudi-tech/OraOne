@@ -81,7 +81,7 @@ function EventPicker({ events, selected, toggle }) {
               <span className="block font-mono text-[12px] font-medium text-[#0F172A]">
                 {e.event}
               </span>
-              <span className="mt-0.5 block text-[11px] text-[#94A3B8]">
+              <span className="mt-0.5 block text-[11px] text-[#5B6B82]">
                 {e.description}
               </span>
             </span>
@@ -141,13 +141,13 @@ function CreateWebhookModal({ events, onClose, onCreated }) {
             <h2 className="text-lg font-bold text-[#0F172A]">
               Add webhook endpoint
             </h2>
-            <p className="text-sm text-[#64748B]">
+            <p className="text-sm text-[#5B6B82]">
               We'll POST signed events to your URL.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]"
+            className="rounded-lg p-1 text-[#5B6B82] hover:bg-[#F1F5F9]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -182,7 +182,7 @@ function CreateWebhookModal({ events, onClose, onCreated }) {
               <label className="text-sm font-medium text-[#334155]">
                 Events
               </label>
-              <span className="text-[11px] text-[#94A3B8]">
+              <span className="text-[11px] text-[#5B6B82]">
                 {selected.length} selected
               </span>
             </div>
@@ -243,7 +243,7 @@ function RevealSecretModal({ secret, onClose }) {
           </div>
           <div>
             <h2 className="text-lg font-bold text-[#0F172A]">Signing secret</h2>
-            <p className="text-sm text-[#64748B]">
+            <p className="text-sm text-[#5B6B82]">
               Store it now — it won't be shown again.
             </p>
           </div>
@@ -314,7 +314,7 @@ function DeliveriesRow({ endpointId }) {
   }
   if (!deliveries.length) {
     return (
-      <p className="py-6 text-center text-sm text-[#94A3B8]">
+      <p className="py-6 text-center text-sm text-[#5B6B82]">
         No deliveries yet. Send a test to try it out.
       </p>
     );
@@ -323,7 +323,7 @@ function DeliveriesRow({ endpointId }) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[#E2E8F0] text-left text-[11px] uppercase tracking-wide text-[#94A3B8]">
+          <tr className="border-b border-[#E2E8F0] text-left text-[11px] uppercase tracking-wide text-[#5B6B82]">
             <th className="py-2 pr-4 font-semibold">Event</th>
             <th className="py-2 pr-4 font-semibold">Result</th>
             <th className="py-2 pr-4 font-semibold">Status</th>
@@ -354,7 +354,7 @@ function DeliveriesRow({ endpointId }) {
               <td className="py-2.5 pr-4 tabular-nums text-[#475569]">
                 {d.attempts}
               </td>
-              <td className="py-2.5 pr-4 text-[#64748B]">
+              <td className="py-2.5 pr-4 text-[#5B6B82]">
                 {fmtRelative(d.created_at)}
               </td>
             </tr>
@@ -489,7 +489,7 @@ export default function Webhooks() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-[#0F172A]">Webhooks</h1>
-            <p className="text-sm text-[#64748B]">
+            <p className="text-sm text-[#5B6B82]">
               Receive signed, real-time events from OraOne on your own servers.
             </p>
           </div>
@@ -520,7 +520,7 @@ export default function Webhooks() {
           <p className="text-sm font-semibold text-[#0F172A]">
             No webhook endpoints yet
           </p>
-          <p className="mt-1 max-w-sm text-sm text-[#64748B]">
+          <p className="mt-1 max-w-sm text-sm text-[#5B6B82]">
             Add an endpoint to get notified about conversations, documents,
             workflows and more.
           </p>
@@ -552,7 +552,7 @@ export default function Webhooks() {
                       <StatusBadge status={ep.status} />
                     </div>
                     {ep.description && (
-                      <p className="mt-1 text-[13px] text-[#64748B]">
+                      <p className="mt-1 text-[13px] text-[#5B6B82]">
                         {ep.description}
                       </p>
                     )}
@@ -561,7 +561,7 @@ export default function Webhooks() {
                         <EventChip key={e}>{e}</EventChip>
                       ))}
                     </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-4 text-[12px] text-[#94A3B8]">
+                    <div className="mt-3 flex flex-wrap items-center gap-4 text-[12px] text-[#5B6B82]">
                       <span>
                         Last delivery: {fmtRelative(ep.last_delivery_at)}
                       </span>

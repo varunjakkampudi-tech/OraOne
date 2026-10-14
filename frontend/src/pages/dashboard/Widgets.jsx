@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { api, formatApiError } from "@/lib/api";
 
 const STATUS = {
-  draft: { label: "Draft", cls: "bg-[#F1F5F9] text-[#64748B]" },
+  draft: { label: "Draft", cls: "bg-[#F1F5F9] text-[#5B6B82]" },
   published: { label: "Published", cls: "bg-green-50 text-green-700" },
   paused: { label: "Paused", cls: "bg-amber-50 text-amber-700" },
 };
@@ -194,7 +194,7 @@ export default function Widgets() {
           <h1 className="text-[28px] font-semibold tracking-tight text-ink">
             Website Widgets
           </h1>
-          <p className="text-sm text-[#64748B] mt-1">
+          <p className="text-sm text-[#5B6B82] mt-1">
             Embed your AI assistant on any website with a single line of code.
           </p>
         </div>
@@ -225,7 +225,7 @@ export default function Widgets() {
                 <div className="text-[28px] font-semibold text-ink">
                   {k.value}
                 </div>
-                <div className="text-xs text-[#64748B]">{k.label}</div>
+                <div className="text-xs text-[#5B6B82]">{k.label}</div>
               </div>
             </div>
           </div>
@@ -236,7 +236,7 @@ export default function Widgets() {
       <div className="relative max-w-md">
         <Search
           size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5B6B82]"
         />
         <input
           value={search}
@@ -248,7 +248,7 @@ export default function Widgets() {
 
       {/* List */}
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-[#94A3B8]">
+        <div className="flex items-center justify-center py-20 text-[#5B6B82]">
           <Loader2 className="animate-spin" />
         </div>
       ) : items.length === 0 ? (
@@ -257,7 +257,7 @@ export default function Widgets() {
           <h3 className="mt-3 text-lg font-semibold text-[#0F172A]">
             No widgets yet
           </h3>
-          <p className="text-sm text-[#64748B] mt-1">
+          <p className="text-sm text-[#5B6B82] mt-1">
             Create a widget, connect an agent and knowledge base, then drop the
             snippet on your site.
           </p>
@@ -342,11 +342,11 @@ function WidgetCard({
               {w.name}
             </h3>
             <StatusBadge status={w.status} />
-            <span className="text-[11px] px-2 py-0.5 rounded-md bg-[#F1F5F9] text-[#64748B] capitalize">
+            <span className="text-[11px] px-2 py-0.5 rounded-md bg-[#F1F5F9] text-[#5B6B82] capitalize">
               {(w.widget_type || "bubble").replace("-", " ")}
             </span>
           </div>
-          <div className="flex items-center gap-4 mt-3 text-xs text-[#64748B] flex-wrap">
+          <div className="flex items-center gap-4 mt-3 text-xs text-[#5B6B82] flex-wrap">
             <span className="inline-flex items-center gap-1">
               <Bot size={13} /> {agent ? agent.name : "No agent"}
             </span>
@@ -429,7 +429,7 @@ function Field({ label, children, hint }) {
   return (
     <label className="block">
       <span className="text-xs font-semibold text-[#334155]">{label}</span>
-      {hint && <span className="text-[11px] text-[#94A3B8] ml-2">{hint}</span>}
+      {hint && <span className="text-[11px] text-[#5B6B82] ml-2">{hint}</span>}
       <div className="mt-1.5">{children}</div>
     </label>
   );
@@ -448,7 +448,7 @@ function WidgetPreview({ form }) {
     .slice(0, 3);
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+      <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#5B6B82]">
         <Eye size={14} /> Live preview
       </div>
       <div className="relative flex-1 overflow-hidden rounded-2xl border border-[#E2E8F0] bg-[linear-gradient(135deg,#F8FAFC,#EEF2F7)] p-4">
@@ -490,7 +490,7 @@ function WidgetPreview({ form }) {
             ))}
           </div>
           <div className="flex items-center gap-2 border-t border-[#EEF2F7] px-3 py-2">
-            <div className="flex-1 rounded-full bg-[#F1F5F9] px-3 py-1.5 text-[11px] text-[#94A3B8]">
+            <div className="flex-1 rounded-full bg-[#F1F5F9] px-3 py-1.5 text-[11px] text-[#5B6B82]">
               Type your message…
             </div>
             <span
@@ -617,7 +617,7 @@ function WidgetModal({ widget, agents, kbs, onClose, onSaved }) {
           </h3>
           <button
             onClick={onClose}
-            className="text-[#94A3B8] hover:text-[#0F172A]"
+            className="text-[#5B6B82] hover:text-[#0F172A]"
           >
             <X size={20} />
           </button>
@@ -900,18 +900,18 @@ function AnalyticsDrawer({ widget, onClose }) {
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#EEF2F7] sticky top-0 bg-white">
           <div>
             <h3 className="text-lg font-bold text-[#0F172A]">Analytics</h3>
-            <p className="text-xs text-[#64748B]">{widget.name}</p>
+            <p className="text-xs text-[#5B6B82]">{widget.name}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-[#94A3B8] hover:text-[#0F172A]"
+            className="text-[#5B6B82] hover:text-[#0F172A]"
           >
             <X size={20} />
           </button>
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-20 text-[#94A3B8]">
+          <div className="flex items-center justify-center py-20 text-[#5B6B82]">
             <Loader2 className="animate-spin" />
           </div>
         ) : (
@@ -931,14 +931,14 @@ function AnalyticsDrawer({ widget, onClose }) {
                   <div className="text-2xl font-bold text-[#0F172A]">
                     {s.value ?? 0}
                   </div>
-                  <div className="text-xs text-[#64748B]">{s.label}</div>
+                  <div className="text-xs text-[#5B6B82]">{s.label}</div>
                 </div>
               ))}
             </div>
 
             {data?.avg_csat != null && (
               <div className="border border-line rounded-lg p-4">
-                <div className="text-xs text-[#64748B]">
+                <div className="text-xs text-[#5B6B82]">
                   Average satisfaction
                 </div>
                 <div className="text-2xl font-bold text-[#0F172A] mt-1">
@@ -958,10 +958,10 @@ function AnalyticsDrawer({ widget, onClose }) {
                       key={i}
                       className="flex items-start gap-2 text-sm text-[#334155]"
                     >
-                      <span className="text-[#94A3B8]">{i + 1}.</span>
+                      <span className="text-[#5B6B82]">{i + 1}.</span>
                       <span className="flex-1">{q.question || q.text}</span>
                       {q.count != null && (
-                        <span className="text-xs text-[#94A3B8]">
+                        <span className="text-xs text-[#5B6B82]">
                           {q.count}×
                         </span>
                       )}

@@ -236,7 +236,7 @@ export default function SolutionsPage() {
           </motion.h1>
           <motion.p
             {...fadeUp}
-            className="mt-5 text-[#64748B] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed"
+            className="mt-5 text-[#5B6B82] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed"
           >
             Tailored AI solutions designed to address the unique challenges of
             your industry and drive meaningful results.
@@ -284,7 +284,7 @@ export default function SolutionsPage() {
                       <p className="text-[10px] font-bold text-[#0F172A] truncate">
                         {ind.tag.title}
                       </p>
-                      <p className="text-[9px] text-[#64748B] truncate">
+                      <p className="text-[9px] text-[#5B6B82] truncate">
                         {ind.tag.sub}
                       </p>
                     </div>
@@ -302,7 +302,7 @@ export default function SolutionsPage() {
                   <h3 className="text-lg font-bold tracking-tight text-[#0F172A]">
                     {ind.name}
                   </h3>
-                  <p className="mt-1.5 text-sm text-[#64748B] leading-relaxed flex-1">
+                  <p className="mt-1.5 text-sm text-[#5B6B82] leading-relaxed flex-1">
                     {ind.desc}
                   </p>
                   <Link
@@ -342,7 +342,7 @@ export default function SolutionsPage() {
                     <p className="text-3xl font-bold tracking-tighter text-[#2563EB]">
                       {s.value}
                     </p>
-                    <p className="text-xs text-[#64748B] mt-0.5">{s.label}</p>
+                    <p className="text-xs text-[#5B6B82] mt-0.5">{s.label}</p>
                   </div>
                 </div>
               ))}
@@ -368,7 +368,10 @@ export default function SolutionsPage() {
 
               <ol className="mt-10 relative">
                 {/* Connector line */}
-                <span className="absolute left-[19px] top-3 bottom-3 w-px bg-[#E2E8F0]" />
+                <li
+                  aria-hidden="true"
+                  className="absolute left-[19px] top-3 bottom-3 w-px bg-[#E2E8F0]"
+                />
                 {STEPS.map((s, i) => (
                   <motion.li
                     key={s.title}
@@ -385,7 +388,7 @@ export default function SolutionsPage() {
                       <p className="text-base font-semibold text-[#0F172A]">
                         {s.title}
                       </p>
-                      <p className="mt-1 text-sm text-[#64748B]">{s.desc}</p>
+                      <p className="mt-1 text-sm text-[#5B6B82]">{s.desc}</p>
                     </div>
                   </motion.li>
                 ))}
@@ -398,7 +401,7 @@ export default function SolutionsPage() {
                 <Quote size={28} className="text-[#2563EB]" />
                 <p className="mt-5 text-lg sm:text-xl text-[#0F172A] leading-relaxed">
                   <span className="font-semibold">OraOne helped us </span>
-                  <span className="text-[#64748B]">
+                  <span className="text-[#5B6B82]">
                     {TESTIMONIALS[activeT].quote.replace(
                       "OraOne helped us ",
                       "",

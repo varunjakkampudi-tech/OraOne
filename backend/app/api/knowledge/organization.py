@@ -35,6 +35,7 @@ from app.schemas.knowledge import (
 from app.services import rag_service
 from app.services.audit import audit
 from app.services.document_processing import process_document
+from app.middleware.org_context import require_permission
 
 router = APIRouter(tags=["knowledge-organization"])
 
@@ -132,6 +133,7 @@ async def list_knowledge_folders(
     "/api/knowledge-folders",
     response_model=KnowledgeFolderOut,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def create_knowledge_folder(
     payload: KnowledgeFolderCreate,
@@ -176,7 +178,11 @@ async def create_knowledge_folder(
     return await _folder_out(session, folder)
 
 
-@router.put("/api/knowledge-folders/{folder_id}", response_model=KnowledgeFolderOut)
+@router.put(
+    "/api/knowledge-folders/{folder_id}",
+    response_model=KnowledgeFolderOut,
+    dependencies=[Depends(require_permission("kb.write"))],
+)
 async def update_knowledge_folder(
     folder_id: uuid.UUID,
     payload: KnowledgeFolderUpdate,
@@ -202,7 +208,9 @@ async def update_knowledge_folder(
 
 
 @router.delete(
-    "/api/knowledge-folders/{folder_id}", status_code=status.HTTP_204_NO_CONTENT
+    "/api/knowledge-folders/{folder_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_permission("kb.delete"))],
 )
 async def delete_knowledge_folder(
     folder_id: uuid.UUID,
@@ -240,7 +248,11 @@ async def delete_knowledge_folder(
 # ─────────────────────── Document organization ───────────────────────
 
 
-@router.patch("/api/documents/{document_id}", response_model=DocumentRead)
+@router.patch(
+    "/api/documents/{document_id}",
+    response_model=DocumentRead,
+    dependencies=[Depends(require_permission("kb.write"))],
+)
 async def patch_document(
     document_id: uuid.UUID,
     payload: DocumentPatch,
@@ -282,7 +294,11 @@ async def patch_document(
     return _doc_to_read(doc, chunk_count=await _doc_chunk_count(session, doc.id))
 
 
-@router.post("/api/documents/bulk", response_model=BulkResult)
+@router.post(
+    "/api/documents/bulk",
+    response_model=BulkResult,
+    dependencies=[Depends(require_permission("kb.write"))],
+)
 async def bulk_documents(
     payload: BulkAction,
     ctx: OrgContext = Depends(get_current_organization),

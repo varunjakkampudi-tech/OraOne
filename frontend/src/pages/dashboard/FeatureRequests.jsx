@@ -123,7 +123,7 @@ function SubmitDialog({ open, onClose, onCreated, authorName }) {
                 type="button"
                 onClick={onClose}
                 aria-label="Close dialog"
-                className="text-[#94A3B8] hover:text-[#475569]"
+                className="text-[#5B6B82] hover:text-[#475569]"
               >
                 <X size={18} />
               </button>
@@ -146,7 +146,7 @@ function SubmitDialog({ open, onClose, onCreated, authorName }) {
                         className={`flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-[12px] font-semibold transition ${
                           sel
                             ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
-                            : "border-[#E2E8F0] text-[#64748B] hover:border-[#BFD3F5]"
+                            : "border-[#E2E8F0] text-[#5B6B82] hover:border-[#BFD3F5]"
                         }`}
                       >
                         <Icon size={17} />
@@ -173,7 +173,7 @@ function SubmitDialog({ open, onClose, onCreated, authorName }) {
                         className={`rounded-xl border px-2 py-2 text-[12px] font-semibold transition ${
                           sel
                             ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
-                            : "border-[#E2E8F0] text-[#64748B] hover:border-[#BFD3F5]"
+                            : "border-[#E2E8F0] text-[#5B6B82] hover:border-[#BFD3F5]"
                         }`}
                       >
                         {p.label}
@@ -251,7 +251,7 @@ function RequestRow({ item, onVote, onDelete }) {
         className={`flex w-14 shrink-0 flex-col items-center gap-0.5 rounded-xl border py-2 transition ${
           item.has_voted
             ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
-            : "border-[#E2E8F0] text-[#64748B] hover:border-[#BFD3F5] hover:bg-[#F8FAFC]"
+            : "border-[#E2E8F0] text-[#5B6B82] hover:border-[#BFD3F5] hover:bg-[#F8FAFC]"
         }`}
         aria-pressed={item.has_voted}
       >
@@ -271,11 +271,11 @@ function RequestRow({ item, onVote, onDelete }) {
           {item.title}
         </p>
         {item.description && (
-          <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-[#64748B]">
+          <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-[#5B6B82]">
             {item.description}
           </p>
         )}
-        <p className="mt-1.5 text-[11.5px] text-[#94A3B8]">
+        <p className="mt-1.5 text-[11.5px] text-[#5B6B82]">
           {item.author_name ? `${item.author_name} · ` : ""}
           {new Date(item.created_at).toLocaleDateString()}
         </p>
@@ -285,7 +285,7 @@ function RequestRow({ item, onVote, onDelete }) {
           type="button"
           onClick={() => onDelete(item)}
           data-testid={`feature-request-delete-${item.id}`}
-          className="shrink-0 rounded-lg p-1.5 text-[#94A3B8] transition hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+          className="shrink-0 rounded-lg p-1.5 text-[#5B6B82] transition hover:bg-[#FEF2F2] hover:text-[#DC2626]"
           aria-label="Delete"
         >
           <Trash2 size={15} />
@@ -391,7 +391,7 @@ export default function FeatureRequests() {
               className={`rounded-lg px-3.5 py-1.5 text-[13px] font-semibold transition ${
                 tab === t.value
                   ? "bg-white text-[#0F172A] shadow-sm"
-                  : "text-[#64748B] hover:text-[#0F172A]"
+                  : "text-[#5B6B82] hover:text-[#0F172A]"
               }`}
             >
               {t.label}
@@ -406,7 +406,7 @@ export default function FeatureRequests() {
               className={`rounded-lg px-3.5 py-1.5 text-[13px] font-semibold capitalize transition ${
                 sort === s
                   ? "bg-white text-[#0F172A] shadow-sm"
-                  : "text-[#64748B] hover:text-[#0F172A]"
+                  : "text-[#5B6B82] hover:text-[#0F172A]"
               }`}
             >
               {s === "top" ? "Top voted" : "Newest"}
@@ -417,7 +417,7 @@ export default function FeatureRequests() {
 
       <Card className="overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-[#94A3B8]">
+          <div className="flex items-center justify-center py-16 text-[#5B6B82]">
             <Loader2 className="animate-spin" size={22} />
           </div>
         ) : sorted.length === 0 ? (

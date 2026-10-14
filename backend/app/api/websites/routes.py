@@ -78,6 +78,7 @@ from app.schemas.website import (
 )
 from app.services.audit import audit
 from app.services.website_crawler import URLValidationError, run_crawl, validate_url
+from app.middleware.org_context import require_permission
 
 router = APIRouter(tags=["websites"])
 
@@ -143,6 +144,7 @@ async def _start_crawl(
     response_model=WebsiteRead,
     status_code=status.HTTP_201_CREATED,
     summary="Register a website and (optionally) start crawling",
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def create_website(
     payload: WebsiteCreate,
@@ -273,7 +275,10 @@ async def get_website(
 
 
 @router.put(
-    "/api/websites/{website_id}", response_model=WebsiteRead, summary="Update a website"
+    "/api/websites/{website_id}",
+    response_model=WebsiteRead,
+    summary="Update a website",
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def update_website(
     website_id: uuid.UUID,
@@ -362,6 +367,7 @@ async def delete_website(
     "/api/websites/{website_id}/crawl",
     response_model=CrawlJobRead,
     summary="Start a crawl",
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def crawl_website(
     website_id: uuid.UUID,
@@ -388,6 +394,7 @@ async def crawl_website(
     "/api/websites/{website_id}/recrawl",
     response_model=CrawlJobRead,
     summary="Force re-crawl",
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def recrawl_website(
     website_id: uuid.UUID,
@@ -402,6 +409,7 @@ async def recrawl_website(
     "/api/websites/{website_id}/pause",
     response_model=WebsiteRead,
     summary="Pause a website",
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def pause_website(
     website_id: uuid.UUID,
@@ -434,6 +442,7 @@ async def pause_website(
     "/api/websites/{website_id}/resume",
     response_model=WebsiteRead,
     summary="Resume a website",
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def resume_website(
     website_id: uuid.UUID,
@@ -489,6 +498,7 @@ async def resume_website(
     "/api/websites/{website_id}/cancel",
     response_model=WebsiteRead,
     summary="Cancel a running crawl",
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def cancel_website(
     website_id: uuid.UUID,

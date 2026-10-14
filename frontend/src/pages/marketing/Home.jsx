@@ -68,7 +68,7 @@ function SectionHeading({ title, children }) {
         {title}
       </h2>
       {children && (
-        <p className="mt-3 text-base leading-relaxed text-[#64748B]">
+        <p className="mt-3 text-base leading-relaxed text-[#5B6B82]">
           {children}
         </p>
       )}
@@ -160,7 +160,7 @@ export default function HomePage() {
               <h3 className="text-base font-semibold text-[#0F172A]">
                 {title}
               </h3>
-              <p className="mt-2 text-base leading-relaxed text-[#64748B]">
+              <p className="mt-2 text-base leading-relaxed text-[#5B6B82]">
                 {text}
               </p>
             </article>
@@ -185,7 +185,7 @@ export default function HomePage() {
                 <h3 className="mt-3 text-lg font-semibold text-[#0F172A]">
                   {title}
                 </h3>
-                <p className="mt-2 text-base leading-relaxed text-[#64748B]">
+                <p className="mt-2 text-base leading-relaxed text-[#5B6B82]">
                   {text}
                 </p>
               </li>
@@ -228,7 +228,7 @@ export default function HomePage() {
               <summary className="cursor-pointer text-base font-semibold text-[#0F172A]">
                 {question}
               </summary>
-              <p className="mt-3 text-base leading-relaxed text-[#64748B]">
+              <p className="mt-3 text-base leading-relaxed text-[#5B6B82]">
                 {answer}
               </p>
             </details>
@@ -239,7 +239,7 @@ export default function HomePage() {
         <h2 className="text-3xl font-bold tracking-tight text-[#0F172A]">
           Bring your workspace together.
         </h2>
-        <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-[#64748B]">
+        <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-[#5B6B82]">
           Start with OraOne AI Chat and build around the conversations that
           matter.
         </p>

@@ -79,3 +79,24 @@ python -m pytest tests/test_local_test_account_seed.py -q
 These tests check the fail-closed guard. They are not a live authentication
 test. Run the repository's `verify_otp_flow_local.py` and other real Product 1
 verification scripts separately for end-to-end evidence.
+
+## Verifying the fixture end to end
+
+With the API running locally, the same opt-in variables drive a real lifecycle
+check: wrong password rejected, password step returns no tokens, wrong OTP
+rejected, OTP single use, `/api/auth/me` role `user`, platform admin API denied,
+refresh rotation with stale-token reuse rejected, and refresh rejected after
+logout:
+
+```bash
+cd backend
+ENVIRONMENT=development AUTH_PROVIDER=self_hosted \
+ORAONE_LOCAL_TEST_ACK=I_UNDERSTAND_THIS_IS_LOCAL_ONLY \
+ORAONE_LOCAL_TEST_PASSWORD='<local password>' \
+python scripts/verify_local_test_account_flow.py --base-url http://127.0.0.1:8000
+```
+
+**Local OTP behaviour:** when no `SMTP_HOST`/`EMAIL_FROM`/SES sender is
+configured, the email service logs that the message was *not sent*. It never
+logs the code. The 6-digit code lives only in the local Redis cache under
+`login_otp:<email>` for 10 minutes and is deleted on first successful use.

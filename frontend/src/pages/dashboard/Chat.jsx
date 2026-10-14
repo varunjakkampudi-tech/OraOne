@@ -821,7 +821,7 @@ export default function Chat() {
                 {search && (
                   <button
                     onClick={() => setSearch("")}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-[#94A3B8] hover:text-[#0F172A]"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-[#5B6B82] hover:text-[#0F172A]"
                     aria-label="Clear search"
                   >
                     <X size={13} />
@@ -841,7 +841,7 @@ export default function Chat() {
                     className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                       filter === t.k
                         ? "bg-[#EFF6FF] text-[#2563EB]"
-                        : "text-[#64748B] hover:bg-[#F8FAFC]"
+                        : "text-[#5B6B82] hover:bg-[#F8FAFC]"
                     }`}
                   >
                     {t.label}
@@ -859,9 +859,9 @@ export default function Chat() {
                 <div className="px-3 py-10 text-center">
                   <MessageSquarePlus
                     size={28}
-                    className="mx-auto text-[#94A3B8]"
+                    className="mx-auto text-[#5B6B82]"
                   />
-                  <p className="mt-2 text-sm text-[#64748B]">
+                  <p className="mt-2 text-sm text-[#5B6B82]">
                     {search
                       ? "No matches found."
                       : filter === "archived"
@@ -871,7 +871,7 @@ export default function Chat() {
                           : "No conversations yet."}
                   </p>
                   {!search && filter === "active" && (
-                    <p className="text-xs text-[#94A3B8]">
+                    <p className="text-xs text-[#5B6B82]">
                       Start a new chat to begin.
                     </p>
                   )}
@@ -896,14 +896,14 @@ export default function Chat() {
                     <>
                       {pinned.length > 0 && (
                         <>
-                          <div className="px-2 pt-1 pb-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-[#94A3B8] flex items-center gap-1">
+                          <div className="px-2 pt-1 pb-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-[#5B6B82] flex items-center gap-1">
                             <Pin size={10} /> Pinned
                           </div>
                           {pinned.map((c) => (
                             <ConversationRow key={c.id} c={c} {...rowProps} />
                           ))}
                           {others.length > 0 && (
-                            <div className="px-2 pt-2 pb-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-[#94A3B8]">
+                            <div className="px-2 pt-2 pb-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-[#5B6B82]">
                               Recent
                             </div>
                           )}
@@ -958,7 +958,7 @@ export default function Chat() {
                         </button>
                         <button
                           onClick={() => setRenaming(false)}
-                          className="p-1.5 rounded-lg text-[#64748B] hover:bg-[#F1F5F9]"
+                          className="p-1.5 rounded-lg text-[#5B6B82] hover:bg-[#F1F5F9]"
                           aria-label="Cancel rename"
                         >
                           <X size={15} />
@@ -971,14 +971,14 @@ export default function Chat() {
                         </h2>
                         <button
                           onClick={beginRename}
-                          className="p-1 rounded-md text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#EFF6FF]"
+                          className="p-1 rounded-md text-[#5B6B82] hover:text-[#2563EB] hover:bg-[#EFF6FF]"
                           aria-label="Rename conversation"
                         >
                           <Pencil size={13} />
                         </button>
                       </div>
                     )}
-                    <p className="text-xs text-[#64748B] truncate">
+                    <p className="text-xs text-[#5B6B82] truncate">
                       {agentName}
                     </p>
                   </div>
@@ -994,7 +994,7 @@ export default function Chat() {
                     className={`p-2 rounded-lg transition-colors ${
                       activeConv?.is_pinned
                         ? "text-[#2563EB] bg-[#EFF6FF]"
-                        : "text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#EFF6FF]"
+                        : "text-[#5B6B82] hover:text-[#2563EB] hover:bg-[#EFF6FF]"
                     }`}
                     aria-label="Pin conversation"
                     title={activeConv?.is_pinned ? "Unpin" : "Pin"}
@@ -1006,7 +1006,7 @@ export default function Chat() {
                     className={`p-2 rounded-lg transition-colors ${
                       activeConv?.is_favorite
                         ? "text-amber-500 bg-amber-50"
-                        : "text-[#94A3B8] hover:text-amber-500 hover:bg-amber-50"
+                        : "text-[#5B6B82] hover:text-amber-500 hover:bg-amber-50"
                     }`}
                     aria-label="Favorite conversation"
                     title={activeConv?.is_favorite ? "Unfavorite" : "Favorite"}
@@ -1022,7 +1022,7 @@ export default function Chat() {
                     onClick={(e) =>
                       activeConv && shareConversation(activeConv, e)
                     }
-                    className="p-2 rounded-lg text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#EFF6FF] transition-colors"
+                    className="p-2 rounded-lg text-[#5B6B82] hover:text-[#2563EB] hover:bg-[#EFF6FF] transition-colors"
                     aria-label="Share conversation"
                     title="Share"
                   >
@@ -1033,7 +1033,7 @@ export default function Chat() {
                       activeConv &&
                       exportConversation(activeConv, "markdown", e)
                     }
-                    className="p-2 rounded-lg text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#EFF6FF] transition-colors"
+                    className="p-2 rounded-lg text-[#5B6B82] hover:text-[#2563EB] hover:bg-[#EFF6FF] transition-colors"
                     aria-label="Export conversation"
                     title="Export as Markdown"
                   >
@@ -1043,7 +1043,7 @@ export default function Chat() {
                     onClick={(e) =>
                       activeConv && deleteConversation(activeConv, e)
                     }
-                    className="p-2 rounded-lg text-[#94A3B8] hover:text-red-500 hover:bg-red-50"
+                    className="p-2 rounded-lg text-[#5B6B82] hover:text-red-500 hover:bg-red-50"
                     aria-label="Delete conversation"
                     title="Delete"
                   >
@@ -1071,7 +1071,7 @@ export default function Chat() {
                       <p className="mt-2 text-sm font-medium text-[#0F172A]">
                         Say hello to start the conversation
                       </p>
-                      <p className="text-xs text-[#94A3B8]">
+                      <p className="text-xs text-[#5B6B82]">
                         Your agent will answer using its instructions and
                         knowledge base.
                       </p>
@@ -1120,7 +1120,7 @@ export default function Chat() {
                       onClick={regenerate}
                       disabled={regenerating}
                       data-testid="chat-regenerate"
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-[#E2E8F0] text-[12px] text-[#64748B] hover:text-[#2563EB] hover:border-[#2563EB] transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-[#E2E8F0] text-[12px] text-[#5B6B82] hover:text-[#2563EB] hover:border-[#2563EB] transition-colors disabled:opacity-50"
                       title="Regenerate the last response"
                     >
                       <RefreshCw
@@ -1138,7 +1138,7 @@ export default function Chat() {
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium transition-colors ${
                       useKnowledge
                         ? "bg-[#EFF6FF] text-[#2563EB]"
-                        : "bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0]"
+                        : "bg-[#F1F5F9] text-[#5B6B82] hover:bg-[#E2E8F0]"
                     }`}
                     aria-pressed={useKnowledge}
                   >
@@ -1148,7 +1148,7 @@ export default function Chat() {
                   {sending && (
                     <span
                       data-testid={CHAT.typingIndicator}
-                      className="inline-flex items-center gap-1.5 text-[12px] text-[#64748B]"
+                      className="inline-flex items-center gap-1.5 text-[12px] text-[#5B6B82]"
                     >
                       <Loader2 size={13} className="animate-spin" /> Agent is
                       typing…
@@ -1203,7 +1203,7 @@ export default function Chat() {
                 ["Status", agents[0]?.status || "Unavailable"],
               ].map(([label, value]) => (
                 <div key={label}>
-                  <dt className="text-xs text-[#64748B]">{label}</dt>
+                  <dt className="text-xs text-[#5B6B82]">{label}</dt>
                   <dd className="mt-1 break-words font-medium text-[#334155]">
                     {value}
                   </dd>
@@ -1288,7 +1288,7 @@ function ConversationRow({
               {c.title || "New Conversation"}
             </p>
           </div>
-          <p className="text-[11px] text-[#94A3B8]">
+          <p className="text-[11px] text-[#5B6B82]">
             {relativeTime(c.last_message_at || c.created_at)}
           </p>
           {Array.isArray(c.tags) && c.tags.length > 0 && (
@@ -1296,7 +1296,7 @@ function ConversationRow({
               {c.tags.slice(0, 3).map((t) => (
                 <span
                   key={t}
-                  className="px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[9.5px] text-[#64748B]"
+                  className="px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[9.5px] text-[#5B6B82]"
                 >
                   {t}
                 </span>
@@ -1310,7 +1310,7 @@ function ConversationRow({
             className={`opacity-0 group-hover:opacity-100 p-1.5 rounded-lg transition-all ${
               c.is_pinned
                 ? "text-[#2563EB] opacity-100"
-                : "text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#EFF6FF]"
+                : "text-[#5B6B82] hover:text-[#2563EB] hover:bg-[#EFF6FF]"
             }`}
             aria-label={c.is_pinned ? "Unpin" : "Pin"}
           >
@@ -1321,7 +1321,7 @@ function ConversationRow({
               e.stopPropagation();
               setMenuFor(open ? null : c.id);
             }}
-            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-[#94A3B8] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-all"
+            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-[#5B6B82] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-all"
             aria-label="More actions"
             aria-haspopup="menu"
             aria-expanded={open}
@@ -1411,7 +1411,7 @@ function Bubble({ role, content, streaming = false, meta }) {
   if (isSystem) {
     return (
       <div className="flex justify-center">
-        <span className="px-3 py-1 rounded-full bg-[#F1F5F9] text-[11px] text-[#64748B]">
+        <span className="px-3 py-1 rounded-full bg-[#F1F5F9] text-[11px] text-[#5B6B82]">
           {content}
         </span>
       </div>
@@ -1477,7 +1477,7 @@ function SourcesPanel({ sources }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-1 text-[10.5px] font-medium text-[#64748B] hover:text-[#2563EB] transition-colors"
+        className="inline-flex items-center gap-1 text-[10.5px] font-medium text-[#5B6B82] hover:text-[#2563EB] transition-colors"
         aria-expanded={open}
       >
         <BookOpen size={11} />
@@ -1499,12 +1499,12 @@ function SourcesPanel({ sources }) {
               </span>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 text-[11.5px] font-medium text-[#0F172A] truncate">
-                  <FileText size={11} className="text-[#94A3B8] shrink-0" />
+                  <FileText size={11} className="text-[#5B6B82] shrink-0" />
                   <span className="truncate">
                     {s.document || s.document_name || "Document"}
                   </span>
                 </div>
-                <div className="text-[10px] text-[#94A3B8]">
+                <div className="text-[10px] text-[#5B6B82]">
                   {s.page != null ? `Page ${s.page}` : "—"}
                   {s.section ? ` · ${s.section}` : ""}
                   {typeof s.score === "number"
@@ -1564,7 +1564,7 @@ function AgentPicker({ agents, onPick, onClose }) {
           </h3>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-[#64748B] hover:bg-[#F1F5F9]"
+            className="p-2 rounded-lg text-[#5B6B82] hover:bg-[#F1F5F9]"
             aria-label="Close"
           >
             <X size={18} />
@@ -1587,7 +1587,7 @@ function AgentPicker({ agents, onPick, onClose }) {
                   <p className="text-sm font-semibold text-[#0F172A] truncate">
                     {a.name}
                   </p>
-                  <p className="text-xs text-[#64748B] capitalize">
+                  <p className="text-xs text-[#5B6B82] capitalize">
                     {a.type || "chat"} agent
                   </p>
                 </div>
@@ -1596,7 +1596,7 @@ function AgentPicker({ agents, onPick, onClose }) {
                     Active
                   </span>
                 ) : (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-[#F1F5F9] text-[#64748B]">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-[#F1F5F9] text-[#5B6B82]">
                     Paused
                   </span>
                 )}

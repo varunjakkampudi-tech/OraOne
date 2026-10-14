@@ -205,7 +205,7 @@ export default function GettingStarted() {
               <p className="text-sm font-bold text-[#0F172A]">
                 {allDone ? "You're all set up! 🎉" : "Setup progress"}
               </p>
-              <p className="text-xs text-[#64748B]">
+              <p className="text-xs text-[#5B6B82]">
                 {allDone
                   ? "Every essential step is complete. Your assistant is ready for customers."
                   : `${doneCount} of ${total} essential steps complete`}
@@ -251,7 +251,7 @@ export default function GettingStarted() {
                   {step.optional && <Badge tone="slate">Optional</Badge>}
                   {step.done && <Badge tone="green">Done</Badge>}
                 </div>
-                <p className="mt-0.5 text-xs leading-snug text-[#64748B]">
+                <p className="mt-0.5 text-xs leading-snug text-[#5B6B82]">
                   {step.desc}
                 </p>
               </div>
@@ -275,7 +275,7 @@ export default function GettingStarted() {
         })}
       </div>
 
-      <p className="flex items-center gap-2 px-1 text-xs text-[#94A3B8]">
+      <p className="flex items-center gap-2 px-1 text-xs text-[#5B6B82]">
         <Circle size={12} />
         Progress updates automatically as you complete each step.
       </p>

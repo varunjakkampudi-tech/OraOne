@@ -31,7 +31,7 @@ export default function Login() {
         <h1 className="text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">
           Welcome Back
         </h1>
-        <p className="mt-2 text-center text-sm text-[#64748B]">
+        <p className="mt-2 text-center text-sm text-[#5B6B82]">
           Sign in securely with your OraOne account using your email address.
           Password recovery is handled securely for you.
         </p>
@@ -94,7 +94,7 @@ export default function Login() {
         <h1 className="text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">
           Check your email
         </h1>
-        <p className="mt-2 text-center text-sm text-[#64748B]">
+        <p className="mt-2 text-center text-sm text-[#5B6B82]">
           We sent a 6-digit code to{" "}
           <span className="font-semibold text-[#2563EB]">{email}</span>
         </p>
@@ -145,7 +145,7 @@ export default function Login() {
       <h1 className="text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">
         Welcome Back
       </h1>
-      <p className="mt-2 text-center text-sm text-[#64748B]">
+      <p className="mt-2 text-center text-sm text-[#5B6B82]">
         Sign in to continue managing your AI agents.
       </p>
 
@@ -206,7 +206,7 @@ export default function Login() {
         </GradientButton>
       </form>
 
-      <p className="mt-6 text-center text-sm text-[#64748B]">
+      <p className="mt-6 text-center text-sm text-[#5B6B82]">
         New to OraOne?{" "}
         <Link
           to="/signup"

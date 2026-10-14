@@ -82,8 +82,8 @@ export default function InviteAccept() {
             <h1 className="text-xl font-bold text-[#0F172A] mt-3">
               Welcome aboard!
             </h1>
-            <p className="text-[#64748B] mt-1">{done.message}</p>
-            <p className="text-sm text-[#94A3B8] mt-4">
+            <p className="text-[#5B6B82] mt-1">{done.message}</p>
+            <p className="text-sm text-[#5B6B82] mt-4">
               Redirecting to your dashboard…
             </p>
           </>
@@ -92,11 +92,11 @@ export default function InviteAccept() {
             <h1 className="text-xl font-bold text-[#0F172A] mt-4">
               Join {preview.organization_name}
             </h1>
-            <p className="text-[#64748B] mt-1">
+            <p className="text-[#5B6B82] mt-1">
               You've been invited as{" "}
               <span className="font-semibold capitalize">{preview.role}</span>.
             </p>
-            <div className="mt-2 text-sm text-[#64748B]">
+            <div className="mt-2 text-sm text-[#5B6B82]">
               Invitation for{" "}
               <span className="font-medium">{preview.email}</span>
             </div>
@@ -123,7 +123,7 @@ export default function InviteAccept() {
             <h1 className="text-xl font-bold text-[#0F172A] mt-3">
               Invitation unavailable
             </h1>
-            <p className="text-[#64748B] mt-1">
+            <p className="text-[#5B6B82] mt-1">
               {preview?.reason || "This invitation link is no longer valid."}
             </p>
             <button

@@ -89,7 +89,7 @@ export function EmptyState({
         )}
         {description && (
           <p
-            className={`mt-1.5 ${s.desc} text-[#64748B] max-w-md mx-auto leading-relaxed`}
+            className={`mt-1.5 ${s.desc} text-[#5B6B82] max-w-md mx-auto leading-relaxed`}
           >
             {description}
           </p>

@@ -74,7 +74,7 @@ function ActivityList() {
   }
   if (!items.length) {
     return (
-      <p className="py-16 text-center text-sm text-[#94A3B8]">
+      <p className="py-16 text-center text-sm text-[#5B6B82]">
         No activity yet.
       </p>
     );
@@ -99,16 +99,16 @@ function ActivityList() {
                 <span className="font-semibold">
                   {ev.actor?.name || "Someone"}
                 </span>{" "}
-                <span className="text-[#64748B]">{ev.summary}</span>
+                <span className="text-[#5B6B82]">{ev.summary}</span>
               </p>
               {ev.resource_type && (
-                <p className="mt-0.5 text-[11px] text-[#94A3B8]">
+                <p className="mt-0.5 text-[11px] text-[#5B6B82]">
                   {ev.resource_type}
                   {ev.resource_id ? ` · ${ev.resource_id}` : ""}
                 </p>
               )}
             </div>
-            <span className="shrink-0 text-[11px] text-[#94A3B8]">
+            <span className="shrink-0 text-[11px] text-[#5B6B82]">
               {fmtRelative(ev.created_at)}
             </span>
           </li>
@@ -179,7 +179,7 @@ function NotificationsList() {
   return (
     <>
       <div className="flex items-center justify-between border-b border-[#E2E8F0] px-5 py-3">
-        <span className="text-[12px] font-semibold text-[#64748B]">
+        <span className="text-[12px] font-semibold text-[#5B6B82]">
           {unread > 0 ? `${unread} unread` : "All caught up"}
         </span>
         {unread > 0 && (
@@ -193,7 +193,7 @@ function NotificationsList() {
         )}
       </div>
       {!items.length ? (
-        <p className="py-16 text-center text-sm text-[#94A3B8]">
+        <p className="py-16 text-center text-sm text-[#5B6B82]">
           No notifications yet.
         </p>
       ) : (
@@ -222,11 +222,11 @@ function NotificationsList() {
                     {n.title}
                   </p>
                   {n.body && (
-                    <p className="mt-0.5 text-[12px] text-[#64748B]">
+                    <p className="mt-0.5 text-[12px] text-[#5B6B82]">
                       {n.body}
                     </p>
                   )}
-                  <p className="mt-0.5 text-[11px] text-[#94A3B8]">
+                  <p className="mt-0.5 text-[11px] text-[#5B6B82]">
                     {fmtRelative(n.created_at)}
                   </p>
                 </div>
@@ -272,7 +272,7 @@ export default function ActivityCenter({ defaultTab = "activity" }) {
           <h1 className="text-xl font-bold text-[#0F172A]">
             Activity & Notifications
           </h1>
-          <p className="text-sm text-[#64748B]">
+          <p className="text-sm text-[#5B6B82]">
             Stay on top of what's happening across your workspace.
           </p>
         </div>

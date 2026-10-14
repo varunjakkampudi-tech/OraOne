@@ -278,7 +278,7 @@ export default function NotificationsMenu({ dark = false }) {
             ) : items.length === 0 ? (
               <div className="px-4 py-12 text-center">
                 <CheckCircle2 className="mx-auto mb-2 h-7 w-7 text-[#CBD5E1]" />
-                <p className="text-sm text-[#64748B]">
+                <p className="text-sm text-[#5B6B82]">
                   You&apos;re all caught up.
                 </p>
               </div>
@@ -312,7 +312,7 @@ export default function NotificationsMenu({ dark = false }) {
                               {n.body}
                             </p>
                           )}
-                          <p className="mt-0.5 text-[11px] text-[#94A3B8]">
+                          <p className="mt-0.5 text-[11px] text-[#5B6B82]">
                             {fmtRelative(n.created_at)}
                           </p>
                         </div>

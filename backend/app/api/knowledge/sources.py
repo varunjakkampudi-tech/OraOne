@@ -36,6 +36,7 @@ from app.services import storage
 from app.services.audit import audit
 from app.services.document_processing import compute_checksum, process_document
 from app.services.website_crawler import URLValidationError, validate_url
+from app.middleware.org_context import require_permission
 
 router = APIRouter(tags=["knowledge-sources"])
 
@@ -269,6 +270,7 @@ async def list_source_types(
     "/api/knowledge/sources/website",
     response_model=DocumentRead,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def ingest_website(
     payload: WebsiteSourceIn,
@@ -314,6 +316,7 @@ async def ingest_website(
     "/api/knowledge/sources/text",
     response_model=DocumentRead,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def ingest_text(
     payload: TextSourceIn,

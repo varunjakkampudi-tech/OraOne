@@ -165,7 +165,7 @@ export default function TopBar({ onMenuClick = () => {} }) {
             className="hidden w-full max-w-lg items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-left text-slate-200 transition-colors hover:bg-white/10 md:flex"
             data-testid="dashboard-search-input"
           >
-            <Search size={16} className="text-[#64748B]" />
+            <Search size={16} className="text-[#5B6B82]" />
             <span className="global-search flex-1 truncate text-[13px] text-slate-300">
               Search conversations, assistants, leads, workflows…
             </span>
@@ -282,7 +282,7 @@ export default function TopBar({ onMenuClick = () => {} }) {
                 `relative -mb-px whitespace-nowrap border-b-2 px-3 py-2.5 text-[13px] font-semibold transition-colors ${
                   isActive || isTabActive(tab)
                     ? "border-[#2563EB] text-[#2563EB]"
-                    : "border-transparent text-[#64748B] hover:text-[#0F172A]"
+                    : "border-transparent text-[#5B6B82] hover:text-[#0F172A]"
                 }`
               }
             >

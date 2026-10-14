@@ -24,7 +24,7 @@ export default function OnboardingLayout() {
           </Link>
           <Link
             to="/login"
-            className="text-sm text-[#64748B] hover:text-[#0F172A]"
+            className="text-sm text-[#5B6B82] hover:text-[#0F172A]"
           >
             Sign out
           </Link>

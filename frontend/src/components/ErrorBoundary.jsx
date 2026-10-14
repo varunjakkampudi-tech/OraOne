@@ -50,7 +50,7 @@ export class ErrorBoundary extends React.Component {
           <h1 className="mt-6 text-2xl sm:text-3xl font-bold tracking-tight text-[#0F172A]">
             Something went wrong
           </h1>
-          <p className="mt-3 text-[#64748B] text-sm">
+          <p className="mt-3 text-[#5B6B82] text-sm">
             An unexpected error occurred while rendering this page. You can
             retry, or head back home.
           </p>

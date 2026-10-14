@@ -76,7 +76,7 @@ export default function Step1Agent() {
                     </span>
                   )}
                 </div>
-                <p className="mt-0.5 text-sm text-[#64748B]">{a.desc}</p>
+                <p className="mt-0.5 text-sm text-[#5B6B82]">{a.desc}</p>
               </div>
               <div
                 className={`size-5 rounded-full border-2 transition-colors ${active ? "border-[#2563EB] bg-[#2563EB]" : "border-[#CBD5E1] group-hover:border-[#94A3B8]"} grid place-items-center`}

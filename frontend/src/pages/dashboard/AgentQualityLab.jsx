@@ -144,6 +144,7 @@ function SimulatorTab() {
               Agent
             </label>
             <select
+              aria-label="Agent"
               value={agentId}
               onChange={(e) => {
                 if (!requestedAgentId) setAgentId(e.target.value);

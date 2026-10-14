@@ -106,6 +106,27 @@ def extract_text(
     )
 
 
+_ZIP_EXTS = frozenset({"docx", "xlsx", "xlsm", "pptx"})
+_TEXT_EXTS = frozenset({"txt", "md", "markdown", "csv", "json", "html", "htm"})
+UPLOAD_EXTENSIONS = frozenset({"pdf"}) | _ZIP_EXTS | _TEXT_EXTS
+
+
+def validate_upload(filename: str, data: bytes) -> None:
+    """Reject unsupported extensions and bodies whose bytes contradict them."""
+    ext = Path(filename).suffix.lower().lstrip(".")
+    if ext not in UPLOAD_EXTENSIONS:
+        raise ValueError(
+            f"Unsupported file type '.{ext}'." if ext else "File has no extension."
+        )
+    head = data[:8192]
+    if ext == "pdf" and b"%PDF-" not in data[:1024]:
+        raise ValueError("File content is not a valid PDF.")
+    if ext in _ZIP_EXTS and not data.startswith(b"PK\x03\x04"):
+        raise ValueError(f"File content is not a valid .{ext} document.")
+    if ext in _TEXT_EXTS and (b"\x00" in head or head.startswith((b"MZ", b"\x7fELF"))):
+        raise ValueError("Text documents must not contain binary content.")
+
+
 def _decode(data: bytes) -> str:
     # Try UTF-8 first, then latin-1 as a forgiving fallback — never raise.
     try:

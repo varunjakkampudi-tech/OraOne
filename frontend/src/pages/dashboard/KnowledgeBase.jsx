@@ -16,7 +16,7 @@ import { api, formatApiError } from "@/lib/api";
 import { PageHeader } from "@/components/dashboard/kit";
 
 const STATUS_BADGE = {
-  draft: "bg-[#F1F5F9] text-[#64748B]",
+  draft: "bg-[#F1F5F9] text-[#5B6B82]",
   active: "bg-green-50 text-green-700",
   archived: "bg-amber-50 text-amber-700",
 };
@@ -151,7 +151,7 @@ export default function KnowledgeBase() {
                 <k.icon size={18} style={{ color: k.color }} />
               </div>
               <div className="min-w-0">
-                <p className="text-[12px] text-[#64748B]">{k.label}</p>
+                <p className="text-[12px] text-[#5B6B82]">{k.label}</p>
                 <p className="text-[26px] font-bold tracking-tight text-[#0F172A] leading-none mt-1">
                   {k.value.toLocaleString()}
                 </p>
@@ -163,7 +163,7 @@ export default function KnowledgeBase() {
 
       {/* Search */}
       <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#E2E8F0]">
-        <Search size={16} className="text-[#94A3B8]" />
+        <Search size={16} className="text-[#5B6B82]" />
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -229,7 +229,7 @@ export default function KnowledgeBase() {
                       {kb.status}
                     </span>
                   </div>
-                  <p className="text-xs text-[#64748B] mt-0.5 line-clamp-2 min-h-[2rem]">
+                  <p className="text-xs text-[#5B6B82] mt-0.5 line-clamp-2 min-h-[2rem]">
                     {kb.description || "—"}
                   </p>
                 </div>
@@ -237,7 +237,7 @@ export default function KnowledgeBase() {
 
               <div className="mt-4 flex items-center gap-4 text-sm">
                 <div>
-                  <p className="text-xs text-[#64748B]">Documents</p>
+                  <p className="text-xs text-[#5B6B82]">Documents</p>
                   <p className="font-semibold text-[#0F172A]">
                     {(kb.document_count || 0).toLocaleString()}
                   </p>

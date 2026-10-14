@@ -265,7 +265,7 @@ export default function AIModels() {
             <h1 className="text-xl font-bold text-[#0F172A]">
               AI Model Router
             </h1>
-            <p className="text-sm text-[#64748B]">
+            <p className="text-sm text-[#5B6B82]">
               Choose the default model, set fallbacks, and control which models
               your agents may use.
             </p>
@@ -327,7 +327,7 @@ export default function AIModels() {
           </p>
         </div>
         <div className="rounded-2xl border border-[#E2E8F0] bg-white p-5">
-          <div className="flex items-center gap-2 text-[#64748B]">
+          <div className="flex items-center gap-2 text-[#5B6B82]">
             <Sparkles className="h-4 w-4" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               Plan
@@ -351,14 +351,14 @@ export default function AIModels() {
           <Gauge className="h-4 w-4 text-[#4F46E5]" />
           <h2 className="text-sm font-bold">Routing rules</h2>
         </div>
-        <p className="mt-1 text-xs text-[#64748B]">
+        <p className="mt-1 text-xs text-[#5B6B82]">
           Bias how the router picks among the models your agents may use, and
           cap spend &amp; latency.
         </p>
 
         {/* Strategy */}
         <div className="mt-4">
-          <span className="text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+          <span className="text-xs font-semibold uppercase tracking-wide text-[#5B6B82]">
             Strategy
           </span>
           <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -379,7 +379,7 @@ export default function AIModels() {
                   } ${!canManage ? "cursor-not-allowed opacity-60" : ""}`}
                 >
                   <Icon
-                    className={`h-4 w-4 ${active ? "text-[#4F46E5]" : "text-[#64748B]"}`}
+                    className={`h-4 w-4 ${active ? "text-[#4F46E5]" : "text-[#5B6B82]"}`}
                   />
                   <span
                     className={`text-sm font-semibold ${
@@ -388,7 +388,7 @@ export default function AIModels() {
                   >
                     {s.label}
                   </span>
-                  <span className="text-[11px] text-[#94A3B8]">{s.hint}</span>
+                  <span className="text-[11px] text-[#5B6B82]">{s.hint}</span>
                 </button>
               );
             })}
@@ -398,7 +398,7 @@ export default function AIModels() {
         {/* Limits + spend */}
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <label className="block">
-            <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+            <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[#5B6B82]">
               <DollarSign className="h-3.5 w-3.5" /> Monthly budget (USD)
             </span>
             <input
@@ -412,12 +412,12 @@ export default function AIModels() {
               data-testid="policy-budget"
               className="mt-1.5 w-full rounded-xl border border-[#E2E8F0] px-3 py-2 text-sm text-[#0F172A] focus:border-[#4F46E5] focus:outline-none disabled:bg-[#F8FAFC]"
             />
-            <span className="mt-1 block text-[11px] text-[#94A3B8]">
+            <span className="mt-1 block text-[11px] text-[#5B6B82]">
               Over budget → routes to the cheapest model.
             </span>
           </label>
           <label className="block">
-            <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+            <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[#5B6B82]">
               <Timer className="h-3.5 w-3.5" /> Max latency (ms)
             </span>
             <input
@@ -431,12 +431,12 @@ export default function AIModels() {
               data-testid="policy-latency"
               className="mt-1.5 w-full rounded-xl border border-[#E2E8F0] px-3 py-2 text-sm text-[#0F172A] focus:border-[#4F46E5] focus:outline-none disabled:bg-[#F8FAFC]"
             />
-            <span className="mt-1 block text-[11px] text-[#94A3B8]">
+            <span className="mt-1 block text-[11px] text-[#5B6B82]">
               Skip models slower than this typical latency.
             </span>
           </label>
           <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3">
-            <span className="text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[#5B6B82]">
               This month's spend
             </span>
             <p
@@ -447,7 +447,7 @@ export default function AIModels() {
             >
               ${(view?.current_month_spend_usd ?? 0).toFixed(2)}
               {view?.monthly_budget_usd != null && (
-                <span className="text-sm font-medium text-[#94A3B8]">
+                <span className="text-sm font-medium text-[#5B6B82]">
                   {" "}
                   / ${view.monthly_budget_usd.toFixed(2)}
                 </span>
@@ -488,7 +488,7 @@ export default function AIModels() {
           <Layers className="h-4 w-4 text-[#4F46E5]" />
           <h2 className="text-sm font-bold">Knowledge retrieval</h2>
         </div>
-        <p className="mt-1 text-xs text-[#64748B]">
+        <p className="mt-1 text-xs text-[#5B6B82]">
           Answers use hybrid search — dense vectors fused with BM25 keyword
           ranking — then a cross-encoder reranker re-scores the top passages for
           sharper grounding.
@@ -505,7 +505,7 @@ export default function AIModels() {
             <span className="block text-sm font-semibold text-[#0F172A]">
               Cross-encoder reranking
             </span>
-            <span className="block text-xs text-[#64748B]">
+            <span className="block text-xs text-[#5B6B82]">
               Re-rank fused candidates for higher answer precision.
             </span>
           </span>
@@ -520,7 +520,7 @@ export default function AIModels() {
         </label>
 
         <div className="mt-4">
-          <span className="text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+          <span className="text-xs font-semibold uppercase tracking-wide text-[#5B6B82]">
             Reranker engine
           </span>
           <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -551,14 +551,14 @@ export default function AIModels() {
                   >
                     {r.label}
                   </span>
-                  <span className="text-[11px] leading-tight text-[#64748B]">
+                  <span className="text-[11px] leading-tight text-[#5B6B82]">
                     {r.hint}
                   </span>
                 </button>
               );
             })}
           </div>
-          <p className="mt-2 text-[11px] text-[#94A3B8]">
+          <p className="mt-2 text-[11px] text-[#5B6B82]">
             Remote engines fall back to the built-in reranker automatically if
             their API key is missing or unreachable.
           </p>
@@ -569,7 +569,7 @@ export default function AIModels() {
       <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-left text-xs uppercase tracking-wide text-[#94A3B8]">
+            <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-left text-xs uppercase tracking-wide text-[#5B6B82]">
               <th className="px-5 py-3 font-semibold">Model</th>
               <th className="px-5 py-3 font-semibold">Provider</th>
               <th className="px-5 py-3 font-semibold">Context</th>
@@ -605,7 +605,7 @@ export default function AIModels() {
                         </span>
                       )}
                     </div>
-                    <span className="font-mono text-[11px] text-[#94A3B8]">
+                    <span className="font-mono text-[11px] text-[#5B6B82]">
                       {m.id}
                     </span>
                   </td>
@@ -623,7 +623,7 @@ export default function AIModels() {
                   </td>
                   <td className="px-5 py-4">
                     {!m.entitled ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-[#94A3B8]">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-[#5B6B82]">
                         <Lock className="h-3.5 w-3.5" /> Requires {m.min_plan}
                       </span>
                     ) : isDefault ? (
@@ -711,7 +711,7 @@ export default function AIModels() {
         </table>
       </div>
 
-      <p className="text-xs text-[#94A3B8]">
+      <p className="text-xs text-[#5B6B82]">
         The router picks an agent's model in this order: the agent's requested
         model (if allowed) → your default → fallbacks → first available model.
         Disabled models are never used.

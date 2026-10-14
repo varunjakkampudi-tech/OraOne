@@ -114,7 +114,7 @@ export default function Billing() {
                   <Badge tone={statusTone}>{subscription.status}</Badge>
                 )}
               </div>
-              <p className="mt-0.5 text-sm text-[#64748B]">
+              <p className="mt-0.5 text-sm text-[#5B6B82]">
                 {subscription?.cancel_at_period_end
                   ? `Cancels on ${renewal}`
                   : `Renews on ${renewal} · billed ${subscription?.billing_cycle || "monthly"}`}
@@ -167,7 +167,7 @@ export default function Billing() {
                 <h3 className="mt-4 text-lg font-bold text-[#0F172A]">
                   {plan.name}
                 </h3>
-                <p className="min-h-[40px] text-sm text-[#64748B]">
+                <p className="min-h-[40px] text-sm text-[#5B6B82]">
                   {plan.description}
                 </p>
                 <div className="mt-3">
@@ -190,7 +190,7 @@ export default function Billing() {
                 </ul>
                 <button
                   disabled
-                  className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition ${"cursor-default bg-[#F1F5F9] text-[#94A3B8]"}`}
+                  className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition ${"cursor-default bg-[#F1F5F9] text-[#5B6B82]"}`}
                 >
                   {isCurrent ? "Current free access" : "Unavailable"}
                 </button>
@@ -209,7 +209,7 @@ export default function Billing() {
             </span>
             <h2 className="font-bold text-[#0F172A]">Invoices</h2>
           </div>
-          <span className="text-sm text-[#64748B]">
+          <span className="text-sm text-[#5B6B82]">
             {invoices.length} total
           </span>
         </div>
@@ -229,12 +229,12 @@ export default function Billing() {
                 className="flex items-center justify-between p-4 transition-colors hover:bg-[#FAFBFE]"
               >
                 <div className="flex items-center gap-3">
-                  <span className="grid size-9 place-items-center rounded-xl bg-[#F5F7FB] text-[#64748B]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[#F5F7FB] text-[#5B6B82]">
                     <Receipt className="h-4 w-4" />
                   </span>
                   <div>
                     <p className="font-semibold text-[#0F172A]">{inv.number}</p>
-                    <p className="text-sm text-[#64748B]">
+                    <p className="text-sm text-[#5B6B82]">
                       {inv.description} ·{" "}
                       {new Date(inv.created_at).toLocaleDateString()}
                     </p>
@@ -250,7 +250,7 @@ export default function Billing() {
                       href={inv.hosted_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="rounded-lg p-2 text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#2563EB]"
+                      className="rounded-lg p-2 text-[#5B6B82] transition-colors hover:bg-[#F1F5F9] hover:text-[#2563EB]"
                     >
                       <Download className="h-4 w-4" />
                     </a>

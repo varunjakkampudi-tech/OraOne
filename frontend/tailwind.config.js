@@ -3,7 +3,7 @@ module.exports = {
     darkMode: ["class"],
     content: [
     "./src/**/*.{js,jsx,ts,tsx}",
-    "./public/index.html"
+    "./index.html"
   ],
   theme: {
     extend: {
@@ -61,8 +61,8 @@ module.exports = {
         },
         ink: '#0F172A',
         body: '#334155',
-        sub: '#64748B',
-        faint: '#94A3B8',
+        sub: '#5B6B82',
+        faint: '#5F6F86',
         line: '#EAF0F6',
         hairline: '#F1F5F9',
         stroke: '#E2E8F0',

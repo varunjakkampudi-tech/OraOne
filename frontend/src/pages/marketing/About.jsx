@@ -134,7 +134,7 @@ export default function AboutPage() {
           </motion.h1>
           <motion.p
             {...fadeUp}
-            className="mt-6 text-[#64748B] text-base sm:text-lg leading-relaxed max-w-2xl mx-auto"
+            className="mt-6 text-[#5B6B82] text-base sm:text-lg leading-relaxed max-w-2xl mx-auto"
           >
             OraOne is on a mission to give every business an AI workforce — one
             that replies on chat and never misses a lead.
@@ -167,7 +167,7 @@ export default function AboutPage() {
                 <p className="text-4xl sm:text-5xl font-black tracking-tighter text-[#2563EB]">
                   {s.value}
                 </p>
-                <p className="mt-2 text-sm text-[#64748B]">{s.label}</p>
+                <p className="mt-2 text-sm text-[#5B6B82]">{s.label}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -249,7 +249,7 @@ export default function AboutPage() {
             <h2 className="mt-3 text-4xl sm:text-5xl font-bold tracking-tighter text-[#0F172A]">
               Our values
             </h2>
-            <p className="mt-4 text-[#64748B]">
+            <p className="mt-4 text-[#5B6B82]">
               Customer-obsessed. Engineering-first. Honest pricing. Privacy by
               design.
             </p>
@@ -275,7 +275,7 @@ export default function AboutPage() {
                 <h3 className="text-lg font-bold tracking-tight text-[#0F172A]">
                   {v.title}
                 </h3>
-                <p className="mt-2 text-sm text-[#64748B] leading-relaxed">
+                <p className="mt-2 text-sm text-[#5B6B82] leading-relaxed">
                   {v.desc}
                 </p>
               </motion.div>
@@ -297,7 +297,10 @@ export default function AboutPage() {
           </motion.div>
 
           <ol className="relative">
-            <span className="absolute left-[19px] top-3 bottom-3 w-px bg-[#E2E8F0]" />
+            <li
+              aria-hidden="true"
+              className="absolute left-[19px] top-3 bottom-3 w-px bg-[#E2E8F0]"
+            />
             {TIMELINE.map((t, i) => (
               <motion.li
                 key={t.year}
@@ -316,7 +319,7 @@ export default function AboutPage() {
                   <h3 className="text-base font-semibold text-[#0F172A]">
                     {t.title}
                   </h3>
-                  <p className="mt-1 text-sm text-[#64748B]">{t.desc}</p>
+                  <p className="mt-1 text-sm text-[#5B6B82]">{t.desc}</p>
                 </div>
               </motion.li>
             ))}

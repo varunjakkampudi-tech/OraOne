@@ -25,6 +25,7 @@ from app.schemas.usage import (
     UsageSnapshotResponse,
 )
 from app.services import usage_service
+from app.middleware.org_context import require_permission
 
 router = APIRouter(tags=["usage"])
 
@@ -51,7 +52,11 @@ async def check_usage(
     return QuotaCheckResponse(**result)
 
 
-@router.post("/api/usage/record", response_model=RecordUsageResponse)
+@router.post(
+    "/api/usage/record",
+    response_model=RecordUsageResponse,
+    dependencies=[Depends(require_permission("settings.manage"))],
+)
 async def record_usage(
     payload: RecordUsageRequest,
     ctx: OrgContext = Depends(get_current_organization),

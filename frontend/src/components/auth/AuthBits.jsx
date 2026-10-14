@@ -31,7 +31,7 @@ export function IconInput({ icon: Icon, ...props }) {
       {Icon && (
         <Icon
           size={17}
-          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5B6B82]"
         />
       )}
       <input {...props} className={Icon ? inputWithIconCls : inputCls} />
@@ -49,7 +49,7 @@ export function PasswordInput({ icon: Icon, "data-testid": testId, ...props }) {
       {Icon && (
         <Icon
           size={17}
-          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5B6B82]"
         />
       )}
       <input
@@ -62,7 +62,7 @@ export function PasswordInput({ icon: Icon, "data-testid": testId, ...props }) {
         type="button"
         onClick={() => setShow((s) => !s)}
         aria-label={show ? "Hide password" : "Show password"}
-        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] transition-colors hover:text-[#475569]"
+        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#5B6B82] transition-colors hover:text-[#475569]"
       >
         {show ? <EyeOff size={18} /> : <Eye size={18} />}
       </button>

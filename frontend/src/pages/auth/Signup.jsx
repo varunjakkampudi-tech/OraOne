@@ -36,7 +36,7 @@ export default function Signup() {
         <h1 className="text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">
           Create Your Account
         </h1>
-        <p className="mt-2 text-center text-sm text-[#64748B]">
+        <p className="mt-2 text-center text-sm text-[#5B6B82]">
           Create your OraOne account with a verified email address.
         </p>
         <div className="mt-8">
@@ -48,7 +48,7 @@ export default function Signup() {
             Continue with email
           </GradientButton>
         </div>
-        <p className="mt-6 text-center text-sm text-[#64748B]">
+        <p className="mt-6 text-center text-sm text-[#5B6B82]">
           Already have an account?{" "}
           <Link
             to="/login"
@@ -118,7 +118,7 @@ export default function Signup() {
       <h1 className="text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">
         Create Your Account
       </h1>
-      <p className="mt-2 text-center text-sm text-[#64748B]">
+      <p className="mt-2 text-center text-sm text-[#5B6B82]">
         Get started with OraOne in just a few steps.
       </p>
 
@@ -180,7 +180,7 @@ export default function Signup() {
           label={
             <>
               Company Name{" "}
-              <span className="font-normal text-[#64748B]">(Optional)</span>
+              <span className="font-normal text-[#5B6B82]">(Optional)</span>
             </>
           }
         >
@@ -231,7 +231,7 @@ export default function Signup() {
         </GradientButton>
       </form>
 
-      <p className="mt-6 text-center text-sm text-[#64748B]">
+      <p className="mt-6 text-center text-sm text-[#5B6B82]">
         Already have an account?{" "}
         <Link
           to="/login"

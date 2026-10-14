@@ -376,7 +376,7 @@ export default function PricingPage() {
                     <p className="text-sm font-bold text-[#0F172A]">
                       {t.title}
                     </p>
-                    <p className="mt-1 text-xs text-[#64748B] leading-relaxed">
+                    <p className="mt-1 text-xs text-[#5B6B82] leading-relaxed">
                       {t.desc}
                     </p>
                   </div>
@@ -394,7 +394,7 @@ export default function PricingPage() {
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tighter text-[#0F172A]">
               Pricing Questions, Answered
             </h2>
-            <p className="mt-3 text-[#64748B]">
+            <p className="mt-3 text-[#5B6B82]">
               Everything you need to know about current free access and usage
               visibility.
             </p>
@@ -409,7 +409,7 @@ export default function PricingPage() {
                   <span className="text-[15px] font-semibold text-[#0F172A]">
                     {f.q}
                   </span>
-                  <span className="text-[#64748B] group-open:rotate-180 transition-transform shrink-0">
+                  <span className="text-[#5B6B82] group-open:rotate-180 transition-transform shrink-0">
                     <ArrowRight size={16} className="rotate-90" />
                   </span>
                 </summary>

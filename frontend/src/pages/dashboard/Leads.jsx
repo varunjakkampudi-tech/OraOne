@@ -350,7 +350,7 @@ export default function Leads() {
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] text-[12.5px] font-semibold transition-colors ${
                   view === "table"
                     ? "bg-[#EFF6FF] text-[#2563EB]"
-                    : "text-[#64748B] hover:text-[#0F172A]"
+                    : "text-[#5B6B82] hover:text-[#0F172A]"
                 }`}
                 data-testid="leads-view-table"
               >
@@ -361,7 +361,7 @@ export default function Leads() {
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] text-[12.5px] font-semibold transition-colors ${
                   view === "pipeline"
                     ? "bg-[#EFF6FF] text-[#2563EB]"
-                    : "text-[#64748B] hover:text-[#0F172A]"
+                    : "text-[#5B6B82] hover:text-[#0F172A]"
                 }`}
                 data-testid="leads-view-pipeline"
               >
@@ -404,7 +404,7 @@ export default function Leads() {
           <div className="relative flex-1 min-w-[200px]">
             <Search
               size={15}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5B6B82]"
             />
             <input
               value={q}
@@ -437,7 +437,7 @@ export default function Leads() {
                 setStatusFilter("");
                 setTempFilter("");
               }}
-              className="inline-flex items-center gap-1 text-[12.5px] font-medium text-[#64748B] hover:text-[#0F172A]"
+              className="inline-flex items-center gap-1 text-[12.5px] font-medium text-[#5B6B82] hover:text-[#0F172A]"
               data-testid="leads-filter-clear"
             >
               <X size={13} /> Clear
@@ -462,7 +462,7 @@ export default function Leads() {
                 <k.icon size={18} style={{ color: k.tone }} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[12px] text-[#94A3B8] leading-tight">
+                <p className="text-[12px] text-[#5B6B82] leading-tight">
                   {k.label}
                 </p>
                 <p className="mt-1 text-[28px] font-bold tracking-tight text-[#0F172A] leading-none">
@@ -504,7 +504,7 @@ export default function Leads() {
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors ${
                 contactFilter === key
                   ? "bg-[#EFF6FF] text-[#2563EB]"
-                  : "text-[#64748B] hover:text-[#0F172A]"
+                  : "text-[#5B6B82] hover:text-[#0F172A]"
               }`}
               data-testid={`leads-contact-${key}`}
             >
@@ -567,7 +567,7 @@ export default function Leads() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-[13px]">
               <thead className="bg-white">
-                <tr className="text-[10.5px] uppercase tracking-[0.12em] text-[#94A3B8]">
+                <tr className="text-[10.5px] uppercase tracking-[0.12em] text-[#5B6B82]">
                   <th className="px-6 py-4 font-semibold">Name</th>
                   <th className="px-6 py-4 font-semibold">Contact</th>
                   <th className="px-6 py-4 font-semibold">Source</th>
@@ -604,7 +604,7 @@ export default function Leads() {
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-[#0F172A]">{l.phone}</p>
-                        <p className="text-[12px] text-[#94A3B8] mt-0.5">
+                        <p className="text-[12px] text-[#5B6B82] mt-0.5">
                           {l.email}
                         </p>
                       </td>
@@ -636,14 +636,14 @@ export default function Leads() {
                             testId={`lead-view-${l.id || l.name}`}
                             onClick={() => openLead(l)}
                           >
-                            <Eye size={14} className="text-[#64748B]" />
+                            <Eye size={14} className="text-[#5B6B82]" />
                           </IconBtn>
                           <IconBtn
                             ariaLabel="Edit"
                             testId={`lead-edit-${l.id || l.name}`}
                             onClick={() => openLead(l)}
                           >
-                            <Pencil size={14} className="text-[#64748B]" />
+                            <Pencil size={14} className="text-[#5B6B82]" />
                           </IconBtn>
                           <IconBtn
                             ariaLabel="Delete"
@@ -664,7 +664,7 @@ export default function Leads() {
 
           {/* Footer */}
           <div className="px-6 py-4 border-t border-[#F1F5F9] flex items-center justify-between flex-wrap gap-3">
-            <p className="text-[12px] text-[#64748B]">
+            <p className="text-[12px] text-[#5B6B82]">
               Showing{" "}
               <span className="font-semibold text-[#0F172A]">
                 {(page - 1) * perPage + 1}
@@ -698,7 +698,7 @@ export default function Leads() {
                 </select>
                 <ChevronDown
                   size={13}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[#5B6B82] pointer-events-none"
                 />
               </div>
               <Pager page={page} total={totalPages} onChange={setPage} />
@@ -761,7 +761,7 @@ function SelectFilter({
       </select>
       <ChevronDown
         size={13}
-        className="absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none"
+        className="absolute right-2 top-1/2 -translate-y-1/2 text-[#5B6B82] pointer-events-none"
       />
     </div>
   );
@@ -816,7 +816,7 @@ function PipelineBoard({ leads, onMove, onOpen }) {
               />
               {stage}
             </span>
-            <span className="text-[11px] font-semibold text-[#94A3B8]">
+            <span className="text-[11px] font-semibold text-[#5B6B82]">
               {cols[stage]?.length || 0}
             </span>
           </div>
@@ -848,7 +848,7 @@ function PipelineBoard({ leads, onMove, onOpen }) {
                   </span>
                 </div>
                 {l.intent && l.intent !== "—" && (
-                  <p className="mt-2 text-[12px] text-[#64748B] line-clamp-2">
+                  <p className="mt-2 text-[12px] text-[#5B6B82] line-clamp-2">
                     {l.intent}
                   </p>
                 )}
@@ -863,7 +863,7 @@ function PipelineBoard({ leads, onMove, onOpen }) {
               </button>
             ))}
             {(cols[stage]?.length || 0) === 0 && (
-              <p className="text-[11.5px] text-[#94A3B8] text-center py-4">
+              <p className="text-[11.5px] text-[#5B6B82] text-center py-4">
                 Drop leads here
               </p>
             )}
@@ -1017,7 +1017,7 @@ function LeadDrawer({
             <h3 className="text-[16px] font-bold text-[#0F172A] truncate">
               {displayName(lead)}
             </h3>
-            <p className="text-[12px] text-[#94A3B8] mt-0.5 capitalize">
+            <p className="text-[12px] text-[#5B6B82] mt-0.5 capitalize">
               {lead.source} lead · {lead.date}
             </p>
           </div>
@@ -1026,14 +1026,14 @@ function LeadDrawer({
             className="size-8 rounded-lg grid place-items-center hover:bg-[#F1F5F9]"
             data-testid="lead-drawer-close"
           >
-            <X size={16} className="text-[#64748B]" />
+            <X size={16} className="text-[#5B6B82]" />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
           {/* Pipeline stage */}
           <div>
-            <p className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-2">
+            <p className="text-[11px] uppercase tracking-[0.1em] text-[#5B6B82] font-semibold mb-2">
               Pipeline stage
             </p>
             <div
@@ -1047,7 +1047,7 @@ function LeadDrawer({
                   className={`text-[11.5px] px-2.5 py-1 rounded-full border font-medium transition-all ${
                     lead.status === s
                       ? STATUS_CLS[s] + " ring-2 ring-offset-1 ring-current/20"
-                      : "bg-white text-[#64748B] border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                      : "bg-white text-[#5B6B82] border-[#E2E8F0] hover:bg-[#F8FAFC]"
                   }`}
                 >
                   {s}
@@ -1058,7 +1058,7 @@ function LeadDrawer({
 
           {/* Contact */}
           <div className="space-y-2">
-            <p className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold">
+            <p className="text-[11px] uppercase tracking-[0.1em] text-[#5B6B82] font-semibold">
               Contact
             </p>
             <ContactRow
@@ -1093,11 +1093,11 @@ function LeadDrawer({
 
           {/* Conversation transcript — the whole thread, even for anon visitors */}
           <div>
-            <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-2">
+            <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-[#5B6B82] font-semibold mb-2">
               <MessageSquare size={12} /> Conversation
             </p>
             {convoLoading ? (
-              <div className="flex items-center gap-2 text-[12.5px] text-[#94A3B8] py-3">
+              <div className="flex items-center gap-2 text-[12.5px] text-[#5B6B82] py-3">
                 <Loader2 size={14} className="animate-spin" /> Loading
                 conversation…
               </div>
@@ -1126,7 +1126,7 @@ function LeadDrawer({
                 ))}
               </div>
             ) : (
-              <p className="text-[12.5px] text-[#94A3B8] py-2">
+              <p className="text-[12.5px] text-[#5B6B82] py-2">
                 No conversation captured for this lead yet.
               </p>
             )}
@@ -1135,7 +1135,7 @@ function LeadDrawer({
           {/* Score + temperature */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold">
+              <label className="text-[11px] uppercase tracking-[0.1em] text-[#5B6B82] font-semibold">
                 Score: {score}
               </label>
               <input
@@ -1149,7 +1149,7 @@ function LeadDrawer({
               />
             </div>
             <div>
-              <label className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold">
+              <label className="text-[11px] uppercase tracking-[0.1em] text-[#5B6B82] font-semibold">
                 Temperature
               </label>
               <div className="flex gap-1.5 mt-2">
@@ -1160,7 +1160,7 @@ function LeadDrawer({
                     className={`flex-1 text-[11.5px] py-1.5 rounded-lg border font-medium capitalize transition-colors ${
                       temp === t
                         ? TEMP_CLS[t]
-                        : "bg-white text-[#64748B] border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                        : "bg-white text-[#5B6B82] border-[#E2E8F0] hover:bg-[#F8FAFC]"
                     }`}
                   >
                     {t}
@@ -1172,7 +1172,7 @@ function LeadDrawer({
 
           {/* Tags */}
           <div>
-            <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-2">
+            <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-[#5B6B82] font-semibold mb-2">
               <Tag size={12} /> Tags
             </p>
             <div
@@ -1194,7 +1194,7 @@ function LeadDrawer({
                 </span>
               ))}
               {tags.length === 0 && (
-                <span className="text-[12px] text-[#94A3B8]">No tags yet</span>
+                <span className="text-[12px] text-[#5B6B82]">No tags yet</span>
               )}
             </div>
             <input
@@ -1214,7 +1214,7 @@ function LeadDrawer({
 
           {/* Notes */}
           <div>
-            <p className="text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-2">
+            <p className="text-[11px] uppercase tracking-[0.1em] text-[#5B6B82] font-semibold mb-2">
               Notes
             </p>
             <textarea
@@ -1229,7 +1229,7 @@ function LeadDrawer({
 
           {/* Timeline */}
           <div>
-            <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-3">
+            <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-[#5B6B82] font-semibold mb-3">
               <Clock size={12} /> Timeline
             </p>
             <ol
@@ -1301,7 +1301,7 @@ function ContactRow({ icon: Icon, value, href }) {
   if (!value) return null;
   const content = (
     <span className="flex items-center gap-2.5 text-[13px] text-[#475569]">
-      <Icon size={14} className="text-[#94A3B8] shrink-0" /> {value}
+      <Icon size={14} className="text-[#5B6B82] shrink-0" /> {value}
     </span>
   );
   return href ? (
@@ -1321,7 +1321,7 @@ function TimelineItem({ label, at, tone }) {
         style={{ background: tone }}
       />
       <p className="text-[12.5px] font-medium text-[#0F172A]">{label}</p>
-      <p className="text-[11.5px] text-[#94A3B8]">
+      <p className="text-[11.5px] text-[#5B6B82]">
         {at ? new Date(at).toLocaleString() : "—"}
       </p>
     </li>
@@ -1365,7 +1365,7 @@ function Pager({ page, total, onChange }) {
     <div className="flex items-center gap-1">
       <button
         onClick={() => page > 1 && onChange(page - 1)}
-        className="size-8 rounded-lg grid place-items-center hover:bg-[#F1F5F9] text-[#64748B] disabled:opacity-40"
+        className="size-8 rounded-lg grid place-items-center hover:bg-[#F1F5F9] text-[#5B6B82] disabled:opacity-40"
         disabled={page === 1}
         aria-label="Previous"
       >
@@ -1401,7 +1401,7 @@ function Pager({ page, total, onChange }) {
       )}
       <button
         onClick={() => page < total && onChange(page + 1)}
-        className="size-8 rounded-lg grid place-items-center hover:bg-[#F1F5F9] text-[#64748B] disabled:opacity-40"
+        className="size-8 rounded-lg grid place-items-center hover:bg-[#F1F5F9] text-[#5B6B82] disabled:opacity-40"
         disabled={page === total}
         aria-label="Next"
       >

@@ -35,6 +35,7 @@ from app.schemas.channels import (
 )
 from app.services import channels_service
 from app.services.audit import audit
+from app.middleware.org_context import require_permission
 
 
 router = APIRouter(prefix="/api/agents", tags=["channels"])
@@ -89,7 +90,11 @@ async def list_channels(
     return ChannelsResponse(agent_id=agent.id, agent_name=agent.name, items=items)
 
 
-@router.patch("/{agent_id}/channels/{channel}", response_model=ChannelRead)
+@router.patch(
+    "/{agent_id}/channels/{channel}",
+    response_model=ChannelRead,
+    dependencies=[Depends(require_permission("agents.write"))],
+)
 async def update_channel(
     agent_id: uuid.UUID,
     channel: str,

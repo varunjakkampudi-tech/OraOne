@@ -156,6 +156,7 @@ function CopyButton({ text, label = "Copy" }) {
   return (
     <button
       onClick={copy}
+      aria-label={label || "Copy to clipboard"}
       className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[12px] font-medium text-[#475569] hover:bg-[#F8FAFC]"
     >
       {copied ? (
@@ -314,7 +315,7 @@ print(data["answer"], data["sources"])`,
           <h1 className="text-xl font-bold text-[#0F172A]">
             Developer Platform
           </h1>
-          <p className="text-sm text-[#64748B]">
+          <p className="text-sm text-[#5B6B82]">
             Build on OraOne with a scoped, rate-limited REST API.
           </p>
         </div>
@@ -332,7 +333,7 @@ print(data["answer"], data["sources"])`,
           <p className="mt-3 text-sm font-semibold text-[#0F172A]">
             1. Create an API key
           </p>
-          <p className="mt-1 text-[13px] text-[#64748B]">
+          <p className="mt-1 text-[13px] text-[#5B6B82]">
             Scope it to only the data and actions you need.
           </p>
         </Link>
@@ -360,7 +361,7 @@ print(data["answer"], data["sources"])`,
           <p className="mt-3 text-sm font-semibold text-[#0F172A]">
             3. Subscribe to events
           </p>
-          <p className="mt-1 text-[13px] text-[#64748B]">
+          <p className="mt-1 text-[13px] text-[#5B6B82]">
             Receive signed webhooks in real time.
           </p>
         </Link>
@@ -421,7 +422,7 @@ print(data["answer"], data["sources"])`,
         <h3 className="text-base font-semibold text-[#0F172A]">
           API playground
         </h3>
-        <p className="mt-1 text-[13px] text-[#64748B]">
+        <p className="mt-1 text-[13px] text-[#5B6B82]">
           Run a live request against your organization. Your key stays in the
           browser.
         </p>
@@ -475,7 +476,7 @@ print(data["answer"], data["sources"])`,
                 >
                   {result.status || "ERR"}
                 </span>
-                <span className="text-[#94A3B8]">Response</span>
+                <span className="text-[#5B6B82]">Response</span>
               </div>
               <pre className="max-h-72 overflow-auto rounded-xl border border-[#1E293B] bg-[#0F172A] p-4 font-mono text-[12px] leading-relaxed text-[#E2E8F0]">
                 {JSON.stringify(result.body, null, 2)}
@@ -503,7 +504,7 @@ print(data["answer"], data["sources"])`,
         <div className="mt-4 space-y-6">
           {grouped.map(([group, rows]) => (
             <div key={group}>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[#94A3B8]">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[#5B6B82]">
                 {group}
               </p>
               <div className="overflow-hidden rounded-xl border border-[#E2E8F0]">
@@ -538,7 +539,7 @@ print(data["answer"], data["sources"])`,
                           Try it
                         </button>
                       )}
-                      <p className="w-full text-[12.5px] text-[#64748B]">
+                      <p className="w-full text-[12.5px] text-[#5B6B82]">
                         {e.desc}
                       </p>
                       {res && (
@@ -549,7 +550,7 @@ print(data["answer"], data["sources"])`,
                             >
                               {res.status || "ERR"}
                             </span>
-                            <span className="text-[#94A3B8]">
+                            <span className="text-[#5B6B82]">
                               Live response
                             </span>
                           </div>
@@ -582,7 +583,7 @@ print(data["answer"], data["sources"])`,
             <p className="text-sm font-semibold text-[#0F172A]">
               OpenAPI / Postman
             </p>
-            <p className="text-[13px] text-[#64748B]">
+            <p className="text-[13px] text-[#5B6B82]">
               Import the schema URL into Postman or Insomnia.
             </p>
           </div>
@@ -598,7 +599,7 @@ print(data["answer"], data["sources"])`,
             <p className="text-sm font-semibold text-[#0F172A]">
               Webhooks &amp; signatures
             </p>
-            <p className="text-[13px] text-[#64748B]">
+            <p className="text-[13px] text-[#5B6B82]">
               Subscribe to events and verify HMAC signatures.
             </p>
           </div>

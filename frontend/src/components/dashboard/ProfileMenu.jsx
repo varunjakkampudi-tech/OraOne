@@ -23,7 +23,11 @@ export default function ProfileMenu({ dark = false }) {
   const ref = useRef(null);
   const nav = useNavigate();
 
+  const platformRole = user?.platform_role || user?.role;
   useEffect(() => {
+    // Plain users cannot hold platform access; skip the guaranteed-403 probe.
+    // The server still decides for every other role.
+    if (!platformRole || platformRole === "user") return undefined;
     let alive = true;
     superAdminApi
       .me()
@@ -36,7 +40,7 @@ export default function ProfileMenu({ dark = false }) {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [platformRole]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -115,9 +119,9 @@ export default function ProfileMenu({ dark = false }) {
           {/* Context: workspace + project */}
           <div className="border-b border-[#F1F5F9] px-2 py-2">
             <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-2">
-              <Building2 size={15} className="text-[#94A3B8]" />
+              <Building2 size={15} className="text-[#5B6B82]" />
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5B6B82]">
                   Workspace
                 </p>
                 <p className="truncate text-[13px] font-medium text-[#0F172A]">
@@ -130,9 +134,9 @@ export default function ProfileMenu({ dark = false }) {
               className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left hover:bg-[#F8FAFC]"
               role="menuitem"
             >
-              <FolderKanban size={15} className="text-[#94A3B8]" />
+              <FolderKanban size={15} className="text-[#5B6B82]" />
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5B6B82]">
                   Project
                 </p>
                 <p className="truncate text-[13px] font-medium text-[#0F172A]">
@@ -149,9 +153,9 @@ export default function ProfileMenu({ dark = false }) {
               role="menuitem"
               data-testid="profile-team"
             >
-              <Users size={15} className="text-[#94A3B8]" />
+              <Users size={15} className="text-[#5B6B82]" />
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5B6B82]">
                   Workspace
                 </p>
                 <p className="truncate text-[13px] font-medium text-[#0F172A]">
@@ -169,7 +173,7 @@ export default function ProfileMenu({ dark = false }) {
               role="menuitem"
               data-testid="profile-settings"
             >
-              <Settings size={15} className="text-[#94A3B8]" />
+              <Settings size={15} className="text-[#5B6B82]" />
               Settings
             </button>
             {isPlatformAdmin && (
@@ -179,7 +183,7 @@ export default function ProfileMenu({ dark = false }) {
                 role="menuitem"
                 data-testid="profile-admin-panel"
               >
-                <ShieldCheck size={15} className="text-[#94A3B8]" />
+                <ShieldCheck size={15} className="text-[#5B6B82]" />
                 Admin Panel
               </button>
             )}
@@ -189,7 +193,7 @@ export default function ProfileMenu({ dark = false }) {
               role="menuitem"
               data-testid="profile-support"
             >
-              <LifeBuoy size={15} className="text-[#94A3B8]" />
+              <LifeBuoy size={15} className="text-[#5B6B82]" />
               Support
             </button>
             <button

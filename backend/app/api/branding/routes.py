@@ -38,6 +38,27 @@ _ALLOWED_IMAGE_TYPES = {
     "image/webp": "webp",
     "image/gif": "gif",
 }
+_IMAGE_SIGNATURES = {
+    "png": (b"\x89PNG\r\n\x1a\n",),
+    "jpg": (b"\xff\xd8\xff",),
+    "gif": (b"GIF87a", b"GIF89a"),
+}
+# Uploaded SVG may carry script; never let a served asset execute as a document.
+_ASSET_HEADERS = {
+    "Cache-Control": "public, max-age=3600",
+    "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+    "X-Content-Type-Options": "nosniff",
+}
+
+
+def _matches_signature(ext: str, body: bytes) -> bool:
+    if ext == "webp":
+        return body[:4] == b"RIFF" and body[8:12] == b"WEBP"
+    if ext == "svg":
+        return b"<svg" in body[:4096].lower()
+    return body.startswith(_IMAGE_SIGNATURES[ext])
+
+
 # Keys we are willing to serve back: org/<uuid>/branding/<uuid>__<safe-name>
 _ASSET_KEY_RE = re.compile(r"^org/[0-9a-fA-F-]{36}/branding/[A-Za-z0-9._-]+$")
 
@@ -114,6 +135,11 @@ async def _upload_brand_asset(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail="Image must be 2 MB or smaller.",
         )
+    if not _matches_signature(ext, body):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="File content does not match the declared image type.",
+        )
 
     key = f"org/{ctx.organization_id}/branding/{uuid.uuid4().hex}__{field}.{ext}"
     storage.put_object(key=key, body=io.BytesIO(body), content_type=file.content_type)
@@ -164,7 +190,7 @@ async def branding_asset(key: str):
     except OSError:
         resolved = local
     if str(resolved).startswith(str(root)) and resolved.is_file():
-        return FileResponse(resolved)
+        return FileResponse(resolved, headers=_ASSET_HEADERS)
     # S3 mode: stream the object back through the backend so the browser only
     # ever talks to our own origin (avoids S3 region/CORS/ORB pitfalls).
     obj = storage.get_object(key)
@@ -173,7 +199,7 @@ async def branding_asset(key: str):
         return Response(
             content=data,
             media_type=content_type or "application/octet-stream",
-            headers={"Cache-Control": "public, max-age=3600"},
+            headers=_ASSET_HEADERS,
         )
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found.")
 

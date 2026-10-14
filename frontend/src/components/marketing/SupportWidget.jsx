@@ -127,7 +127,7 @@ export default function SupportWidget() {
                   <p className="mt-3 text-[15px] font-semibold text-[#0F172A]">
                     Message sent!
                   </p>
-                  <p className="mt-1 text-[13px] text-[#64748B]">
+                  <p className="mt-1 text-[13px] text-[#5B6B82]">
                     Thanks for reaching out — our team will get back to you
                     within 24 hours.
                   </p>
@@ -211,7 +211,7 @@ export default function SupportWidget() {
 
                   <a
                     href={`mailto:${SUPPORT_EMAIL}`}
-                    className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-[#64748B] hover:text-[#2563EB]"
+                    className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-[#5B6B82] hover:text-[#2563EB]"
                   >
                     <Mail size={13} /> {SUPPORT_EMAIL}
                   </a>

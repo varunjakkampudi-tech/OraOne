@@ -138,11 +138,11 @@ function KpiCard({ label, value, icon: Icon, tone, spark, hint }) {
             <Icon size={18} style={{ color: tone }} />
           </div>
           <div className="min-w-0">
-            <p className="text-[12px] text-[#64748B] leading-tight">{label}</p>
+            <p className="text-[12px] text-[#5B6B82] leading-tight">{label}</p>
             <p className="mt-1.5 text-[28px] font-bold tracking-tight text-[#0F172A] leading-none">
               {value}
             </p>
-            {hint && <p className="mt-1 text-[11px] text-[#94A3B8]">{hint}</p>}
+            {hint && <p className="mt-1 text-[11px] text-[#5B6B82]">{hint}</p>}
           </div>
         </div>
         {spark && <Sparkline data={spark} color={tone} />}
@@ -167,7 +167,7 @@ function Panel({ title, action, children, className = "" }) {
 
 function EmptyHint({ children = "No data yet." }) {
   return (
-    <div className="grid h-full place-items-center text-sm text-[#94A3B8]">
+    <div className="grid h-full place-items-center text-sm text-[#5B6B82]">
       {children}
     </div>
   );
@@ -329,7 +329,7 @@ function Donut({ obj, centerLabel, centerValue }) {
   return (
     <div className="mt-3 grid grid-cols-[1fr_1fr] gap-4 items-center">
       {!data.length ? (
-        <p className="text-sm text-[#64748B] col-span-2 text-center py-6">
+        <p className="text-sm text-[#5B6B82] col-span-2 text-center py-6">
           No data yet.
         </p>
       ) : (
@@ -363,7 +363,7 @@ function Donut({ obj, centerLabel, centerValue }) {
                 <p className="text-2xl font-bold tracking-tight text-[#0F172A] leading-none">
                   {centerValue ?? total}
                 </p>
-                <p className="text-[11px] text-[#64748B] mt-1">
+                <p className="text-[11px] text-[#5B6B82] mt-1">
                   {centerLabel ?? "Total"}
                 </p>
               </div>
@@ -394,13 +394,13 @@ function Donut({ obj, centerLabel, centerValue }) {
 
 function DataTable({ columns, rows, empty = "No data yet." }) {
   if (!rows || !rows.length) {
-    return <p className="text-sm text-[#64748B] text-center py-6">{empty}</p>;
+    return <p className="text-sm text-[#5B6B82] text-center py-6">{empty}</p>;
   }
   return (
     <div className="mt-3 overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[#E2E8F0] text-left text-[11px] uppercase tracking-wide text-[#94A3B8]">
+          <tr className="border-b border-[#E2E8F0] text-left text-[11px] uppercase tracking-wide text-[#5B6B82]">
             {columns.map((c) => (
               <th
                 key={c.key}
@@ -442,7 +442,7 @@ function FeedbackStrip({ feedback }) {
           <p className="text-[18px] font-bold text-[#0F172A] leading-none">
             {fmtNum(f.positive)}
           </p>
-          <p className="text-[11px] text-[#64748B] mt-1">Positive</p>
+          <p className="text-[11px] text-[#5B6B82] mt-1">Positive</p>
         </div>
       </div>
       <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 flex items-center gap-3">
@@ -453,7 +453,7 @@ function FeedbackStrip({ feedback }) {
           <p className="text-[18px] font-bold text-[#0F172A] leading-none">
             {fmtNum(f.negative)}
           </p>
-          <p className="text-[11px] text-[#64748B] mt-1">Negative</p>
+          <p className="text-[11px] text-[#5B6B82] mt-1">Negative</p>
         </div>
       </div>
       <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 flex items-center gap-3">
@@ -464,7 +464,7 @@ function FeedbackStrip({ feedback }) {
           <p className="text-[18px] font-bold text-[#0F172A] leading-none">
             {fmtPct(f.satisfaction_rate)}
           </p>
-          <p className="text-[11px] text-[#64748B] mt-1">Satisfaction</p>
+          <p className="text-[11px] text-[#5B6B82] mt-1">Satisfaction</p>
         </div>
       </div>
     </div>
@@ -547,7 +547,7 @@ function QuestionList({
   empty = "No questions yet.",
 }) {
   if (!rows || !rows.length) {
-    return <p className="text-sm text-[#64748B] text-center py-6">{empty}</p>;
+    return <p className="text-sm text-[#5B6B82] text-center py-6">{empty}</p>;
   }
   const max = Math.max(...rows.map((r) => r.count || 0), 1);
   return (
@@ -601,7 +601,7 @@ function ModuleUnavailable({ onRetry }) {
     <div className="grid min-h-[40vh] place-items-center rounded-lg border border-dashed border-[#CBD5E1] bg-white p-8 text-center">
       <div>
         <p className="font-semibold text-[#0F172A]">Analytics unavailable</p>
-        <p className="mt-1 text-sm text-[#64748B]">
+        <p className="mt-1 text-sm text-[#5B6B82]">
           We couldn&apos;t load this workspace data.
         </p>
         <GhostButton type="button" className="mt-4" onClick={onRetry}>
@@ -742,7 +742,7 @@ function OverviewTab({ days }) {
               <p className="text-[18px] font-bold text-[#0F172A] leading-none">
                 {fmtNum(s.value)}
               </p>
-              <p className="text-[11px] text-[#64748B] mt-1">{s.label}</p>
+              <p className="text-[11px] text-[#5B6B82] mt-1">{s.label}</p>
             </div>
           </div>
         ))}
@@ -897,7 +897,7 @@ function OverviewTab({ days }) {
         <Panel title="Top Performing Agents">
           <div className="mt-5 space-y-5">
             {topAgents.length === 0 ? (
-              <p className="text-sm text-[#64748B] text-center py-6">
+              <p className="text-sm text-[#5B6B82] text-center py-6">
                 No agent data yet.
               </p>
             ) : (
@@ -925,7 +925,7 @@ function OverviewTab({ days }) {
                         <p className="text-[13.5px] font-semibold text-[#0F172A] truncate">
                           {a.name}
                         </p>
-                        <p className="text-[11px] text-[#64748B] mt-0.5">
+                        <p className="text-[11px] text-[#5B6B82] mt-0.5">
                           {a.conversations.toLocaleString()} conversations
                         </p>
                       </div>
@@ -953,7 +953,7 @@ function OverviewTab({ days }) {
         <Panel title="Workflow Runs">
           <div className="mt-4 space-y-3">
             {runStatusData.length === 0 ? (
-              <p className="text-sm text-[#64748B] text-center py-6">
+              <p className="text-sm text-[#5B6B82] text-center py-6">
                 No workflow runs yet.
               </p>
             ) : (
@@ -1191,7 +1191,7 @@ function InsightsTab({ days }) {
           />
         </Panel>
         <Panel title="Knowledge Gaps">
-          <div className="flex items-start gap-2 mt-1 text-[12px] text-[#94A3B8]">
+          <div className="flex items-start gap-2 mt-1 text-[12px] text-[#5B6B82]">
             <Lightbulb size={14} className="text-[#F59E0B] mt-0.5 shrink-0" />
             <span>
               Questions asked in conversations the AI could not confidently
@@ -1293,7 +1293,7 @@ function AgentsTab({ days }) {
           tone="#2563EB"
         />
         <div className="p-5 rounded-lg bg-white border border-[#E2E8F0]">
-          <p className="text-[12px] text-[#64748B] mb-2">By Status</p>
+          <p className="text-[12px] text-[#5B6B82] mb-2">By Status</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(data?.breakdowns?.by_status || {}).map(
               ([k, v], i) => (
@@ -1788,7 +1788,7 @@ export default function Analytics() {
                   className={`px-3 py-1.5 rounded-lg text-[13px] font-semibold transition-colors ${
                     days === r.days
                       ? "bg-white text-[#0F172A] shadow-sm"
-                      : "text-[#64748B] hover:text-[#0F172A]"
+                      : "text-[#5B6B82] hover:text-[#0F172A]"
                   }`}
                 >
                   {r.label}

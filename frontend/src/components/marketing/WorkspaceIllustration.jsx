@@ -46,7 +46,7 @@ export default function WorkspaceIllustration({ compact = false }) {
             <p className="text-sm font-bold text-[#0F172A]">
               Your workspace, together
             </p>
-            <p className="mt-1 text-[11px] leading-relaxed text-[#64748B]">
+            <p className="mt-1 text-[11px] leading-relaxed text-[#5B6B82]">
               Knowledge, assistants and customer conversations.
             </p>
           </div>
@@ -86,7 +86,7 @@ export default function WorkspaceIllustration({ compact = false }) {
           </div>
         </div>
       </div>
-      <figcaption className="border-t border-[#E2E8F0] px-4 py-2.5 text-[11px] text-[#64748B]">
+      <figcaption className="border-t border-[#E2E8F0] px-4 py-2.5 text-[11px] text-[#5B6B82]">
         Interface illustration · No live customer data
       </figcaption>
     </figure>

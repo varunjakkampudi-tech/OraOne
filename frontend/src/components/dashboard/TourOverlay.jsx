@@ -108,7 +108,7 @@ export default function TourOverlay() {
             <button
               onClick={exit}
               aria-label="Skip tour"
-              className="text-[#94A3B8] hover:text-[#475569]"
+              className="text-[#5B6B82] hover:text-[#475569]"
             >
               <X size={16} />
             </button>
@@ -141,7 +141,7 @@ export default function TourOverlay() {
             <button
               onClick={back}
               disabled={index === 0}
-              className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-[#64748B] hover:text-[#0F172A] disabled:opacity-0"
+              className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-[#5B6B82] hover:text-[#0F172A] disabled:opacity-0"
             >
               <ArrowLeft size={13} /> Back
             </button>
@@ -150,7 +150,7 @@ export default function TourOverlay() {
               {!isLast && (
                 <button
                   onClick={exit}
-                  className="rounded-full px-3 py-2 text-[12.5px] font-semibold text-[#94A3B8] hover:text-[#475569]"
+                  className="rounded-full px-3 py-2 text-[12.5px] font-semibold text-[#5B6B82] hover:text-[#475569]"
                 >
                   Skip
                 </button>

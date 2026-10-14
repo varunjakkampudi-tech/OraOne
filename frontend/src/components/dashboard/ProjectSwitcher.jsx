@@ -154,7 +154,7 @@ export default function ProjectSwitcher({
           data-testid="project-switcher-menu"
         >
           <div className="border-b border-[#F1F5F9] px-3 py-2">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#5B6B82]">
               Switch project
             </span>
           </div>
@@ -184,7 +184,7 @@ export default function ProjectSwitcher({
                     <span className="block truncate font-medium text-[#0F172A]">
                       {p.name}
                     </span>
-                    <span className="block text-[11px] text-[#94A3B8]">
+                    <span className="block text-[11px] text-[#5B6B82]">
                       {p.is_default ? "Default · " : ""}
                       {p.resource_counts?.agents ?? 0}{" "}
                       {(p.resource_counts?.agents ?? 0) === 1

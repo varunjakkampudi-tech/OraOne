@@ -159,7 +159,7 @@ export default function ContactPage() {
             your business
           </h1>
 
-          <p className="mt-5 text-[#64748B] text-base sm:text-lg leading-relaxed max-w-md">
+          <p className="mt-5 text-[#5B6B82] text-base sm:text-lg leading-relaxed max-w-md">
             Book a personalized demo and see how OraOne answers customers
             instantly, captures every lead, and works around the clock on your
             website.
@@ -215,7 +215,7 @@ export default function ContactPage() {
             <div className="relative">
               <User
                 size={17}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5B6B82]"
               />
               <input
                 type="text"
@@ -234,7 +234,7 @@ export default function ContactPage() {
             <div className="relative">
               <Mail
                 size={17}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5B6B82]"
               />
               <input
                 type="email"
@@ -261,13 +261,13 @@ export default function ContactPage() {
                 >
                   <Phone
                     size={17}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5B6B82]"
                   />
                   <span className="text-base leading-none">
                     {form.country.flag}
                   </span>
                   <span>{form.country.code}</span>
-                  <ChevronDown size={14} className="text-[#94A3B8]" />
+                  <ChevronDown size={14} className="text-[#5B6B82]" />
                 </button>
                 {countryOpen && (
                   <div className="absolute z-20 mt-2 left-0 w-60 max-h-72 overflow-y-auto rounded-xl border border-[#E2E8F0] bg-white shadow-premium-lg py-2">
@@ -283,7 +283,7 @@ export default function ContactPage() {
                       >
                         <span className="text-base">{c.flag}</span>
                         <span className="font-medium w-12">{c.code}</span>
-                        <span className="text-[#64748B] text-[13px] truncate">
+                        <span className="text-[#5B6B82] text-[13px] truncate">
                           {c.name}
                         </span>
                       </button>
@@ -316,14 +316,14 @@ export default function ContactPage() {
               >
                 <span
                   className={
-                    form.company_size ? "text-[#0F172A]" : "text-[#94A3B8]"
+                    form.company_size ? "text-[#0F172A]" : "text-[#5B6B82]"
                   }
                 >
                   {form.company_size || "Select company size"}
                 </span>
                 <ChevronDown
                   size={16}
-                  className={`text-[#94A3B8] transition-transform ${sizeOpen ? "rotate-180" : ""}`}
+                  className={`text-[#5B6B82] transition-transform ${sizeOpen ? "rotate-180" : ""}`}
                 />
               </button>
               {sizeOpen && (
@@ -364,20 +364,21 @@ export default function ContactPage() {
             <div className="relative">
               <Calendar
                 size={17}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5B6B82] pointer-events-none"
               />
               <input
                 type="datetime-local"
                 value={form.demo_time}
                 onChange={(e) => update("demo_time", e.target.value)}
                 data-testid="contact-demo-time"
-                className={`${fieldCls("pl-11 pr-4")} ${form.demo_time ? "text-[#0F172A]" : "text-[#94A3B8]"}`}
+                aria-label="Preferred demo time"
+                className={`${fieldCls("pl-11 pr-4")} ${form.demo_time ? "text-[#0F172A]" : "text-[#5B6B82]"}`}
               />
             </div>
           </FormField>
 
           {/* Security note */}
-          <div className="flex items-center gap-2 text-[12.5px] text-[#64748B]">
+          <div className="flex items-center gap-2 text-[12.5px] text-[#5B6B82]">
             <ShieldCheck size={14} className="text-[#2563EB]" />
             Your information is secure and will never be shared.
           </div>
@@ -398,7 +399,7 @@ export default function ContactPage() {
           </button>
 
           {/* Footer link */}
-          <p className="text-center text-sm text-[#64748B]">
+          <p className="text-center text-sm text-[#5B6B82]">
             Not sure yet?{" "}
             <Link
               to="/"
@@ -438,7 +439,7 @@ function InfoCard({ icon: Icon, label, value }) {
         <Icon size={20} className="text-[#2563EB]" />
       </div>
       <div>
-        <p className="text-[12px] text-[#94A3B8]">{label}</p>
+        <p className="text-[12px] text-[#5B6B82]">{label}</p>
         <p className="mt-0.5 text-[15px] font-semibold text-[#0F172A]">
           {value}
         </p>

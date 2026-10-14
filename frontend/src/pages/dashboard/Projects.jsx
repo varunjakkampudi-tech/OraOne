@@ -104,7 +104,7 @@ function ProjectModal({ open, mode, initial, onClose, onSaved }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-[#64748B] hover:bg-[#F1F5F9]"
+            className="rounded-lg p-2 text-[#5B6B82] hover:bg-[#F1F5F9]"
           >
             <X size={18} />
           </button>
@@ -284,7 +284,7 @@ export default function Projects() {
             <FolderKanban className="text-[#2563EB]" size={26} />
             Projects
           </h1>
-          <p className="mt-1 text-sm text-[#64748B]">
+          <p className="mt-1 text-sm text-[#5B6B82]">
             Organize your workspace into projects. Each project keeps its own
             agents, knowledge, and conversations.
           </p>
@@ -358,12 +358,12 @@ export default function Projects() {
                           </span>
                         )}
                         {archived && (
-                          <span className="rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[11px] font-semibold text-[#64748B]">
+                          <span className="rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[11px] font-semibold text-[#5B6B82]">
                             Archived
                           </span>
                         )}
                       </div>
-                      <p className="mt-0.5 line-clamp-2 text-xs text-[#64748B]">
+                      <p className="mt-0.5 line-clamp-2 text-xs text-[#5B6B82]">
                         {p.description || "No description"}
                       </p>
                     </div>
@@ -375,11 +375,11 @@ export default function Projects() {
                         key={key}
                         className="rounded-lg bg-[#F8FAFC] p-2 text-center"
                       >
-                        <Icon size={14} className="mx-auto text-[#94A3B8]" />
+                        <Icon size={14} className="mx-auto text-[#5B6B82]" />
                         <div className="mt-1 text-sm font-bold text-[#0F172A]">
                           {counts[key] ?? 0}
                         </div>
-                        <div className="text-[10px] text-[#94A3B8]">
+                        <div className="text-[10px] text-[#5B6B82]">
                           {label}
                         </div>
                       </div>
@@ -443,7 +443,7 @@ export default function Projects() {
           {/* Add-project tile */}
           <button
             onClick={openCreate}
-            className="flex min-h-44 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#CBD5E1] p-5 text-[#64748B] transition-colors hover:border-[#2563EB] hover:text-[#2563EB]"
+            className="flex min-h-44 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#CBD5E1] p-5 text-[#5B6B82] transition-colors hover:border-[#2563EB] hover:text-[#2563EB]"
             data-testid="add-project-tile"
           >
             <Plus size={24} />

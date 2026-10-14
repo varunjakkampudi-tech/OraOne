@@ -45,7 +45,7 @@ export default function Step3Channels() {
       <h1 className="text-4xl font-bold tracking-tighter text-[#0F172A]">
         Connect your channels
       </h1>
-      <p className="mt-3 text-[#64748B]">
+      <p className="mt-3 text-[#5B6B82]">
         Choose the channel you want to connect first. You can always add more
         later.
       </p>
@@ -64,7 +64,7 @@ export default function Step3Channels() {
               <p className="text-base font-semibold text-[#0F172A]">
                 {c.label}
               </p>
-              <p className="text-sm text-[#64748B]">{c.desc}</p>
+              <p className="text-sm text-[#5B6B82]">{c.desc}</p>
             </div>
             <CheckCircle2 size={20} className="text-[#CBD5E1]" />
           </button>
@@ -81,7 +81,7 @@ export default function Step3Channels() {
         <div className="flex items-center gap-3">
           <button
             onClick={finish}
-            className="text-sm text-[#64748B] hover:text-[#0F172A]"
+            className="text-sm text-[#5B6B82] hover:text-[#0F172A]"
           >
             I'll do this later
           </button>

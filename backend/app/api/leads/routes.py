@@ -30,6 +30,7 @@ from app.schemas.leads import (
 )
 from app.services import lead_service
 from app.services.audit import audit
+from app.middleware.org_context import require_permission
 
 
 router = APIRouter(prefix="/api/leads", tags=["leads"])
@@ -226,6 +227,7 @@ async def lead_stats(
     response_model=LeadRead,
     status_code=status.HTTP_201_CREATED,
     summary="Create a lead",
+    dependencies=[Depends(require_permission("leads.write"))],
 )
 async def create_lead(
     payload: LeadCreate,
@@ -315,7 +317,12 @@ async def lead_conversation(
     )
 
 
-@router.patch("/{lead_id}", response_model=LeadRead, summary="Update a lead")
+@router.patch(
+    "/{lead_id}",
+    response_model=LeadRead,
+    summary="Update a lead",
+    dependencies=[Depends(require_permission("leads.write"))],
+)
 async def update_lead(
     lead_id: uuid.UUID,
     payload: LeadUpdate,
@@ -376,6 +383,7 @@ async def update_lead(
     "/{lead_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a lead",
+    dependencies=[Depends(require_permission("leads.write"))],
 )
 async def delete_lead(
     lead_id: uuid.UUID,

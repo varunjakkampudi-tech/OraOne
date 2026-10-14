@@ -82,7 +82,7 @@ export default function HelpMenu({ dark = false }) {
               <Compass size={17} />
               <div className="min-w-0">
                 <p className="text-[13px] font-semibold">Take a tour</p>
-                <p className="text-[11px] text-[#64748B]">
+                <p className="text-[11px] text-[#5B6B82]">
                   A quick guided walkthrough
                 </p>
               </div>
@@ -96,7 +96,7 @@ export default function HelpMenu({ dark = false }) {
                 className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] font-medium text-[#475569] transition-colors hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                 role="menuitem"
               >
-                <l.icon size={15} className="text-[#94A3B8]" />
+                <l.icon size={15} className="text-[#5B6B82]" />
                 {l.label}
               </button>
             ))}

@@ -293,7 +293,7 @@ export default function Integrations() {
                   <p className="mt-3 text-[14px] font-semibold text-[#0F172A]">
                     {e.catalog.name}
                   </p>
-                  <p className="text-[11.5px] text-[#64748B] mt-0.5 flex items-center gap-1">
+                  <p className="text-[11.5px] text-[#5B6B82] mt-0.5 flex items-center gap-1">
                     <Clock size={10} />{" "}
                     {e.integration.last_synced_at
                       ? `Synced ${timeAgo(e.integration.last_synced_at)}`
@@ -317,7 +317,7 @@ export default function Integrations() {
             <div className="relative flex-1 min-w-[220px]">
               <Search
                 size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5B6B82]"
               />
               <input
                 type="text"
@@ -347,7 +347,7 @@ export default function Integrations() {
           </div>
 
           {loading ? (
-            <div className="py-16 grid place-items-center text-[#94A3B8]">
+            <div className="py-16 grid place-items-center text-[#5B6B82]">
               <Loader2 size={22} className="animate-spin" />
             </div>
           ) : (
@@ -385,11 +385,11 @@ export default function Integrations() {
                     <p className="mt-3 text-[14.5px] font-semibold text-[#0F172A]">
                       {e.catalog.name}
                     </p>
-                    <p className="text-[10.5px] text-[#94A3B8] uppercase tracking-wider font-bold">
+                    <p className="text-[10.5px] text-[#5B6B82] uppercase tracking-wider font-bold">
                       {CATEGORY_LABELS[e.catalog.category] ||
                         e.catalog.category}
                     </p>
-                    <p className="mt-2 text-[12.5px] text-[#64748B] leading-snug">
+                    <p className="mt-2 text-[12.5px] text-[#5B6B82] leading-snug">
                       {e.catalog.description}
                     </p>
                   </motion.button>
@@ -571,7 +571,7 @@ function DetailDrawer({
                 <h3 className="text-lg font-bold text-[#0F172A]">
                   {catalog.name}
                 </h3>
-                <p className="text-[11px] text-[#94A3B8] uppercase tracking-wider font-bold">
+                <p className="text-[11px] text-[#5B6B82] uppercase tracking-wider font-bold">
                   {CATEGORY_LABELS[catalog.category] || catalog.category}
                 </p>
               </div>
@@ -579,7 +579,7 @@ function DetailDrawer({
             <button
               onClick={onClose}
               aria-label="Close panel"
-              className="text-[#94A3B8] hover:text-[#0F172A]"
+              className="text-[#5B6B82] hover:text-[#0F172A]"
               data-testid="int-detail-close"
             >
               <X size={18} />
@@ -701,17 +701,17 @@ function DetailDrawer({
                 <p className="text-[11px] font-bold tracking-[0.2em] text-[#2563EB]">
                   SYNCED CONTENT
                 </p>
-                <span className="text-[11px] text-[#94A3B8]">
+                <span className="text-[11px] text-[#5B6B82]">
                   {items.length} item(s)
                 </span>
               </div>
               {itemsLoading ? (
-                <div className="py-6 grid place-items-center text-[#94A3B8]">
+                <div className="py-6 grid place-items-center text-[#5B6B82]">
                   <Loader2 size={18} className="animate-spin" />
                 </div>
               ) : items.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-[#E2E8F0] px-4 py-6 text-center">
-                  <p className="text-[12.5px] text-[#64748B]">
+                  <p className="text-[12.5px] text-[#5B6B82]">
                     Nothing selected yet. Click <b>Browse Files</b> to choose
                     folders or files to sync.
                   </p>
@@ -740,7 +740,7 @@ function DetailDrawer({
                         <ItIcon
                           size={15}
                           className={
-                            it.is_folder ? "text-[#2563EB]" : "text-[#64748B]"
+                            it.is_folder ? "text-[#2563EB]" : "text-[#5B6B82]"
                           }
                         />
                         <div className="min-w-0 flex-1">
@@ -748,7 +748,7 @@ function DetailDrawer({
                             {it.name}
                           </p>
                           {it.path && (
-                            <p className="text-[10.5px] text-[#94A3B8] truncate">
+                            <p className="text-[10.5px] text-[#5B6B82] truncate">
                               {it.path}
                             </p>
                           )}
@@ -784,7 +784,7 @@ function DetailDrawer({
                       {l.message && (
                         <span className="text-[#64748B]"> — {l.message}</span>
                       )}
-                      <span className="block text-[10.5px] text-[#94A3B8]">
+                      <span className="block text-[10.5px] text-[#5B6B82]">
                         {timeAgo(l.created_at)}
                       </span>
                     </div>
@@ -1007,11 +1007,11 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                 ? "Select content to sync"
                 : "Confirm selection"}
             </h3>
-            <p className="text-[12px] text-[#64748B]">{providerName}</p>
+            <p className="text-[12px] text-[#5B6B82]">{providerName}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-[#94A3B8] hover:text-[#0F172A]"
+            className="text-[#5B6B82] hover:text-[#0F172A]"
           >
             <X size={18} />
           </button>
@@ -1036,7 +1036,7 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                     <p className="text-[12.5px] font-semibold text-[#0F172A]">
                       {m.label}
                     </p>
-                    <p className="text-[10.5px] text-[#64748B] leading-tight mt-0.5">
+                    <p className="text-[10.5px] text-[#5B6B82] leading-tight mt-0.5">
                       {m.hint}
                     </p>
                   </button>
@@ -1074,7 +1074,7 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                         className={`px-3 py-1.5 rounded-md text-[12px] font-semibold capitalize ${
                           tab === t
                             ? "bg-white text-[#2563EB] shadow-sm"
-                            : "text-[#64748B]"
+                            : "text-[#5B6B82]"
                         }`}
                       >
                         {t}
@@ -1085,7 +1085,7 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                     <div className="relative flex-1">
                       <Search
                         size={13}
-                        className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+                        className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#5B6B82]"
                       />
                       <input
                         value={search}
@@ -1111,7 +1111,7 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
 
                 {/* Breadcrumb */}
                 {tab === "browse" && !search && (
-                  <div className="px-5 pt-2 flex items-center gap-1 text-[11.5px] text-[#64748B] flex-wrap">
+                  <div className="px-5 pt-2 flex items-center gap-1 text-[11.5px] text-[#5B6B82] flex-wrap">
                     {stack.length > 1 && (
                       <button
                         onClick={() => setStack((s) => s.slice(0, -1))}
@@ -1153,11 +1153,11 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                 {/* List */}
                 <div className="flex-1 overflow-y-auto px-5 py-3 min-h-[180px]">
                   {loading ? (
-                    <div className="py-10 grid place-items-center text-[#94A3B8]">
+                    <div className="py-10 grid place-items-center text-[#5B6B82]">
                       <Loader2 size={20} className="animate-spin" />
                     </div>
                   ) : data.length === 0 ? (
-                    <div className="py-10 text-center text-[12.5px] text-[#94A3B8]">
+                    <div className="py-10 text-center text-[12.5px] text-[#5B6B82]">
                       No items here.
                     </div>
                   ) : (
@@ -1192,7 +1192,7 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                               className={
                                 item.is_folder
                                   ? "text-[#2563EB]"
-                                  : "text-[#64748B]"
+                                  : "text-[#5B6B82]"
                               }
                             />
                             <button
@@ -1204,7 +1204,7 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                                 {item.name}
                               </p>
                               {item.size != null && (
-                                <p className="text-[10px] text-[#94A3B8]">
+                                <p className="text-[10px] text-[#5B6B82]">
                                   {formatBytes(item.size)}
                                 </p>
                               )}
@@ -1226,7 +1226,7 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
 
             {/* Footer */}
             <div className="px-5 py-3 border-t border-[#E2E8F0] flex items-center justify-between">
-              <span className="text-[12px] text-[#64748B]">
+              <span className="text-[12px] text-[#5B6B82]">
                 {mode === "full"
                   ? "Full Drive"
                   : `${folders.size} folder(s) · ${files.size} file(s)`}
@@ -1370,7 +1370,7 @@ function FiltersPanel({ options, setOptions, toggleFileType, alwaysOpen }) {
               className={`px-2.5 py-1 rounded-full text-[11.5px] font-semibold border ${
                 active
                   ? "border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]"
-                  : "border-[#E2E8F0] text-[#64748B]"
+                  : "border-[#E2E8F0] text-[#5B6B82]"
               }`}
             >
               {o.label}
@@ -1380,7 +1380,7 @@ function FiltersPanel({ options, setOptions, toggleFileType, alwaysOpen }) {
         {options.file_types && (
           <button
             onClick={() => setOptions((o) => ({ ...o, file_types: null }))}
-            className="px-2.5 py-1 rounded-full text-[11.5px] font-semibold text-[#94A3B8]"
+            className="px-2.5 py-1 rounded-full text-[11.5px] font-semibold text-[#5B6B82]"
           >
             Clear
           </button>
@@ -1424,7 +1424,7 @@ function FiltersPanel({ options, setOptions, toggleFileType, alwaysOpen }) {
           }
           className="w-16 px-2 py-1 rounded-lg border border-[#E2E8F0] text-[12px] focus:border-[#2563EB] focus:outline-none"
         />
-        <span className="text-[11.5px] text-[#64748B]">MB</span>
+        <span className="text-[11.5px] text-[#5B6B82]">MB</span>
       </div>
     </div>
   );
@@ -1450,7 +1450,7 @@ function ToggleRow({ label, checked, onChange }) {
 function ConfirmRow({ label, value }) {
   return (
     <div className="flex items-center justify-between px-3 py-2.5">
-      <span className="text-[12px] text-[#64748B]">{label}</span>
+      <span className="text-[12px] text-[#5B6B82]">{label}</span>
       <span className="text-[12.5px] font-semibold text-[#0F172A] text-right max-w-[60%] truncate">
         {value}
       </span>
@@ -1468,7 +1468,7 @@ function formatBytes(n) {
 function Stat({ label, value }) {
   return (
     <div className="px-3 py-2.5 rounded-xl border border-[#E2E8F0]">
-      <p className="text-[10.5px] text-[#94A3B8] uppercase tracking-wider font-bold">
+      <p className="text-[10.5px] text-[#5B6B82] uppercase tracking-wider font-bold">
         {label}
       </p>
       <p className="text-[13px] font-semibold text-[#0F172A] truncate capitalize">
@@ -1523,7 +1523,7 @@ function Section({ title, subtitle, icon: Icon, children }) {
         )}
         <div>
           <h2 className="text-[16px] font-bold text-[#0F172A]">{title}</h2>
-          {subtitle && <p className="text-[12px] text-[#94A3B8]">{subtitle}</p>}
+          {subtitle && <p className="text-[12px] text-[#5B6B82]">{subtitle}</p>}
         </div>
       </div>
       {children}

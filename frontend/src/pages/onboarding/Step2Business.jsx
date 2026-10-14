@@ -44,7 +44,7 @@ export default function Step2Business() {
       <h1 className="text-4xl font-bold tracking-tighter text-[#0F172A]">
         Tell us about your business
       </h1>
-      <p className="mt-3 text-[#64748B]">
+      <p className="mt-3 text-[#5B6B82]">
         This helps us customize your AI agents.
       </p>
 
@@ -67,6 +67,7 @@ export default function Step2Business() {
             Industry
           </label>
           <select
+            aria-label="Industry"
             value={form.industry}
             onChange={(e) => setForm({ ...form, industry: e.target.value })}
             data-testid={ONBOARDING.step2Industry}

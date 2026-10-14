@@ -464,7 +464,7 @@ export default function CreateAgentWizard() {
         </div>
         <button
           onClick={() => nav("/app/dashboard")}
-          className="rounded-lg p-2 text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0F172A]"
+          className="rounded-lg p-2 text-[#5B6B82] hover:bg-[#F1F5F9] hover:text-[#0F172A]"
           aria-label="Close"
         >
           <X size={18} />
@@ -630,7 +630,7 @@ function StepGoal({ goal, onChoose }) {
       <h2 className="text-lg font-semibold text-[#0F172A]">
         What do you want your AI to do?
       </h2>
-      <p className="mt-1 text-sm text-[#64748B]">
+      <p className="mt-1 text-sm text-[#5B6B82]">
         Pick a goal — no technical setup required.
       </p>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -656,7 +656,7 @@ function StepGoal({ goal, onChoose }) {
                 <p className="text-sm font-semibold text-[#0F172A]">
                   {g.title}
                 </p>
-                <p className="mt-0.5 text-xs text-[#64748B]">{g.desc}</p>
+                <p className="mt-0.5 text-xs text-[#5B6B82]">{g.desc}</p>
               </div>
             </button>
           );
@@ -684,7 +684,7 @@ function StepKnowledge({
       <h2 className="text-lg font-semibold text-[#0F172A]">
         Where should it learn from?
       </h2>
-      <p className="mt-1 text-sm text-[#64748B]">
+      <p className="mt-1 text-sm text-[#5B6B82]">
         Choose a source — we'll build and index the knowledge for you.
       </p>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -707,7 +707,7 @@ function StepKnowledge({
                 <p className="text-sm font-semibold text-[#0F172A]">
                   {s.title}
                 </p>
-                <p className="mt-0.5 text-xs text-[#64748B]">{s.desc}</p>
+                <p className="mt-0.5 text-xs text-[#5B6B82]">{s.desc}</p>
               </div>
             </button>
           );
@@ -727,7 +727,7 @@ function StepKnowledge({
               value={url}
               onChange={(e) => setUrl(e.target.value)}
             />
-            <p className="mt-1.5 text-xs text-[#94A3B8]">
+            <p className="mt-1.5 text-xs text-[#5B6B82]">
               We'll crawl your site and turn its pages into answerable
               knowledge.
             </p>
@@ -739,7 +739,7 @@ function StepKnowledge({
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-4 py-8 text-sm font-medium text-[#64748B] hover:border-[#2563EB] hover:text-[#2563EB]"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-4 py-8 text-sm font-medium text-[#5B6B82] hover:border-[#2563EB] hover:text-[#2563EB]"
             >
               <Upload size={18} /> Click to choose files
             </button>
@@ -757,7 +757,7 @@ function StepKnowledge({
                     key={i}
                     className="flex items-center gap-2 rounded-lg bg-[#F1F5F9] px-3 py-2 text-sm text-[#0F172A]"
                   >
-                    <FileText size={14} className="text-[#64748B]" />
+                    <FileText size={14} className="text-[#5B6B82]" />
                     <span className="truncate">{f.name}</span>
                   </li>
                 ))}
@@ -815,7 +815,7 @@ function StepKnowledge({
         )}
 
         {sourceKind === "skip" && (
-          <p className="rounded-xl bg-[#F8FAFC] px-4 py-3 text-sm text-[#64748B]">
+          <p className="rounded-xl bg-[#F8FAFC] px-4 py-3 text-sm text-[#5B6B82]">
             No problem — you can add knowledge any time after your agent is
             live.
           </p>
@@ -849,7 +849,7 @@ function StepRefine({
 
   if (loading || !clarify) {
     return (
-      <div className="flex items-center gap-2 py-10 text-sm text-[#64748B]">
+      <div className="flex items-center gap-2 py-10 text-sm text-[#5B6B82]">
         <Loader2 size={16} className="animate-spin" /> Reviewing your knowledge
         and preparing a few questions…
       </div>
@@ -866,7 +866,7 @@ function StepRefine({
           <h2 className="text-lg font-semibold text-[#0F172A]">
             A few quick questions
           </h2>
-          <p className="mt-1 text-sm text-[#64748B]">{clarify.intro}</p>
+          <p className="mt-1 text-sm text-[#5B6B82]">{clarify.intro}</p>
         </div>
       </div>
 
@@ -876,12 +876,12 @@ function StepRefine({
             <p className="text-sm font-semibold text-[#0F172A]">
               {q.question}
               {q.type === "multi" && (
-                <span className="ml-2 text-xs font-normal text-[#64748B]">
+                <span className="ml-2 text-xs font-normal text-[#5B6B82]">
                   Choose any
                 </span>
               )}
               {q.optional && (
-                <span className="ml-2 text-xs font-normal text-[#64748B]">
+                <span className="ml-2 text-xs font-normal text-[#5B6B82]">
                   Optional
                 </span>
               )}
@@ -919,7 +919,7 @@ function StepRefine({
             value={extra}
             onChange={(e) => setExtra(e.target.value)}
           />
-          <p className="mt-1.5 text-xs text-[#94A3B8]">
+          <p className="mt-1.5 text-xs text-[#5B6B82]">
             Your answers refine the assistant's system prompt — you can
             fine-tune it in the next steps.
           </p>
@@ -935,17 +935,17 @@ function StepModel({ models, loading, model, setModel }) {
       <h2 className="text-lg font-semibold text-[#0F172A]">
         Choose the AI model
       </h2>
-      <p className="mt-1 text-sm text-[#64748B]">
+      <p className="mt-1 text-sm text-[#5B6B82]">
         Pick the engine that powers your agent. You can change this later.
       </p>
 
       {loading ? (
-        <div className="mt-6 flex items-center gap-2 text-sm text-[#64748B]">
+        <div className="mt-6 flex items-center gap-2 text-sm text-[#5B6B82]">
           <Loader2 size={16} className="animate-spin" /> Loading available
           models…
         </div>
       ) : models.length === 0 ? (
-        <p className="mt-6 rounded-xl bg-[#F8FAFC] px-4 py-3 text-sm text-[#64748B]">
+        <p className="mt-6 rounded-xl bg-[#F8FAFC] px-4 py-3 text-sm text-[#5B6B82]">
           No models available on your plan. The default model will be used.
         </p>
       ) : (
@@ -974,7 +974,7 @@ function StepModel({ models, loading, model, setModel }) {
                       <Check size={16} className="shrink-0 text-[#2563EB]" />
                     )}
                   </div>
-                  <p className="mt-0.5 text-xs capitalize text-[#64748B]">
+                  <p className="mt-0.5 text-xs capitalize text-[#5B6B82]">
                     {m.provider}
                   </p>
                   {Array.isArray(m.capabilities) &&
@@ -1007,7 +1007,7 @@ function StepCustomize({ form, setForm }) {
       <h2 className="text-lg font-semibold text-[#0F172A]">
         Customize your agent
       </h2>
-      <p className="mt-1 text-sm text-[#64748B]">
+      <p className="mt-1 text-sm text-[#5B6B82]">
         Give it a name, a personality, and a greeting.
       </p>
 
@@ -1077,7 +1077,7 @@ function StepCustomize({ form, setForm }) {
       <div className="mt-4">
         <label className="mb-1.5 block text-sm font-medium text-[#0F172A]">
           Instructions{" "}
-          <span className="font-normal text-[#64748B]">
+          <span className="font-normal text-[#5B6B82]">
             (how it should behave)
           </span>
         </label>
@@ -1156,7 +1156,7 @@ function StepDeploy({ goal, form, kbId, sourceKind, model, url }) {
           Review &amp; deploy
         </h2>
       </div>
-      <p className="mt-1 text-sm text-[#64748B]">
+      <p className="mt-1 text-sm text-[#5B6B82]">
         We'll create the agent{isChat ? ", publish a website widget," : ""} and
         connect your knowledge — all in one click.
       </p>
@@ -1167,7 +1167,7 @@ function StepDeploy({ goal, form, kbId, sourceKind, model, url }) {
             key={g.title}
             className="overflow-hidden rounded-2xl border border-[#E2E8F0]"
           >
-            <p className="border-b border-[#F1F5F9] bg-[#F8FAFC] px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-[#64748B]">
+            <p className="border-b border-[#F1F5F9] bg-[#F8FAFC] px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-[#5B6B82]">
               {g.title}
             </p>
             <dl className="divide-y divide-[#F1F5F9]">
@@ -1176,8 +1176,8 @@ function StepDeploy({ goal, form, kbId, sourceKind, model, url }) {
                   key={r.label}
                   className="flex items-center justify-between gap-4 px-4 py-2.5"
                 >
-                  <dt className="inline-flex items-center gap-2 text-sm text-[#64748B]">
-                    {r.icon && <r.icon size={14} className="text-[#94A3B8]" />}
+                  <dt className="inline-flex items-center gap-2 text-sm text-[#5B6B82]">
+                    {r.icon && <r.icon size={14} className="text-[#5B6B82]" />}
                     {r.label}
                   </dt>
                   <dd className="truncate text-sm font-medium capitalize text-[#0F172A]">
@@ -1190,7 +1190,7 @@ function StepDeploy({ goal, form, kbId, sourceKind, model, url }) {
         ))}
       </div>
 
-      <p className="mt-4 flex items-center gap-1.5 text-xs text-[#94A3B8]">
+      <p className="mt-4 flex items-center gap-1.5 text-xs text-[#5B6B82]">
         <Sparkles size={12} /> Memory, retention and cost use your workspace
         defaults — adjust them anytime from the agent settings.
       </p>
@@ -1231,7 +1231,7 @@ function DeployedView({ result, goal, copied, onCopy, nav }) {
       <h2 className="mt-4 text-xl font-bold text-[#0F172A]">
         {agent?.name} is live! 🎉
       </h2>
-      <p className="mx-auto mt-1 max-w-md text-sm text-[#64748B]">
+      <p className="mx-auto mt-1 max-w-md text-sm text-[#5B6B82]">
         Your agent has been created and activated.{" "}
         {goal?.type === "chat" && snippet
           ? "Drop the snippet below on your website to go live."

@@ -8,7 +8,7 @@ function LegalShell({ title, updated, children }) {
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tighter text-[#0F172A]">
           {title}
         </h1>
-        <p className="mt-3 text-sm text-[#64748B]">Last updated: {updated}</p>
+        <p className="mt-3 text-sm text-[#5B6B82]">Last updated: {updated}</p>
         <div className="mt-10 prose prose-slate max-w-none text-[#475569] space-y-6">
           {children}
         </div>
