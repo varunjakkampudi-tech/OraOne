@@ -50,7 +50,7 @@ export default function SharedConversation() {
             </span>
             OraOne
           </Link>
-          <span className="text-[11px] px-2 py-1 rounded-full bg-[#F1F5F9] text-[#64748B]">
+          <span className="text-[11px] px-2 py-1 rounded-full bg-[#F1F5F9] text-[#5B6B82]">
             Shared transcript
           </span>
         </div>

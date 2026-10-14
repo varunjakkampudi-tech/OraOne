@@ -330,7 +330,7 @@ export default function SupportLauncher() {
               >
                 {fbSent ? (
                   <div className="py-8 text-center">
-                    <span className="mx-auto grid size-12 place-items-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
+                    <span className="mx-auto grid size-12 place-items-center rounded-full bg-[#DCFCE7] text-[#166534]">
                       <Check size={24} />
                     </span>
                     <p className="mt-3 text-sm font-semibold text-[#0F172A]">
@@ -435,7 +435,7 @@ export default function SupportLauncher() {
                           {m.sources.slice(0, 4).map((s, j) => (
                             <span
                               key={j}
-                              className="inline-flex items-center gap-1 rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[10px] font-medium text-[#2563EB]"
+                              className="inline-flex items-center gap-1 rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[10px] font-medium text-[#1D4ED8]"
                             >
                               <FileText size={10} />
                               {s.title || s.url || "Source"}
@@ -455,7 +455,7 @@ export default function SupportLauncher() {
                           data-testid={`support-feedback-${i}`}
                         >
                           {m.feedback ? (
-                            <span className="text-[10px] font-medium text-[#16A34A]">
+                            <span className="text-[10px] font-medium text-[#15803D]">
                               Thanks for the feedback!
                             </span>
                           ) : (
@@ -550,7 +550,7 @@ export default function SupportLauncher() {
               </form>
             )}
             {!unavailable && config?.settings?.show_branding !== false && (
-              <div className="bg-white pb-2 text-center text-[10px] text-[#94A3B8]">
+              <div className="bg-white pb-2 text-center text-[10px] text-[#64748B]">
                 Powered by OraOne
               </div>
             )}

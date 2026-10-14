@@ -350,7 +350,7 @@ function SaveStatus({ state }) {
   if (state === "saved")
     return (
       <span
-        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#16A34A]"
+        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#15803D]"
         data-testid="save-status-saved"
       >
         <Check size={13} /> Saved
@@ -712,7 +712,7 @@ function AppearanceSection() {
             className={`rounded-xl border p-4 ${
               t.id === "light"
                 ? "border-[#2563EB] ring-2 ring-[#2563EB]/15"
-                : "border-[#E2E8F0] opacity-60"
+                : "border-[#E2E8F0] bg-[#F8FAFC]"
             }`}
           >
             <div className="flex items-center justify-between">
@@ -796,7 +796,7 @@ function SessionsSection() {
 
       <div className="max-w-2xl space-y-3">
         <div className="rounded-xl border border-[#E2E8F0] p-4 flex items-center gap-4">
-          <div className="size-10 rounded-xl bg-[#EFF6FF] grid place-items-center text-[#2563EB] shrink-0">
+          <div className="size-10 rounded-xl bg-[#EFF6FF] grid place-items-center text-[#1D4ED8] shrink-0">
             <Monitor size={18} />
           </div>
           <div className="min-w-0 flex-1">
@@ -1049,7 +1049,7 @@ function ActivitySection() {
                 <p className="text-[13px] text-[#0F172A]">
                   <span className="font-semibold">{l.actor}</span> {l.text}
                 </p>
-                <p className="text-xs text-[#94A3B8] mt-0.5">{relTime(l.at)}</p>
+                <p className="text-xs text-[#64748B] mt-0.5">{relTime(l.at)}</p>
               </div>
             </li>
           ))}

@@ -131,7 +131,7 @@ export default function ProjectSwitcher({
         </span>
         <span className="min-w-0 flex-1">
           <span
-            className={`block text-[10px] font-semibold uppercase tracking-wider ${inHeader ? "text-slate-300" : "text-[#94A3B8]"}`}
+            className={`block text-[10px] font-semibold uppercase tracking-wider ${inHeader ? "text-slate-300" : "text-[#64748B]"}`}
           >
             Project
           </span>
@@ -143,7 +143,7 @@ export default function ProjectSwitcher({
         </span>
         <ChevronsUpDown
           size={15}
-          className={`flex-shrink-0 ${inHeader ? "text-slate-300" : "text-[#94A3B8]"}`}
+          className={`flex-shrink-0 ${inHeader ? "text-slate-300" : "text-[#64748B]"}`}
         />
       </button>
 
@@ -202,7 +202,7 @@ export default function ProjectSwitcher({
           <div className="border-t border-[#E2E8F0] p-1.5">
             <button
               onClick={goNew}
-              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium text-[#2563EB] hover:bg-[#EFF6FF]"
+              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium text-[#1D4ED8] hover:bg-[#EFF6FF]"
               data-testid="project-switcher-new"
             >
               <Plus size={15} />

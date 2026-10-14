@@ -263,7 +263,7 @@ function ScannerTab() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {result.safe ? (
-                  <CheckCircle2 className="h-5 w-5 text-[#16A34A]" />
+                  <CheckCircle2 className="h-5 w-5 text-[#15803D]" />
                 ) : (
                   <AlertTriangle className="h-5 w-5 text-[#C2410C]" />
                 )}
@@ -326,7 +326,7 @@ function ScanRow({ label, flagged, detail }) {
         {flagged ? (
           <XCircle className="h-4 w-4 text-[#DC2626]" />
         ) : (
-          <CheckCircle2 className="h-4 w-4 text-[#16A34A]" />
+          <CheckCircle2 className="h-4 w-4 text-[#15803D]" />
         )}
         <span className="text-[13px] font-semibold text-[#0F172A]">
           {label}
@@ -541,7 +541,7 @@ function FlagsTab({ canManage }) {
         </div>
       )}
       {flags.length === 0 ? (
-        <p className="py-12 text-center text-sm text-[#94A3B8]">
+        <p className="py-12 text-center text-sm text-[#64748B]">
           No feature flags yet.
         </p>
       ) : (
@@ -742,7 +742,7 @@ function ReadinessTab() {
     <div className="space-y-5">
       <div className="flex items-center gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-5">
         <div className="grid h-16 w-16 place-items-center rounded-2xl bg-[#F0FDF4]">
-          <span className="text-xl font-bold text-[#16A34A]">
+          <span className="text-xl font-bold text-[#15803D]">
             {data?.score ?? 0}%
           </span>
         </div>
@@ -760,7 +760,7 @@ function ReadinessTab() {
             className="flex items-start gap-3 rounded-2xl border border-[#E2E8F0] bg-white p-4"
           >
             {it.status === "pass" ? (
-              <CheckCircle2 className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[#16A34A]" />
+              <CheckCircle2 className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[#15803D]" />
             ) : (
               <AlertTriangle className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[#C2410C]" />
             )}
@@ -800,7 +800,7 @@ function DeploymentsTab({ canManage }) {
   if (loading) return <TabSpinner />;
 
   const statusStyle = {
-    succeeded: "bg-[#DCFCE7] text-[#16A34A]",
+    succeeded: "bg-[#DCFCE7] text-[#166534]",
     failed: "bg-[#FEE2E2] text-[#DC2626]",
     rolled_back: "bg-[#FEF3C7] text-[#B45309]",
     in_progress: "bg-[#EEF2FF] text-[#4F46E5]",
@@ -820,7 +820,7 @@ function DeploymentsTab({ canManage }) {
         </div>
       )}
       {items.length === 0 ? (
-        <p className="py-12 text-center text-sm text-[#94A3B8]">
+        <p className="py-12 text-center text-sm text-[#64748B]">
           No deployments recorded.
         </p>
       ) : (

@@ -148,7 +148,7 @@ export default function ContactPage() {
           transition={{ duration: 0.5 }}
           className="lg:pt-6"
         >
-          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-[11px] font-bold tracking-[0.2em] text-[#2563EB]">
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-[11px] font-bold tracking-[0.2em] text-[#1D4ED8]">
             <span className="size-1.5 rounded-full bg-[#2563EB]" />
             BOOK A DEMO
           </span>

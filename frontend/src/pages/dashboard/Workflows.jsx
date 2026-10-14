@@ -146,7 +146,7 @@ const STATUS_STYLES = {
 
 const RUN_STATUS_STYLES = {
   queued: { cls: "bg-[#F1F5F9] text-[#475569]", icon: Clock },
-  running: { cls: "bg-[#EFF6FF] text-[#2563EB]", icon: Loader2 },
+  running: { cls: "bg-[#EFF6FF] text-[#1D4ED8]", icon: Loader2 },
   awaiting_approval: { cls: "bg-[#FEF3C7] text-[#B45309]", icon: ShieldCheck },
   completed: { cls: "bg-[#ECFDF5] text-[#047857]", icon: CheckCircle2 },
   failed: { cls: "bg-[#FEF2F2] text-[#B91C1C]", icon: XCircle },
@@ -601,7 +601,7 @@ function StepEditor({
   return (
     <div className="rounded-xl border border-[#E2E8F0] bg-[#FBFCFE]">
       <div className="p-3 flex items-center gap-2 border-b border-[#EEF2F7]">
-        <span className="w-6 h-6 rounded-md bg-[#EFF6FF] text-[#2563EB] text-[11px] font-bold flex items-center justify-center">
+        <span className="w-6 h-6 rounded-md bg-[#EFF6FF] text-[#1D4ED8] text-[11px] font-bold flex items-center justify-center">
           {index + 1}
         </span>
         <Icon size={15} className="text-[#2563EB]" />
@@ -1206,7 +1206,7 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
                       key={v.id}
                       className="flex items-center gap-2.5 p-3 rounded-xl border border-[#E2E8F0] bg-white"
                     >
-                      <span className="w-7 h-7 rounded-md bg-[#EFF6FF] text-[#2563EB] text-[11px] font-bold flex items-center justify-center">
+                      <span className="w-7 h-7 rounded-md bg-[#EFF6FF] text-[#1D4ED8] text-[11px] font-bold flex items-center justify-center">
                         v{v.version}
                       </span>
                       <span className="text-sm font-semibold text-[#0F172A] truncate">

@@ -12,10 +12,9 @@ Allowed statuses: PASS, FAIL, BLOCKED, NOT TESTED, NOT APPLICABLE.
 
 ## Verdict
 
-**Product 1 is NOT production-ready.** Local functional, isolation and security
-acceptance pass. The external release gates (identity, deployment, TLS,
-monitoring, production backups) are still BLOCKED, and the WCAG contrast work
-is still FAIL.
+**Product 1 is NOT production-ready.** Local functional, isolation, security and automated
+accessibility acceptance pass. The external release gates (identity, deployment, TLS,
+monitoring, production backups) are still BLOCKED.
 
 ## Evidence scripts (all loopback-only, synthetic data, self-cleaning)
 
@@ -98,7 +97,7 @@ is still FAIL.
 | Object-storage persistence and restart | PASS (local) | S3 + API restart, re-process reads stored bytes |
 | Load (local, 4 vCPU, 4 gunicorn workers) | PASS (indicative) | 60 s × 40 conc: ~64 rps, 0 errors, p95 1.3–2.4 s (generator on the same host) |
 | Soak through Caddy with retry policy | PASS | 180 s × 10 conc, 19,177 req, 39 forced worker recycles, 0 errors. Without Caddy, recycling dropped 23 of ~21k requests, so `lb_try_duration` was added |
-| Accessibility (WCAG 2.2 AA) | FAIL (improving) | axe critical/serious: 74 → 42 of 276 routes after token, contrast and label fixes. Remaining: mostly `#64748B` on tinted chips and status pills |
+| Accessibility (WCAG 2.2 AA, automated) | PASS | axe-core WCAG 2.0/2.1/2.2 A+AA: 0 critical/serious violations on all 276 routes at 1440 px (was 74). Colour tokens, status pills, avatar palette, toast colours, form labels and brand-preview text contrast fixed. A manual screen-reader/keyboard audit is still NOT TESTED |
 | Responsive layout | PASS | 0 of 276 routes overflow horizontally at 390, 768 or 1440 px; 0 API 5xx; 0 navigation timeouts ([ROUTE-ACCEPTANCE.md](ROUTE-ACCEPTANCE.md)) |
 | Production identity (Cognito) | BLOCKED | External gate: live pool, hosted UI, logout, refresh, user migration |
 | Production deploy, TLS, DNS, monitoring, rollback | BLOCKED | No release authorization; public deployment untouched |

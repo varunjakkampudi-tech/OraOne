@@ -64,7 +64,7 @@ function DiffViewer({ diff }) {
                 {String(c.from ?? "—")}
               </span>
               <ArrowRight className="h-3.5 w-3.5" style={{ color: SUB }} />
-              <span className="rounded bg-[#DCFCE7] px-1.5 py-0.5 text-[#15803D]">
+              <span className="rounded bg-[#DCFCE7] px-1.5 py-0.5 text-[#166534]">
                 {String(c.to ?? "—")}
               </span>
             </div>

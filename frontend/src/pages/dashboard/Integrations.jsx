@@ -336,7 +336,7 @@ export default function Integrations() {
                   data-testid={`int-cat-${c}`}
                   className={`px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-colors ${
                     cat === c
-                      ? "border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]"
+                      ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                       : "border-[#E2E8F0] bg-white text-[#475569] hover:border-[#2563EB] hover:text-[#2563EB]"
                   }`}
                 >
@@ -1101,7 +1101,7 @@ function BrowseModal({ integrationId, providerName, onClose, onSaved }) {
                     data-testid="browse-filters-toggle"
                     className={`px-2.5 py-1.5 rounded-lg border text-[12px] font-semibold inline-flex items-center gap-1 ${
                       showFilters
-                        ? "border-[#2563EB] text-[#2563EB] bg-[#EFF6FF]"
+                        ? "border-[#2563EB] text-[#1D4ED8] bg-[#EFF6FF]"
                         : "border-[#E2E8F0] text-[#475569]"
                     }`}
                   >
@@ -1369,7 +1369,7 @@ function FiltersPanel({ options, setOptions, toggleFileType, alwaysOpen }) {
               onClick={() => toggleFileType(o.key)}
               className={`px-2.5 py-1 rounded-full text-[11.5px] font-semibold border ${
                 active
-                  ? "border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]"
+                  ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                   : "border-[#E2E8F0] text-[#5B6B82]"
               }`}
             >
@@ -1496,7 +1496,7 @@ function StatusPill({ status, large }) {
     disconnected: {
       bg: "#F1F5F9",
       dot: "#94A3B8",
-      text: "#64748B",
+      text: "#475569",
       label: "Not Connected",
     },
   };

@@ -385,7 +385,7 @@ export default function Team() {
                               <p className="text-[13.5px] font-semibold text-[#0F172A] flex items-center gap-2">
                                 {m.full_name || m.email.split("@")[0]}
                                 {m.is_you && (
-                                  <span className="text-[10px] font-bold text-[#2563EB] bg-[#EFF6FF] px-1.5 py-0.5 rounded-full">
+                                  <span className="text-[10px] font-bold text-[#1D4ED8] bg-[#EFF6FF] px-1.5 py-0.5 rounded-full">
                                     YOU
                                   </span>
                                 )}
@@ -515,7 +515,7 @@ export default function Team() {
                           <button
                             onClick={() => copyInvite(i)}
                             data-testid={`invite-copy-${i.id}`}
-                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-semibold text-[#2563EB] hover:bg-[#EFF6FF]"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-semibold text-[#1D4ED8] hover:bg-[#EFF6FF]"
                           >
                             <Copy size={11} /> Copy link
                           </button>
@@ -658,7 +658,7 @@ export default function Team() {
                           data-testid={`invite-role-${r}`}
                           className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-[13px] font-semibold transition-colors justify-center ${
                             active
-                              ? "border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]"
+                              ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                               : "border-[#E2E8F0] text-[#475569] hover:border-[#2563EB]"
                           }`}
                         >
@@ -712,7 +712,7 @@ function StatusBadge({ status }) {
       label: "Pending",
     },
     accepted: {
-      cls: "text-[#15803D] bg-[#DCFCE7]",
+      cls: "text-[#166534] bg-[#DCFCE7]",
       icon: CheckCircle2,
       label: "Accepted",
     },

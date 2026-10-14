@@ -312,7 +312,7 @@ export default function AIModels() {
           </p>
         </div>
         <div className="rounded-2xl border border-[#E2E8F0] bg-white p-5">
-          <div className="flex items-center gap-2 text-[#0EA5E9]">
+          <div className="flex items-center gap-2 text-[#0369A1]">
             <Layers className="h-4 w-4" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               Fallback chain
@@ -376,7 +376,7 @@ export default function AIModels() {
                     active
                       ? "border-[#4F46E5] bg-[#EEF2FF]"
                       : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC]"
-                  } ${!canManage ? "cursor-not-allowed opacity-60" : ""}`}
+                  } ${!canManage ? "cursor-not-allowed" : ""}`}
                 >
                   <Icon
                     className={`h-4 w-4 ${active ? "text-[#4F46E5]" : "text-[#5B6B82]"}`}
@@ -499,7 +499,7 @@ export default function AIModels() {
             hybridEnabled
               ? "border-[#4F46E5] bg-[#EEF2FF]"
               : "border-[#E2E8F0] bg-white"
-          } ${!canManage ? "opacity-60" : "cursor-pointer"}`}
+          } ${!canManage ? "cursor-not-allowed" : "cursor-pointer"}`}
         >
           <span>
             <span className="block text-sm font-semibold text-[#0F172A]">
@@ -540,7 +540,7 @@ export default function AIModels() {
                       : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC]"
                   } ${
                     !canManage || (!hybridEnabled && r.key !== "none")
-                      ? "cursor-not-allowed opacity-60"
+                      ? "cursor-not-allowed"
                       : ""
                   }`}
                 >
@@ -639,7 +639,7 @@ export default function AIModels() {
                         <Layers className="h-3.5 w-3.5" /> Fallback
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-[#16A34A]">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-[#15803D]">
                         <Check className="h-3.5 w-3.5" /> Available
                       </span>
                     )}

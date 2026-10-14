@@ -152,6 +152,15 @@ function LogoUploader({
   );
 }
 
+// Pick white or ink text for a brand colour, whichever meets more contrast.
+function readableOn(hex) {
+  const lum = [1, 3, 5]
+    .map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  const l = 0.2126 * lum[0] + 0.7152 * lum[1] + 0.0722 * lum[2];
+  return 1.05 / (l + 0.05) >= (l + 0.05) / 0.05 ? "#FFFFFF" : "#0F172A";
+}
+
 export default function Branding() {
   const { can } = usePermissions();
   const { refresh: refreshCtx } = useBranding();
@@ -403,6 +412,7 @@ export default function Branding() {
                     value={form.primary_color}
                     onChange={(e) => set("primary_color")(e.target.value)}
                     data-testid="branding-primary-color"
+                    aria-label="Primary colour hex value"
                     className={`w-full rounded-xl border px-3 py-2 text-sm uppercase outline-none focus:ring-2 ${
                       primaryValid
                         ? "border-[#E2E8F0] focus:border-[#2563EB] focus:ring-[#2563EB]/20"
@@ -427,6 +437,7 @@ export default function Branding() {
                     value={form.accent_color}
                     onChange={(e) => set("accent_color")(e.target.value)}
                     data-testid="branding-accent-color"
+                    aria-label="Accent colour hex value"
                     className={`w-full rounded-xl border px-3 py-2 text-sm uppercase outline-none focus:ring-2 ${
                       accentValid
                         ? "border-[#E2E8F0] focus:border-[#2563EB] focus:ring-[#2563EB]/20"
@@ -550,21 +561,29 @@ export default function Branding() {
               <p className="text-xs text-[#5B6B82]">Live preview</p>
               <div className="mt-4 space-y-2">
                 <button
-                  className="w-full rounded-xl py-2 text-sm font-semibold text-white"
+                  type="button"
+                  className="w-full rounded-xl py-2 text-sm font-semibold"
                   style={{
                     backgroundColor: primaryValid
                       ? form.primary_color
                       : "#4F46E5",
+                    color: readableOn(
+                      primaryValid ? form.primary_color.slice(0, 7) : "#4F46E5",
+                    ),
                   }}
                 >
                   Primary action
                 </button>
                 <button
-                  className="w-full rounded-xl py-2 text-sm font-semibold text-white"
+                  type="button"
+                  className="w-full rounded-xl py-2 text-sm font-semibold"
                   style={{
                     backgroundColor: accentValid
                       ? form.accent_color
                       : "#06B6D4",
+                    color: readableOn(
+                      accentValid ? form.accent_color.slice(0, 7) : "#06B6D4",
+                    ),
                   }}
                 >
                   Accent action

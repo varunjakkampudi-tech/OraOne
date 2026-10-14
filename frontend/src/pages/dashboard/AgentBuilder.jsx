@@ -537,7 +537,7 @@ export default function AgentBuilder() {
                       <span
                         className={`grid size-8 shrink-0 place-items-center rounded-full ${
                           done
-                            ? "bg-[#DCFCE7] text-[#16A34A]"
+                            ? "bg-[#DCFCE7] text-[#166534]"
                             : active
                               ? "bg-[#EFF4FF] text-[#2563EB]"
                               : "bg-[#F1F5F9] text-[#CBD5E1]"
@@ -634,7 +634,7 @@ function SaveStatus({ state }) {
   if (state === "saved")
     return (
       <span
-        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#16A34A]"
+        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#15803D]"
         data-testid="agent-save-status"
       >
         <Check size={13} /> Saved
@@ -920,7 +920,7 @@ function IntegrationsStep() {
                   </p>
                 </div>
                 {connected ? (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#16A34A] shrink-0">
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#15803D] shrink-0">
                     <Check size={13} /> Connected
                   </span>
                 ) : (

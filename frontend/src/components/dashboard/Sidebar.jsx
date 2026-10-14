@@ -65,7 +65,7 @@ const isPathActive = (pathname, item) =>
 const linkClass = ({ isActive }) =>
   `flex min-h-[36px] items-center gap-2.5 px-3 py-1.5 rounded-lg text-[13.5px] font-medium transition-colors ${
     isActive
-      ? "bg-[#F0F6FF] text-[#2563EB]"
+      ? "bg-[#F0F6FF] text-[#1D4ED8]"
       : "text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
   }`;
 
@@ -211,7 +211,7 @@ function SidebarContent({ onItemClick, showClose, onClose, closeButtonRef }) {
                           className={({ isActive }) =>
                             `flex min-h-[32px] items-center rounded-md px-3 py-1 text-[13px] transition-colors ${
                               isActive || isPathActive(pathname, child)
-                                ? "bg-[#F0F6FF] font-semibold text-[#2563EB]"
+                                ? "bg-[#F0F6FF] font-semibold text-[#1D4ED8]"
                                 : "text-[#5B6B82] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                             }`
                           }

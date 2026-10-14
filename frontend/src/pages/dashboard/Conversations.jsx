@@ -284,7 +284,7 @@ export default function Conversations() {
               onClick={() => setShowStatus((v) => !v)}
               className={`relative size-10 rounded-xl border grid place-items-center transition-colors ${
                 statusFilter !== "all" || showStatus
-                  ? "border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]"
+                  ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                   : "border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569]"
               }`}
               aria-label="Filters"
@@ -500,7 +500,7 @@ export default function Conversations() {
             className="hidden min-w-0 self-start rounded-lg border border-[#E2E8F0] bg-white p-5 xl:block"
             aria-label="Customer context"
           >
-            <div className="grid size-12 place-items-center rounded-full bg-[#EFF6FF] text-[#2563EB]">
+            <div className="grid size-12 place-items-center rounded-full bg-[#EFF6FF] text-[#1D4ED8]">
               <User size={23} />
             </div>
             <h2 className="mt-4 break-words text-base font-semibold text-[#0F172A]">
@@ -747,7 +747,7 @@ function ConversationPanel({ conv }) {
         <button
           disabled
           title="Saving conversation notes is not yet connected. This is a local draft."
-          className="px-4 py-2.5 rounded-xl bg-[#EFF6FF] text-[#2563EB] text-[13px] font-semibold hover:bg-[#DBEAFE]"
+          className="px-4 py-2.5 rounded-xl bg-[#EFF6FF] text-[#1D4ED8] text-[13px] font-semibold hover:bg-[#DBEAFE]"
           data-testid="conv-note-add"
         >
           Draft only
@@ -795,8 +795,8 @@ function MessageBubble({ message }) {
       <div
         className={`size-9 rounded-full grid place-items-center shrink-0 ${
           isCustomer
-            ? "bg-[#DBEAFE] text-[#2563EB]"
-            : "bg-[#EFF6FF] text-[#2563EB]"
+            ? "bg-[#DBEAFE] text-[#1D4ED8]"
+            : "bg-[#EFF6FF] text-[#1D4ED8]"
         }`}
       >
         {isCustomer ? <User size={15} /> : <Bot size={15} />}
@@ -867,7 +867,7 @@ function MessageBubble({ message }) {
             {grounded != null && (
               <span
                 className={`inline-flex items-center gap-1 ${
-                  grounded ? "text-[#16A34A]" : "text-[#D97706]"
+                  grounded ? "text-[#15803D]" : "text-[#D97706]"
                 }`}
                 title={
                   grounded

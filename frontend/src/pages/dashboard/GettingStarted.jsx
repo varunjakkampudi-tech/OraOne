@@ -236,7 +236,7 @@ export default function GettingStarted() {
                 className={
                   "grid size-11 shrink-0 place-items-center rounded-2xl ring-1 " +
                   (step.done
-                    ? "bg-[#DCFCE7] text-[#15803D] ring-[#BBF7D0]"
+                    ? "bg-[#DCFCE7] text-[#166534] ring-[#BBF7D0]"
                     : "bg-[#EFF4FF] text-[#2563EB] ring-[#E0E7FF]")
                 }
               >
@@ -258,7 +258,7 @@ export default function GettingStarted() {
 
               <div className="shrink-0">
                 {step.done ? (
-                  <CheckCircle2 size={22} className="text-[#16A34A]" />
+                  <CheckCircle2 size={22} className="text-[#15803D]" />
                 ) : (
                   <GhostButton
                     as={Link}

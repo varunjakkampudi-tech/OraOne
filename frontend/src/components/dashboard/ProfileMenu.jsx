@@ -91,7 +91,7 @@ export default function ProfileMenu({ dark = false }) {
         </span>
         <ChevronDown
           size={15}
-          className={dark ? "text-slate-300" : "text-[#94A3B8]"}
+          className={dark ? "text-slate-300" : "text-[#64748B]"}
         />
       </button>
 

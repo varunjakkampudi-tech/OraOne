@@ -492,7 +492,7 @@ export default function CreateAgentWizard() {
                 </div>
                 <span
                   className={`hidden text-sm font-medium sm:inline ${
-                    current ? "text-[#0F172A]" : "text-[#94A3B8]"
+                    current ? "text-[#0F172A]" : "text-[#64748B]"
                   }`}
                 >
                   {label}
@@ -859,7 +859,7 @@ function StepRefine({
   return (
     <div>
       <div className="flex items-start gap-3">
-        <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+        <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#EFF6FF] text-[#1D4ED8]">
           <Sparkles size={18} />
         </div>
         <div>
@@ -983,7 +983,7 @@ function StepModel({ models, loading, model, setModel }) {
                         {m.capabilities.slice(0, 3).map((c) => (
                           <span
                             key={c}
-                            className="rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[10px] font-medium text-[#2563EB]"
+                            className="rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[10px] font-medium text-[#1D4ED8]"
                           >
                             {c}
                           </span>

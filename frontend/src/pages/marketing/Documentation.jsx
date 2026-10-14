@@ -526,7 +526,7 @@ export default function DocumentationPage() {
             transition={{ duration: 0.5 }}
             className="max-w-3xl"
           >
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFF6FF] text-[11px] font-semibold tracking-[0.2em] text-[#2563EB]">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFF6FF] text-[11px] font-semibold tracking-[0.2em] text-[#1D4ED8]">
               <BookOpen size={11} /> DOCUMENTATION
             </span>
             <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter text-[#0F172A] leading-[1.04]">
@@ -574,7 +574,7 @@ export default function DocumentationPage() {
                     data-testid={`doc-nav-${n.id}`}
                     className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all ${
                       isActive
-                        ? "bg-[#EFF6FF] text-[#2563EB] font-semibold"
+                        ? "bg-[#EFF6FF] text-[#1D4ED8] font-semibold"
                         : "text-[#475569] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                     }`}
                   >
@@ -759,7 +759,7 @@ export default function DocumentationPage() {
                           <span
                             className={`px-2 py-0.5 rounded-md text-[10.5px] font-bold tracking-wider ${
                               e.method === "POST"
-                                ? "bg-[#DCFCE7] text-[#15803D]"
+                                ? "bg-[#DCFCE7] text-[#166534]"
                                 : e.method === "GET"
                                   ? "bg-[#DBEAFE] text-[#1D4ED8]"
                                   : "bg-[#F1F5F9] text-[#475569]"
@@ -868,7 +868,7 @@ export default function DocumentationPage() {
                                   key={idx}
                                   className="flex gap-2.5 text-[13.5px] text-[#475569]"
                                 >
-                                  <span className="flex-shrink-0 size-5 rounded-full bg-[#EFF6FF] text-[#2563EB] text-[11px] font-bold grid place-items-center">
+                                  <span className="flex-shrink-0 size-5 rounded-full bg-[#EFF6FF] text-[#1D4ED8] text-[11px] font-bold grid place-items-center">
                                     {idx + 1}
                                   </span>
                                   <span>{step}</span>
@@ -1059,7 +1059,7 @@ export default function DocumentationPage() {
                           {i.date}
                         </p>
                       </div>
-                      <span className="text-[11px] font-semibold text-[#15803D] bg-[#DCFCE7] px-2 py-0.5 rounded-full">
+                      <span className="text-[11px] font-semibold text-[#166534] bg-[#DCFCE7] px-2 py-0.5 rounded-full">
                         {i.status}
                       </span>
                     </li>

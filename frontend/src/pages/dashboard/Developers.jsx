@@ -136,8 +136,8 @@ const ENDPOINTS = [
 ];
 
 const METHOD_STYLES = {
-  GET: "bg-[#DCFCE7] text-[#16A34A]",
-  POST: "bg-[#DBEAFE] text-[#2563EB]",
+  GET: "bg-[#DCFCE7] text-[#166534]",
+  POST: "bg-[#DBEAFE] text-[#1D4ED8]",
   PATCH: "bg-[#FEF3C7] text-[#B45309]",
   DELETE: "bg-[#FEE2E2] text-[#DC2626]",
 };
@@ -160,7 +160,7 @@ function CopyButton({ text, label = "Copy" }) {
       className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[12px] font-medium text-[#475569] hover:bg-[#F8FAFC]"
     >
       {copied ? (
-        <Check className="h-3.5 w-3.5 text-[#16A34A]" />
+        <Check className="h-3.5 w-3.5 text-[#15803D]" />
       ) : (
         <Copy className="h-3.5 w-3.5" />
       )}
@@ -338,7 +338,7 @@ print(data["answer"], data["sources"])`,
           </p>
         </Link>
         <div className="rounded-2xl border border-[#E2E8F0] bg-white p-5">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#DCFCE7] text-[#16A34A]">
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#DCFCE7] text-[#166534]">
             <Terminal className="h-5 w-5" />
           </div>
           <p className="mt-3 text-sm font-semibold text-[#0F172A]">
@@ -472,7 +472,7 @@ print(data["answer"], data["sources"])`,
             <div className="mt-2">
               <div className="mb-1 flex items-center gap-2 text-[12px]">
                 <span
-                  className={`rounded-md px-2 py-0.5 font-semibold ${result.ok ? "bg-[#DCFCE7] text-[#16A34A]" : "bg-[#FEE2E2] text-[#DC2626]"}`}
+                  className={`rounded-md px-2 py-0.5 font-semibold ${result.ok ? "bg-[#DCFCE7] text-[#166534]" : "bg-[#FEE2E2] text-[#DC2626]"}`}
                 >
                   {result.status || "ERR"}
                 </span>
@@ -546,7 +546,7 @@ print(data["answer"], data["sources"])`,
                         <div className="w-full">
                           <div className="mb-1 flex items-center gap-2 text-[12px]">
                             <span
-                              className={`rounded-md px-2 py-0.5 font-semibold ${res.ok ? "bg-[#DCFCE7] text-[#16A34A]" : "bg-[#FEE2E2] text-[#DC2626]"}`}
+                              className={`rounded-md px-2 py-0.5 font-semibold ${res.ok ? "bg-[#DCFCE7] text-[#166534]" : "bg-[#FEE2E2] text-[#DC2626]"}`}
                             >
                               {res.status || "ERR"}
                             </span>

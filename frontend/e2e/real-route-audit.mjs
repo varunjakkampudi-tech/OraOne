@@ -79,7 +79,7 @@ for (const r of routes.filter((x) => x.type !== "layout" && (!only || only.test(
   try {
     await page.goto(BASE + requested, { waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForLoadState("networkidle", { timeout: 6000 }).catch(() => {});
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(1200);
   } catch (e) {
     status = "timeout";
   }

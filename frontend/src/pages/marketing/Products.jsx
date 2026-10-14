@@ -26,7 +26,7 @@ export default function ProductsPage() {
       </header>
       <section className="my-10 grid items-center gap-8 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-5 sm:p-8 lg:grid-cols-2">
         <div>
-          <span className="rounded-full bg-[#EFF6FF] px-3 py-1 text-xs font-medium text-[#2563EB]">
+          <span className="rounded-full bg-[#EFF6FF] px-3 py-1 text-xs font-medium text-[#1D4ED8]">
             Product 1 · Active development
           </span>
           <h2 className="mt-5 text-3xl font-bold tracking-tight text-[#0F172A]">

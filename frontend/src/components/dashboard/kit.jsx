@@ -184,7 +184,7 @@ export function Segmented({ value, onChange, options }) {
           >
             {label}
             {typeof o !== "string" && o.badge && (
-              <span className="ml-1.5 text-[11px] font-semibold text-[#16A34A]">
+              <span className="ml-1.5 text-[11px] font-semibold text-[#15803D]">
                 {o.badge}
               </span>
             )}
@@ -197,7 +197,7 @@ export function Segmented({ value, onChange, options }) {
 
 /* Status badge. */
 const TONES = {
-  green: "bg-[#DCFCE7] text-[#15803D]",
+  green: "bg-[#DCFCE7] text-[#166534]",
   blue: "bg-[#DBEAFE] text-[#1D4ED8]",
   indigo: "bg-[#F0F9FF] text-[#0369A1]",
   amber: "bg-[#FEF3C7] text-[#B45309]",

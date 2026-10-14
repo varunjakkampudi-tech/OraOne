@@ -84,7 +84,7 @@ export default function SEOLanding({ config }) {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.span
             {...fadeUp}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#2563EB]"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#1D4ED8]"
           >
             <Sparkles size={11} /> {eyebrow}
           </motion.span>
@@ -208,7 +208,7 @@ export default function SEOLanding({ config }) {
                     >
                       <CheckCircle2
                         size={16}
-                        className="text-[#16A34A] mt-0.5 flex-shrink-0"
+                        className="text-[#15803D] mt-0.5 flex-shrink-0"
                       />
                       {p}
                     </li>
@@ -336,7 +336,7 @@ export default function SEOLanding({ config }) {
                     })
                   }
                   data-testid={`landing-${slug}-cta-footer-primary`}
-                  className="inline-flex items-center gap-1.5 px-6 py-3.5 rounded-xl bg-white text-[#2563EB] text-[15px] font-bold hover:bg-[#EFF6FF] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-6 py-3.5 rounded-xl bg-white text-[#1D4ED8] text-[15px] font-bold hover:bg-[#EFF6FF] transition-colors"
                 >
                   {primaryCTA} <ArrowRight size={15} />
                 </Link>

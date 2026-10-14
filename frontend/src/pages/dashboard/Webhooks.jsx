@@ -36,7 +36,7 @@ function fmtRelative(value) {
 }
 
 const STATUS_STYLES = {
-  active: "bg-[#DCFCE7] text-[#16A34A]",
+  active: "bg-[#DCFCE7] text-[#166534]",
   paused: "bg-[#FEF3C7] text-[#B45309]",
   disabled: "bg-[#FEE2E2] text-[#DC2626]",
 };
@@ -339,7 +339,7 @@ function DeliveriesRow({ endpointId }) {
               </td>
               <td className="py-2.5 pr-4">
                 {d.success ? (
-                  <span className="inline-flex items-center gap-1 text-[#16A34A]">
+                  <span className="inline-flex items-center gap-1 text-[#15803D]">
                     <CircleCheck className="h-4 w-4" /> Delivered
                   </span>
                 ) : (

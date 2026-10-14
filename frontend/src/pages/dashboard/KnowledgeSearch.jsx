@@ -355,7 +355,7 @@ function SourceRow({ index, source }) {
       {...(href ? { href, target: "_blank", rel: "noreferrer" } : {})}
       className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] group"
     >
-      <span className="h-6 w-6 shrink-0 rounded-md bg-[#EFF6FF] text-[#2563EB] text-xs font-bold inline-flex items-center justify-center">
+      <span className="h-6 w-6 shrink-0 rounded-md bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold inline-flex items-center justify-center">
         {index}
       </span>
       <span className="text-[#5B6B82]">

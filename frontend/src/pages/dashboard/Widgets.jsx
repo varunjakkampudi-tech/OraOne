@@ -501,7 +501,7 @@ function WidgetPreview({ form }) {
             </span>
           </div>
           {form.show_branding && (
-            <div className="border-t border-[#EEF2F7] py-1.5 text-center text-[10px] text-[#94A3B8]">
+            <div className="border-t border-[#EEF2F7] py-1.5 text-center text-[10px] text-[#64748B]">
               Powered by OraOne
             </div>
           )}
@@ -514,7 +514,7 @@ function WidgetPreview({ form }) {
           <MessageSquare size={20} />
         </div>
       </div>
-      <p className="mt-2 text-center text-[11px] text-[#94A3B8]">
+      <p className="mt-2 text-center text-[11px] text-[#64748B]">
         Preview updates as you edit ·{" "}
         {TYPES.find((t) => t.value === form.widget_type)?.label}
       </p>

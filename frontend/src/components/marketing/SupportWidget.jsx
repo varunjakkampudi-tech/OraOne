@@ -121,7 +121,7 @@ export default function SupportWidget() {
             <div className="p-4">
               {sent ? (
                 <div className="py-6 text-center" data-testid="support-sent">
-                  <span className="mx-auto grid size-12 place-items-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
+                  <span className="mx-auto grid size-12 place-items-center rounded-full bg-[#DCFCE7] text-[#166534]">
                     <Check size={24} />
                   </span>
                   <p className="mt-3 text-[15px] font-semibold text-[#0F172A]">

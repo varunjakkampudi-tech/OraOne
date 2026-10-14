@@ -78,7 +78,7 @@ export default function InviteAccept() {
           </div>
         ) : done ? (
           <>
-            <CheckCircle2 className="w-10 h-10 text-[#16A34A] mx-auto mt-4" />
+            <CheckCircle2 className="w-10 h-10 text-[#15803D] mx-auto mt-4" />
             <h1 className="text-xl font-bold text-[#0F172A] mt-3">
               Welcome aboard!
             </h1>

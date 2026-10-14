@@ -840,7 +840,7 @@ export default function Chat() {
                     data-testid={`chat-filter-${t.k}`}
                     className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                       filter === t.k
-                        ? "bg-[#EFF6FF] text-[#2563EB]"
+                        ? "bg-[#EFF6FF] text-[#1D4ED8]"
                         : "text-[#5B6B82] hover:bg-[#F8FAFC]"
                     }`}
                   >
@@ -951,7 +951,7 @@ export default function Chat() {
                         />
                         <button
                           onClick={commitRename}
-                          className="p-1.5 rounded-lg text-[#16A34A] hover:bg-green-50"
+                          className="p-1.5 rounded-lg text-[#15803D] hover:bg-green-50"
                           aria-label="Save title"
                         >
                           <Check size={15} />
@@ -993,7 +993,7 @@ export default function Chat() {
                     onClick={(e) => activeConv && togglePin(activeConv, e)}
                     className={`p-2 rounded-lg transition-colors ${
                       activeConv?.is_pinned
-                        ? "text-[#2563EB] bg-[#EFF6FF]"
+                        ? "text-[#1D4ED8] bg-[#EFF6FF]"
                         : "text-[#5B6B82] hover:text-[#2563EB] hover:bg-[#EFF6FF]"
                     }`}
                     aria-label="Pin conversation"
@@ -1137,7 +1137,7 @@ export default function Chat() {
                     data-testid={CHAT.knowledgeToggle}
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium transition-colors ${
                       useKnowledge
-                        ? "bg-[#EFF6FF] text-[#2563EB]"
+                        ? "bg-[#EFF6FF] text-[#1D4ED8]"
                         : "bg-[#F1F5F9] text-[#5B6B82] hover:bg-[#E2E8F0]"
                     }`}
                     aria-pressed={useKnowledge}
@@ -1266,7 +1266,7 @@ function ConversationRow({
       <div className="flex items-center gap-2">
         <div
           className={`size-8 rounded-lg grid place-items-center shrink-0 ${
-            sel ? "bg-[#2563EB] text-white" : "bg-[#F1F5F9] text-[#64748B]"
+            sel ? "bg-[#2563EB] text-white" : "bg-[#F1F5F9] text-[#5B6B82]"
           }`}
         >
           <Sparkles size={15} />
@@ -1459,7 +1459,7 @@ function Bubble({ role, content, streaming = false, meta }) {
         ) : (
           !isUser &&
           usedCount > 0 && (
-            <span className="mt-1 inline-flex items-center gap-1 text-[10.5px] text-[#94A3B8]">
+            <span className="mt-1 inline-flex items-center gap-1 text-[10.5px] text-[#64748B]">
               <BookOpen size={11} /> {usedCount} knowledge source
               {usedCount > 1 ? "s" : ""} used
             </span>
@@ -1494,7 +1494,7 @@ function SourcesPanel({ sources }) {
               key={`${s.document_id || s.document || i}-${s.page ?? i}`}
               className="flex items-start gap-2 px-2.5 py-1.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]"
             >
-              <span className="mt-0.5 size-4 rounded grid place-items-center bg-[#EFF6FF] text-[10px] font-semibold text-[#2563EB] shrink-0">
+              <span className="mt-0.5 size-4 rounded grid place-items-center bg-[#EFF6FF] text-[10px] font-semibold text-[#1D4ED8] shrink-0">
                 {i + 1}
               </span>
               <div className="min-w-0">
@@ -1580,7 +1580,7 @@ function AgentPicker({ agents, onPick, onClose }) {
                 data-testid={CHAT.agentOption}
                 className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[#F8FAFC] text-left transition-colors"
               >
-                <div className="size-10 rounded-xl bg-[#EFF6FF] grid place-items-center text-[#2563EB] shrink-0">
+                <div className="size-10 rounded-xl bg-[#EFF6FF] grid place-items-center text-[#1D4ED8] shrink-0">
                   <Icon size={18} />
                 </div>
                 <div className="flex-1 min-w-0">

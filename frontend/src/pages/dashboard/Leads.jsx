@@ -63,11 +63,11 @@ const STATUS_CLS = {
 
 const AVATAR_PALETTE = [
   "#2563EB", // blue
-  "#0EA5E9", // sky
-  "#16A34A", // green
-  "#F59E0B", // amber
-  "#06B6D4", // cyan
-  "#EC4899", // pink
+  "#0369A1", // sky
+  "#15803D", // green
+  "#B45309", // amber
+  "#0E7490", // cyan
+  "#BE185D", // pink
 ];
 
 const KPI_CARDS = [
@@ -349,7 +349,7 @@ export default function Leads() {
                 onClick={() => setView("table")}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] text-[12.5px] font-semibold transition-colors ${
                   view === "table"
-                    ? "bg-[#EFF6FF] text-[#2563EB]"
+                    ? "bg-[#EFF6FF] text-[#1D4ED8]"
                     : "text-[#5B6B82] hover:text-[#0F172A]"
                 }`}
                 data-testid="leads-view-table"
@@ -360,7 +360,7 @@ export default function Leads() {
                 onClick={() => setView("pipeline")}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] text-[12.5px] font-semibold transition-colors ${
                   view === "pipeline"
-                    ? "bg-[#EFF6FF] text-[#2563EB]"
+                    ? "bg-[#EFF6FF] text-[#1D4ED8]"
                     : "text-[#5B6B82] hover:text-[#0F172A]"
                 }`}
                 data-testid="leads-view-pipeline"
@@ -475,7 +475,7 @@ export default function Leads() {
             </div>
             <div className="mt-2.5 flex items-center gap-1.5">
               <span className="size-1.5 rounded-full bg-[#22C55E]" />
-              <span className="text-[11px] text-[#94A3B8]">
+              <span className="text-[11px] text-[#64748B]">
                 Live · across this project
               </span>
             </div>
@@ -503,7 +503,7 @@ export default function Leads() {
               }}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors ${
                 contactFilter === key
-                  ? "bg-[#EFF6FF] text-[#2563EB]"
+                  ? "bg-[#EFF6FF] text-[#1D4ED8]"
                   : "text-[#5B6B82] hover:text-[#0F172A]"
               }`}
               data-testid={`leads-contact-${key}`}
@@ -513,7 +513,7 @@ export default function Leads() {
                 className={`text-[10.5px] leading-none px-1.5 py-0.5 rounded-full ${
                   contactFilter === key
                     ? "bg-[#2563EB] text-white"
-                    : "bg-[#F1F5F9] text-[#94A3B8]"
+                    : "bg-[#F1F5F9] text-[#5B6B82]"
                 }`}
               >
                 {contactCounts[key]}
@@ -682,6 +682,7 @@ export default function Leads() {
             <div className="flex items-center gap-2">
               <div className="relative">
                 <select
+                  aria-label="Rows per page"
                   value={perPage}
                   onChange={(e) => {
                     setPerPage(Number(e.target.value));
@@ -747,6 +748,7 @@ function SelectFilter({
   return (
     <div className="relative">
       <select
+        aria-label={placeholder || testid}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         data-testid={testid}
@@ -1182,7 +1184,7 @@ function LeadDrawer({
               {tags.map((t) => (
                 <span
                   key={t}
-                  className="inline-flex items-center gap-1 text-[11.5px] px-2 py-1 rounded-full bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] font-medium"
+                  className="inline-flex items-center gap-1 text-[11.5px] px-2 py-1 rounded-full bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE] font-medium"
                 >
                   {t}
                   <button
@@ -1385,7 +1387,7 @@ function Pager({ page, total, onChange }) {
         </button>
       ))}
       {pages[pages.length - 1] < total && (
-        <span className="px-1 text-[#94A3B8]">...</span>
+        <span className="px-1 text-[#64748B]">...</span>
       )}
       {pages[pages.length - 1] < total && (
         <button

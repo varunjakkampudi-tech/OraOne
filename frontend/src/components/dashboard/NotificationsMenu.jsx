@@ -38,27 +38,27 @@ function fmtRelative(value) {
 const TYPE_META = {
   agent_created: {
     icon: Bot,
-    tint: "bg-[#EFF6FF] text-[#2563EB]",
+    tint: "bg-[#EFF6FF] text-[#1D4ED8]",
     to: () => "/app/agents",
   },
   agent_deployed: {
     icon: Bot,
-    tint: "bg-[#EFF6FF] text-[#2563EB]",
+    tint: "bg-[#EFF6FF] text-[#1D4ED8]",
     to: () => "/app/agents",
   },
   knowledge_indexed: {
     icon: BookOpen,
-    tint: "bg-[#DCFCE7] text-[#16A34A]",
+    tint: "bg-[#DCFCE7] text-[#166534]",
     to: () => "/app/knowledge-base",
   },
   knowledge_sync: {
     icon: BookOpen,
-    tint: "bg-[#DCFCE7] text-[#16A34A]",
+    tint: "bg-[#DCFCE7] text-[#166534]",
     to: () => "/app/knowledge-base",
   },
   website_crawled: {
     icon: Globe,
-    tint: "bg-[#EFF6FF] text-[#2563EB]",
+    tint: "bg-[#EFF6FF] text-[#1D4ED8]",
     to: () => "/app/websites",
   },
   website_failed: {
@@ -83,24 +83,24 @@ const TYPE_META = {
   },
   conversation: {
     icon: MessagesSquare,
-    tint: "bg-[#DCFCE7] text-[#16A34A]",
+    tint: "bg-[#DCFCE7] text-[#166534]",
     to: (n) =>
       n.resource_id ? `/app/chat/${n.resource_id}` : "/app/conversations",
   },
   new_conversation: {
     icon: MessagesSquare,
-    tint: "bg-[#DCFCE7] text-[#16A34A]",
+    tint: "bg-[#DCFCE7] text-[#166534]",
     to: (n) =>
       n.resource_id ? `/app/chat/${n.resource_id}` : "/app/conversations",
   },
   lead: {
     icon: Users,
-    tint: "bg-[#E0F2FE] text-[#0EA5E9]",
+    tint: "bg-[#E0F2FE] text-[#0369A1]",
     to: () => "/app/leads",
   },
   new_lead: {
     icon: Users,
-    tint: "bg-[#E0F2FE] text-[#0EA5E9]",
+    tint: "bg-[#E0F2FE] text-[#0369A1]",
     to: () => "/app/leads",
   },
   workflow_failed: {
@@ -110,17 +110,17 @@ const TYPE_META = {
   },
   workflow_completed: {
     icon: Workflow,
-    tint: "bg-[#DCFCE7] text-[#16A34A]",
+    tint: "bg-[#DCFCE7] text-[#166534]",
     to: () => "/app/workflows",
   },
   team_invite: {
     icon: Users,
-    tint: "bg-[#EFF6FF] text-[#2563EB]",
+    tint: "bg-[#EFF6FF] text-[#1D4ED8]",
     to: () => "/app/team",
   },
   member_joined: {
     icon: Users,
-    tint: "bg-[#EFF6FF] text-[#2563EB]",
+    tint: "bg-[#EFF6FF] text-[#1D4ED8]",
     to: () => "/app/team",
   },
   payment_failed: {
@@ -233,7 +233,7 @@ export default function NotificationsMenu({ dark = false }) {
     <div className="relative" ref={ref} data-testid="notifications-menu">
       <button
         onClick={() => setOpen((v) => !v)}
-        className={`relative rounded-xl p-2.5 ${dark ? "text-slate-200 hover:bg-white/10" : "text-[#64748B] hover:bg-[#F1F5F9]"}`}
+        className={`relative rounded-xl p-2.5 ${dark ? "text-slate-200 hover:bg-white/10" : "text-[#5B6B82] hover:bg-[#F1F5F9]"}`}
         aria-label="Notifications"
         aria-haspopup="menu"
         aria-expanded={open}

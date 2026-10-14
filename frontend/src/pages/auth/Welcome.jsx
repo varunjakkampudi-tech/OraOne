@@ -49,7 +49,7 @@ export default function Welcome() {
       <div className="mt-8 space-y-5 border-t border-[#EEF0F6] pt-6">
         {STEPS.map((s) => (
           <div key={s.title} className="flex items-start gap-3.5">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EFF6FF] text-[#1D4ED8]">
               <s.icon size={19} />
             </span>
             <div>

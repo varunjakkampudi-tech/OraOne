@@ -353,7 +353,7 @@ export default function Projects() {
                           {p.name}
                         </h3>
                         {p.is_default && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[11px] font-semibold text-[#2563EB]">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[11px] font-semibold text-[#1D4ED8]">
                             <Star size={10} /> Default
                           </span>
                         )}
@@ -388,7 +388,7 @@ export default function Projects() {
 
                   <div className="mt-auto flex items-center gap-2">
                     {active ? (
-                      <span className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#EFF6FF] px-3 py-2 text-sm font-semibold text-[#2563EB]">
+                      <span className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#EFF6FF] px-3 py-2 text-sm font-semibold text-[#1D4ED8]">
                         <Check size={15} /> Active
                       </span>
                     ) : (

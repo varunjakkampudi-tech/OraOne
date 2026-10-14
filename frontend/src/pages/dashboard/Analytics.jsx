@@ -435,7 +435,7 @@ function FeedbackStrip({ feedback }) {
   return (
     <div className="grid grid-cols-3 gap-3">
       <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 flex items-center gap-3">
-        <div className="size-9 rounded-xl bg-[#DCFCE7] grid place-items-center text-[#16A34A]">
+        <div className="size-9 rounded-xl bg-[#DCFCE7] grid place-items-center text-[#166534]">
           <ThumbsUp size={16} />
         </div>
         <div>
@@ -1832,7 +1832,7 @@ export default function Analytics() {
               data-testid={`analytics-tab-${t.key}`}
               className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors ${
                 on
-                  ? "bg-[#EFF6FF] text-[#2563EB]"
+                  ? "bg-[#EFF6FF] text-[#1D4ED8]"
                   : "text-[#475569] hover:bg-[#F8FAFC]"
               }`}
             >

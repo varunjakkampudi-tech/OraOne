@@ -50,7 +50,7 @@ export default function ProductTiles() {
                 className={
                   "rounded-full px-2.5 py-1 text-xs font-medium " +
                   (product.id === 1
-                    ? "bg-[#EFF6FF] text-[#2563EB]"
+                    ? "bg-[#EFF6FF] text-[#1D4ED8]"
                     : "bg-[#F1F5F9] text-[#475569]")
                 }
               >

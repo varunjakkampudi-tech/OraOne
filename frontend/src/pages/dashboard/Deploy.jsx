@@ -382,6 +382,7 @@ export default function Deploy() {
         <div className="flex items-center gap-2">
           {agents.length > 0 && (
             <select
+              aria-label="Agent"
               value={agentId}
               onChange={(e) => setAgentId(e.target.value)}
               className="rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-medium text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
@@ -506,7 +507,7 @@ export default function Deploy() {
                   >
                     <div className="flex items-start gap-3">
                       <div
-                        className={`h-9 w-9 rounded-lg grid place-items-center shrink-0 ${c.enabled ? "bg-[#2563EB] text-white" : "bg-[#F1F5F9] text-[#64748B]"}`}
+                        className={`h-9 w-9 rounded-lg grid place-items-center shrink-0 ${c.enabled ? "bg-[#2563EB] text-white" : "bg-[#F1F5F9] text-[#5B6B82]"}`}
                       >
                         <Icon size={17} />
                       </div>

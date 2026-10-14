@@ -385,7 +385,7 @@ export function ProgressStages({ stages, current = 0 }) {
                       ? "bg-[#2563EB] text-white"
                       : active
                         ? "bg-white border-2 border-[#2563EB] text-[#2563EB] ring-4 ring-[#2563EB]/15"
-                        : "bg-[#F1F5F9] text-[#94A3B8] border border-[#E2E8F0]"
+                        : "bg-[#F1F5F9] text-[#5B6B82] border border-[#E2E8F0]"
                   }`}
                 >
                   {i + 1}

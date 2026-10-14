@@ -225,7 +225,7 @@ export default function TemplatesPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.span
             {...fadeUp}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#2563EB]"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#1D4ED8]"
           >
             <Sparkles size={11} /> AI AGENT TEMPLATES
           </motion.span>
@@ -460,7 +460,7 @@ function PreviewModal({ template, onClose }) {
                   </div>
                   {i < arr.length - 1 && (
                     <div className="flex justify-center">
-                      <ArrowDown size={12} className="text-[#94A3B8]" />
+                      <ArrowDown size={12} className="text-[#64748B]" />
                     </div>
                   )}
                 </React.Fragment>
@@ -481,7 +481,7 @@ function PreviewModal({ template, onClose }) {
                 >
                   <CheckCircle2
                     size={13}
-                    className="text-[#16A34A] mt-0.5 flex-shrink-0"
+                    className="text-[#15803D] mt-0.5 flex-shrink-0"
                   />{" "}
                   {u}
                 </li>

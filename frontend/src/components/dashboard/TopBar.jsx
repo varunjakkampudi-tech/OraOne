@@ -212,7 +212,7 @@ export default function TopBar({ onMenuClick = () => {} }) {
                       action.state ? { state: action.state } : undefined,
                     );
                   }}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#2563EB] hover:bg-[#EFF6FF]"
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#1D4ED8] hover:bg-[#EFF6FF]"
                   role="menuitem"
                 >
                   <Plus size={16} /> {action.label}

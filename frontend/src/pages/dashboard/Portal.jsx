@@ -48,7 +48,7 @@ const ACTIONS = [
     title: "Getting started",
     desc: "A guided checklist from zero to a live assistant.",
     to: "/app/getting-started",
-    accent: "from-[#ECFDF5] to-[#D1FAE5] text-[#16A34A]",
+    accent: "from-[#ECFDF5] to-[#D1FAE5] text-[#15803D]",
   },
   {
     key: "developers",
@@ -64,7 +64,7 @@ const ACTIONS = [
     title: "Product status",
     desc: "Live health of every OraOne service.",
     to: "/app/status",
-    accent: "from-[#ECFDF5] to-[#D1FAE5] text-[#16A34A]",
+    accent: "from-[#ECFDF5] to-[#D1FAE5] text-[#15803D]",
   },
   {
     key: "changelog",

@@ -197,6 +197,7 @@ export default function DataTable({
           {filters.map((f) => (
             <select
               key={f.key}
+              aria-label={f.label || f.key}
               value={activeFilters[f.key] ?? ""}
               onChange={(e) =>
                 setActiveFilters((s) => ({ ...s, [f.key]: e.target.value }))

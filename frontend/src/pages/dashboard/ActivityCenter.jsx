@@ -29,20 +29,20 @@ function fmtRelative(value) {
 }
 
 const ACTION_META = {
-  team_created: { icon: Users2, tint: "bg-[#EFF6FF] text-[#2563EB]" },
-  team_updated: { icon: Users2, tint: "bg-[#EFF6FF] text-[#2563EB]" },
+  team_created: { icon: Users2, tint: "bg-[#EFF6FF] text-[#1D4ED8]" },
+  team_updated: { icon: Users2, tint: "bg-[#EFF6FF] text-[#1D4ED8]" },
   shared: { icon: Share2, tint: "bg-[#ECFEFF] text-[#0891B2]" },
-  commented: { icon: MessageSquare, tint: "bg-[#F0FDF4] text-[#16A34A]" },
+  commented: { icon: MessageSquare, tint: "bg-[#F0FDF4] text-[#166534]" },
   task_created: { icon: CheckSquare, tint: "bg-[#FEF3C7] text-[#B45309]" },
   task_updated: { icon: CheckSquare, tint: "bg-[#FEF3C7] text-[#B45309]" },
 };
 
 const NOTIF_META = {
   mention: { icon: AtSign, tint: "bg-[#FAE8FF] text-[#A21CAF]" },
-  comment: { icon: MessageSquare, tint: "bg-[#F0FDF4] text-[#16A34A]" },
+  comment: { icon: MessageSquare, tint: "bg-[#F0FDF4] text-[#166534]" },
   share: { icon: Share2, tint: "bg-[#ECFEFF] text-[#0891B2]" },
   task_assigned: { icon: CheckSquare, tint: "bg-[#FEF3C7] text-[#B45309]" },
-  team_invite: { icon: Users2, tint: "bg-[#EFF6FF] text-[#2563EB]" },
+  team_invite: { icon: Users2, tint: "bg-[#EFF6FF] text-[#1D4ED8]" },
 };
 
 function ActivityList() {
@@ -233,7 +233,7 @@ function NotificationsList() {
                 {!n.read && (
                   <button
                     onClick={() => markRead(n.id)}
-                    className="shrink-0 rounded-lg px-2 py-1 text-[11px] font-semibold text-[#2563EB] hover:bg-[#EFF6FF]"
+                    className="shrink-0 rounded-lg px-2 py-1 text-[11px] font-semibold text-[#1D4ED8] hover:bg-[#EFF6FF]"
                   >
                     Mark read
                   </button>
@@ -265,7 +265,7 @@ export default function ActivityCenter({ defaultTab = "activity" }) {
       className="mx-auto max-w-3xl space-y-6 p-6"
     >
       <div className="flex items-center gap-3">
-        <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
+        <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#EFF6FF] text-[#1D4ED8]">
           <ActivityIcon className="h-6 w-6" />
         </div>
         <div>

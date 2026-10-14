@@ -171,7 +171,7 @@ export default function PricingPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.span
             {...fadeUp}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#2563EB]"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#1D4ED8]"
           >
             <Sparkles size={12} /> FREE ACCESS · BILLING DISABLED
           </motion.span>
@@ -346,7 +346,7 @@ export default function PricingPage() {
                   {t.cta.label}
                 </Link>
                 <p
-                  className={`mt-3 text-center text-xs ${t.dark ? "text-white/55" : "text-[#94A3B8]"}`}
+                  className={`mt-3 text-center text-xs ${t.dark ? "text-white/55" : "text-[#64748B]"}`}
                 >
                   No payment method required
                 </p>
