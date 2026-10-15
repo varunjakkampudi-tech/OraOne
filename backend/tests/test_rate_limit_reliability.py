@@ -105,6 +105,4 @@ async def test_cognito_subject_requires_verified_token(monkeypatch):
 
     monkeypatch.setattr(jwt_auth, "verify_cognito_access_token", verified)
     request = _request(headers=[(b"authorization", b"Bearer signed-cognito")])
-    assert (
-        await rate_limit._verified_caller_id(request) == "user:verified-cognito-user"
-    )
+    assert await rate_limit._verified_caller_id(request) == "user:verified-cognito-user"
