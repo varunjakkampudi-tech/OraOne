@@ -205,7 +205,7 @@ export default function GettingStarted() {
               <p className="text-sm font-bold text-[#0F172A]">
                 {allDone ? "You're all set up! 🎉" : "Setup progress"}
               </p>
-              <p className="text-xs text-[#64748B]">
+              <p className="text-xs text-[#5B6B82]">
                 {allDone
                   ? "Every essential step is complete. Your assistant is ready for customers."
                   : `${doneCount} of ${total} essential steps complete`}
@@ -236,7 +236,7 @@ export default function GettingStarted() {
                 className={
                   "grid size-11 shrink-0 place-items-center rounded-2xl ring-1 " +
                   (step.done
-                    ? "bg-[#DCFCE7] text-[#15803D] ring-[#BBF7D0]"
+                    ? "bg-[#DCFCE7] text-[#166534] ring-[#BBF7D0]"
                     : "bg-[#EFF4FF] text-[#2563EB] ring-[#E0E7FF]")
                 }
               >
@@ -251,14 +251,14 @@ export default function GettingStarted() {
                   {step.optional && <Badge tone="slate">Optional</Badge>}
                   {step.done && <Badge tone="green">Done</Badge>}
                 </div>
-                <p className="mt-0.5 text-xs leading-snug text-[#64748B]">
+                <p className="mt-0.5 text-xs leading-snug text-[#5B6B82]">
                   {step.desc}
                 </p>
               </div>
 
               <div className="shrink-0">
                 {step.done ? (
-                  <CheckCircle2 size={22} className="text-[#16A34A]" />
+                  <CheckCircle2 size={22} className="text-[#15803D]" />
                 ) : (
                   <GhostButton
                     as={Link}
@@ -275,7 +275,7 @@ export default function GettingStarted() {
         })}
       </div>
 
-      <p className="flex items-center gap-2 px-1 text-xs text-[#94A3B8]">
+      <p className="flex items-center gap-2 px-1 text-xs text-[#5B6B82]">
         <Circle size={12} />
         Progress updates automatically as you complete each step.
       </p>

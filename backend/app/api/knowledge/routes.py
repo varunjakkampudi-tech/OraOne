@@ -64,7 +64,12 @@ from app.schemas.knowledge import (
 from app.services import storage
 from app.services import usage_service
 from app.services.audit import audit
-from app.services.document_processing import compute_checksum, process_document
+from app.services.document_processing import (
+    compute_checksum,
+    process_document,
+    validate_upload,
+)
+from app.middleware.org_context import require_permission
 
 
 def _doc_to_read(
@@ -178,6 +183,7 @@ async def _chunk_counts_for_doc(
         "Creates an empty knowledge base. Documents are attached later via "
         "`POST /api/documents/upload`. Defaults `status` to `draft`."
     ),
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def create_knowledge_base(
     payload: KnowledgeBaseCreate,
@@ -315,6 +321,7 @@ async def get_knowledge_base(
     response_model=KnowledgeBaseRead,
     summary="Update a knowledge base",
     description="Partial update — any omitted field is left unchanged.",
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def update_knowledge_base(
     kb_id: uuid.UUID,
@@ -403,6 +410,7 @@ _DEFAULT_MAX_BYTES = 25 * 1024 * 1024  # 25 MiB
         "created in `pending` status — chunking + embedding happen in a "
         "later phase."
     ),
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def upload_document(
     background_tasks: BackgroundTasks,
@@ -445,8 +453,14 @@ async def upload_document(
 
     from io import BytesIO
 
-    checksum = compute_checksum(body)
     filename = file.filename or "upload.bin"
+    try:
+        validate_upload(filename, body)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=str(exc)
+        ) from exc
+    checksum = compute_checksum(body)
 
     # ── Duplicate / version detection ──
     # Identical bytes already present in this KB → dedup (return existing).
@@ -642,6 +656,7 @@ async def get_document(
         "`/chunks` for progress. Reprocessing wipes any existing chunks "
         "for this document and rebuilds them from the source file."
     ),
+    dependencies=[Depends(require_permission("kb.write"))],
 )
 async def process_document_endpoint(
     document_id: uuid.UUID,

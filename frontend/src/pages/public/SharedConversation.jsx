@@ -50,7 +50,7 @@ export default function SharedConversation() {
             </span>
             OraOne
           </Link>
-          <span className="text-[11px] px-2 py-1 rounded-full bg-[#F1F5F9] text-[#64748B]">
+          <span className="text-[11px] px-2 py-1 rounded-full bg-[#F1F5F9] text-[#5B6B82]">
             Shared transcript
           </span>
         </div>
@@ -58,12 +58,12 @@ export default function SharedConversation() {
 
       <main className="max-w-3xl mx-auto px-4 py-8">
         {state.loading ? (
-          <div className="grid place-items-center py-24 text-[#64748B]">
+          <div className="grid place-items-center py-24 text-[#5B6B82]">
             <Loader2 size={26} className="animate-spin" />
           </div>
         ) : state.error ? (
           <div className="grid place-items-center py-24 text-center">
-            <MessageSquare size={32} className="text-[#94A3B8]" />
+            <MessageSquare size={32} className="text-[#5B6B82]" />
             <p className="mt-3 text-sm text-[#334155]">{state.error}</p>
             <Link
               to="/"
@@ -78,7 +78,7 @@ export default function SharedConversation() {
               <h1 className="text-xl font-bold text-[#0F172A]">
                 {state.data.title || "Conversation"}
               </h1>
-              <p className="mt-1 text-sm text-[#64748B]">
+              <p className="mt-1 text-sm text-[#5B6B82]">
                 {state.data.agent_name
                   ? `with ${state.data.agent_name}`
                   : "AI conversation"}
@@ -94,7 +94,7 @@ export default function SharedConversation() {
                 if (m.role === "system") {
                   return (
                     <div key={i} className="flex justify-center">
-                      <span className="px-3 py-1 rounded-full bg-[#F1F5F9] text-[11px] text-[#64748B]">
+                      <span className="px-3 py-1 rounded-full bg-[#F1F5F9] text-[11px] text-[#5B6B82]">
                         {m.content}
                       </span>
                     </div>
@@ -127,14 +127,14 @@ export default function SharedConversation() {
                 );
               })}
               {(state.data.messages || []).length === 0 && (
-                <p className="text-center text-sm text-[#94A3B8] py-12">
+                <p className="text-center text-sm text-[#5B6B82] py-12">
                   This conversation has no messages yet.
                 </p>
               )}
             </div>
 
             <div className="mt-10 pt-6 border-t border-[#E2E8F0] text-center">
-              <p className="text-xs text-[#94A3B8]">
+              <p className="text-xs text-[#5B6B82]">
                 Powered by{" "}
                 <Link
                   to="/"

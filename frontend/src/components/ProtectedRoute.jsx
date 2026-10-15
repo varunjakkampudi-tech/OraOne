@@ -20,7 +20,7 @@ export function ProtectedRoute({ children }) {
         className="min-h-screen grid place-items-center bg-[#F8FAFC]"
         data-testid="protected-route-auth-loading"
       >
-        <div className="flex items-center gap-3 text-[#64748B] text-sm">
+        <div className="flex items-center gap-3 text-[#5B6B82] text-sm">
           <span className="size-2 rounded-full bg-[#2563EB] animate-pulse" />
           Loading your session…
         </div>
@@ -40,7 +40,7 @@ export function ProtectedRoute({ children }) {
         className="min-h-screen grid place-items-center bg-[#F8FAFC]"
         data-testid="protected-route-identity-loading"
       >
-        <div className="flex items-center gap-3 text-[#64748B] text-sm">
+        <div className="flex items-center gap-3 text-[#5B6B82] text-sm">
           <span className="size-2 rounded-full bg-[#2563EB] animate-pulse" />
           Loading your workspace…
         </div>
@@ -59,7 +59,7 @@ export function ProtectedRoute({ children }) {
           <h1 className="text-lg font-semibold text-[#0F172A]">
             Couldn&apos;t load your workspace
           </h1>
-          <p className="text-sm text-[#64748B] leading-relaxed">
+          <p className="text-sm text-[#5B6B82] leading-relaxed">
             {identityError}
           </p>
           <button
@@ -91,7 +91,7 @@ export function GuestRoute({ children }) {
         className="min-h-screen grid place-items-center bg-[#F8FAFC]"
         data-testid="guest-route-auth-loading"
       >
-        <div className="flex items-center gap-3 text-[#64748B] text-sm">
+        <div className="flex items-center gap-3 text-[#5B6B82] text-sm">
           <span className="size-2 rounded-full bg-[#2563EB] animate-pulse" />
           Loading…
         </div>
@@ -119,7 +119,7 @@ function SessionRetry({ message, onRetry }) {
         <h1 className="text-lg font-semibold text-[#0F172A]">
           Couldn’t verify your session
         </h1>
-        <p className="text-sm text-[#64748B]">{message}</p>
+        <p className="text-sm text-[#5B6B82]">{message}</p>
         <button
           type="button"
           onClick={onRetry}

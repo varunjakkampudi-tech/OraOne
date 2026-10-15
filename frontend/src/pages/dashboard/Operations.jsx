@@ -111,7 +111,7 @@ function HealthTab() {
           <span className="text-sm font-bold capitalize text-[#0F172A]">
             {health?.status || "unknown"}
           </span>
-          <span className="text-[12px] text-[#94A3B8]">
+          <span className="text-[12px] text-[#5B6B82]">
             v{health?.version} · up{" "}
             {Math.floor((health?.uptime_seconds || 0) / 60)}m
           </span>
@@ -141,7 +141,7 @@ function HealthTab() {
               <p className="mt-3 text-sm font-semibold capitalize text-[#0F172A]">
                 {c.component.replace(/_/g, " ")}
               </p>
-              <p className="text-[12px] capitalize text-[#64748B]">
+              <p className="text-[12px] capitalize text-[#5B6B82]">
                 {c.status}
                 {c.latency_ms != null ? ` · ${c.latency_ms}ms` : ""}
               </p>
@@ -174,7 +174,7 @@ function MetricCard({ label, value, tone }) {
   const valCls = tone === "warn" ? "text-[#C2410C]" : "text-[#0F172A]";
   return (
     <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4">
-      <p className="text-[12px] font-medium text-[#64748B]">{label}</p>
+      <p className="text-[12px] font-medium text-[#5B6B82]">{label}</p>
       <p className={`mt-1 text-2xl font-bold tabular-nums ${valCls}`}>
         {value}
       </p>
@@ -253,7 +253,7 @@ function ScannerTab() {
           <div className="grid h-full place-items-center text-center">
             <div>
               <ScanLine className="mx-auto h-8 w-8 text-[#CBD5E1]" />
-              <p className="mt-2 text-sm text-[#94A3B8]">
+              <p className="mt-2 text-sm text-[#5B6B82]">
                 Run a scan to see results.
               </p>
             </div>
@@ -263,7 +263,7 @@ function ScannerTab() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {result.safe ? (
-                  <CheckCircle2 className="h-5 w-5 text-[#16A34A]" />
+                  <CheckCircle2 className="h-5 w-5 text-[#15803D]" />
                 ) : (
                   <AlertTriangle className="h-5 w-5 text-[#C2410C]" />
                 )}
@@ -326,14 +326,14 @@ function ScanRow({ label, flagged, detail }) {
         {flagged ? (
           <XCircle className="h-4 w-4 text-[#DC2626]" />
         ) : (
-          <CheckCircle2 className="h-4 w-4 text-[#16A34A]" />
+          <CheckCircle2 className="h-4 w-4 text-[#15803D]" />
         )}
         <span className="text-[13px] font-semibold text-[#0F172A]">
           {label}
         </span>
       </div>
       <span
-        className={`text-right text-[12px] ${flagged ? "text-[#C2410C]" : "text-[#94A3B8]"}`}
+        className={`text-right text-[12px] ${flagged ? "text-[#C2410C]" : "text-[#5B6B82]"}`}
       >
         {detail}
       </span>
@@ -366,7 +366,7 @@ function EventsTab() {
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
         {Object.keys(bySeverity).length === 0 ? (
-          <span className="text-[12px] text-[#94A3B8]">
+          <span className="text-[12px] text-[#5B6B82]">
             No security events recorded.
           </span>
         ) : (
@@ -381,14 +381,14 @@ function EventsTab() {
         )}
       </div>
       {events.length === 0 ? (
-        <p className="py-12 text-center text-sm text-[#94A3B8]">
+        <p className="py-12 text-center text-sm text-[#5B6B82]">
           No events to show.
         </p>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#E2E8F0] text-left text-[11px] uppercase tracking-wide text-[#94A3B8]">
+              <tr className="border-b border-[#E2E8F0] text-left text-[11px] uppercase tracking-wide text-[#5B6B82]">
                 <th className="px-4 py-2.5 font-semibold">Severity</th>
                 <th className="px-4 py-2.5 font-semibold">Event</th>
                 <th className="px-4 py-2.5 font-semibold">Title</th>
@@ -408,7 +408,7 @@ function EventsTab() {
                     {e.event_type}
                   </td>
                   <td className="px-4 py-2.5 text-[#0F172A]">{e.title}</td>
-                  <td className="px-4 py-2.5 text-[12px] text-[#64748B]">
+                  <td className="px-4 py-2.5 text-[12px] text-[#5B6B82]">
                     {fmtRelative(e.created_at)}
                   </td>
                 </tr>
@@ -444,7 +444,7 @@ function AuditTab() {
   if (loading) return <TabSpinner />;
   if (!entries.length)
     return (
-      <p className="py-12 text-center text-sm text-[#94A3B8]">
+      <p className="py-12 text-center text-sm text-[#5B6B82]">
         No audit entries.
       </p>
     );
@@ -453,7 +453,7 @@ function AuditTab() {
     <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[#E2E8F0] text-left text-[11px] uppercase tracking-wide text-[#94A3B8]">
+          <tr className="border-b border-[#E2E8F0] text-left text-[11px] uppercase tracking-wide text-[#5B6B82]">
             <th className="px-4 py-2.5 font-semibold">Action</th>
             <th className="px-4 py-2.5 font-semibold">Resource</th>
             <th className="px-4 py-2.5 font-semibold">When</th>
@@ -470,7 +470,7 @@ function AuditTab() {
               <td className="px-4 py-2.5 text-[#0F172A]">
                 {a.resource}
                 {a.resource_id ? (
-                  <span className="text-[#94A3B8]">
+                  <span className="text-[#5B6B82]">
                     {" "}
                     · {a.resource_id.slice(0, 8)}
                   </span>
@@ -478,7 +478,7 @@ function AuditTab() {
                   ""
                 )}
               </td>
-              <td className="px-4 py-2.5 text-[12px] text-[#64748B]">
+              <td className="px-4 py-2.5 text-[12px] text-[#5B6B82]">
                 {fmtRelative(a.created_at)}
               </td>
             </tr>
@@ -541,7 +541,7 @@ function FlagsTab({ canManage }) {
         </div>
       )}
       {flags.length === 0 ? (
-        <p className="py-12 text-center text-sm text-[#94A3B8]">
+        <p className="py-12 text-center text-sm text-[#64748B]">
           No feature flags yet.
         </p>
       ) : (
@@ -556,19 +556,19 @@ function FlagsTab({ canManage }) {
                   <p className="font-mono text-sm font-semibold text-[#0F172A]">
                     {f.name}
                   </p>
-                  <span className="rounded bg-[#F1F5F9] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#64748B]">
+                  <span className="rounded bg-[#F1F5F9] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#5B6B82]">
                     {f.environment}
                   </span>
-                  <span className="rounded bg-[#F1F5F9] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#64748B]">
+                  <span className="rounded bg-[#F1F5F9] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#5B6B82]">
                     {f.scope}
                   </span>
                 </div>
                 {f.description && (
-                  <p className="mt-0.5 text-[12px] text-[#64748B]">
+                  <p className="mt-0.5 text-[12px] text-[#5B6B82]">
                     {f.description}
                   </p>
                 )}
-                <p className="mt-0.5 text-[11px] text-[#94A3B8]">
+                <p className="mt-0.5 text-[11px] text-[#5B6B82]">
                   Rollout {f.rollout_percentage}%
                 </p>
               </div>
@@ -646,7 +646,7 @@ function CreateFlagModal({ onClose, onCreated }) {
           <h2 className="text-lg font-bold text-[#0F172A]">New feature flag</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]"
+            className="rounded-lg p-1 text-[#5B6B82] hover:bg-[#F1F5F9]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -742,13 +742,13 @@ function ReadinessTab() {
     <div className="space-y-5">
       <div className="flex items-center gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-5">
         <div className="grid h-16 w-16 place-items-center rounded-2xl bg-[#F0FDF4]">
-          <span className="text-xl font-bold text-[#16A34A]">
+          <span className="text-xl font-bold text-[#15803D]">
             {data?.score ?? 0}%
           </span>
         </div>
         <div>
           <p className="text-sm font-bold text-[#0F172A]">Release readiness</p>
-          <p className="text-[13px] text-[#64748B]">
+          <p className="text-[13px] text-[#5B6B82]">
             {data?.passed}/{data?.total} checks passing · v{data?.version}
           </p>
         </div>
@@ -760,13 +760,13 @@ function ReadinessTab() {
             className="flex items-start gap-3 rounded-2xl border border-[#E2E8F0] bg-white p-4"
           >
             {it.status === "pass" ? (
-              <CheckCircle2 className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[#16A34A]" />
+              <CheckCircle2 className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[#15803D]" />
             ) : (
               <AlertTriangle className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[#C2410C]" />
             )}
             <div className="min-w-0">
               <p className="text-sm font-semibold text-[#0F172A]">{it.area}</p>
-              <p className="text-[12px] text-[#64748B]">{it.detail}</p>
+              <p className="text-[12px] text-[#5B6B82]">{it.detail}</p>
             </div>
           </div>
         ))}
@@ -800,7 +800,7 @@ function DeploymentsTab({ canManage }) {
   if (loading) return <TabSpinner />;
 
   const statusStyle = {
-    succeeded: "bg-[#DCFCE7] text-[#16A34A]",
+    succeeded: "bg-[#DCFCE7] text-[#166534]",
     failed: "bg-[#FEE2E2] text-[#DC2626]",
     rolled_back: "bg-[#FEF3C7] text-[#B45309]",
     in_progress: "bg-[#EEF2FF] text-[#4F46E5]",
@@ -820,7 +820,7 @@ function DeploymentsTab({ canManage }) {
         </div>
       )}
       {items.length === 0 ? (
-        <p className="py-12 text-center text-sm text-[#94A3B8]">
+        <p className="py-12 text-center text-sm text-[#64748B]">
           No deployments recorded.
         </p>
       ) : (
@@ -838,12 +838,12 @@ function DeploymentsTab({ canManage }) {
                   <p className="font-mono text-sm font-bold text-[#0F172A]">
                     v{d.version}
                   </p>
-                  <span className="rounded bg-[#F1F5F9] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#64748B]">
+                  <span className="rounded bg-[#F1F5F9] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#5B6B82]">
                     {d.environment}
                   </span>
                 </div>
                 {d.notes && (
-                  <p className="mt-0.5 truncate text-[12px] text-[#64748B]">
+                  <p className="mt-0.5 truncate text-[12px] text-[#5B6B82]">
                     {d.notes}
                   </p>
                 )}
@@ -853,7 +853,7 @@ function DeploymentsTab({ canManage }) {
               >
                 {String(d.status).replace(/_/g, " ")}
               </span>
-              <span className="shrink-0 text-[11px] text-[#94A3B8]">
+              <span className="shrink-0 text-[11px] text-[#5B6B82]">
                 {fmtRelative(d.created_at)}
               </span>
             </div>
@@ -914,7 +914,7 @@ function RecordDeployModal({ onClose, onCreated }) {
           </h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]"
+            className="rounded-lg p-1 text-[#5B6B82] hover:bg-[#F1F5F9]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -1044,7 +1044,7 @@ export default function Operations() {
           <h1 className="text-xl font-bold text-[#0F172A]">
             Operations & Security
           </h1>
-          <p className="text-sm text-[#64748B]">
+          <p className="text-sm text-[#5B6B82]">
             System health, security scanning, audit trail, feature flags and
             release readiness.
           </p>

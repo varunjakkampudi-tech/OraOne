@@ -526,14 +526,14 @@ export default function DocumentationPage() {
             transition={{ duration: 0.5 }}
             className="max-w-3xl"
           >
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFF6FF] text-[11px] font-semibold tracking-[0.2em] text-[#2563EB]">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFF6FF] text-[11px] font-semibold tracking-[0.2em] text-[#1D4ED8]">
               <BookOpen size={11} /> DOCUMENTATION
             </span>
             <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter text-[#0F172A] leading-[1.04]">
               Build, ship and scale with{" "}
               <span className="text-[#2563EB]">OraOne</span>.
             </h1>
-            <p className="mt-4 text-base sm:text-lg text-[#64748B] leading-relaxed">
+            <p className="mt-4 text-base sm:text-lg text-[#5B6B82] leading-relaxed">
               Quick starts, product guides, API references, integration
               playbooks and everything else your team needs to take an AI agent
               from zero to production.
@@ -562,7 +562,7 @@ export default function DocumentationPage() {
           {/* sidebar */}
           <aside className="hidden lg:block">
             <nav className="sticky top-24 space-y-1" data-testid="doc-sidebar">
-              <p className="text-[11px] font-semibold tracking-[0.2em] text-[#94A3B8] uppercase mb-3 px-3">
+              <p className="text-[11px] font-semibold tracking-[0.2em] text-[#5B6B82] uppercase mb-3 px-3">
                 On this page
               </p>
               {NAV.map((n) => {
@@ -574,7 +574,7 @@ export default function DocumentationPage() {
                     data-testid={`doc-nav-${n.id}`}
                     className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all ${
                       isActive
-                        ? "bg-[#EFF6FF] text-[#2563EB] font-semibold"
+                        ? "bg-[#EFF6FF] text-[#1D4ED8] font-semibold"
                         : "text-[#475569] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                     }`}
                   >
@@ -613,14 +613,14 @@ export default function DocumentationPage() {
                       <span className="text-[11px] font-bold tracking-[0.2em] text-[#2563EB]">
                         STEP {s.n}
                       </span>
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#5B6B82] bg-[#F1F5F9] px-2 py-0.5 rounded-full">
                         <Clock size={10} /> {s.time}
                       </span>
                     </div>
                     <h3 className="mt-2 text-[15px] font-semibold text-[#0F172A]">
                       {s.title}
                     </h3>
-                    <p className="mt-1.5 text-[13.5px] text-[#64748B] leading-relaxed">
+                    <p className="mt-1.5 text-[13.5px] text-[#5B6B82] leading-relaxed">
                       {s.desc}
                     </p>
                   </motion.div>
@@ -652,7 +652,7 @@ export default function DocumentationPage() {
                       className={`relative inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
                         isActive
                           ? "text-[#2563EB]"
-                          : "text-[#64748B] hover:text-[#0F172A]"
+                          : "text-[#5B6B82] hover:text-[#0F172A]"
                       }`}
                     >
                       <span
@@ -700,7 +700,7 @@ export default function DocumentationPage() {
                         {topic.title}
                       </h4>
                     </div>
-                    <p className="mt-2.5 text-[13.5px] text-[#64748B] leading-relaxed">
+                    <p className="mt-2.5 text-[13.5px] text-[#5B6B82] leading-relaxed">
                       {topic.desc}
                     </p>
                   </div>
@@ -759,7 +759,7 @@ export default function DocumentationPage() {
                           <span
                             className={`px-2 py-0.5 rounded-md text-[10.5px] font-bold tracking-wider ${
                               e.method === "POST"
-                                ? "bg-[#DCFCE7] text-[#15803D]"
+                                ? "bg-[#DCFCE7] text-[#166534]"
                                 : e.method === "GET"
                                   ? "bg-[#DBEAFE] text-[#1D4ED8]"
                                   : "bg-[#F1F5F9] text-[#475569]"
@@ -775,7 +775,7 @@ export default function DocumentationPage() {
                       <h4 className="mt-2 text-lg font-bold text-[#0F172A]">
                         {e.title}
                       </h4>
-                      <p className="mt-1 text-[13.5px] text-[#64748B]">
+                      <p className="mt-1 text-[13.5px] text-[#5B6B82]">
                         {e.desc}
                       </p>
                     </div>
@@ -821,14 +821,14 @@ export default function DocumentationPage() {
                             <h4 className="text-[14.5px] font-semibold text-[#0F172A]">
                               {it.name}
                             </h4>
-                            <p className="text-[12.5px] text-[#64748B] mt-0.5">
+                            <p className="text-[12.5px] text-[#5B6B82] mt-0.5">
                               {it.desc}
                             </p>
                           </div>
                         </div>
                         <ChevronDown
                           size={18}
-                          className={`text-[#94A3B8] transition-transform ${isOpen ? "rotate-180" : ""}`}
+                          className={`text-[#5B6B82] transition-transform ${isOpen ? "rotate-180" : ""}`}
                         />
                       </button>
                       {isOpen && (
@@ -868,7 +868,7 @@ export default function DocumentationPage() {
                                   key={idx}
                                   className="flex gap-2.5 text-[13.5px] text-[#475569]"
                                 >
-                                  <span className="flex-shrink-0 size-5 rounded-full bg-[#EFF6FF] text-[#2563EB] text-[11px] font-bold grid place-items-center">
+                                  <span className="flex-shrink-0 size-5 rounded-full bg-[#EFF6FF] text-[#1D4ED8] text-[11px] font-bold grid place-items-center">
                                     {idx + 1}
                                   </span>
                                   <span>{step}</span>
@@ -907,7 +907,7 @@ export default function DocumentationPage() {
                     <h4 className="mt-3.5 text-[14.5px] font-semibold text-[#0F172A]">
                       {s.title}
                     </h4>
-                    <p className="mt-1.5 text-[13px] text-[#64748B] leading-relaxed">
+                    <p className="mt-1.5 text-[13px] text-[#5B6B82] leading-relaxed">
                       {s.desc}
                     </p>
                   </div>
@@ -931,7 +931,7 @@ export default function DocumentationPage() {
               <div className="mt-6 relative max-w-xl">
                 <Search
                   size={16}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5B6B82] pointer-events-none"
                 />
                 <input
                   type="text"
@@ -947,7 +947,7 @@ export default function DocumentationPage() {
                 {filteredFaqs.length === 0 && (
                   <p
                     data-testid="faq-empty"
-                    className="text-sm text-[#64748B] py-4"
+                    className="text-sm text-[#5B6B82] py-4"
                   >
                     No results for &quot;{faqQuery}&quot;. Try a different
                     phrase or contact support.
@@ -970,7 +970,7 @@ export default function DocumentationPage() {
                         </span>
                         <ChevronDown
                           size={16}
-                          className={`flex-shrink-0 text-[#94A3B8] transition-transform ${
+                          className={`flex-shrink-0 text-[#5B6B82] transition-transform ${
                             isOpen ? "rotate-180" : ""
                           }`}
                         />
@@ -1055,11 +1055,11 @@ export default function DocumentationPage() {
                         <p className="text-[13.5px] text-[#0F172A]">
                           {i.title}
                         </p>
-                        <p className="text-[11.5px] text-[#94A3B8] mt-0.5">
+                        <p className="text-[11.5px] text-[#5B6B82] mt-0.5">
                           {i.date}
                         </p>
                       </div>
-                      <span className="text-[11px] font-semibold text-[#15803D] bg-[#DCFCE7] px-2 py-0.5 rounded-full">
+                      <span className="text-[11px] font-semibold text-[#166534] bg-[#DCFCE7] px-2 py-0.5 rounded-full">
                         {i.status}
                       </span>
                     </li>
@@ -1114,7 +1114,7 @@ function SectionHeader({ eyebrow, title, subtitle }) {
       <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-[#0F172A] leading-tight">
         {title}
       </h2>
-      <p className="mt-2 text-[14.5px] text-[#64748B] leading-relaxed">
+      <p className="mt-2 text-[14.5px] text-[#5B6B82] leading-relaxed">
         {subtitle}
       </p>
     </div>
@@ -1134,7 +1134,7 @@ function SupportCard({ icon: Icon, title, desc, cta, href, testid }) {
       <h4 className="mt-3.5 text-[14.5px] font-semibold text-[#0F172A]">
         {title}
       </h4>
-      <p className="mt-1.5 text-[13px] text-[#64748B] leading-relaxed">
+      <p className="mt-1.5 text-[13px] text-[#5B6B82] leading-relaxed">
         {desc}
       </p>
       <span className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#2563EB] group-hover:gap-2 transition-all">

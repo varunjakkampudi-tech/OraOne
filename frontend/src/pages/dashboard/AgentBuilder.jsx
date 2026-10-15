@@ -249,7 +249,7 @@ export default function AgentBuilder() {
     <div>
       <button
         onClick={() => nav("/app/agents")}
-        className="text-sm text-[#64748B] hover:text-[#0F172A] inline-flex items-center gap-1.5 mb-4"
+        className="text-sm text-[#5B6B82] hover:text-[#0F172A] inline-flex items-center gap-1.5 mb-4"
       >
         <ArrowLeft size={14} /> Back to Agents
       </button>
@@ -259,7 +259,7 @@ export default function AgentBuilder() {
           <h2 className="text-2xl font-bold tracking-tight text-[#0F172A]">
             {agent.name}
           </h2>
-          <p className="text-sm text-[#64748B] mt-0.5 capitalize">
+          <p className="text-sm text-[#5B6B82] mt-0.5 capitalize">
             {agent.type} Agent · {agent.status}
           </p>
         </div>
@@ -296,7 +296,7 @@ export default function AgentBuilder() {
                   "min-h-11 border-b-2 px-4 py-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:text-[#94A3B8] " +
                   (tab === t.key
                     ? "border-[#2563EB] text-[#2563EB]"
-                    : "border-transparent text-[#64748B] hover:text-[#0F172A]")
+                    : "border-transparent text-[#5B6B82] hover:text-[#0F172A]")
                 }
               >
                 {t.label}
@@ -363,7 +363,7 @@ export default function AgentBuilder() {
                     onChange={(e) => set("website_url", e.target.value)}
                     placeholder="https://yourwebsite.com"
                   />
-                  <p className="mt-1.5 text-[12.5px] text-[#64748B]">
+                  <p className="mt-1.5 text-[12.5px] text-[#5B6B82]">
                     We'll automatically crawl this site into your Knowledge Base
                     when you deploy, so the agent answers from your real
                     content.
@@ -447,7 +447,7 @@ export default function AgentBuilder() {
                 <h3 className="text-lg font-semibold text-[#0F172A]">
                   Review & Deploy
                 </h3>
-                <p className="text-sm text-[#64748B] mt-1">
+                <p className="text-sm text-[#5B6B82] mt-1">
                   Make sure everything looks good before going live.
                 </p>
                 <div className="mt-6 grid sm:grid-cols-2 gap-4 text-sm">
@@ -537,7 +537,7 @@ export default function AgentBuilder() {
                       <span
                         className={`grid size-8 shrink-0 place-items-center rounded-full ${
                           done
-                            ? "bg-[#DCFCE7] text-[#16A34A]"
+                            ? "bg-[#DCFCE7] text-[#166534]"
                             : active
                               ? "bg-[#EFF4FF] text-[#2563EB]"
                               : "bg-[#F1F5F9] text-[#CBD5E1]"
@@ -552,7 +552,7 @@ export default function AgentBuilder() {
                         )}
                       </span>
                       <span
-                        className={`text-sm font-medium ${done || active ? "text-[#0F172A]" : "text-[#94A3B8]"}`}
+                        className={`text-sm font-medium ${done || active ? "text-[#0F172A]" : "text-[#5B6B82]"}`}
                       >
                         {s.label}
                       </span>
@@ -602,7 +602,7 @@ function ModelField({ agent, models, onChange }) {
           </option>
         ))}
       </select>
-      <p className="mt-1.5 text-[12.5px] text-[#64748B]">
+      <p className="mt-1.5 text-[12.5px] text-[#5B6B82]">
         Choose the model that powers this agent. You can change it any time.
       </p>
     </Field>
@@ -612,7 +612,7 @@ function ModelField({ agent, models, onChange }) {
 function Row({ label, value }) {
   return (
     <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-      <p className="text-xs text-[#64748B]">{label}</p>
+      <p className="text-xs text-[#5B6B82]">{label}</p>
       <p className="text-sm font-medium text-[#0F172A] mt-0.5">
         {value || "—"}
       </p>
@@ -625,7 +625,7 @@ function SaveStatus({ state }) {
   if (state === "saving")
     return (
       <span
-        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#64748B]"
+        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#5B6B82]"
         data-testid="agent-save-status"
       >
         <Loader2 size={13} className="animate-spin" /> Saving…
@@ -634,7 +634,7 @@ function SaveStatus({ state }) {
   if (state === "saved")
     return (
       <span
-        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#16A34A]"
+        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#15803D]"
         data-testid="agent-save-status"
       >
         <Check size={13} /> Saved
@@ -642,7 +642,7 @@ function SaveStatus({ state }) {
     );
   return (
     <span
-      className="text-[12px] font-medium text-[#94A3B8] select-none"
+      className="text-[12px] font-medium text-[#5B6B82] select-none"
       data-testid="agent-save-status"
     >
       Auto-saved
@@ -748,7 +748,7 @@ function KnowledgeStep({ agentName }) {
         <h3 className="text-lg font-semibold text-[#0F172A]">
           Knowledge Source
         </h3>
-        <p className="text-sm text-[#64748B] mt-1">
+        <p className="text-sm text-[#5B6B82] mt-1">
           Upload documents your agent will answer from. Files are added right
           here.
         </p>
@@ -783,7 +783,7 @@ function KnowledgeStep({ agentName }) {
         }}
         className={`p-10 rounded-2xl border border-dashed text-center transition-colors ${drag ? "border-[#2563EB] bg-[#EFF6FF]" : "border-[#CBD5E1] bg-[#F8FAFC]"}`}
       >
-        <UploadCloud size={28} className="mx-auto text-[#94A3B8]" />
+        <UploadCloud size={28} className="mx-auto text-[#5B6B82]" />
         <p className="text-sm text-[#475569] mt-3">
           Drag &amp; drop PDF, DOCX or TXT files here
         </p>
@@ -821,16 +821,16 @@ function KnowledgeStep({ agentName }) {
               key={d.id}
               className="flex items-center gap-3 p-3 rounded-xl border border-[#E2E8F0] bg-white"
             >
-              <FileText size={16} className="text-[#64748B] shrink-0" />
+              <FileText size={16} className="text-[#5B6B82] shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-[#0F172A] truncate">
                   {d.filename}
                 </p>
-                <p className="text-xs text-[#94A3B8] capitalize">{d.status}</p>
+                <p className="text-xs text-[#5B6B82] capitalize">{d.status}</p>
               </div>
               <button
                 onClick={() => removeDoc(d)}
-                className="p-1.5 rounded-lg text-[#94A3B8] hover:text-red-600 hover:bg-red-50"
+                className="p-1.5 rounded-lg text-[#5B6B82] hover:text-red-600 hover:bg-red-50"
               >
                 <Trash2 size={14} />
               </button>
@@ -887,7 +887,7 @@ function IntegrationsStep() {
     <div className="space-y-5">
       <div>
         <h3 className="text-lg font-semibold text-[#0F172A]">Integrations</h3>
-        <p className="text-sm text-[#64748B] mt-1">
+        <p className="text-sm text-[#5B6B82] mt-1">
           Connect tools your agent will use — right here.
         </p>
       </div>
@@ -915,12 +915,12 @@ function IntegrationsStep() {
                   <p className="text-sm font-medium text-[#0F172A] truncate">
                     {e.catalog.name}
                   </p>
-                  <p className="text-xs text-[#94A3B8] truncate">
+                  <p className="text-xs text-[#5B6B82] truncate">
                     {e.catalog.description}
                   </p>
                 </div>
                 {connected ? (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#16A34A] shrink-0">
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#15803D] shrink-0">
                     <Check size={13} /> Connected
                   </span>
                 ) : (

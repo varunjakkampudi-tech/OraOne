@@ -268,7 +268,7 @@ export default function Agents() {
                 <p className="truncate font-semibold text-[#0F172A]">
                   {a.name}
                 </p>
-                <p className="text-[12px] text-[#64748B]">{meta.label}</p>
+                <p className="text-[12px] text-[#5B6B82]">{meta.label}</p>
               </div>
             </div>
           );
@@ -286,7 +286,7 @@ export default function Agents() {
         sortable: true,
         render: (a) => (
           <span className="inline-flex items-center gap-1 text-[12.5px] text-[#475569]">
-            <Cpu size={12} className="text-[#94A3B8]" /> {a.model || "—"}
+            <Cpu size={12} className="text-[#5B6B82]" /> {a.model || "—"}
           </span>
         ),
       },
@@ -310,7 +310,7 @@ export default function Agents() {
         sortable: true,
         accessor: (a) => a.updated_at || "",
         render: (a) => (
-          <span className="inline-flex items-center gap-1 text-[12.5px] text-[#64748B]">
+          <span className="inline-flex items-center gap-1 text-[12.5px] text-[#5B6B82]">
             <Clock size={12} /> {fmtRelative(a.updated_at)}
           </span>
         ),
@@ -678,7 +678,7 @@ function AgentDrawer({
             <span className="inline-flex items-center gap-1 rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[11px] font-semibold text-[#1D4ED8]">
               <Cpu size={11} /> {agent.model || "no model"}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[11px] text-[#64748B]">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[11px] text-[#5B6B82]">
               <Clock size={11} /> {fmtRelative(agent.updated_at)}
             </span>
           </div>
@@ -696,13 +696,13 @@ function AgentDrawer({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-[#EAF0F6] bg-[#FBFCFE] p-4">
-              <p className="text-[12px] text-[#64748B]">Conversations</p>
+              <p className="text-[12px] text-[#5B6B82]">Conversations</p>
               <p className="mt-1 text-[20px] font-bold text-[#0F172A]">
                 {(agent.conversations || 0).toLocaleString()}
               </p>
             </div>
             <div className="rounded-xl border border-[#EAF0F6] bg-[#FBFCFE] p-4">
-              <p className="text-[12px] text-[#64748B]">Success rate</p>
+              <p className="text-[12px] text-[#5B6B82]">Success rate</p>
               <p className="mt-1 text-[20px] font-bold text-[#0F172A]">
                 {agent.success_rate || 0}%
               </p>

@@ -269,7 +269,7 @@ export default function Conversations() {
             <div className="relative flex-1">
               <Search
                 size={15}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5B6B82]"
               />
               <input
                 type="search"
@@ -284,7 +284,7 @@ export default function Conversations() {
               onClick={() => setShowStatus((v) => !v)}
               className={`relative size-10 rounded-xl border grid place-items-center transition-colors ${
                 statusFilter !== "all" || showStatus
-                  ? "border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]"
+                  ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                   : "border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569]"
               }`}
               aria-label="Filters"
@@ -303,7 +303,7 @@ export default function Conversations() {
               className="px-3 py-2.5 border-b border-[#E2E8F0] bg-[#F8FAFC]/60"
               data-testid="conv-status-filter"
             >
-              <p className="text-[10.5px] uppercase tracking-[0.1em] text-[#94A3B8] font-semibold mb-2">
+              <p className="text-[10.5px] uppercase tracking-[0.1em] text-[#5B6B82] font-semibold mb-2">
                 Filter by status
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -334,7 +334,7 @@ export default function Conversations() {
                   data-testid="conv-list-loading"
                 >
                   <Loader2 size={22} className="animate-spin text-[#2563EB]" />
-                  <span className="text-[13px] text-[#94A3B8]">
+                  <span className="text-[13px] text-[#5B6B82]">
                     Loading conversations…
                   </span>
                 </li>
@@ -420,11 +420,11 @@ export default function Conversations() {
                           <p className="text-[13.5px] font-semibold text-[#0F172A] truncate">
                             {c.name}
                           </p>
-                          <span className="text-[11px] text-[#94A3B8] whitespace-nowrap">
+                          <span className="text-[11px] text-[#5B6B82] whitespace-nowrap">
                             {c.time}
                           </span>
                         </div>
-                        <p className="text-[11.5px] text-[#64748B] mt-0.5 truncate">
+                        <p className="text-[11.5px] text-[#5B6B82] mt-0.5 truncate">
                           {c.phone} <span className="text-[#CBD5E1]">·</span>{" "}
                           {meta.label}
                         </p>
@@ -437,17 +437,17 @@ export default function Conversations() {
                             {c.statusLabel}
                           </span>
                           {c.msgCount > 0 && (
-                            <span className="inline-flex items-center gap-1 text-[10.5px] text-[#94A3B8]">
+                            <span className="inline-flex items-center gap-1 text-[10.5px] text-[#5B6B82]">
                               <MessageSquare size={11} /> {c.msgCount}
                             </span>
                           )}
                           {c.tokens > 0 && (
-                            <span className="inline-flex items-center gap-1 text-[10.5px] text-[#94A3B8]">
+                            <span className="inline-flex items-center gap-1 text-[10.5px] text-[#5B6B82]">
                               <Zap size={11} /> {fmtTokens(c.tokens)}
                             </span>
                           )}
                           {c.cost > 0 && (
-                            <span className="inline-flex items-center gap-1 text-[10.5px] text-[#94A3B8]">
+                            <span className="inline-flex items-center gap-1 text-[10.5px] text-[#5B6B82]">
                               {fmtCost(c.cost)}
                             </span>
                           )}
@@ -487,7 +487,7 @@ export default function Conversations() {
         {/* ============ RIGHT — conversation detail ============ */}
         {requestedConversationId && !active && !loading && !error ? (
           <div
-            className="rounded-lg bg-white border border-[#E2E8F0] grid place-items-center min-h-[520px] p-6 text-sm text-[#64748B]"
+            className="rounded-lg bg-white border border-[#E2E8F0] grid place-items-center min-h-[520px] p-6 text-sm text-[#5B6B82]"
             data-testid="conversation-not-found"
           >
             This conversation is unavailable in the current workspace.
@@ -500,13 +500,13 @@ export default function Conversations() {
             className="hidden min-w-0 self-start rounded-lg border border-[#E2E8F0] bg-white p-5 xl:block"
             aria-label="Customer context"
           >
-            <div className="grid size-12 place-items-center rounded-full bg-[#EFF6FF] text-[#2563EB]">
+            <div className="grid size-12 place-items-center rounded-full bg-[#EFF6FF] text-[#1D4ED8]">
               <User size={23} />
             </div>
             <h2 className="mt-4 break-words text-base font-semibold text-[#0F172A]">
               {active.name}
             </h2>
-            <p className="mt-1 break-all text-sm text-[#64748B]">
+            <p className="mt-1 break-all text-sm text-[#5B6B82]">
               {active.customer_email ||
                 active.customer_phone ||
                 "Contact information not provided"}
@@ -524,7 +524,7 @@ export default function Conversations() {
                 ["Assistant", active.agent_name || "Not recorded"],
               ].map(([label, value]) => (
                 <div key={label}>
-                  <dt className="text-xs text-[#64748B]">{label}</dt>
+                  <dt className="text-xs text-[#5B6B82]">{label}</dt>
                   <dd className="mt-1 break-words font-medium text-[#334155]">
                     {value}
                   </dd>
@@ -547,18 +547,18 @@ function Pager({ page, total, onChange }) {
         onClick={() => onChange(page - 1)}
         disabled={page <= 1}
         aria-label="Previous page"
-        className="grid size-9 place-items-center rounded-md border border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC] disabled:opacity-40"
+        className="grid size-9 place-items-center rounded-md border border-[#E2E8F0] text-[#5B6B82] hover:bg-[#F8FAFC] disabled:opacity-40"
       >
         <ChevronLeft size={15} />
       </button>
-      <span className="px-3 text-sm text-[#64748B]">
+      <span className="px-3 text-sm text-[#5B6B82]">
         Page {page} of {total}
       </span>
       <button
         onClick={() => onChange(page + 1)}
         disabled={page >= total}
         aria-label="Next page"
-        className="grid size-9 place-items-center rounded-md border border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC] disabled:opacity-40"
+        className="grid size-9 place-items-center rounded-md border border-[#E2E8F0] text-[#5B6B82] hover:bg-[#F8FAFC] disabled:opacity-40"
       >
         <ChevronRight size={15} />
       </button>
@@ -645,11 +645,11 @@ function ConversationPanel({ conv }) {
               {conv.statusLabel}
             </span>
           </div>
-          <p className="text-[12px] text-[#64748B] mt-0.5">
+          <p className="text-[12px] text-[#5B6B82] mt-0.5">
             {conv.phone} <span className="text-[#CBD5E1]">·</span> {meta.label}
           </p>
         </div>
-        <div className="hidden sm:flex items-center gap-3 text-[12px] text-[#64748B]">
+        <div className="hidden sm:flex items-center gap-3 text-[12px] text-[#5B6B82]">
           {conv.startedAt && (
             <span className="inline-flex items-center gap-1.5">
               <Calendar size={13} />{" "}
@@ -667,7 +667,7 @@ function ConversationPanel({ conv }) {
           className="size-9 rounded-lg grid place-items-center hover:bg-[#F1F5F9]"
           aria-label="More"
         >
-          <MoreVertical size={15} className="text-[#64748B]" />
+          <MoreVertical size={15} className="text-[#5B6B82]" />
         </button>
       </div>
 
@@ -709,14 +709,14 @@ function ConversationPanel({ conv }) {
       <div className="flex-1 overflow-y-auto px-5 py-5 max-h-[520px] scrollbar-thin">
         {/* Date divider */}
         <div className="flex justify-center mb-5">
-          <span className="px-3 py-1 rounded-full bg-[#F1F5F9] text-[11px] text-[#64748B] font-medium">
+          <span className="px-3 py-1 rounded-full bg-[#F1F5F9] text-[11px] text-[#5B6B82] font-medium">
             {conv.date || new Date().toLocaleDateString()}
           </span>
         </div>
 
         <div className="space-y-4">
           {msgLoading ? (
-            <div className="flex items-center justify-center gap-2 text-[#94A3B8] text-sm py-8">
+            <div className="flex items-center justify-center gap-2 text-[#5B6B82] text-sm py-8">
               <Loader2 size={15} className="animate-spin" /> Loading transcript…
             </div>
           ) : messages.length > 0 ? (
@@ -726,7 +726,7 @@ function ConversationPanel({ conv }) {
           ) : msgError ? (
             <p className="text-center text-red-500 text-sm py-8">{msgError}</p>
           ) : (
-            <p className="text-center text-[#94A3B8] text-sm py-8">
+            <p className="text-center text-[#5B6B82] text-sm py-8">
               No messages in this conversation yet.
             </p>
           )}
@@ -747,7 +747,7 @@ function ConversationPanel({ conv }) {
         <button
           disabled
           title="Saving conversation notes is not yet connected. This is a local draft."
-          className="px-4 py-2.5 rounded-xl bg-[#EFF6FF] text-[#2563EB] text-[13px] font-semibold hover:bg-[#DBEAFE]"
+          className="px-4 py-2.5 rounded-xl bg-[#EFF6FF] text-[#1D4ED8] text-[13px] font-semibold hover:bg-[#DBEAFE]"
           data-testid="conv-note-add"
         >
           Draft only
@@ -759,9 +759,9 @@ function ConversationPanel({ conv }) {
 
 function RollupStat({ icon: Icon, label, value }) {
   return (
-    <span className="inline-flex items-center gap-1.5 text-[#64748B]">
-      <Icon size={12} className="text-[#94A3B8]" />
-      <span className="text-[#94A3B8]">{label}</span>
+    <span className="inline-flex items-center gap-1.5 text-[#5B6B82]">
+      <Icon size={12} className="text-[#5B6B82]" />
+      <span className="text-[#5B6B82]">{label}</span>
       <span className="font-semibold text-[#0F172A]">{value}</span>
     </span>
   );
@@ -795,8 +795,8 @@ function MessageBubble({ message }) {
       <div
         className={`size-9 rounded-full grid place-items-center shrink-0 ${
           isCustomer
-            ? "bg-[#DBEAFE] text-[#2563EB]"
-            : "bg-[#EFF6FF] text-[#2563EB]"
+            ? "bg-[#DBEAFE] text-[#1D4ED8]"
+            : "bg-[#EFF6FF] text-[#1D4ED8]"
         }`}
       >
         {isCustomer ? <User size={15} /> : <Bot size={15} />}
@@ -804,7 +804,7 @@ function MessageBubble({ message }) {
       <div
         className={`max-w-[72%] ${isCustomer ? "items-end text-right" : "items-start text-left"} flex flex-col`}
       >
-        <p className="text-[10.5px] text-[#94A3B8] mb-1 font-medium">
+        <p className="text-[10.5px] text-[#5B6B82] mb-1 font-medium">
           {isCustomer ? "Customer" : "Agent"}
           {time && (
             <>
@@ -843,7 +843,7 @@ function MessageBubble({ message }) {
 
         {/* Per-message observability */}
         {hasObs && (
-          <div className="mt-1.5 flex items-center gap-2 flex-wrap text-[10px] text-[#94A3B8]">
+          <div className="mt-1.5 flex items-center gap-2 flex-wrap text-[10px] text-[#5B6B82]">
             {model && (
               <span className="inline-flex items-center gap-1 bg-[#F1F5F9] rounded px-1.5 py-0.5">
                 <Cpu size={10} /> {model}
@@ -867,7 +867,7 @@ function MessageBubble({ message }) {
             {grounded != null && (
               <span
                 className={`inline-flex items-center gap-1 ${
-                  grounded ? "text-[#16A34A]" : "text-[#D97706]"
+                  grounded ? "text-[#15803D]" : "text-[#D97706]"
                 }`}
                 title={
                   grounded

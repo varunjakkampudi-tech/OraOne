@@ -146,11 +146,11 @@ const STATUS_STYLES = {
 
 const RUN_STATUS_STYLES = {
   queued: { cls: "bg-[#F1F5F9] text-[#475569]", icon: Clock },
-  running: { cls: "bg-[#EFF6FF] text-[#2563EB]", icon: Loader2 },
+  running: { cls: "bg-[#EFF6FF] text-[#1D4ED8]", icon: Loader2 },
   awaiting_approval: { cls: "bg-[#FEF3C7] text-[#B45309]", icon: ShieldCheck },
   completed: { cls: "bg-[#ECFDF5] text-[#047857]", icon: CheckCircle2 },
   failed: { cls: "bg-[#FEF2F2] text-[#B91C1C]", icon: XCircle },
-  cancelled: { cls: "bg-[#F1F5F9] text-[#64748B]", icon: XCircle },
+  cancelled: { cls: "bg-[#F1F5F9] text-[#5B6B82]", icon: XCircle },
 };
 
 function emptyStep(type = "ai_prompt") {
@@ -196,7 +196,7 @@ export default function Workflows() {
           <h1 className="mt-1 text-2xl sm:text-3xl font-black text-[#0F172A]">
             Automate work across your AI stack.
           </h1>
-          <p className="mt-1 text-sm text-[#64748B]">
+          <p className="mt-1 text-sm text-[#5B6B82]">
             Chain your AI, knowledge bases and agents into repeatable,
             multi-step automations.
           </p>
@@ -219,7 +219,7 @@ export default function Workflows() {
 
       {/* List */}
       {loading ? (
-        <div className="flex items-center justify-center py-24 text-[#64748B]">
+        <div className="flex items-center justify-center py-24 text-[#5B6B82]">
           <Loader2 className="animate-spin" size={22} />
         </div>
       ) : items.length === 0 ? (
@@ -273,7 +273,7 @@ function EmptyState({ onCreate }) {
       <h3 className="mt-4 text-lg font-bold text-[#0F172A]">
         No workflows yet
       </h3>
-      <p className="mt-1 text-sm text-[#64748B]">
+      <p className="mt-1 text-sm text-[#5B6B82]">
         Build your first automation — retrieve, reason, and act in one flow.
       </p>
       <button
@@ -322,13 +322,13 @@ function AnalyticsStrip({ data }) {
           key={c.label}
           className="p-4 rounded-lg border border-[#E2E8F0] bg-white"
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-[#64748B] uppercase">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-[#5B6B82] uppercase">
             <BarChart3 size={12} className="text-[#2563EB]" /> {c.label}
           </div>
           <div className="mt-1.5 text-2xl font-black text-[#0F172A]">
             {c.value}
           </div>
-          <div className="text-[12px] text-[#94A3B8]">{c.sub}</div>
+          <div className="text-[12px] text-[#5B6B82]">{c.sub}</div>
         </div>
       ))}
     </div>
@@ -358,10 +358,10 @@ function WorkflowCard({ workflow, onOpen }) {
       <h3 className="mt-3 font-bold text-[#0F172A] truncate">
         {workflow.name}
       </h3>
-      <p className="mt-1 text-sm text-[#64748B] line-clamp-2 min-h-[40px]">
+      <p className="mt-1 text-sm text-[#5B6B82] line-clamp-2 min-h-[40px]">
         {workflow.description || "No description."}
       </p>
-      <div className="mt-3 flex items-center gap-4 text-[12px] text-[#64748B]">
+      <div className="mt-3 flex items-center gap-4 text-[12px] text-[#5B6B82]">
         <span>{workflow.run_count} runs</span>
         {rate !== null && <span>{rate}% success</span>}
         <span className="ml-auto inline-flex items-center gap-1 text-[#2563EB] font-semibold">
@@ -446,12 +446,12 @@ function WorkflowEditor({ onClose, onSaved }) {
       <div className="p-6 border-b border-[#E2E8F0] flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-[#0F172A]">New Workflow</h2>
-          <p className="text-sm text-[#64748B]">
+          <p className="text-sm text-[#5B6B82]">
             Define the trigger and an ordered list of steps.
           </p>
         </div>
         <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#F1F5F9]">
-          <X size={18} className="text-[#64748B]" />
+          <X size={18} className="text-[#5B6B82]" />
         </button>
       </div>
 
@@ -489,7 +489,7 @@ function WorkflowEditor({ onClose, onSaved }) {
               placeholder="60"
               className="w-full px-3 py-2 rounded-xl border border-[#E2E8F0] text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
             />
-            <span className="mt-1 block text-[11px] text-[#94A3B8]">
+            <span className="mt-1 block text-[11px] text-[#5B6B82]">
               The workflow must be Active for the scheduler to run it.
             </span>
           </Field>
@@ -508,7 +508,7 @@ function WorkflowEditor({ onClose, onSaved }) {
         <div>
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-[#0F172A]">Steps</h3>
-            <span className="text-[12px] text-[#94A3B8]">
+            <span className="text-[12px] text-[#5B6B82]">
               Reference earlier outputs with{" "}
               <code className="px-1 bg-[#F1F5F9] rounded">{"{{var}}"}</code>
             </span>
@@ -601,7 +601,7 @@ function StepEditor({
   return (
     <div className="rounded-xl border border-[#E2E8F0] bg-[#FBFCFE]">
       <div className="p-3 flex items-center gap-2 border-b border-[#EEF2F7]">
-        <span className="w-6 h-6 rounded-md bg-[#EFF6FF] text-[#2563EB] text-[11px] font-bold flex items-center justify-center">
+        <span className="w-6 h-6 rounded-md bg-[#EFF6FF] text-[#1D4ED8] text-[11px] font-bold flex items-center justify-center">
           {index + 1}
         </span>
         <Icon size={15} className="text-[#2563EB]" />
@@ -630,15 +630,15 @@ function StepEditor({
         </button>
       </div>
       <div className="p-3 space-y-2">
-        <p className="text-[12px] text-[#94A3B8]">{meta.hint}</p>
+        <p className="text-[12px] text-[#5B6B82]">{meta.hint}</p>
         <StepConfig step={step} agents={agents} kbs={kbs} onConfig={onConfig} />
         <details className="mt-1 group">
-          <summary className="cursor-pointer text-[11px] font-semibold text-[#64748B] hover:text-[#2563EB] select-none">
+          <summary className="cursor-pointer text-[11px] font-semibold text-[#5B6B82] hover:text-[#2563EB] select-none">
             Error handling
           </summary>
           <div className="mt-2 grid grid-cols-2 gap-2">
             <label className="block">
-              <span className="block text-[11px] text-[#64748B] mb-1">
+              <span className="block text-[11px] text-[#5B6B82] mb-1">
                 Retries
               </span>
               <input
@@ -651,7 +651,7 @@ function StepEditor({
               />
             </label>
             <label className="block">
-              <span className="block text-[11px] text-[#64748B] mb-1">
+              <span className="block text-[11px] text-[#5B6B82] mb-1">
                 Retry delay (s)
               </span>
               <input
@@ -767,7 +767,7 @@ function StepConfig({ step, agents, kbs, onConfig }) {
             "What should the reviewer approve? Supports {{vars}}.",
             3,
           )}
-          <p className="text-[11px] text-[#94A3B8]">
+          <p className="text-[11px] text-[#5B6B82]">
             The run pauses here until an owner/admin approves or rejects it.
           </p>
         </div>
@@ -1038,7 +1038,7 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
   return (
     <Overlay onClose={onClose}>
       {loading || !wf ? (
-        <div className="flex items-center justify-center py-24 text-[#64748B]">
+        <div className="flex items-center justify-center py-24 text-[#5B6B82]">
           <Loader2 className="animate-spin" size={22} />
         </div>
       ) : (
@@ -1054,7 +1054,7 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
                 <h2 className="mt-2 text-lg font-bold text-[#0F172A]">
                   {wf.name}
                 </h2>
-                <p className="text-sm text-[#64748B]">
+                <p className="text-sm text-[#5B6B82]">
                   {wf.description || "No description."}
                 </p>
               </div>
@@ -1062,7 +1062,7 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
                 onClick={onClose}
                 className="p-2 rounded-lg hover:bg-[#F1F5F9]"
               >
-                <X size={18} className="text-[#64748B]" />
+                <X size={18} className="text-[#5B6B82]" />
               </button>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -1107,7 +1107,7 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
                 Flow ({wf.steps?.length || 0}{" "}
                 {wf.steps?.length === 1 ? "step" : "steps"})
                 {activeRun && (
-                  <span className="ml-2 align-middle text-[11px] font-medium text-[#94A3B8]">
+                  <span className="ml-2 align-middle text-[11px] font-medium text-[#5B6B82]">
                     · showing latest run
                   </span>
                 )}
@@ -1179,7 +1179,7 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
                 </button>
               </div>
               {runs.length === 0 ? (
-                <p className="mt-2 text-sm text-[#94A3B8]">No runs yet.</p>
+                <p className="mt-2 text-sm text-[#5B6B82]">No runs yet.</p>
               ) : (
                 <div className="mt-2 space-y-2">
                   {runs.map((r) => (
@@ -1206,13 +1206,13 @@ function WorkflowDrawer({ workflowId, onClose, onChanged }) {
                       key={v.id}
                       className="flex items-center gap-2.5 p-3 rounded-xl border border-[#E2E8F0] bg-white"
                     >
-                      <span className="w-7 h-7 rounded-md bg-[#EFF6FF] text-[#2563EB] text-[11px] font-bold flex items-center justify-center">
+                      <span className="w-7 h-7 rounded-md bg-[#EFF6FF] text-[#1D4ED8] text-[11px] font-bold flex items-center justify-center">
                         v{v.version}
                       </span>
                       <span className="text-sm font-semibold text-[#0F172A] truncate">
                         {v.snapshot?.name || "Untitled"}
                       </span>
-                      <span className="text-[11px] text-[#94A3B8]">
+                      <span className="text-[11px] text-[#5B6B82]">
                         {v.snapshot?.steps?.length ?? 0} steps
                       </span>
                       <button
@@ -1260,10 +1260,10 @@ function RunRow({ run, onOpen }) {
         />{" "}
         {run.status}
       </span>
-      <span className="text-[12px] text-[#64748B]">
+      <span className="text-[12px] text-[#5B6B82]">
         {run.steps_completed}/{run.steps_total} steps
       </span>
-      <span className="ml-auto text-[12px] text-[#94A3B8]">
+      <span className="ml-auto text-[12px] text-[#5B6B82]">
         {new Date(run.created_at).toLocaleString()}
       </span>
     </button>
@@ -1295,7 +1295,7 @@ function RunTimeline({ run }) {
               <span className="text-sm font-semibold text-[#0F172A]">
                 {rs.name}
               </span>
-              <span className="ml-auto text-[11px] text-[#94A3B8]">
+              <span className="ml-auto text-[11px] text-[#5B6B82]">
                 {meta.label}
               </span>
             </div>

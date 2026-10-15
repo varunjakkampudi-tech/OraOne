@@ -41,12 +41,12 @@ function CognitoManagedAuthNotice({ title, message, endpoint = "login" }) {
       <h1 className="mt-5 text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">
         {title}
       </h1>
-      <p className="mt-2 text-center text-sm leading-relaxed text-[#64748B]">
+      <p className="mt-2 text-center text-sm leading-relaxed text-[#5B6B82]">
         {message}
       </p>
       {isCodeFlow && (
         <div className="mt-6 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#5B6B82]">
             Your secure email code
           </p>
           <div className="mt-3 flex justify-center gap-2" aria-hidden="true">
@@ -59,7 +59,7 @@ function CognitoManagedAuthNotice({ title, message, endpoint = "login" }) {
               </span>
             ))}
           </div>
-          <p className="mt-3 text-xs leading-relaxed text-[#64748B]">
+          <p className="mt-3 text-xs leading-relaxed text-[#5B6B82]">
             A secure verification page will open. Enter the 6-digit code from
             your email there; OraOne never reads or stores it.
           </p>
@@ -74,7 +74,7 @@ function CognitoManagedAuthNotice({ title, message, endpoint = "login" }) {
           Continue with email
         </GradientButton>
       </div>
-      <p className="mt-6 text-center text-sm text-[#64748B]">
+      <p className="mt-6 text-center text-sm text-[#5B6B82]">
         <Link
           to="/login"
           className="font-semibold text-[#2563EB] hover:underline"
@@ -164,7 +164,7 @@ export function VerifyEmail() {
       <h1 className="mt-5 text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">
         Verify Your Email
       </h1>
-      <p className="mt-2 text-center text-sm leading-relaxed text-[#64748B]">
+      <p className="mt-2 text-center text-sm leading-relaxed text-[#5B6B82]">
         We&apos;ve sent a 6-digit verification code to
         <br />
         <span className="font-semibold text-[#2563EB]">
@@ -206,7 +206,7 @@ export function VerifyEmail() {
           data-testid="verify-code-input"
         />
 
-        <p className="mt-5 text-center text-sm text-[#64748B]">
+        <p className="mt-5 text-center text-sm text-[#5B6B82]">
           Didn&apos;t receive the code?{" "}
           <button
             type="button"
@@ -219,11 +219,11 @@ export function VerifyEmail() {
           </button>
         </p>
 
-        <p className="mt-2 text-center text-xs text-[#94A3B8]">
+        <p className="mt-2 text-center text-xs text-[#5B6B82]">
           Check your spam or junk folder if the message is delayed.
         </p>
 
-        <p className="mt-2 flex items-center justify-center gap-1.5 text-sm text-[#94A3B8]">
+        <p className="mt-2 flex items-center justify-center gap-1.5 text-sm text-[#5B6B82]">
           <Clock size={14} />
           {seconds > 0 ? (
             <>
@@ -250,7 +250,7 @@ export function VerifyEmail() {
         </div>
       </form>
 
-      <p className="mt-6 text-center text-sm text-[#64748B]">
+      <p className="mt-6 text-center text-sm text-[#5B6B82]">
         Wrong email address?{" "}
         <Link
           to="/signup"
@@ -307,7 +307,7 @@ export function ForgotPassword() {
       <h1 className="mt-5 text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">
         Forgot Password?
       </h1>
-      <p className="mt-2 text-center text-sm leading-relaxed text-[#64748B]">
+      <p className="mt-2 text-center text-sm leading-relaxed text-[#5B6B82]">
         Enter your email and we&apos;ll send you a 6-digit code to reset your
         password.
       </p>
@@ -421,7 +421,7 @@ export function ResetPassword() {
       <h1 className="mt-5 text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">
         Reset Your Password
       </h1>
-      <p className="mt-2 text-center text-sm leading-relaxed text-[#64748B]">
+      <p className="mt-2 text-center text-sm leading-relaxed text-[#5B6B82]">
         Enter and confirm your new password
         <br />
         to regain access to your account.

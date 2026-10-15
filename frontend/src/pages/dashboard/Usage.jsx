@@ -60,7 +60,7 @@ function UsageCard({ m }) {
           <div>
             <p className="text-sm font-semibold text-[#0F172A]">{m.label}</p>
             {m.period && (
-              <p className="text-xs text-[#94A3B8]">Period {m.period}</p>
+              <p className="text-xs text-[#5B6B82]">Period {m.period}</p>
             )}
           </div>
         </div>
@@ -75,7 +75,7 @@ function UsageCard({ m }) {
         <span className="text-[28px] font-semibold tracking-tight text-ink">
           {m.used.toLocaleString()}
         </span>
-        <span className="text-sm text-[#64748B]">
+        <span className="text-sm text-[#5B6B82]">
           {m.unlimited ? (
             <span className="inline-flex items-center gap-1">
               / <InfinityIcon className="h-4 w-4" /> unlimited
@@ -206,7 +206,7 @@ export default function Usage() {
             >
               {s.value}
             </p>
-            <p className="mt-0.5 text-[12px] text-[#64748B]">{s.label}</p>
+            <p className="mt-0.5 text-[12px] text-[#5B6B82]">{s.label}</p>
           </Card>
         ))}
       </div>

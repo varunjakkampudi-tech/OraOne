@@ -19,20 +19,20 @@ export default function ProductsPage() {
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-[#0F172A] sm:text-5xl">
           The OraOne ecosystem
         </h1>
-        <p className="mt-5 text-lg leading-relaxed text-[#64748B]">
+        <p className="mt-5 text-lg leading-relaxed text-[#5B6B82]">
           Start with AI Chat. Explore the shared workspace vision for voice,
           messaging, automation and beyond.
         </p>
       </header>
       <section className="my-10 grid items-center gap-8 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-5 sm:p-8 lg:grid-cols-2">
         <div>
-          <span className="rounded-full bg-[#EFF6FF] px-3 py-1 text-xs font-medium text-[#2563EB]">
+          <span className="rounded-full bg-[#EFF6FF] px-3 py-1 text-xs font-medium text-[#1D4ED8]">
             Product 1 · Active development
           </span>
           <h2 className="mt-5 text-3xl font-bold tracking-tight text-[#0F172A]">
             OraOne AI Chat Platform
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-[#64748B]">
+          <p className="mt-4 text-base leading-relaxed text-[#5B6B82]">
             Bring website conversations, business knowledge and your team into
             one workspace.
           </p>
@@ -63,7 +63,7 @@ export default function ProductsPage() {
           <h2 className="text-2xl font-bold tracking-tight text-[#0F172A]">
             Ten products. One shared direction.
           </h2>
-          <p className="mt-3 text-base leading-relaxed text-[#64748B]">
+          <p className="mt-3 text-base leading-relaxed text-[#5B6B82]">
             Product numbers identify the portfolio, not a promised release
             order. Products 2–9 are planned; OraOne OS is the long-term vision.
           </p>
@@ -74,7 +74,7 @@ export default function ProductsPage() {
         <h2 className="text-2xl font-bold tracking-tight text-[#0F172A]">
           Choose a thoughtful starting point.
         </h2>
-        <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#64748B]">
+        <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#5B6B82]">
           OraOne access is currently free. Begin with your business knowledge
           and review your assistant before publishing.
         </p>

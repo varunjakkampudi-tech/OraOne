@@ -71,7 +71,7 @@ function MarketingPanel() {
         </p>
         <WorkspacePreview />
       </div>
-      <p className="relative text-xs text-[#64748B]">
+      <p className="relative text-xs text-[#5B6B82]">
         A clear view of the work behind every conversation.
       </p>
     </aside>
@@ -81,7 +81,7 @@ function MarketingPanel() {
 /* ── Trust badges footer (inside each card) ────────────────── */
 export function TrustBadges() {
   return (
-    <div className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-[#EEF0F6] pt-5 text-xs text-[#64748B]">
+    <div className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-[#EEF0F6] pt-5 text-xs text-[#5B6B82]">
       <span className="inline-flex items-center gap-1.5">
         <LockKeyhole size={14} aria-hidden="true" /> Email-only access
       </span>
@@ -134,7 +134,7 @@ export function OrLine() {
   return (
     <div className="my-6 flex items-center gap-3">
       <div className="h-px flex-1 bg-[#EEF0F6]" />
-      <span className="text-xs font-semibold text-[#94A3B8]">OR</span>
+      <span className="text-xs font-semibold text-[#5B6B82]">OR</span>
       <div className="h-px flex-1 bg-[#EEF0F6]" />
     </div>
   );
@@ -168,7 +168,7 @@ export function TipBox({ icon: Icon = ShieldCheck, title, children }) {
       <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-white text-[#2563EB] shadow-sm">
         <Icon size={16} />
       </span>
-      <p className="text-xs leading-relaxed text-[#64748B]">
+      <p className="text-xs leading-relaxed text-[#5B6B82]">
         {title && (
           <span className="font-semibold text-[#0F172A]">{title} </span>
         )}

@@ -34,3 +34,23 @@ remain because they are product or operational dependencies.
 4. Independently review crawling, uploads, webhooks, billing, tenant
    isolation, and prompt-injection controls.
 5. Provision Hostinger, DNS, TLS, secrets, monitoring, and rollback storage.
+
+## Product 1 acceptance batch 1 (PR #2 follow-up)
+
+Method: a fresh static import graph from `src/index.js` (static, re-export,
+literal dynamic `import()`, CSS `url()`). It reached 176/176 frontend files
+with zero unresolved imports, so no frontend source deletions were justified.
+Backend: a module importer scan over `app/`, `scripts/`, `tests/`, `server.py`
+and `worker.py`. No `importlib`/`__import__` dynamic loading exists in `app/`.
+
+| Item | Action | Evidence |
+| --- | --- | --- |
+| `backend/app/database/repositories/project_scoped.py` | Removed | Zero importers, not exported from `repositories/__init__.py`, no tests/scripts/docs references, no dynamic loading |
+| `oidc-client-ts`, `react-oidc-context` (frontend deps) | Removed | Not imported by `src/`, `packages/`, `e2e/` or config. Cognito uses `src/lib/cognito.js`. Build, lint, SDK and browser suites pass after removal |
+| `tailwind.config.js` content glob `./public/index.html` | Corrected to `./index.html` | Vite serves the root `index.html`; the old path did not exist |
+| Settings → Two-factor toggle | Replaced with a "Planned" status | No backend MFA exists; the toggle only flipped local state and showed "2FA enabled" |
+| Settings → Notifications copy | Clarified | Preferences persist only in `localStorage`; copy now says so |
+| `frontend/yarn.lock` (untracked, environment-generated) | Removed | The repository uses npm with `package-lock.json` |
+| `public/favicon-16.png` | Retained | Unreferenced brand asset variant; kept to preserve branding |
+| `app/services/security_service.py`, `user_service.py` | Retained | Imported via `from app.services import …` (scanner false positive) |
+| `vulture` findings (`cls` in Pydantic validators) | Retained | Framework-required signatures |

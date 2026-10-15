@@ -47,14 +47,14 @@ export default function AgentCreate() {
     <div className="max-w-2xl mx-auto">
       <button
         onClick={() => nav("/app/agents")}
-        className="text-sm text-[#64748B] hover:text-[#0F172A] inline-flex items-center gap-1.5 mb-4"
+        className="text-sm text-[#5B6B82] hover:text-[#0F172A] inline-flex items-center gap-1.5 mb-4"
       >
         <ArrowLeft size={14} /> Back to Agents
       </button>
       <h2 className="text-2xl font-bold tracking-tight text-[#0F172A]">
         Create New Agent
       </h2>
-      <p className="text-sm text-[#64748B] mt-1">
+      <p className="text-sm text-[#5B6B82] mt-1">
         Select the type of agent you want to create.
       </p>
 
@@ -77,7 +77,7 @@ export default function AgentCreate() {
               <p className="text-base font-semibold text-[#0F172A]">
                 {t.label}
               </p>
-              <p className="text-sm text-[#64748B]">{t.desc}</p>
+              <p className="text-sm text-[#5B6B82]">{t.desc}</p>
             </div>
             <div
               className={`size-5 rounded-full border-2 ${type === t.id ? "border-[#2563EB] bg-[#2563EB]" : "border-[#CBD5E1]"} grid place-items-center`}
@@ -97,16 +97,16 @@ export default function AgentCreate() {
           className="block text-sm font-semibold text-[#0F172A]"
         >
           Website to learn from{" "}
-          <span className="font-normal text-[#94A3B8]">(optional)</span>
+          <span className="font-normal text-[#5B6B82]">(optional)</span>
         </label>
-        <p className="text-sm text-[#64748B] mt-0.5">
+        <p className="text-sm text-[#5B6B82] mt-0.5">
           We'll crawl your site like a search bot and turn its pages into
           knowledge your agent can answer from.
         </p>
         <div className="mt-2 relative">
           <Globe
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5B6B82]"
           />
           <input
             id="agent-website"

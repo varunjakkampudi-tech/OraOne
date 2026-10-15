@@ -64,7 +64,7 @@ function DiffViewer({ diff }) {
                 {String(c.from ?? "—")}
               </span>
               <ArrowRight className="h-3.5 w-3.5" style={{ color: SUB }} />
-              <span className="rounded bg-[#DCFCE7] px-1.5 py-0.5 text-[#15803D]">
+              <span className="rounded bg-[#DCFCE7] px-1.5 py-0.5 text-[#166534]">
                 {String(c.to ?? "—")}
               </span>
             </div>
@@ -271,6 +271,7 @@ export default function AgentVersions() {
               Agent
             </label>
             <select
+              aria-label="Agent"
               value={agentId}
               onChange={(e) => {
                 if (!requestedAgentId) setAgentId(e.target.value);
@@ -354,6 +355,7 @@ export default function AgentVersions() {
                     From
                   </label>
                   <select
+                    aria-label="Compare from version"
                     value={compare.from ?? 0}
                     onChange={(e) =>
                       setCompare((c) => ({
@@ -376,6 +378,7 @@ export default function AgentVersions() {
                     To
                   </label>
                   <select
+                    aria-label="Compare to version"
                     value={compare.to ?? 0}
                     onChange={(e) =>
                       setCompare((c) => ({ ...c, to: Number(e.target.value) }))

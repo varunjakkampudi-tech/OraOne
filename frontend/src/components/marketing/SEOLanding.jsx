@@ -84,7 +84,7 @@ export default function SEOLanding({ config }) {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.span
             {...fadeUp}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#2563EB]"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#1D4ED8]"
           >
             <Sparkles size={11} /> {eyebrow}
           </motion.span>
@@ -135,7 +135,7 @@ export default function SEOLanding({ config }) {
           {/* Trust badges */}
           <motion.div
             {...fadeUp}
-            className="mt-8 flex flex-wrap items-center justify-center gap-3 text-[11.5px] text-[#64748B]"
+            className="mt-8 flex flex-wrap items-center justify-center gap-3 text-[11.5px] text-[#5B6B82]"
           >
             <Badge icon={ShieldCheck} text="Server-side access control" />
             <Badge icon={Lock} text="Backend provider credentials" />
@@ -172,7 +172,7 @@ export default function SEOLanding({ config }) {
                 <h3 className="mt-4 text-[16px] font-bold text-[#0F172A]">
                   {b.title}
                 </h3>
-                <p className="mt-2 text-[13.5px] text-[#64748B] leading-relaxed">
+                <p className="mt-2 text-[13.5px] text-[#5B6B82] leading-relaxed">
                   {b.desc}
                 </p>
               </motion.div>
@@ -208,7 +208,7 @@ export default function SEOLanding({ config }) {
                     >
                       <CheckCircle2
                         size={16}
-                        className="text-[#16A34A] mt-0.5 flex-shrink-0"
+                        className="text-[#15803D] mt-0.5 flex-shrink-0"
                       />
                       {p}
                     </li>
@@ -234,7 +234,7 @@ export default function SEOLanding({ config }) {
                     <p className="mt-1 text-lg font-bold text-[#0F172A]">
                       {f.previewTitle || f.title}
                     </p>
-                    <p className="text-[13px] text-[#64748B]">
+                    <p className="text-[13px] text-[#5B6B82]">
                       {f.previewDesc || f.desc}
                     </p>
                   </div>
@@ -267,13 +267,13 @@ export default function SEOLanding({ config }) {
                   transition={{ delay: i * 0.04 }}
                   className="p-5 rounded-2xl bg-white border border-[#E2E8F0] hover:border-[#2563EB]/30 transition-all"
                 >
-                  <span className="text-[10.5px] font-bold tracking-wider text-[#94A3B8] uppercase">
+                  <span className="text-[10.5px] font-bold tracking-wider text-[#5B6B82] uppercase">
                     {u.industry}
                   </span>
                   <h3 className="mt-1 text-[15px] font-bold text-[#0F172A]">
                     {u.title}
                   </h3>
-                  <p className="mt-1.5 text-[13px] text-[#64748B] leading-relaxed">
+                  <p className="mt-1.5 text-[13px] text-[#5B6B82] leading-relaxed">
                     {u.desc}
                   </p>
                 </motion.div>
@@ -336,7 +336,7 @@ export default function SEOLanding({ config }) {
                     })
                   }
                   data-testid={`landing-${slug}-cta-footer-primary`}
-                  className="inline-flex items-center gap-1.5 px-6 py-3.5 rounded-xl bg-white text-[#2563EB] text-[15px] font-bold hover:bg-[#EFF6FF] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-6 py-3.5 rounded-xl bg-white text-[#1D4ED8] text-[15px] font-bold hover:bg-[#EFF6FF] transition-colors"
                 >
                   {primaryCTA} <ArrowRight size={15} />
                 </Link>
@@ -385,7 +385,7 @@ function FaqItem({ q, a, idx, slug }) {
         </span>
         <ChevronDown
           size={16}
-          className={`flex-shrink-0 text-[#94A3B8] transition-transform ${open ? "rotate-180" : ""}`}
+          className={`flex-shrink-0 text-[#5B6B82] transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (

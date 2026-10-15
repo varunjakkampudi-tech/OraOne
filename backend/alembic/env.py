@@ -19,7 +19,7 @@ if str(ROOT) not in sys.path:
 try:
     from dotenv import load_dotenv
 
-    load_dotenv(ROOT / ".env", override=True)
+    load_dotenv(ROOT / ".env", override=False)
 except Exception:
     pass
 

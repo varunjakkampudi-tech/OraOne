@@ -128,7 +128,7 @@ function SectionCard({ title, subtitle, icon: Icon, right, children }) {
               {title}
             </h2>
             {subtitle ? (
-              <p className="text-[13px] text-[#64748B] mt-0.5">{subtitle}</p>
+              <p className="text-[13px] text-[#5B6B82] mt-0.5">{subtitle}</p>
             ) : null}
           </div>
         </div>
@@ -374,7 +374,7 @@ export default function Deploy() {
             <h1 className="text-2xl sm:text-[28px] font-bold tracking-tight text-[#0F172A]">
               Channels &amp; Deploy
             </h1>
-            <p className="text-[13px] text-[#64748B]">
+            <p className="text-[13px] text-[#5B6B82]">
               Configure your website widget and SDK installation.
             </p>
           </div>
@@ -382,6 +382,7 @@ export default function Deploy() {
         <div className="flex items-center gap-2">
           {agents.length > 0 && (
             <select
+              aria-label="Agent"
               value={agentId}
               onChange={(e) => setAgentId(e.target.value)}
               className="rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-medium text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
@@ -397,7 +398,7 @@ export default function Deploy() {
       </div>
 
       {loading || !deploy ? (
-        <div className="grid place-items-center py-24 text-[#64748B]">
+        <div className="grid place-items-center py-24 text-[#5B6B82]">
           <Loader2 className="animate-spin" size={26} />
         </div>
       ) : (
@@ -415,7 +416,7 @@ export default function Deploy() {
                 <span className="font-semibold text-[#0F172A]">
                   {deploy.agent_name}
                 </span>
-                <span className="text-[#94A3B8]"> · key </span>
+                <span className="text-[#5B6B82]"> · key </span>
                 <code className="text-[12px] bg-[#F1F5F9] rounded px-1.5 py-0.5 font-mono text-[#475569]">
                   {deploy.public_key}
                 </code>
@@ -506,7 +507,7 @@ export default function Deploy() {
                   >
                     <div className="flex items-start gap-3">
                       <div
-                        className={`h-9 w-9 rounded-lg grid place-items-center shrink-0 ${c.enabled ? "bg-[#2563EB] text-white" : "bg-[#F1F5F9] text-[#64748B]"}`}
+                        className={`h-9 w-9 rounded-lg grid place-items-center shrink-0 ${c.enabled ? "bg-[#2563EB] text-white" : "bg-[#F1F5F9] text-[#5B6B82]"}`}
                       >
                         <Icon size={17} />
                       </div>
@@ -521,7 +522,7 @@ export default function Deploy() {
                             </span>
                           ) : null}
                         </div>
-                        <p className="text-[12.5px] text-[#64748B] mt-0.5">
+                        <p className="text-[12.5px] text-[#5B6B82] mt-0.5">
                           {c.description}
                         </p>
                       </div>
@@ -530,7 +531,7 @@ export default function Deploy() {
                       {busyChannel === c.channel ? (
                         <Loader2
                           size={16}
-                          className="animate-spin text-[#94A3B8]"
+                          className="animate-spin text-[#5B6B82]"
                         />
                       ) : (
                         <Toggle
@@ -589,7 +590,7 @@ export default function Deploy() {
                   className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[13px] font-semibold transition ${
                     installTab === t.key
                       ? "bg-white text-[#0F172A] shadow-sm"
-                      : "text-[#64748B] hover:text-[#334155]"
+                      : "text-[#5B6B82] hover:text-[#334155]"
                   }`}
                 >
                   <t.icon size={14} />
@@ -600,7 +601,7 @@ export default function Deploy() {
 
             {installTab === "embed" && (
               <div className="space-y-3">
-                <p className="text-[13px] text-[#64748B]">
+                <p className="text-[13px] text-[#5B6B82]">
                   Paste this once before{" "}
                   <code className="bg-[#F1F5F9] rounded px-1 py-0.5 font-mono text-[12px]">
                     &lt;/body&gt;
@@ -626,7 +627,7 @@ export default function Deploy() {
                     work today.
                   </span>
                 </div>
-                <p className="text-[13px] text-[#64748B]">
+                <p className="text-[13px] text-[#5B6B82]">
                   Once published, install the package and initialise the SDK
                   like this.
                 </p>
@@ -640,7 +641,7 @@ export default function Deploy() {
 
             {installTab === "sdk" && (
               <div className="space-y-3">
-                <p className="text-[13px] text-[#64748B]">
+                <p className="text-[13px] text-[#5B6B82]">
                   Load the script and drive everything programmatically.
                 </p>
                 <CodeBlock code={deploy.snippets.sdk} language="html" />
@@ -660,7 +661,7 @@ export default function Deploy() {
                     className={`rounded-lg px-3 py-1.5 text-[12.5px] font-semibold border transition ${
                       platform === g.platform
                         ? "border-[#2563EB] bg-[#EFF4FF] text-[#2563EB]"
-                        : "border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#F8FAFC]"
+                        : "border-[#E2E8F0] bg-white text-[#5B6B82] hover:bg-[#F8FAFC]"
                     }`}
                   >
                     {g.label}
@@ -753,7 +754,7 @@ export default function Deploy() {
               </button>
             </div>
             {domains.length === 0 ? (
-              <p className="text-[13px] text-[#94A3B8]">
+              <p className="text-[13px] text-[#5B6B82]">
                 No domains pinned — widget is unrestricted. Add your production
                 host before going live.
               </p>
@@ -764,13 +765,13 @@ export default function Deploy() {
                     key={d}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-[#F1F5F9] px-2.5 py-1.5 text-[13px] font-medium text-[#334155]"
                   >
-                    <Globe size={13} className="text-[#94A3B8]" />
+                    <Globe size={13} className="text-[#5B6B82]" />
                     {d}
                     <button
                       onClick={() =>
                         setDomains((arr) => arr.filter((x) => x !== d))
                       }
-                      className="text-[#94A3B8] hover:text-[#EF4444]"
+                      className="text-[#5B6B82] hover:text-[#EF4444]"
                     >
                       <X size={13} />
                     </button>
@@ -783,7 +784,7 @@ export default function Deploy() {
           {/* Footer hint */}
           <div className="rounded-2xl border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-5 py-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-[13px] text-[#475569]">
-              <Palette size={16} className="text-[#94A3B8]" />
+              <Palette size={16} className="text-[#5B6B82]" />
               Want to fully theme the bubble, colours and launcher? Use the
               widget designer.
             </div>

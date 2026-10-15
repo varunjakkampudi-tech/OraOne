@@ -25,7 +25,7 @@ export default function ServerError() {
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-[#0F172A]">
           Server Error
         </h1>
-        <p className="mt-3 text-[#64748B] max-w-md mx-auto">
+        <p className="mt-3 text-[#5B6B82] max-w-md mx-auto">
           Something went wrong on our end. Our team has been notified. Please
           try again in a few moments.
         </p>

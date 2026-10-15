@@ -104,6 +104,8 @@ async def cleanup(email: str) -> None:
             )
             await session.execute(delete(User).where(User.id == user.id))
             await session.commit()
+        if await session.scalar(select(User.id).where(User.email == email)):
+            raise RuntimeError("Synthetic account still present after cleanup.")
     for key in (
         auth_service._verify_code_key,
         auth_service._login_otp_key,

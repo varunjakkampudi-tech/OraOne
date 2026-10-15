@@ -116,7 +116,7 @@ export function StatCard({
       <p className="mt-4 text-[28px] font-extrabold leading-none tracking-tight text-[#0F172A]">
         {value}
       </p>
-      <div className="mt-3 flex items-center gap-2 text-[11.5px] text-[#94A3B8]">
+      <div className="mt-3 flex items-center gap-2 text-[11.5px] text-[#5B6B82]">
         {delta && <Delta up={up}>{delta}</Delta>}
         {sub && <span>{sub}</span>}
       </div>
@@ -153,7 +153,7 @@ export function SectionTitle({
         <div>
           <h2 className="text-[15px] font-bold text-[#0F172A]">{title}</h2>
           {subtitle && (
-            <p className="text-[11.5px] text-[#64748B]">{subtitle}</p>
+            <p className="text-[11.5px] text-[#5B6B82]">{subtitle}</p>
           )}
         </div>
       </div>
@@ -179,12 +179,12 @@ export function Segmented({ value, onChange, options }) {
               "rounded-full px-4 py-1.5 text-sm font-semibold capitalize transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40",
               active
                 ? "bg-white text-[#0F172A] shadow-sm"
-                : "text-[#64748B] hover:text-[#0F172A]",
+                : "text-[#5B6B82] hover:text-[#0F172A]",
             )}
           >
             {label}
             {typeof o !== "string" && o.badge && (
-              <span className="ml-1.5 text-[11px] font-semibold text-[#16A34A]">
+              <span className="ml-1.5 text-[11px] font-semibold text-[#15803D]">
                 {o.badge}
               </span>
             )}
@@ -197,7 +197,7 @@ export function Segmented({ value, onChange, options }) {
 
 /* Status badge. */
 const TONES = {
-  green: "bg-[#DCFCE7] text-[#15803D]",
+  green: "bg-[#DCFCE7] text-[#166534]",
   blue: "bg-[#DBEAFE] text-[#1D4ED8]",
   indigo: "bg-[#F0F9FF] text-[#0369A1]",
   amber: "bg-[#FEF3C7] text-[#B45309]",

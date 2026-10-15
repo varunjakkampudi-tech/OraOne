@@ -349,7 +349,7 @@ export function EmptyStateLoader({
     >
       <OraMark size={64} className="animate-pulse" />
       <p className="mt-6 text-lg font-bold text-[#0F172A]">{label}</p>
-      <p className="mt-1 text-[13px] text-[#64748B] max-w-sm">{sub}</p>
+      <p className="mt-1 text-[13px] text-[#5B6B82] max-w-sm">{sub}</p>
       <div className="mt-4">
         <DotsLoader />
       </div>
@@ -385,14 +385,14 @@ export function ProgressStages({ stages, current = 0 }) {
                       ? "bg-[#2563EB] text-white"
                       : active
                         ? "bg-white border-2 border-[#2563EB] text-[#2563EB] ring-4 ring-[#2563EB]/15"
-                        : "bg-[#F1F5F9] text-[#94A3B8] border border-[#E2E8F0]"
+                        : "bg-[#F1F5F9] text-[#5B6B82] border border-[#E2E8F0]"
                   }`}
                 >
                   {i + 1}
                 </span>
                 <p
                   className={`mt-2 text-[11.5px] font-semibold ${
-                    done || active ? "text-[#2563EB]" : "text-[#94A3B8]"
+                    done || active ? "text-[#2563EB]" : "text-[#5B6B82]"
                   }`}
                 >
                   {s}
@@ -455,7 +455,7 @@ export function TopProgressBar({ active = true, label }) {
         />
       </div>
       {label && (
-        <p className="text-center text-[11px] text-[#64748B] mt-1 font-medium">
+        <p className="text-center text-[11px] text-[#5B6B82] mt-1 font-medium">
           {label}
         </p>
       )}

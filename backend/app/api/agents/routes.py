@@ -49,6 +49,7 @@ from app.services.audit import audit
 from app.services import usage_service
 from app.services import agent_lifecycle
 from app.services import agent_website_service
+from app.middleware.org_context import require_permission
 
 
 router = APIRouter(prefix="/api/agents", tags=["agents"])
@@ -292,6 +293,7 @@ async def list_agents(
     status_code=status.HTTP_201_CREATED,
     summary="Create an agent",
     description="Create a new agent and its 1:1 `agent_configs` sidecar in a single transaction.",
+    dependencies=[Depends(require_permission("agents.write"))],
 )
 async def create_agent(
     payload: AgentCreate,
@@ -459,6 +461,7 @@ async def get_agent(
         "Updates to `system_prompt`, `temperature`, `voice`, `language`, "
         "`greeting`, or `max_tokens` are applied to the 1:1 `agent_configs` row."
     ),
+    dependencies=[Depends(require_permission("agents.write"))],
 )
 async def update_agent(
     agent_id: uuid.UUID,

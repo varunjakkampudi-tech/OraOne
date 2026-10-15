@@ -35,6 +35,7 @@ from app.middleware.org_context import OrgContext, get_current_organization
 from app.middleware.project_context import ProjectContext, get_current_project
 from app.services import marketplace as catalog
 from app.services.audit import audit
+from app.middleware.org_context import require_permission
 
 router = APIRouter(prefix="/api/marketplace", tags=["marketplace"])
 
@@ -209,6 +210,7 @@ async def list_installations(
     "/listings/{slug}/install",
     response_model=InstallResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission("integrations.manage"))],
 )
 async def install_listing(
     slug: str,
@@ -324,6 +326,7 @@ async def install_listing(
     "/installations/{installation_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
+    dependencies=[Depends(require_permission("integrations.manage"))],
 )
 async def uninstall_listing(
     installation_id: uuid.UUID,

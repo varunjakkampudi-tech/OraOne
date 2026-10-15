@@ -95,7 +95,7 @@ export default function Navbar() {
             >
               <span>{item.label}</span>
               {item.status && (
-                <span className="text-[11px] text-[#64748B]">
+                <span className="text-[11px] text-[#5B6B82]">
                   {item.status}
                 </span>
               )}

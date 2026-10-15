@@ -18,6 +18,7 @@ from app.database.session import get_db
 from app.middleware.org_context import OrgContext, get_current_organization
 from app.services import agent_versioning as av
 from app.services.audit import audit
+from app.middleware.org_context import require_permission
 
 router = APIRouter(prefix="/api/agents", tags=["agent-versioning"])
 
@@ -43,7 +44,11 @@ async def list_versions(
     return data
 
 
-@router.post("/{agent_id}/versions", summary="Publish a new prompt version")
+@router.post(
+    "/{agent_id}/versions",
+    summary="Publish a new prompt version",
+    dependencies=[Depends(require_permission("agents.write"))],
+)
 async def publish_version(
     agent_id: uuid.UUID,
     payload: PublishRequest,
@@ -88,7 +93,11 @@ async def diff_versions(
     return data
 
 
-@router.post("/{agent_id}/versions/restore", summary="Roll back to a prior version")
+@router.post(
+    "/{agent_id}/versions/restore",
+    summary="Roll back to a prior version",
+    dependencies=[Depends(require_permission("agents.write"))],
+)
 async def restore_version(
     agent_id: uuid.UUID,
     payload: RestoreRequest,

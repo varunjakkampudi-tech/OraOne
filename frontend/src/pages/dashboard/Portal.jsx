@@ -48,7 +48,7 @@ const ACTIONS = [
     title: "Getting started",
     desc: "A guided checklist from zero to a live assistant.",
     to: "/app/getting-started",
-    accent: "from-[#ECFDF5] to-[#D1FAE5] text-[#16A34A]",
+    accent: "from-[#ECFDF5] to-[#D1FAE5] text-[#15803D]",
   },
   {
     key: "developers",
@@ -64,7 +64,7 @@ const ACTIONS = [
     title: "Product status",
     desc: "Live health of every OraOne service.",
     to: "/app/status",
-    accent: "from-[#ECFDF5] to-[#D1FAE5] text-[#16A34A]",
+    accent: "from-[#ECFDF5] to-[#D1FAE5] text-[#15803D]",
   },
   {
     key: "changelog",
@@ -169,7 +169,7 @@ export default function Portal() {
             </span>
             <div>
               <p className="text-sm font-bold text-[#0F172A]">Your plan</p>
-              <p className="text-xs text-[#64748B]">
+              <p className="text-xs text-[#5B6B82]">
                 Resource usage this period
               </p>
             </div>
@@ -209,12 +209,12 @@ export default function Portal() {
                   {a.title}
                 </p>
                 {a.external ? (
-                  <ArrowUpRight size={15} className="text-[#94A3B8]" />
+                  <ArrowUpRight size={15} className="text-[#5B6B82]" />
                 ) : (
-                  <ArrowRight size={15} className="text-[#94A3B8]" />
+                  <ArrowRight size={15} className="text-[#5B6B82]" />
                 )}
               </div>
-              <p className="mt-1 text-[13px] leading-snug text-[#64748B]">
+              <p className="mt-1 text-[13px] leading-snug text-[#5B6B82]">
                 {a.desc}
               </p>
             </>

@@ -171,7 +171,7 @@ export default function PricingPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.span
             {...fadeUp}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#2563EB]"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#1D4ED8]"
           >
             <Sparkles size={12} /> FREE ACCESS · BILLING DISABLED
           </motion.span>
@@ -346,7 +346,7 @@ export default function PricingPage() {
                   {t.cta.label}
                 </Link>
                 <p
-                  className={`mt-3 text-center text-xs ${t.dark ? "text-white/55" : "text-[#94A3B8]"}`}
+                  className={`mt-3 text-center text-xs ${t.dark ? "text-white/55" : "text-[#64748B]"}`}
                 >
                   No payment method required
                 </p>
@@ -376,7 +376,7 @@ export default function PricingPage() {
                     <p className="text-sm font-bold text-[#0F172A]">
                       {t.title}
                     </p>
-                    <p className="mt-1 text-xs text-[#64748B] leading-relaxed">
+                    <p className="mt-1 text-xs text-[#5B6B82] leading-relaxed">
                       {t.desc}
                     </p>
                   </div>
@@ -394,7 +394,7 @@ export default function PricingPage() {
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tighter text-[#0F172A]">
               Pricing Questions, Answered
             </h2>
-            <p className="mt-3 text-[#64748B]">
+            <p className="mt-3 text-[#5B6B82]">
               Everything you need to know about current free access and usage
               visibility.
             </p>
@@ -409,7 +409,7 @@ export default function PricingPage() {
                   <span className="text-[15px] font-semibold text-[#0F172A]">
                     {f.q}
                   </span>
-                  <span className="text-[#64748B] group-open:rotate-180 transition-transform shrink-0">
+                  <span className="text-[#5B6B82] group-open:rotate-180 transition-transform shrink-0">
                     <ArrowRight size={16} className="rotate-90" />
                   </span>
                 </summary>

@@ -21,8 +21,8 @@ export const COLOR = {
   // Text / ink scale
   ink: "#0F172A", // primary text & headings
   body: "#334155", // body copy
-  sub: "#64748B", // secondary text
-  faint: "#94A3B8", // tertiary / captions
+  sub: "#5B6B82", // secondary text (AA on canvas and tinted chips)
+  faint: "#5F6F86", // tertiary / captions (AA)
 
   // Lines & surfaces
   line: "#EAF0F6", // card borders

@@ -146,7 +146,7 @@ export default function Changelog() {
                 <span className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-br from-[#EFF6FF] to-[#ECFEFF] px-2.5 py-1 text-[12px] font-bold text-[#1D4ED8] ring-1 ring-[#DBEAFE]">
                   v{entry.version}
                 </span>
-                <span className="text-[12.5px] font-medium text-[#94A3B8]">
+                <span className="text-[12.5px] font-medium text-[#5B6B82]">
                   {entry.date}
                 </span>
                 {entry.highlight && (

@@ -197,7 +197,7 @@ export default function WorkflowCanvas({
         data-testid="workflow-canvas-empty"
       >
         <p className="text-sm font-semibold text-[#475569]">No steps yet</p>
-        <p className="mt-1 text-[12px] text-[#94A3B8]">
+        <p className="mt-1 text-[12px] text-[#5B6B82]">
           Add steps below — they'll appear here as connected nodes.
         </p>
       </div>
@@ -295,7 +295,7 @@ export default function WorkflowCanvas({
                     )}
                   </div>
                   {branch && (
-                    <p className="mt-1.5 pl-1.5 text-[11px] italic text-[#94A3B8]">
+                    <p className="mt-1.5 pl-1.5 text-[11px] italic text-[#5B6B82]">
                       ⤷ {branch}
                     </p>
                   )}

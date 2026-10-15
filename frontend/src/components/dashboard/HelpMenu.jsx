@@ -57,7 +57,7 @@ export default function HelpMenu({ dark = false }) {
     <div className="relative" ref={ref} data-testid="help-menu">
       <button
         onClick={() => setOpen((v) => !v)}
-        className={`grid size-9 place-items-center rounded-full transition-colors ${dark ? "text-slate-200 hover:bg-white/10" : "text-[#64748B] hover:bg-[#F1F5F9]"}`}
+        className={`grid size-9 place-items-center rounded-full transition-colors ${dark ? "text-slate-200 hover:bg-white/10" : "text-[#5B6B82] hover:bg-[#F1F5F9]"}`}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Help and product tour"
@@ -75,14 +75,14 @@ export default function HelpMenu({ dark = false }) {
           <div className="p-2">
             <button
               onClick={takeTour}
-              className="flex w-full items-center gap-2.5 rounded-xl bg-[#F0F6FF] px-3 py-2.5 text-left text-[#2563EB] transition-colors hover:bg-[#E0EDFF]"
+              className="flex w-full items-center gap-2.5 rounded-xl bg-[#F0F6FF] px-3 py-2.5 text-left text-[#1D4ED8] transition-colors hover:bg-[#E0EDFF]"
               role="menuitem"
               data-testid="help-take-tour"
             >
               <Compass size={17} />
               <div className="min-w-0">
                 <p className="text-[13px] font-semibold">Take a tour</p>
-                <p className="text-[11px] text-[#64748B]">
+                <p className="text-[11px] text-[#5B6B82]">
                   A quick guided walkthrough
                 </p>
               </div>
@@ -96,7 +96,7 @@ export default function HelpMenu({ dark = false }) {
                 className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] font-medium text-[#475569] transition-colors hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                 role="menuitem"
               >
-                <l.icon size={15} className="text-[#94A3B8]" />
+                <l.icon size={15} className="text-[#5B6B82]" />
                 {l.label}
               </button>
             ))}

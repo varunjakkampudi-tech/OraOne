@@ -129,7 +129,7 @@ export default function KnowledgeSearch() {
         <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0F172A]">
           Ask Your Knowledge
         </h2>
-        <p className="text-sm text-[#64748B] mt-1">
+        <p className="text-sm text-[#5B6B82] mt-1">
           Grounded answers and hybrid search across your documents and crawled
           websites.
         </p>
@@ -152,7 +152,7 @@ export default function KnowledgeSearch() {
                 <div className="text-2xl font-bold text-[#0F172A]">
                   {k.value}
                 </div>
-                <div className="text-xs text-[#64748B]">{k.label}</div>
+                <div className="text-xs text-[#5B6B82]">{k.label}</div>
               </div>
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function KnowledgeSearch() {
           <div className="relative flex-1">
             <Search
               size={18}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5B6B82]"
             />
             <input
               value={query}
@@ -208,6 +208,7 @@ export default function KnowledgeSearch() {
             ))}
           </div>
           <select
+            aria-label="Source type"
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
             className="px-3 py-1.5 rounded-lg border border-[#E2E8F0] text-xs text-[#475569]"
@@ -219,6 +220,7 @@ export default function KnowledgeSearch() {
             ))}
           </select>
           <select
+            aria-label="Knowledge base"
             value={kbId}
             onChange={(e) => setKbId(e.target.value)}
             className="px-3 py-1.5 rounded-lg border border-[#E2E8F0] text-xs text-[#475569]"
@@ -241,7 +243,7 @@ export default function KnowledgeSearch() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex items-center justify-center py-16 text-[#94A3B8]"
+            className="flex items-center justify-center py-16 text-[#5B6B82]"
           >
             <Loader2 className="animate-spin" />
           </motion.div>
@@ -353,10 +355,10 @@ function SourceRow({ index, source }) {
       {...(href ? { href, target: "_blank", rel: "noreferrer" } : {})}
       className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] group"
     >
-      <span className="h-6 w-6 shrink-0 rounded-md bg-[#EFF6FF] text-[#2563EB] text-xs font-bold inline-flex items-center justify-center">
+      <span className="h-6 w-6 shrink-0 rounded-md bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold inline-flex items-center justify-center">
         {index}
       </span>
-      <span className="text-[#64748B]">
+      <span className="text-[#5B6B82]">
         <SourceIcon type={source.type} />
       </span>
       <div className="min-w-0 flex-1">
@@ -364,7 +366,7 @@ function SourceRow({ index, source }) {
           {source.title || source.document || source.url}
         </div>
         {(source.url || source.page != null || source.section) && (
-          <div className="text-[11px] text-[#64748B] truncate">
+          <div className="text-[11px] text-[#5B6B82] truncate">
             {isWeb
               ? source.url
               : [
@@ -377,14 +379,14 @@ function SourceRow({ index, source }) {
         )}
       </div>
       {source.score != null && (
-        <span className="text-[11px] text-[#94A3B8] shrink-0">
+        <span className="text-[11px] text-[#5B6B82] shrink-0">
           {Math.round(source.score * 100)}%
         </span>
       )}
       {href && (
         <ExternalLink
           size={13}
-          className="text-[#94A3B8] group-hover:text-[#2563EB] shrink-0"
+          className="text-[#5B6B82] group-hover:text-[#2563EB] shrink-0"
         />
       )}
     </Wrapper>
@@ -409,7 +411,7 @@ function HitsView({ hits }) {
           >
             <div className="flex items-center justify-between gap-3 mb-2">
               <div className="inline-flex items-center gap-2 min-w-0">
-                <span className="text-[#64748B]">
+                <span className="text-[#5B6B82]">
                   <SourceIcon type={h.source_type} />
                 </span>
                 <span className="text-sm font-medium text-[#0F172A] truncate">
@@ -420,7 +422,7 @@ function HitsView({ hits }) {
                     href={h.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[#94A3B8] hover:text-[#2563EB]"
+                    className="text-[#5B6B82] hover:text-[#2563EB]"
                   >
                     <ExternalLink size={12} />
                   </a>
@@ -454,7 +456,7 @@ function HitsView({ hits }) {
 
 function Chip({ label, value }) {
   return (
-    <span className="text-[10px] px-2 py-0.5 rounded-md bg-[#F1F5F9] text-[#64748B]">
+    <span className="text-[10px] px-2 py-0.5 rounded-md bg-[#F1F5F9] text-[#5B6B82]">
       {label}: {Number(value).toFixed(2)}
     </span>
   );
@@ -472,7 +474,7 @@ function EmptyState({ noData }) {
       <h3 className="mt-3 text-lg font-semibold text-[#0F172A]">
         {noData ? "No matches found" : "Ask anything about your knowledge"}
       </h3>
-      <p className="text-sm text-[#64748B] mt-1">
+      <p className="text-sm text-[#5B6B82] mt-1">
         {noData
           ? "Try a different query or broaden your source filter."
           : "Answers are grounded in your documents and crawled websites, with citations."}

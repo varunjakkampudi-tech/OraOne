@@ -262,7 +262,7 @@ export default function Team() {
           <h1 className="text-[28px] font-semibold tracking-tight text-ink">
             Team &amp; Access
           </h1>
-          <p className="mt-1 text-sm text-[#64748B]">
+          <p className="mt-1 text-sm text-[#5B6B82]">
             Role-based access control, invitations and member management.
           </p>
         </div>
@@ -317,7 +317,7 @@ export default function Team() {
             <div className="relative max-w-xs w-full">
               <Search
                 size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5B6B82]"
               />
               <input
                 type="text"
@@ -355,7 +355,7 @@ export default function Team() {
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-5 py-10 text-center text-[13px] text-[#64748B]"
+                      className="px-5 py-10 text-center text-[13px] text-[#5B6B82]"
                     >
                       No members match your search.
                     </td>
@@ -385,12 +385,12 @@ export default function Team() {
                               <p className="text-[13.5px] font-semibold text-[#0F172A] flex items-center gap-2">
                                 {m.full_name || m.email.split("@")[0]}
                                 {m.is_you && (
-                                  <span className="text-[10px] font-bold text-[#2563EB] bg-[#EFF6FF] px-1.5 py-0.5 rounded-full">
+                                  <span className="text-[10px] font-bold text-[#1D4ED8] bg-[#EFF6FF] px-1.5 py-0.5 rounded-full">
                                     YOU
                                   </span>
                                 )}
                               </p>
-                              <p className="text-[12px] text-[#64748B]">
+                              <p className="text-[12px] text-[#5B6B82]">
                                 {m.email}
                               </p>
                             </div>
@@ -476,7 +476,7 @@ export default function Team() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-5 py-8 text-center text-[13px] text-[#64748B]"
+                    className="px-5 py-8 text-center text-[13px] text-[#5B6B82]"
                   >
                     No invitations yet.
                   </td>
@@ -500,10 +500,10 @@ export default function Team() {
                         {meta.label}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-[12.5px] text-[#64748B]">
+                    <td className="px-5 py-3.5 text-[12.5px] text-[#5B6B82]">
                       {i.invited_by || "—"}
                     </td>
-                    <td className="px-5 py-3.5 text-[12.5px] text-[#64748B]">
+                    <td className="px-5 py-3.5 text-[12.5px] text-[#5B6B82]">
                       {timeAgo(i.created_at)}
                     </td>
                     <td className="px-5 py-3.5">
@@ -515,7 +515,7 @@ export default function Team() {
                           <button
                             onClick={() => copyInvite(i)}
                             data-testid={`invite-copy-${i.id}`}
-                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-semibold text-[#2563EB] hover:bg-[#EFF6FF]"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-semibold text-[#1D4ED8] hover:bg-[#EFF6FF]"
                           >
                             <Copy size={11} /> Copy link
                           </button>
@@ -530,7 +530,7 @@ export default function Team() {
                           )}
                         </div>
                       ) : (
-                        <span className="text-[11.5px] text-[#94A3B8]">—</span>
+                        <span className="text-[11.5px] text-[#5B6B82]">—</span>
                       )}
                     </td>
                   </tr>
@@ -589,7 +589,7 @@ export default function Team() {
               </tbody>
             </table>
           ) : (
-            <div className="px-5 py-8 text-center text-[13px] text-[#64748B]">
+            <div className="px-5 py-8 text-center text-[13px] text-[#5B6B82]">
               {loading
                 ? "Loading permissions…"
                 : "Permission data is unavailable. Refresh to try again."}
@@ -658,7 +658,7 @@ export default function Team() {
                           data-testid={`invite-role-${r}`}
                           className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-[13px] font-semibold transition-colors justify-center ${
                             active
-                              ? "border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]"
+                              ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                               : "border-[#E2E8F0] text-[#475569] hover:border-[#2563EB]"
                           }`}
                         >
@@ -668,7 +668,7 @@ export default function Team() {
                     })}
                   </div>
                 </div>
-                <p className="text-[12px] text-[#64748B] flex items-start gap-1.5">
+                <p className="text-[12px] text-[#5B6B82] flex items-start gap-1.5">
                   <Mail size={13} className="mt-0.5 flex-shrink-0" />
                   We'll generate a secure invite link — copy and share it with
                   your teammate to let them join.
@@ -712,13 +712,13 @@ function StatusBadge({ status }) {
       label: "Pending",
     },
     accepted: {
-      cls: "text-[#15803D] bg-[#DCFCE7]",
+      cls: "text-[#166534] bg-[#DCFCE7]",
       icon: CheckCircle2,
       label: "Accepted",
     },
-    revoked: { cls: "text-[#94A3B8] bg-[#F1F5F9]", icon: X, label: "Revoked" },
+    revoked: { cls: "text-[#5B6B82] bg-[#F1F5F9]", icon: X, label: "Revoked" },
     expired: {
-      cls: "text-[#94A3B8] bg-[#F1F5F9]",
+      cls: "text-[#5B6B82] bg-[#F1F5F9]",
       icon: Clock,
       label: "Expired",
     },
@@ -744,7 +744,7 @@ function PermCell({ on }) {
   }
   return (
     <span className="inline-flex size-6 rounded-full bg-[#F1F5F9] items-center justify-center">
-      <X size={13} className="text-[#94A3B8]" strokeWidth={3} />
+      <X size={13} className="text-[#5B6B82]" strokeWidth={3} />
     </span>
   );
 }

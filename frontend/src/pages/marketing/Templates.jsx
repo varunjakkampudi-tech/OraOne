@@ -225,7 +225,7 @@ export default function TemplatesPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.span
             {...fadeUp}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#2563EB]"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#1D4ED8]"
           >
             <Sparkles size={11} /> AI AGENT TEMPLATES
           </motion.span>
@@ -237,7 +237,7 @@ export default function TemplatesPage() {
           </motion.h1>
           <motion.p
             {...fadeUp}
-            className="mt-5 text-[#64748B] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed"
+            className="mt-5 text-[#5B6B82] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed"
           >
             Quick-start with ready-to-use AI agent templates — preview the
             prompt, conversation flow and one-click deploy.
@@ -274,7 +274,7 @@ export default function TemplatesPage() {
                         />
                       </div>
                       <div>
-                        <span className="text-[10.5px] font-bold tracking-wider text-[#94A3B8] uppercase">
+                        <span className="text-[10.5px] font-bold tracking-wider text-[#5B6B82] uppercase">
                           {t.industry}
                         </span>
                         <span
@@ -289,7 +289,7 @@ export default function TemplatesPage() {
                   <h3 className="mt-4 text-lg font-bold tracking-tight text-[#0F172A] leading-snug">
                     {t.name}
                   </h3>
-                  <p className="mt-2 text-sm text-[#64748B] leading-relaxed flex-1">
+                  <p className="mt-2 text-sm text-[#5B6B82] leading-relaxed flex-1">
                     {t.desc}
                   </p>
                   <div className="mt-5 flex items-center gap-2">
@@ -330,7 +330,7 @@ export default function TemplatesPage() {
                 <h3 className="text-xl font-bold tracking-tight text-[#0F172A]">
                   More templates coming soon!
                 </h3>
-                <p className="mt-1.5 text-sm text-[#64748B] leading-relaxed max-w-2xl">
+                <p className="mt-1.5 text-sm text-[#5B6B82] leading-relaxed max-w-2xl">
                   We&apos;re building more industry-specific AI agent templates
                   — Logistics, EdTech, FinTech and more.
                 </p>
@@ -401,7 +401,7 @@ function PreviewModal({ template, onClose }) {
               <template.icon size={24} style={{ color: template.color }} />
             </div>
             <div>
-              <p className="text-[10.5px] font-bold tracking-wider text-[#94A3B8] uppercase">
+              <p className="text-[10.5px] font-bold tracking-wider text-[#5B6B82] uppercase">
                 {template.industry}
               </p>
               <h3 className="text-lg font-bold text-[#0F172A]">
@@ -417,7 +417,7 @@ function PreviewModal({ template, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="text-[#94A3B8] hover:text-[#0F172A]"
+            className="text-[#5B6B82] hover:text-[#0F172A]"
             data-testid="template-preview-close"
           >
             <X size={18} />
@@ -433,7 +433,7 @@ function PreviewModal({ template, onClose }) {
               </p>
               <button
                 onClick={copy}
-                className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-[#64748B] hover:text-[#2563EB]"
+                className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-[#5B6B82] hover:text-[#2563EB]"
               >
                 {copied ? <Check size={11} /> : <Copy size={11} />}
                 {copied ? "Copied" : "Copy"}
@@ -460,7 +460,7 @@ function PreviewModal({ template, onClose }) {
                   </div>
                   {i < arr.length - 1 && (
                     <div className="flex justify-center">
-                      <ArrowDown size={12} className="text-[#94A3B8]" />
+                      <ArrowDown size={12} className="text-[#64748B]" />
                     </div>
                   )}
                 </React.Fragment>
@@ -481,7 +481,7 @@ function PreviewModal({ template, onClose }) {
                 >
                   <CheckCircle2
                     size={13}
-                    className="text-[#16A34A] mt-0.5 flex-shrink-0"
+                    className="text-[#15803D] mt-0.5 flex-shrink-0"
                   />{" "}
                   {u}
                 </li>

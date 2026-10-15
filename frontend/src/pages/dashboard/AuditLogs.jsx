@@ -47,7 +47,7 @@ function JsonBlock({ label, data }) {
   if (data == null) return null;
   return (
     <div className="min-w-0 flex-1">
-      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#5B6B82]">
         {label}
       </p>
       <pre className="overflow-x-auto rounded-lg bg-[#0F172A] p-3 text-xs leading-relaxed text-[#E2E8F0] scrollbar-thin">
@@ -124,7 +124,7 @@ export default function AuditLogs() {
           <h1 className="flex items-center gap-2 text-2xl font-bold text-[#0F172A]">
             <ScrollText size={24} /> Audit Log
           </h1>
-          <p className="mt-1 text-sm text-[#64748B]">
+          <p className="mt-1 text-sm text-[#5B6B82]">
             Every change in your workspace, captured for security and
             compliance.
           </p>
@@ -140,10 +140,11 @@ export default function AuditLogs() {
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-white p-4">
-        <span className="flex items-center gap-1.5 text-sm font-medium text-[#64748B]">
+        <span className="flex items-center gap-1.5 text-sm font-medium text-[#5B6B82]">
           <Filter size={15} /> Filters
         </span>
         <select
+          aria-label="Filter by action"
           value={filters.action}
           onChange={(e) => setFilter("action")(e.target.value)}
           data-testid="audit-filter-action"
@@ -157,6 +158,7 @@ export default function AuditLogs() {
           ))}
         </select>
         <select
+          aria-label="Filter by resource"
           value={filters.resource}
           onChange={(e) => setFilter("resource")(e.target.value)}
           data-testid="audit-filter-resource"
@@ -170,6 +172,7 @@ export default function AuditLogs() {
           ))}
         </select>
         <select
+          aria-label="Time range"
           value={filters.days}
           onChange={(e) => setFilter("days")(e.target.value)}
           data-testid="audit-filter-days"
@@ -184,18 +187,18 @@ export default function AuditLogs() {
         {hasFilters && (
           <button
             onClick={clearFilters}
-            className="inline-flex items-center gap-1 text-sm font-medium text-[#64748B] hover:text-[#0F172A]"
+            className="inline-flex items-center gap-1 text-sm font-medium text-[#5B6B82] hover:text-[#0F172A]"
           >
             <X size={14} /> Clear
           </button>
         )}
-        <span className="ml-auto text-xs text-[#94A3B8]">{pageInfo}</span>
+        <span className="ml-auto text-xs text-[#5B6B82]">{pageInfo}</span>
       </div>
 
       {/* Table */}
       <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white">
         {loading ? (
-          <div className="grid h-64 place-items-center text-[#64748B]">
+          <div className="grid h-64 place-items-center text-[#5B6B82]">
             <Loader2 className="animate-spin" />
           </div>
         ) : logs.length === 0 ? (
@@ -205,7 +208,7 @@ export default function AuditLogs() {
               <p className="mt-3 text-sm font-medium text-[#475569]">
                 No audit events
               </p>
-              <p className="mt-1 text-xs text-[#94A3B8]">
+              <p className="mt-1 text-xs text-[#5B6B82]">
                 {hasFilters
                   ? "No events match your filters."
                   : "Actions across your workspace will appear here."}
@@ -228,7 +231,7 @@ export default function AuditLogs() {
                       hasDetail ? "hover:bg-[#F8FAFC]" : "cursor-default"
                     }`}
                   >
-                    <span className="w-4 shrink-0 text-[#94A3B8]">
+                    <span className="w-4 shrink-0 text-[#5B6B82]">
                       {hasDetail ? (
                         open ? (
                           <ChevronDown size={15} />
@@ -243,7 +246,7 @@ export default function AuditLogs() {
                     <span className="w-36 shrink-0 truncate text-sm font-medium text-[#0F172A]">
                       {l.resource}
                       {l.resource_id && (
-                        <span className="ml-1 font-mono text-xs text-[#94A3B8]">
+                        <span className="ml-1 font-mono text-xs text-[#5B6B82]">
                           {String(l.resource_id).slice(0, 8)}
                         </span>
                       )}
@@ -251,7 +254,7 @@ export default function AuditLogs() {
                     <span className="min-w-0 flex-1 truncate text-sm text-[#475569]">
                       {actorLabel(l.user_id)}
                     </span>
-                    <span className="shrink-0 text-xs text-[#94A3B8]">
+                    <span className="shrink-0 text-xs text-[#5B6B82]">
                       {fmtTime(l.created_at)}
                     </span>
                   </button>
@@ -286,7 +289,7 @@ export default function AuditLogs() {
           >
             Previous
           </button>
-          <span className="text-xs text-[#94A3B8]">{pageInfo}</span>
+          <span className="text-xs text-[#5B6B82]">{pageInfo}</span>
           <button
             onClick={() => setOffset((o) => o + PAGE_SIZE)}
             disabled={offset + PAGE_SIZE >= total}

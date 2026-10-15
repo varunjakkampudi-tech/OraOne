@@ -158,7 +158,7 @@ export default function Guide() {
       </Step>
 
       <Card className="flex items-center gap-3 p-4">
-        <CheckCircle2 size={20} className="shrink-0 text-[#16A34A]" />
+        <CheckCircle2 size={20} className="shrink-0 text-[#15803D]" />
         <p className="text-[13px] text-[#475569]">
           That's it — your agent is live. Watch real conversations come in under{" "}
           <Link

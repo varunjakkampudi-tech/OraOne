@@ -92,6 +92,37 @@ def _caller_id(request: Request) -> str:
     return f"ip:{_client_ip(request)}"
 
 
+async def _verified_caller_id(request: Request) -> str:
+    """Use only cryptographically verified subjects, including Cognito/cookies.
+
+    Unauthenticated login and recovery routes intentionally remain IP-scoped.
+    Invalid, expired or forged credentials never select a distinct bucket.
+    """
+    auth = request.headers.get("authorization", "")
+    token = auth[7:].strip() if auth.lower().startswith("bearer ") else ""
+    if not token and not auth:
+        from app.core.cookies import ACCESS_COOKIE_NAME
+
+        token = request.cookies.get(ACCESS_COOKIE_NAME, "")
+    if not token:
+        return f"ip:{_client_ip(request)}"
+    try:
+        from app.core.config import settings
+
+        if settings.auth_provider == "cognito":
+            from app.middleware.jwt_auth import verify_cognito_access_token
+
+            claims = await verify_cognito_access_token(token)
+        else:
+            from app.core.security import decode_access_token
+
+            claims = decode_access_token(token)
+        subject = claims.get("sub")
+        return f"user:{subject}" if subject else f"ip:{_client_ip(request)}"
+    except Exception:  # noqa: BLE001 — invalid identity uses shared IP bucket
+        return f"ip:{_client_ip(request)}"
+
+
 class RateLimitTier:
     __slots__ = ("name", "prefixes", "limit", "window_seconds")
 
@@ -163,7 +194,12 @@ async def rate_limit_middleware(request: Request, call_next):
     try:
         cache = _cache()
         window_bucket = int(time.time() // tier.window_seconds)
-        key = f"{tier.name}:{_caller_id(request)}:{window_bucket}"
+        identity = (
+            f"ip:{_client_ip(request)}"
+            if tier.name in {"auth", "password"}
+            else await _verified_caller_id(request)
+        )
+        key = f"{tier.name}:{identity}:{window_bucket}"
         count = cache.increment(key, ttl_seconds=tier.window_seconds * 1.5)
         if count > tier.limit:
             return JSONResponse(
@@ -178,7 +214,24 @@ async def rate_limit_middleware(request: Request, call_next):
                 },
                 headers={"Retry-After": str(tier.window_seconds)},
             )
-    except Exception:  # noqa: BLE001 — never block a request on a cache hiccup
+    except Exception:  # noqa: BLE001 — reject unmetered traffic in production
         log.warning("rate_limit_check_failed", exc_info=True)
-
+        if os.getenv("ENVIRONMENT", "").strip().lower() in {
+            "production",
+            "prod",
+            "staging",
+        }:
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "success": False,
+                    "error": {
+                        "code": "RATE_LIMIT_UNAVAILABLE",
+                        "message": "Request limits are temporarily unavailable. Retry shortly.",
+                    },
+                    "requestId": getattr(request.state, "request_id", None),
+                },
+                headers={"Retry-After": "5"},
+            )
+        # Local development tolerates temporary cache failure for debugging.
     return await call_next(request)

@@ -34,7 +34,7 @@ const STATUS_BADGE = {
 };
 
 const KB_STATUS_BADGE = {
-  draft: "bg-[#F1F5F9] text-[#64748B]",
+  draft: "bg-[#F1F5F9] text-[#5B6B82]",
   active: "bg-green-50 text-green-700",
   archived: "bg-amber-50 text-amber-700",
 };
@@ -378,7 +378,7 @@ export default function KnowledgeBaseDetails() {
     <div className="space-y-6" data-testid="kb-details-page">
       <button
         onClick={() => nav("/app/knowledge-base")}
-        className="text-sm text-[#64748B] hover:text-[#0F172A] inline-flex items-center gap-1.5"
+        className="text-sm text-[#5B6B82] hover:text-[#0F172A] inline-flex items-center gap-1.5"
       >
         <ArrowLeft size={14} /> Back to Knowledge Bases
       </button>
@@ -402,7 +402,7 @@ export default function KnowledgeBaseDetails() {
             </span>
           </div>
           {kb.description && (
-            <p className="text-sm text-[#64748B] mt-1 max-w-2xl">
+            <p className="text-sm text-[#5B6B82] mt-1 max-w-2xl">
               {kb.description}
             </p>
           )}
@@ -430,7 +430,7 @@ export default function KnowledgeBaseDetails() {
       >
         <Search
           size={16}
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5B6B82]"
         />
         <input
           value={query}
@@ -444,7 +444,7 @@ export default function KnowledgeBaseDetails() {
             <button
               type="button"
               onClick={clearSearch}
-              className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#0F172A]"
+              className="p-1.5 rounded-lg text-[#5B6B82] hover:text-[#0F172A]"
               aria-label="Clear search"
             >
               <X size={15} />
@@ -469,13 +469,13 @@ export default function KnowledgeBaseDetails() {
             <h3 className="text-sm font-semibold text-[#0F172A]">
               Search results for “{searchResults.query}”
             </h3>
-            <span className="text-xs text-[#64748B]">
+            <span className="text-xs text-[#5B6B82]">
               {searchResults.hits.length} match
               {searchResults.hits.length === 1 ? "" : "es"}
             </span>
           </div>
           {searchResults.hits.length === 0 ? (
-            <div className="p-8 text-center text-sm text-[#64748B]">
+            <div className="p-8 text-center text-sm text-[#5B6B82]">
               No matching content found.
             </div>
           ) : (
@@ -488,17 +488,17 @@ export default function KnowledgeBaseDetails() {
                       {h.document}
                     </span>
                     {h.page != null && (
-                      <span className="text-[10px] text-[#94A3B8]">
+                      <span className="text-[10px] text-[#5B6B82]">
                         · page {h.page}
                       </span>
                     )}
                     {h.section && (
-                      <span className="text-[10px] text-[#94A3B8] truncate">
+                      <span className="text-[10px] text-[#5B6B82] truncate">
                         · {h.section}
                       </span>
                     )}
                     {h.score != null && (
-                      <span className="ml-auto text-[10px] text-[#94A3B8]">
+                      <span className="ml-auto text-[10px] text-[#5B6B82]">
                         {(h.score * 100).toFixed(0)}%
                       </span>
                     )}
@@ -534,11 +534,11 @@ export default function KnowledgeBaseDetails() {
         }`}
         data-testid="kb-details-dropzone"
       >
-        <CloudUpload size={34} className="mx-auto text-[#94A3B8]" />
+        <CloudUpload size={34} className="mx-auto text-[#5B6B82]" />
         <p className="mt-3 text-base font-semibold text-[#0F172A]">
           Drag &amp; drop files here
         </p>
-        <p className="text-sm text-[#64748B] mt-1">
+        <p className="text-sm text-[#5B6B82] mt-1">
           PDF, DOCX, TXT, MD, CSV, XLSX, PPTX, JSON, HTML — up to 25 MB each
           {selectedFolder && selectedFolder !== "unfiled" && (
             <>
@@ -593,12 +593,12 @@ export default function KnowledgeBaseDetails() {
           data-testid="kb-folders"
         >
           <div className="flex items-center justify-between px-2 py-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-[#94A3B8]">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-[#5B6B82]">
               Folders
             </span>
             <button
               onClick={createFolder}
-              className="p-1 rounded-lg text-[#64748B] hover:text-[#2563EB] hover:bg-[#EFF6FF]"
+              className="p-1 rounded-lg text-[#5B6B82] hover:text-[#2563EB] hover:bg-[#EFF6FF]"
               aria-label="New folder"
               data-testid="kb-folder-add"
               title="New folder"
@@ -622,7 +622,7 @@ export default function KnowledgeBaseDetails() {
           />
           <div className="my-1 border-t border-[#F1F5F9]" />
           {folders.length === 0 ? (
-            <p className="px-2 py-3 text-[11px] text-[#94A3B8]">
+            <p className="px-2 py-3 text-[11px] text-[#5B6B82]">
               No folders yet. Create one to organize documents.
             </p>
           ) : (
@@ -649,7 +649,7 @@ export default function KnowledgeBaseDetails() {
               <button
                 onClick={toggleSelectAll}
                 disabled={visibleDocs.length === 0}
-                className="text-[#64748B] hover:text-[#2563EB] disabled:opacity-40"
+                className="text-[#5B6B82] hover:text-[#2563EB] disabled:opacity-40"
                 aria-label="Select all"
                 data-testid="kb-select-all"
               >
@@ -667,7 +667,7 @@ export default function KnowledgeBaseDetails() {
                     : folderName(selectedFolder)}
               </h3>
             </div>
-            <span className="text-xs text-[#64748B]">
+            <span className="text-xs text-[#5B6B82]">
               {visibleDocs.length} shown
             </span>
           </div>
@@ -713,7 +713,7 @@ export default function KnowledgeBaseDetails() {
                         </button>
                       ))}
                       {folders.length === 0 && (
-                        <p className="px-3 py-2 text-[11px] text-[#94A3B8]">
+                        <p className="px-3 py-2 text-[11px] text-[#5B6B82]">
                           No folders
                         </p>
                       )}
@@ -741,7 +741,7 @@ export default function KnowledgeBaseDetails() {
               </button>
               <button
                 onClick={clearSelection}
-                className="ml-auto text-xs text-[#64748B] hover:text-[#0F172A]"
+                className="ml-auto text-xs text-[#5B6B82] hover:text-[#0F172A]"
               >
                 Clear
               </button>
@@ -749,7 +749,7 @@ export default function KnowledgeBaseDetails() {
           )}
 
           {visibleDocs.length === 0 ? (
-            <div className="p-10 text-center text-sm text-[#64748B]">
+            <div className="p-10 text-center text-sm text-[#5B6B82]">
               No documents {selectedFolder ? "in this folder" : "uploaded yet"}.
             </div>
           ) : (
@@ -764,7 +764,7 @@ export default function KnowledgeBaseDetails() {
                 >
                   <button
                     onClick={() => toggleSelect(d.id)}
-                    className="text-[#94A3B8] hover:text-[#2563EB]"
+                    className="text-[#5B6B82] hover:text-[#2563EB]"
                     aria-label="Select document"
                     data-testid={`kb-doc-select-${d.id}`}
                   >
@@ -785,7 +785,7 @@ export default function KnowledgeBaseDetails() {
                     >
                       {d.filename}
                     </button>
-                    <p className="text-xs text-[#64748B] mt-0.5 truncate">
+                    <p className="text-xs text-[#5B6B82] mt-0.5 truncate">
                       {d.file_type || "Unknown"} · {humanSize(d.file_size)} ·{" "}
                       {(d.chunk_count || 0).toLocaleString()} chunks
                       {d.chunk_count > 0 && (
@@ -899,17 +899,17 @@ export default function KnowledgeBaseDetails() {
               </h3>
               <button
                 onClick={() => setTextOpen(false)}
-                className="size-8 grid place-items-center rounded-lg text-[#64748B] hover:bg-[#F1F5F9]"
+                className="size-8 grid place-items-center rounded-lg text-[#5B6B82] hover:bg-[#F1F5F9]"
                 aria-label="Close"
               >
                 <X size={16} />
               </button>
             </div>
-            <p className="mt-1 text-sm text-[#64748B]">
+            <p className="mt-1 text-sm text-[#5B6B82]">
               Paste raw content or Q&amp;A. It will be chunked, embedded and
               searchable like any document.
             </p>
-            <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+            <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-[#5B6B82]">
               Title
             </label>
             <input
@@ -919,7 +919,7 @@ export default function KnowledgeBaseDetails() {
               className="mt-1 w-full rounded-xl border border-[#E2E8F0] px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
               data-testid="kb-text-title"
             />
-            <label className="mt-3 block text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+            <label className="mt-3 block text-xs font-semibold uppercase tracking-wide text-[#5B6B82]">
               Content
             </label>
             <textarea
@@ -959,7 +959,7 @@ function Stat({ label, value, icon: Icon }) {
   return (
     <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-[#E2E8F0]">
       <Icon size={14} className="text-[#475569]" />
-      <span className="text-[#64748B]">{label}:</span>
+      <span className="text-[#5B6B82]">{label}:</span>
       <span className="font-semibold text-[#0F172A]">
         {(value || 0).toLocaleString()}
       </span>
@@ -988,7 +988,7 @@ function FolderItem({
       <Icon
         size={15}
         style={color ? { color } : undefined}
-        className={active ? "text-[#2563EB]" : "text-[#64748B]"}
+        className={active ? "text-[#2563EB]" : "text-[#5B6B82]"}
       />
       <span
         className={`flex-1 text-sm truncate ${active ? "text-[#2563EB] font-medium" : "text-[#334155]"}`}
@@ -1003,7 +1003,7 @@ function FolderItem({
                 e.stopPropagation();
                 onRename();
               }}
-              className="p-0.5 rounded text-[#94A3B8] hover:text-[#2563EB]"
+              className="p-0.5 rounded text-[#5B6B82] hover:text-[#2563EB]"
               aria-label="Rename folder"
             >
               <Pencil size={12} />
@@ -1015,7 +1015,7 @@ function FolderItem({
                 e.stopPropagation();
                 onDelete();
               }}
-              className="p-0.5 rounded text-[#94A3B8] hover:text-red-500"
+              className="p-0.5 rounded text-[#5B6B82] hover:text-red-500"
               aria-label="Delete folder"
             >
               <Trash2 size={12} />
@@ -1023,7 +1023,7 @@ function FolderItem({
           )}
         </span>
       )}
-      <span className="group-hover:hidden text-[11px] text-[#94A3B8] tabular-nums">
+      <span className="group-hover:hidden text-[11px] text-[#5B6B82] tabular-nums">
         {count ?? 0}
       </span>
     </div>
@@ -1102,14 +1102,14 @@ function PreviewDrawer({ doc, onClose, onChanged }) {
                 {doc.filename}
               </h3>
             </div>
-            <p className="text-[11px] text-[#94A3B8] mt-0.5">
+            <p className="text-[11px] text-[#5B6B82] mt-0.5">
               {doc.file_type} · {humanSize(doc.file_size)}
               {doc.version > 1 && <> · v{doc.version}</>}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#0F172A] hover:bg-[#F1F5F9]"
+            className="p-1.5 rounded-lg text-[#5B6B82] hover:text-[#0F172A] hover:bg-[#F1F5F9]"
             aria-label="Close"
           >
             <X size={16} />
@@ -1210,7 +1210,7 @@ function PreviewDrawer({ doc, onClose, onChanged }) {
             <Section icon={Tag} title="Tags">
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {tags.length === 0 && (
-                  <span className="text-xs text-[#94A3B8]">No tags yet.</span>
+                  <span className="text-xs text-[#5B6B82]">No tags yet.</span>
                 )}
                 {tags.map((t) => (
                   <span
@@ -1270,10 +1270,10 @@ function PreviewDrawer({ doc, onClose, onChanged }) {
                       <span className="font-medium text-[#334155]">
                         v{v.version}
                       </span>
-                      <span className="text-[#94A3B8]">
+                      <span className="text-[#5B6B82]">
                         {humanSize(v.file_size)}
                       </span>
-                      <span className="text-[#94A3B8]">
+                      <span className="text-[#5B6B82]">
                         {new Date(v.created_at).toLocaleDateString()}
                       </span>
                     </li>
@@ -1293,7 +1293,7 @@ function Section({ icon: Icon, title, children }) {
     <div>
       <div className="flex items-center gap-1.5 mb-2">
         <Icon size={13} className="text-[#2563EB]" />
-        <h4 className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B]">
+        <h4 className="text-[11px] font-semibold uppercase tracking-wide text-[#5B6B82]">
           {title}
         </h4>
       </div>
@@ -1305,7 +1305,7 @@ function Section({ icon: Icon, title, children }) {
 function MiniStat({ label, value }) {
   return (
     <div className="px-3 py-2 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-      <p className="text-[10px] uppercase tracking-wide text-[#94A3B8]">
+      <p className="text-[10px] uppercase tracking-wide text-[#5B6B82]">
         {label}
       </p>
       <p className="text-sm font-semibold text-[#0F172A]">{value}</p>

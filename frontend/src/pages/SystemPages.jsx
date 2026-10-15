@@ -25,7 +25,7 @@ function Shell({ icon: Icon, title, desc, children, badge }) {
         <h1 className="mt-5 text-3xl sm:text-4xl font-black tracking-tight text-[#0F172A]">
           {title}
         </h1>
-        <p className="mt-3 text-[#64748B] leading-relaxed">{desc}</p>
+        <p className="mt-3 text-[#5B6B82] leading-relaxed">{desc}</p>
         {children}
       </motion.div>
     </div>

@@ -14,9 +14,9 @@ const fadeUp = {
 
 // Category color tokens
 const CAT_STYLES = {
-  CRM: { bg: "#FEE2E2", color: "#DC2626" },
-  Communication: { bg: "#DBEAFE", color: "#2563EB" },
-  Documents: { bg: "#DCFCE7", color: "#16A34A" },
+  CRM: { bg: "#FEE2E2", color: "#B91C1C" },
+  Communication: { bg: "#DBEAFE", color: "#1D4ED8" },
+  Documents: { bg: "#DCFCE7", color: "#166534" },
   Other: { bg: "#EDE9FE", color: "#7C3AED" },
 };
 
@@ -87,7 +87,7 @@ export default function IntegrationsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.span
             {...fadeUp}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#2563EB]"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-xs font-bold tracking-[0.2em] text-[#1D4ED8]"
           >
             <span className="size-1.5 rounded-full bg-[#2563EB]" />
             SEAMLESS INTEGRATIONS
@@ -101,7 +101,7 @@ export default function IntegrationsPage() {
           </motion.h1>
           <motion.p
             {...fadeUp}
-            className="mt-5 text-[#64748B] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed"
+            className="mt-5 text-[#5B6B82] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed"
           >
             Connect OraOne with the tools you use every day.
             <br className="hidden sm:block" /> Automate workflows and streamline
@@ -160,7 +160,7 @@ export default function IntegrationsPage() {
                     {i.category}
                   </span>
 
-                  <p className="mt-3 text-sm text-[#64748B] leading-relaxed flex-1">
+                  <p className="mt-3 text-sm text-[#5B6B82] leading-relaxed flex-1">
                     {i.desc}
                   </p>
                 </motion.div>
@@ -183,13 +183,13 @@ export default function IntegrationsPage() {
 
               {/* Right text */}
               <div>
-                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFF6FF] text-[10px] font-bold tracking-[0.2em] text-[#2563EB]">
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFF6FF] text-[10px] font-bold tracking-[0.2em] text-[#1D4ED8]">
                   <Sparkles size={10} /> MORE INTEGRATIONS COMING SOON
                 </span>
                 <h2 className="mt-5 text-3xl sm:text-4xl font-bold tracking-tight text-[#0F172A] leading-tight">
                   We're adding more integrations every month.
                 </h2>
-                <p className="mt-4 text-[#64748B] leading-relaxed">
+                <p className="mt-4 text-[#5B6B82] leading-relaxed">
                   Can't find the integration you need? Our team can help you
                   build a custom integration.
                 </p>

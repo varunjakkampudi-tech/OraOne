@@ -63,9 +63,9 @@ const isPathActive = (pathname, item) =>
   ) || false;
 
 const linkClass = ({ isActive }) =>
-  `flex min-h-[42px] items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+  `flex min-h-[36px] items-center gap-2.5 px-3 py-1.5 rounded-lg text-[13.5px] font-medium transition-colors ${
     isActive
-      ? "bg-[#F0F6FF] text-[#2563EB]"
+      ? "bg-[#F0F6FF] text-[#1D4ED8]"
       : "text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
   }`;
 
@@ -81,15 +81,15 @@ function NavItem({ item, onItemClick }) {
   if (item.disabled) {
     return (
       <div
-        className="flex min-h-[42px] items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-[#94A3B8] cursor-not-allowed select-none"
+        className="flex min-h-[36px] items-center gap-2.5 px-3 py-1.5 rounded-lg text-[13.5px] font-medium text-[#5B6B82] cursor-not-allowed select-none"
         data-testid={item.id}
         aria-disabled="true"
         title="Planned"
       >
-        <Icon size={18} />
+        <Icon size={17} />
         <span className="flex-1">{item.label}</span>
         {item.badge && (
-          <span className="rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[10px] font-bold text-[#94A3B8]">
+          <span className="rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[10px] font-bold text-[#475569]">
             {item.badge}
           </span>
         )}
@@ -111,10 +111,10 @@ function NavItem({ item, onItemClick }) {
         isPathActive(pathname, item) && !childSelected ? "page" : undefined
       }
     >
-      <Icon size={18} />
+      <Icon size={17} />
       <span className="flex-1">{item.label}</span>
       {item.badge && (
-        <span className="rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[10px] font-bold text-[#64748B]">
+        <span className="rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[10px] font-bold text-[#475569]">
           {item.badge}
         </span>
       )}
@@ -145,7 +145,7 @@ function SidebarContent({ onItemClick, showClose, onClose, closeButtonRef }) {
             <button
               onClick={onClose}
               ref={closeButtonRef}
-              className="grid size-11 place-items-center rounded-lg text-[#64748B] hover:bg-[#F1F5F9]"
+              className="grid size-11 place-items-center rounded-lg text-[#5B6B82] hover:bg-[#F1F5F9]"
               aria-label="Close menu"
               data-testid="sidebar-close-btn"
             >
@@ -153,7 +153,7 @@ function SidebarContent({ onItemClick, showClose, onClose, closeButtonRef }) {
             </button>
           </div>
           <div className="px-4 pt-3 lg:hidden">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5B6B82]">
               Workspace
             </p>
             <p className="truncate text-sm font-semibold text-[#0F172A]">
@@ -173,7 +173,7 @@ function SidebarContent({ onItemClick, showClose, onClose, closeButtonRef }) {
             className={gi > 0 ? "pt-1.5" : ""}
           >
             {group.label && (
-              <p className="px-3 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-[0.09em] text-[#94A3B8]">
+              <p className="px-3 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-[0.09em] text-[#5B6B82]">
                 {group.label}
               </p>
             )}
@@ -188,7 +188,7 @@ function SidebarContent({ onItemClick, showClose, onClose, closeButtonRef }) {
                       <button
                         type="button"
                         onClick={() => setChatOpen((open) => !open)}
-                        className="mr-2 grid size-8 shrink-0 place-items-center rounded-lg text-[#94A3B8] transition hover:bg-[#F8FAFC] hover:text-[#0F172A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40"
+                        className="mr-2 grid size-8 shrink-0 place-items-center rounded-lg text-[#5B6B82] transition hover:bg-[#F8FAFC] hover:text-[#0F172A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40"
                         aria-label={`${chatOpen ? "Collapse" : "Expand"} ${item.label} navigation`}
                         aria-expanded={chatOpen}
                       >
@@ -209,10 +209,10 @@ function SidebarContent({ onItemClick, showClose, onClose, closeButtonRef }) {
                           data-testid={child.id}
                           onClick={onItemClick}
                           className={({ isActive }) =>
-                            `flex min-h-[42px] items-center rounded-lg px-3 py-2 text-sm transition-colors ${
+                            `flex min-h-[32px] items-center rounded-md px-3 py-1 text-[13px] transition-colors ${
                               isActive || isPathActive(pathname, child)
-                                ? "bg-[#F0F6FF] font-semibold text-[#2563EB]"
-                                : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                                ? "bg-[#F0F6FF] font-semibold text-[#1D4ED8]"
+                                : "text-[#5B6B82] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                             }`
                           }
                           aria-current={
@@ -233,7 +233,7 @@ function SidebarContent({ onItemClick, showClose, onClose, closeButtonRef }) {
       <div className="border-t border-[#E2E8F0] p-3">
         <NavLink
           to="/app/status"
-          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-[#5B6B82] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
         >
           <span
             className="size-2 rounded-full bg-[#94A3B8]"
@@ -243,14 +243,14 @@ function SidebarContent({ onItemClick, showClose, onClose, closeButtonRef }) {
         </NavLink>
         <NavLink
           to="/app/guide"
-          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-[#5B6B82] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
         >
           Help &amp; Support
         </NavLink>
         <NavLink
           to="/app/products"
           data-testid="nav-product-portfolio"
-          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-[#5B6B82] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
         >
           Explore all products
         </NavLink>

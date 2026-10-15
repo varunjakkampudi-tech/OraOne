@@ -43,7 +43,7 @@ export default function CaseStudiesPage() {
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter text-[#0F172A]">
             Case Studies
           </h1>
-          <p className="mt-4 text-[#64748B] max-w-2xl mx-auto">
+          <p className="mt-4 text-[#5B6B82] max-w-2xl mx-auto">
             Representative outcomes for teams putting OraOne to work across
             industries.
           </p>
@@ -74,7 +74,7 @@ export default function CaseStudiesPage() {
               <p className="text-2xl font-bold text-[#2563EB] tracking-tight">
                 {c.result}
               </p>
-              <p className="mt-4 text-[#64748B] italic">"{c.quote}"</p>
+              <p className="mt-4 text-[#5B6B82] italic">"{c.quote}"</p>
             </motion.div>
           ))}
         </div>

@@ -89,7 +89,7 @@ function CreateTeamModal({ onClose, onCreated }) {
           <h2 className="text-lg font-bold text-[#0F172A]">New team</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]"
+            className="rounded-lg p-1 text-[#5B6B82] hover:bg-[#F1F5F9]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -250,14 +250,14 @@ function TeamDetailDrawer({ teamId, members, canManage, onClose, onChanged }) {
               <h2 className="text-sm font-bold text-[#0F172A]">
                 {team?.name || "Team"}
               </h2>
-              <p className="text-[12px] text-[#94A3B8]">
+              <p className="text-[12px] text-[#5B6B82]">
                 {team?.members?.length || 0} members
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]"
+            className="rounded-lg p-1 text-[#5B6B82] hover:bg-[#F1F5F9]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -276,7 +276,7 @@ function TeamDetailDrawer({ teamId, members, canManage, onClose, onChanged }) {
             )}
 
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-[12px] font-bold uppercase tracking-wide text-[#94A3B8]">
+              <h3 className="text-[12px] font-bold uppercase tracking-wide text-[#5B6B82]">
                 Members
               </h3>
               {canManage && !adding && (
@@ -344,7 +344,7 @@ function TeamDetailDrawer({ teamId, members, canManage, onClose, onChanged }) {
                     <p className="truncate text-sm font-medium text-[#0F172A]">
                       {m.user?.name || "Member"}
                     </p>
-                    <p className="truncate text-[11px] text-[#94A3B8]">
+                    <p className="truncate text-[11px] text-[#5B6B82]">
                       {m.user?.email}
                     </p>
                   </div>
@@ -353,7 +353,7 @@ function TeamDetailDrawer({ teamId, members, canManage, onClose, onChanged }) {
                     <button
                       onClick={() => removeMember(m.id)}
                       disabled={busy}
-                      className="rounded-lg p-1.5 text-[#94A3B8] hover:bg-[#FEE2E2] hover:text-[#DC2626] disabled:opacity-50"
+                      className="rounded-lg p-1.5 text-[#5B6B82] hover:bg-[#FEE2E2] hover:text-[#DC2626] disabled:opacity-50"
                       aria-label="Remove member"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -435,7 +435,7 @@ export default function Teams() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-[#0F172A]">Teams</h1>
-            <p className="text-sm text-[#64748B]">
+            <p className="text-sm text-[#5B6B82]">
               Group members into departments and share resources with the whole
               team at once.
             </p>
@@ -457,7 +457,7 @@ export default function Teams() {
           <p className="mt-3 text-sm font-medium text-[#475569]">
             No teams yet
           </p>
-          <p className="text-[13px] text-[#94A3B8]">
+          <p className="text-[13px] text-[#5B6B82]">
             Create your first team to start collaborating.
           </p>
         </div>
@@ -483,13 +483,13 @@ export default function Teams() {
                     <p className="truncate text-sm font-bold text-[#0F172A]">
                       {team.name}
                     </p>
-                    <p className="text-[12px] text-[#94A3B8]">
+                    <p className="text-[12px] text-[#5B6B82]">
                       {team.member_count ?? team.members?.length ?? 0} members
                     </p>
                   </div>
                 </div>
                 {team.description && (
-                  <p className="mt-3 line-clamp-2 text-[13px] text-[#64748B]">
+                  <p className="mt-3 line-clamp-2 text-[13px] text-[#5B6B82]">
                     {team.description}
                   </p>
                 )}
@@ -505,7 +505,7 @@ export default function Teams() {
                   <button
                     onClick={() => remove(team)}
                     disabled={busyId === team.id}
-                    className="rounded-lg p-1.5 text-[#94A3B8] opacity-0 transition group-hover:opacity-100 hover:bg-[#FEE2E2] hover:text-[#DC2626] disabled:opacity-50"
+                    className="rounded-lg p-1.5 text-[#5B6B82] opacity-0 transition group-hover:opacity-100 hover:bg-[#FEE2E2] hover:text-[#DC2626] disabled:opacity-50"
                     aria-label="Delete team"
                   >
                     <Trash2 className="h-4 w-4" />

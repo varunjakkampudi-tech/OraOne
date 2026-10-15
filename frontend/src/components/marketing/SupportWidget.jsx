@@ -121,13 +121,13 @@ export default function SupportWidget() {
             <div className="p-4">
               {sent ? (
                 <div className="py-6 text-center" data-testid="support-sent">
-                  <span className="mx-auto grid size-12 place-items-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
+                  <span className="mx-auto grid size-12 place-items-center rounded-full bg-[#DCFCE7] text-[#166534]">
                     <Check size={24} />
                   </span>
                   <p className="mt-3 text-[15px] font-semibold text-[#0F172A]">
                     Message sent!
                   </p>
-                  <p className="mt-1 text-[13px] text-[#64748B]">
+                  <p className="mt-1 text-[13px] text-[#5B6B82]">
                     Thanks for reaching out — our team will get back to you
                     within 24 hours.
                   </p>
@@ -211,7 +211,7 @@ export default function SupportWidget() {
 
                   <a
                     href={`mailto:${SUPPORT_EMAIL}`}
-                    className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-[#64748B] hover:text-[#2563EB]"
+                    className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-[#5B6B82] hover:text-[#2563EB]"
                   >
                     <Mail size={13} /> {SUPPORT_EMAIL}
                   </a>

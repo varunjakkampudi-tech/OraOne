@@ -94,13 +94,13 @@ function CreateKeyModal({ scopes, onClose, onCreated }) {
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-lg font-bold text-[#0F172A]">Create API key</h2>
-            <p className="text-sm text-[#64748B]">
+            <p className="text-sm text-[#5B6B82]">
               Scope the key to only what it needs.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9]"
+            className="rounded-lg p-1 text-[#5B6B82] hover:bg-[#F1F5F9]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -139,7 +139,7 @@ function CreateKeyModal({ scopes, onClose, onCreated }) {
                       <span className="block font-medium text-[#0F172A]">
                         {s.label}
                       </span>
-                      <span className="block font-mono text-[11px] text-[#94A3B8]">
+                      <span className="block font-mono text-[11px] text-[#5B6B82]">
                         {s.scope}
                       </span>
                     </span>
@@ -203,7 +203,7 @@ function RevealKeyModal({ payload, onClose }) {
             <h2 className="text-lg font-bold text-[#0F172A]">
               Save your API key
             </h2>
-            <p className="text-sm text-[#64748B]">
+            <p className="text-sm text-[#5B6B82]">
               This is the only time you'll see the full key.
             </p>
           </div>
@@ -320,7 +320,7 @@ export default function ApiKeys() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-[#0F172A]">API Keys</h1>
-            <p className="text-sm text-[#64748B]">
+            <p className="text-sm text-[#5B6B82]">
               Programmatic access to your organization via the{" "}
               <span className="font-mono text-[#4F46E5]">/api/v1</span> REST
               API.
@@ -353,7 +353,7 @@ export default function ApiKeys() {
           <p className="text-sm font-semibold text-[#0F172A]">
             No API keys yet
           </p>
-          <p className="mt-1 max-w-sm text-sm text-[#64748B]">
+          <p className="mt-1 max-w-sm text-sm text-[#5B6B82]">
             Create a key to call the OraOne API from your own servers, scripts,
             or integrations.
           </p>
@@ -370,7 +370,7 @@ export default function ApiKeys() {
         <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-left text-xs uppercase tracking-wide text-[#94A3B8]">
+              <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-left text-xs uppercase tracking-wide text-[#5B6B82]">
                 <th className="px-5 py-3 font-semibold">Name</th>
                 <th className="px-5 py-3 font-semibold">Key</th>
                 <th className="px-5 py-3 font-semibold">Scopes</th>
@@ -400,10 +400,10 @@ export default function ApiKeys() {
                       ))}
                     </div>
                   </td>
-                  <td className="px-5 py-4 text-[#64748B]">
+                  <td className="px-5 py-4 text-[#5B6B82]">
                     {fmtRelative(k.last_used_at)}
                   </td>
-                  <td className="px-5 py-4 text-[#64748B]">
+                  <td className="px-5 py-4 text-[#5B6B82]">
                     {fmtDate(k.created_at)}
                   </td>
                   {canManage && (
@@ -428,7 +428,7 @@ export default function ApiKeys() {
         <h2 className="text-base font-semibold text-[#0F172A]">
           Using the API
         </h2>
-        <p className="mt-1 text-sm text-[#64748B]">
+        <p className="mt-1 text-sm text-[#5B6B82]">
           Authenticate every request with your key. Rate limits follow your{" "}
           <Link to="/app/billing" className="font-medium text-[#4F46E5]">
             plan

@@ -330,13 +330,13 @@ export default function SupportLauncher() {
               >
                 {fbSent ? (
                   <div className="py-8 text-center">
-                    <span className="mx-auto grid size-12 place-items-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
+                    <span className="mx-auto grid size-12 place-items-center rounded-full bg-[#DCFCE7] text-[#166534]">
                       <Check size={24} />
                     </span>
                     <p className="mt-3 text-sm font-semibold text-[#0F172A]">
                       Message sent!
                     </p>
-                    <p className="mt-1 text-[12.5px] text-[#64748B]">
+                    <p className="mt-1 text-[12.5px] text-[#5B6B82]">
                       Our team will get back to you within 24 hours.
                     </p>
                   </div>
@@ -408,7 +408,7 @@ export default function SupportLauncher() {
                 className="flex-1 space-y-3 overflow-y-auto bg-[#F8FAFC] p-4"
               >
                 {booting && (
-                  <div className="flex items-center justify-center py-10 text-[#94A3B8]">
+                  <div className="flex items-center justify-center py-10 text-[#5B6B82]">
                     <Loader2 className="animate-spin" size={20} />
                   </div>
                 )}
@@ -435,7 +435,7 @@ export default function SupportLauncher() {
                           {m.sources.slice(0, 4).map((s, j) => (
                             <span
                               key={j}
-                              className="inline-flex items-center gap-1 rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[10px] font-medium text-[#2563EB]"
+                              className="inline-flex items-center gap-1 rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[10px] font-medium text-[#1D4ED8]"
                             >
                               <FileText size={10} />
                               {s.title || s.url || "Source"}
@@ -455,12 +455,12 @@ export default function SupportLauncher() {
                           data-testid={`support-feedback-${i}`}
                         >
                           {m.feedback ? (
-                            <span className="text-[10px] font-medium text-[#16A34A]">
+                            <span className="text-[10px] font-medium text-[#15803D]">
                               Thanks for the feedback!
                             </span>
                           ) : (
                             <>
-                              <span className="text-[10px] text-[#94A3B8]">
+                              <span className="text-[10px] text-[#5B6B82]">
                                 Was this helpful?
                               </span>
                               <button
@@ -468,7 +468,7 @@ export default function SupportLauncher() {
                                 onClick={() => sendFeedback(i, true)}
                                 data-testid={`support-feedback-up-${i}`}
                                 aria-label="Helpful"
-                                className="flex h-6 w-6 items-center justify-center rounded-md text-[#94A3B8] transition hover:bg-[#ECFDF5] hover:text-[#047857]"
+                                className="flex h-6 w-6 items-center justify-center rounded-md text-[#5B6B82] transition hover:bg-[#ECFDF5] hover:text-[#047857]"
                               >
                                 <ThumbsUp size={12} />
                               </button>
@@ -477,7 +477,7 @@ export default function SupportLauncher() {
                                 onClick={() => sendFeedback(i, false)}
                                 data-testid={`support-feedback-down-${i}`}
                                 aria-label="Not helpful"
-                                className="flex h-6 w-6 items-center justify-center rounded-md text-[#94A3B8] transition hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                                className="flex h-6 w-6 items-center justify-center rounded-md text-[#5B6B82] transition hover:bg-[#FEF2F2] hover:text-[#DC2626]"
                               >
                                 <ThumbsDown size={12} />
                               </button>
@@ -492,7 +492,7 @@ export default function SupportLauncher() {
                   <div className="flex justify-start">
                     <div className="rounded-2xl rounded-bl-md border border-[#E2E8F0] bg-white px-3.5 py-2.5">
                       <Loader2
-                        className="animate-spin text-[#94A3B8]"
+                        className="animate-spin text-[#5B6B82]"
                         size={14}
                       />
                     </div>
@@ -550,7 +550,7 @@ export default function SupportLauncher() {
               </form>
             )}
             {!unavailable && config?.settings?.show_branding !== false && (
-              <div className="bg-white pb-2 text-center text-[10px] text-[#94A3B8]">
+              <div className="bg-white pb-2 text-center text-[10px] text-[#64748B]">
                 Powered by OraOne
               </div>
             )}

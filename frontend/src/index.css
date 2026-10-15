@@ -430,3 +430,11 @@ code {
     border-bottom-color: inherit;
   }
 }
+
+/* Sonner rich colours: darken toast text to meet WCAG AA on tinted surfaces. */
+html body [data-sonner-toaster][data-sonner-theme="light"] {
+  --success-text: #166534;
+  --info-text: #1d4ed8;
+  --warning-text: #92400e;
+  --error-text: #b91c1c;
+}

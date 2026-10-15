@@ -40,7 +40,7 @@ export default function Welcome() {
       <h1 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-[#0F172A]">
         Welcome to OraOne! <span aria-hidden="true">🎉</span>
       </h1>
-      <p className="mt-2 text-center text-sm leading-relaxed text-[#64748B]">
+      <p className="mt-2 text-center text-sm leading-relaxed text-[#5B6B82]">
         Your account is all set up and you&apos;re ready to go.
         <br />
         Let&apos;s get you started on your automation journey.
@@ -49,12 +49,12 @@ export default function Welcome() {
       <div className="mt-8 space-y-5 border-t border-[#EEF0F6] pt-6">
         {STEPS.map((s) => (
           <div key={s.title} className="flex items-start gap-3.5">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EFF6FF] text-[#1D4ED8]">
               <s.icon size={19} />
             </span>
             <div>
               <p className="text-sm font-bold text-[#0F172A]">{s.title}</p>
-              <p className="mt-0.5 text-xs leading-snug text-[#64748B]">
+              <p className="mt-0.5 text-xs leading-snug text-[#5B6B82]">
                 {s.desc}
               </p>
             </div>
@@ -73,7 +73,7 @@ export default function Welcome() {
         </GradientButton>
       </div>
 
-      <p className="mt-5 text-center text-sm text-[#64748B]">
+      <p className="mt-5 text-center text-sm text-[#5B6B82]">
         Need help getting started?{" "}
         <Link
           to="/docs"

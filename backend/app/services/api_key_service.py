@@ -4,11 +4,9 @@ Key format: ``sk_ora_<id8>_<secret>`` where ``sk_ora_<id8>`` is the public,
 non-secret ``prefix`` (stored + displayable) and ``<secret>`` is a
 high-entropy token. Only ``sha256(full_key)`` is persisted.
 
-Rate limiting is a per-key fixed-window (1 minute) counter held in process
-memory. The per-minute ceiling comes from the active plan's ``api_rpm``
-limit (``-1`` = unlimited, ``0`` = API disabled on this plan). This is
-sufficient for a single-worker deployment; a Redis-backed limiter would be
-the multi-worker upgrade path.
+Rate limiting uses an atomic shared cache counter per key and minute.
+Production requires Redis; denied requests are not charged as accepted API
+calls. The active plan's ``api_rpm`` is -1 for unlimited and 0 for disabled.
 """
 
 from __future__ import annotations
@@ -27,6 +25,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.api_scopes import normalize_scopes
 from app.database.models.api_key import ApiKey
 from app.services import billing_service, usage_service
+from app.services.cache import get_shared_cache
 
 _KEY_BYTES = 32
 _ID_BYTES = 4  # -> 8 hex chars
@@ -160,42 +159,44 @@ async def touch_last_used(session: AsyncSession, key: ApiKey) -> None:
     await session.commit()
 
 
-# ── rate limiting (in-process fixed window) ──────────────────────────────
-# key_id -> (window_minute_epoch, count)
-_RATE_BUCKETS: dict[str, tuple[int, int]] = {}
+# ── distributed per-key rate limiting ────────────────────────────────────
+
+
+def _quota_cache():
+    return get_shared_cache("api-key-quota")
 
 
 async def enforce_rate_limit(session: AsyncSession, key: ApiKey) -> dict:
-    """Enforce per-minute quota from the plan's ``api_rpm``; raises 429/403.
-
-    Returns ``{"limit", "remaining"}`` for response headers.
-    """
+    """Enforce the plan limit across all API workers using atomic counters."""
     sub = await billing_service.get_or_create_subscription(session, key.organization_id)
     rpm = int((sub.plan.limits or {}).get("api_rpm", 0))
-
     if rpm == 0:
         raise HTTPException(
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail="The API is not available on your current plan. Upgrade to enable it.",
         )
 
-    # Record monthly api_calls usage regardless of limit shape.
+    remaining = -1
+    if rpm > 0:
+        window = int(time.time() // 60)
+        try:
+            # Redis INCR is atomic between workers. A longer TTL avoids
+            # retaining a counter if the first worker exits during the minute.
+            count = _quota_cache().increment(f"{key.id}:{window}", ttl_seconds=120)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="API usage limits are temporarily unavailable. Retry shortly.",
+                headers={"Retry-After": "5"},
+            ) from exc
+        if count > rpm:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Rate limit exceeded ({rpm} requests/minute). Try again shortly.",
+                headers={"Retry-After": str(60 - int(time.time()) % 60)},
+            )
+        remaining = max(0, rpm - count)
+
+    # Count accepted requests only; blocked attempts do not consume paid usage.
     await usage_service.record_usage(session, key.organization_id, "api_calls", 1)
-
-    if rpm < 0:  # unlimited
-        return {"limit": -1, "remaining": -1}
-
-    window = int(time.time() // 60)
-    bucket_key = str(key.id)
-    cur_window, count = _RATE_BUCKETS.get(bucket_key, (window, 0))
-    if cur_window != window:
-        cur_window, count = window, 0
-    count += 1
-    _RATE_BUCKETS[bucket_key] = (cur_window, count)
-
-    if count > rpm:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Rate limit exceeded ({rpm} requests/minute). Try again shortly.",
-        )
-    return {"limit": rpm, "remaining": max(0, rpm - count)}
+    return {"limit": rpm, "remaining": remaining}
