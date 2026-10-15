@@ -182,9 +182,7 @@ async def enforce_rate_limit(session: AsyncSession, key: ApiKey) -> dict:
         try:
             # Redis INCR is atomic between workers. A longer TTL avoids
             # retaining a counter if the first worker exits during the minute.
-            count = _quota_cache().increment(
-                f"{key.id}:{window}", ttl_seconds=120
-            )
+            count = _quota_cache().increment(f"{key.id}:{window}", ttl_seconds=120)
         except Exception as exc:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
