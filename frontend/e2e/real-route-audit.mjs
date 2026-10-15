@@ -30,8 +30,10 @@ const readOtp = () =>
 const sample = (p) =>
   p.replace(/\$[A-Za-z]+/g, "00000000-0000-4000-8000-000000000999");
 
-function classify(finalPath, text, requested) {
+function classify(finalPath, text, requested, heading) {
   const t = text.toLowerCase();
+  // An auth retry UI is not an accepted functional screen or successful alias.
+  if (/couldn[’']t verify your session|couldn[’']t load your workspace/i.test(heading)) return "session-error";
   if (finalPath !== requested.split("?")[0]) return "alias-redirect";
   if (/page not found|404/.test(t) && /not found/.test(t)) return "not-found";
   if (/(access denied|not authorized|permission|restricted|super admin only|platform admin)/.test(t) && /(denied|restricted|not authorized|only)/.test(t)) return "restricted";
@@ -67,10 +69,13 @@ for (const r of routes.filter((x) => x.type !== "layout" && (!only || only.test(
   const requested = sample(r.path);
   const consoleErrors = [];
   const serverErrors = [];
+  const authResponses = [];
   const onConsole = (m) => m.type() === "error" && consoleErrors.push(m.text().slice(0, 200));
   const onPageError = (e) => consoleErrors.push("pageerror: " + e.message.slice(0, 200));
   const onResponse = (res) => {
-    if (res.url().includes("/api/") && res.status() >= 500) serverErrors.push(`${res.status()} ${new URL(res.url()).pathname}`);
+    if (!res.url().includes("/api/")) return;
+    if (res.status() >= 500) serverErrors.push(`${res.status()} ${new URL(res.url()).pathname}`);
+    if ([401, 403, 429].includes(res.status())) authResponses.push(`${res.status()} ${new URL(res.url()).pathname}`);
   };
   page.on("console", onConsole);
   page.on("pageerror", onPageError);
@@ -109,8 +114,9 @@ for (const r of routes.filter((x) => x.type !== "layout" && (!only || only.test(
     finalPath,
     navStatus: status,
     heading: heading.trim().slice(0, 80),
-    classification: finalPath.startsWith("/login") ? "auth-required" : classify(finalPath, text, requested),
+    classification: finalPath.startsWith("/login") ? "auth-required" : classify(finalPath, text, requested, heading),
     serverErrors,
+    authResponses: authResponses.slice(0, 10),
     consoleErrors: consoleErrors.slice(0, 3),
     axe,
     horizontalOverflow: overflow,
@@ -122,4 +128,18 @@ await browser.close();
 const out = path.resolve(process.cwd(), `output/real-route-audit-${VIEWPORT.width}.json`);
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, JSON.stringify(results, null, 2));
+const sessionFailures = results.filter((entry) => entry.classification === "session-error");
+const navigationFailures = results.filter((entry) => entry.navStatus !== "ok");
+const serverFailures = results.filter((entry) => entry.serverErrors.length > 0);
+const accessibilityFailures = results.filter((entry) => entry.axe?.length > 0);
 console.log("Wrote", out, results.length, "destinations");
+console.log("Route acceptance:", {
+  sessionFailures: sessionFailures.length,
+  navigationFailures: navigationFailures.length,
+  serverFailures: serverFailures.length,
+  accessibilityFailures: accessibilityFailures.length,
+});
+if (sessionFailures.length || navigationFailures.length || serverFailures.length || accessibilityFailures.length) {
+  console.error("Route audit NOT ACCEPTED: see JSON per-route evidence.");
+  process.exitCode = 1;
+}
