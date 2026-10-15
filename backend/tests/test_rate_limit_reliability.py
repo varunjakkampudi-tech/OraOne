@@ -79,9 +79,7 @@ async def test_verified_cookie_gets_user_bucket(monkeypatch):
 
     monkeypatch.setattr(settings, "auth_provider", "self_hosted")
     token, _ = create_access_token(sub="signed-cookie-user", email="person@example.com")
-    request = _request(
-        headers=[(b"cookie", f"{ACCESS_COOKIE_NAME}={token}".encode())]
-    )
+    request = _request(headers=[(b"cookie", f"{ACCESS_COOKIE_NAME}={token}".encode())])
     assert await rate_limit._verified_caller_id(request) == "user:signed-cookie-user"
 
 
