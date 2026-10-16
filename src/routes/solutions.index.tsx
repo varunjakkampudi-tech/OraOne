@@ -1,19 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense } from "react";
-import { RouteLoader } from "@/components/oraone/route-loader";
+import { SiteTemplate } from "@/components/site/templates";
+import { sitePage } from "@/content/site";
 import { pageHead } from "@/lib/oraone";
 
-const PublicPage = lazy(() =>
-  import("@/components/oraone/marketing").then((m) => ({ default: m.PublicPage })),
-);
 export const Route = createFileRoute("/solutions/")({
   head: () => pageHead("Solutions Overview", "/solutions"),
-  component: Page,
+  component: () => <SiteTemplate page={sitePage("/solutions")} />,
 });
-function Page() {
-  return (
-    <Suspense fallback={<RouteLoader />}>
-      <PublicPage title="Solutions Overview" pagePath="/solutions" />
-    </Suspense>
-  );
-}

@@ -21,7 +21,7 @@ test.describe("@smoke core pages render", () => {
 
   test("hero image loads on the home page @smoke", async ({ page }) => {
     await page.goto("/");
-    const hero = page.locator("img.marketing-hero-photo");
+    const hero = page.locator("main figure img").first();
     await expect(hero).toBeVisible();
     await expect
       .poll(() => hero.evaluate((img: HTMLImageElement) => img.naturalWidth))

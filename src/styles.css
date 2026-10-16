@@ -99,29 +99,33 @@ textarea,
 select {
   outline-offset: 4px;
 }
-h1,
-h2,
-h3,
-p {
-  margin: 0;
-}
-h1 {
-  font-size: 26px;
-  line-height: 1.35;
-  font-weight: 750;
-}
-h2 {
-  font-size: 15px;
-  font-weight: 650;
-  line-height: 1.5;
-}
-h3 {
-  font-size: 13px;
-  font-weight: 650;
-  line-height: 1.5;
-}
-p {
-  line-height: 1.65;
+/* Heading and paragraph defaults live in the base layer so Tailwind size and margin
+   utilities on individual elements take effect. */
+@layer base {
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+  h1 {
+    font-size: 26px;
+    line-height: 1.35;
+    font-weight: 750;
+  }
+  h2 {
+    font-size: 15px;
+    font-weight: 650;
+    line-height: 1.5;
+  }
+  h3 {
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.5;
+  }
+  p {
+    line-height: 1.65;
+  }
 }
 svg {
   flex-shrink: 0;

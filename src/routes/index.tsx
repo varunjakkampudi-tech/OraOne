@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MarketingHome } from "@/components/oraone/marketing";
+import { SiteTemplate } from "@/components/site/templates";
+import { sitePage } from "@/content/site";
 import { pageHead } from "@/lib/oraone";
+
 export const Route = createFileRoute("/")({
   head: () => pageHead("OraOne — Unified AI Business Platform", "/"),
-  component: Index,
+  component: () => <SiteTemplate page={sitePage("/")} />,
 });
-function Index() {
-  return <MarketingHome />;
-}

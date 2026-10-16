@@ -7,7 +7,10 @@ export const DEV_USER = { email: "varun@oraone.in", password: "varun@oraone.in" 
  * Sign in through the development endpoint. The browser context receives the
  * httpOnly session cookies, exactly as after a real sign-in.
  */
-export async function signInAsDevUser(page: Page, account = DEV_USER): Promise<void> {
+export async function signInAsDevUser(
+  page: Page,
+  account: { readonly email: string; readonly password: string } = DEV_USER,
+): Promise<void> {
   const response = await page.request.post("/api/auth/dev-login", {
     data: { email: account.email, password: account.password },
   });

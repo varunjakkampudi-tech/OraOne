@@ -6,10 +6,9 @@ test.describe("@regression navigation and interactions", () => {
     test.skip(isMobile, "Desktop navigation is hidden on mobile widths.");
     await page.goto("/");
     await waitForAppReady(page);
-    const nav = page.getByRole("navigation", { name: "Main navigation" });
-    await nav.getByRole("button", { name: "Products" }).click();
-    await expect(page.getByRole("menu")).toBeVisible();
-    await expect(page.getByRole("menu").getByText("AI Chat")).toBeVisible();
+    const nav = page.getByRole("navigation", { name: "Main" });
+    await nav.getByText("Products", { exact: true }).click();
+    await expect(nav.getByRole("link", { name: "AI Chat" })).toBeVisible();
   });
 
   test("main navigation link goes to pricing @regression", async ({ page, isMobile }) => {
@@ -17,7 +16,7 @@ test.describe("@regression navigation and interactions", () => {
     await page.goto("/");
     await waitForAppReady(page);
     await page
-      .getByRole("navigation", { name: "Main navigation" })
+      .getByRole("navigation", { name: "Main" })
       .getByRole("link", { name: "Pricing" })
       .click();
     await expect(page).toHaveURL(/\/pricing$/);
@@ -27,30 +26,17 @@ test.describe("@regression navigation and interactions", () => {
     test.skip(!isMobile, "The mobile menu is only shown at narrow widths.");
     await page.goto("/");
     await waitForAppReady(page);
-    await page.getByRole("button", { name: "Open navigation" }).click();
+    await page.getByRole("button", { name: "Open menu" }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
     await dialog.getByRole("link", { name: "Pricing" }).click();
     await expect(page).toHaveURL(/\/pricing$/);
   });
 
-  test("product tour video is opt-in and has playable sources @regression", async ({ page }) => {
+  test("home page labels each capability with its status @regression", async ({ page }) => {
     await page.goto("/");
-    await waitForAppReady(page);
-    await expect(page.locator("video.app-tour-video")).toHaveCount(0);
-    const start = page.getByRole("button", { name: "Play the sample tour" });
-    await start.scrollIntoViewIfNeeded();
-    await start.click();
-    const video = page.locator("video.app-tour-video");
-    await expect(video).toBeVisible();
-    const sources = await video
-      .locator("source")
-      .evaluateAll((nodes) => nodes.map((node) => (node as HTMLSourceElement).src));
-    expect(sources.length).toBeGreaterThanOrEqual(2);
-    for (const src of sources) {
-      const response = await page.request.get(src);
-      expect(response.ok(), `video source ${src} must load`).toBeTruthy();
-    }
+    await expect(page.getByText("Available", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("In development", { exact: true }).first()).toBeVisible();
   });
 
   test("unknown route shows the not-found page @regression", async ({ page }) => {
