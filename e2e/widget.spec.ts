@@ -1,7 +1,17 @@
 import { expect, test } from "./fixtures";
-import { signInAsDevUser, waitForAppReady } from "./helpers";
+import {
+  createTestAssistant,
+  deleteTestAssistant,
+  signInAsDevUser,
+  waitForAppReady,
+} from "./helpers";
 
 test.describe("@regression website widget", () => {
+  const created: string[] = [];
+  test.afterEach(async ({ page }) => {
+    for (const id of created.splice(0)) await deleteTestAssistant(page, id);
+  });
+
   test("the embeddable loader is served as JavaScript @regression", async ({ page }) => {
     const response = await page.request.get("/widget.js");
     expect(response.ok()).toBeTruthy();
@@ -13,15 +23,9 @@ test.describe("@regression website widget", () => {
 
   test("install page offers the script tag, SDK and React code @regression", async ({ page }) => {
     await signInAsDevUser(page);
-    const projects = await page.request.get("/api/projects?limit=5");
-    const projectId = (await projects.json()).items[0].id as string;
     const name = `Widget test ${Date.now()}`;
-    const created = await page.request.post("/api/agents", {
-      headers: { "X-Project-Id": projectId },
-      data: { name, type: "chat", description: "Customer support", model: "openai/gpt-5.5" },
-    });
-    expect(created.status()).toBe(201);
-    const agentId = (await created.json()).id as string;
+    const agentId = await createTestAssistant(page, name);
+    created.push(agentId);
 
     await page.goto(`/studio/assistants/${agentId}/install`);
     await waitForAppReady(page);

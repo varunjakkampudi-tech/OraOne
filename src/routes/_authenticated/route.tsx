@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { ApiError } from "@/lib/api/client";
 import { getMe } from "@/lib/api/auth";
+import { RouteError } from "@/components/oraone/route-error";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -15,5 +16,6 @@ export const Route = createFileRoute("/_authenticated")({
       throw err;
     }
   },
+  errorComponent: RouteError,
   component: () => <Outlet />,
 });

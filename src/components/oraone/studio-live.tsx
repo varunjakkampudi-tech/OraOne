@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { ApiError, messageOf } from "@/lib/api/client";
 import {
   getConversation,
@@ -60,18 +60,31 @@ export function InboxPage() {
             No conversations yet. Test an assistant in its playground to start one.
           </p>
         ) : conversations ? (
-          <ul className="grid gap-2" aria-label="Conversations">
+          <ul className="grid grid-cols-1 gap-2" aria-label="Conversations">
             {conversations.map((c) => (
               <li key={c.id}>
                 <Link
                   to="/studio/inbox/$conversationId"
                   params={{ conversationId: c.id }}
-                  className="flex items-center justify-between gap-4 rounded-lg border border-border bg-card px-4 py-3 hover:bg-accent"
+                  className="flex items-center gap-4 rounded-xl border border-border bg-card px-4 py-4 transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                 >
-                  <span className="font-medium">{c.title || "Untitled conversation"}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {when(c.last_message_at ?? c.updated_at)}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-medium">
+                      {c.title || "Untitled conversation"}
+                    </span>
+                    <span className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                      <span className="rounded-full bg-muted px-2 py-0.5 capitalize">
+                        {c.status}
+                      </span>
+                      <time dateTime={c.last_message_at ?? c.updated_at}>
+                        {when(c.last_message_at ?? c.updated_at)}
+                      </time>
+                    </span>
                   </span>
+                  <ChevronRight
+                    className="size-5 shrink-0 text-muted-foreground"
+                    aria-hidden="true"
+                  />
                 </Link>
               </li>
             ))}

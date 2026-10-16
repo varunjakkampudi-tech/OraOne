@@ -40,3 +40,24 @@ export async function brokenImages(page: Page): Promise<string[]> {
       .map((img) => img.getAttribute("src") ?? "(no src)"),
   );
 }
+
+/**
+ * Create a throwaway assistant for a test and return its id. Pair it with
+ * deleteTestAssistant in afterEach so repeated runs leave no clutter behind.
+ */
+export async function createTestAssistant(page: Page, name: string): Promise<string> {
+  const projects = await page.request.get("/api/projects?limit=5");
+  const projectId = (await projects.json()).items[0].id as string;
+  const created = await page.request.post("/api/agents", {
+    headers: { "X-Project-Id": projectId },
+    data: { name, type: "chat", description: "Customer support", model: "openai/gpt-5.5" },
+  });
+  if (created.status() !== 201)
+    throw new Error(`Could not create test assistant: ${created.status()}`);
+  return (await created.json()).id as string;
+}
+
+/** Soft-delete an assistant created by createTestAssistant. */
+export async function deleteTestAssistant(page: Page, agentId: string): Promise<void> {
+  await page.request.delete(`/api/agents/${agentId}`);
+}

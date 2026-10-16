@@ -40,7 +40,14 @@ const toAssistant = (a: Agent): Assistant => ({
   instructions: a.system_prompt ?? "",
 });
 
-// Secondary screens live under "More" so the main navigation stays short.
+// The main sections of the studio. Secondary screens live under "More" so the navigation stays short.
+const STUDIO_LINKS = [
+  { to: "/studio", label: "Assistants" },
+  { to: "/studio/inbox", label: "Inbox" },
+  { to: "/studio/leads", label: "Leads" },
+  { to: "/studio/knowledge", label: "Knowledge" },
+] as const;
+
 const MORE_LINKS = [
   { to: "/studio/integrations", label: "Integrations" },
   { to: "/studio/webhooks", label: "Webhooks" },
@@ -61,53 +68,66 @@ export function StudioFrame({ children }: { children: React.ReactNode }) {
   }, []);
   return (
     <div className="min-h-dvh bg-background text-foreground">
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-border px-5 py-3">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <Link to="/studio" aria-label="My OraOne workspaces">
+      <header className="border-b border-border bg-background">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3">
+          <Link to="/studio" aria-label="My OraOne assistants" className="shrink-0">
             <Brand />
           </Link>
-          <nav
-            aria-label="Studio sections"
-            className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium"
-          >
-            <Link to="/studio" className="hover:underline">
-              Assistants
-            </Link>
-            <Link to="/studio/inbox" className="hover:underline">
-              Inbox
-            </Link>
-            <Link to="/studio/leads" className="hover:underline">
-              Leads
-            </Link>
-            <Link to="/studio/knowledge" className="hover:underline">
-              Knowledge
-            </Link>
-            <details className="relative">
-              <summary className="cursor-pointer list-none hover:underline">More</summary>
-              <div className="absolute left-0 z-20 mt-2 grid w-56 gap-1 rounded-lg border border-border bg-background p-2 shadow-lg">
-                {MORE_LINKS.map((item) => (
-                  <Link key={item.to} to={item.to} className="rounded-md px-3 py-2 hover:bg-muted">
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </details>
-          </nav>
+          <div className="flex min-w-0 items-center gap-3 text-sm">
+            <span className="hidden truncate text-muted-foreground md:inline">{email}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label="Sign out"
+              onClick={async () => {
+                await logout().catch(() => undefined);
+                navigate({ to: "/auth/sign-in", replace: true });
+              }}
+            >
+              <LogOut />
+              <span className="hidden sm:inline">Sign out</span>
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-3 text-sm">
-          <span className="hidden sm:inline text-muted-foreground">{email}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={async () => {
-              await logout().catch(() => undefined);
-              navigate({ to: "/auth/sign-in", replace: true });
-            }}
-          >
-            <LogOut />
-            Sign out
-          </Button>
-        </div>
+        <nav
+          aria-label="Studio sections"
+          className="mx-auto flex max-w-5xl items-center gap-1 overflow-x-auto px-3 pb-2 text-sm font-medium [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {STUDIO_LINKS.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              activeOptions={{ exact: item.to === "/studio" }}
+              activeProps={{
+                "aria-current": "page",
+                className: "bg-accent text-accent-foreground",
+              }}
+              className="shrink-0 rounded-md px-3 py-2 hover:bg-muted"
+            >
+              {item.label}
+            </Link>
+          ))}
+          <details className="relative shrink-0">
+            <summary
+              className="cursor-pointer list-none rounded-md px-3 py-2 hover:bg-muted"
+              aria-label="More studio sections"
+            >
+              More
+            </summary>
+            <div className="absolute left-0 z-20 mt-2 grid w-56 gap-1 rounded-lg border border-border bg-background p-2 shadow-lg">
+              {MORE_LINKS.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  activeProps={{ "aria-current": "page", className: "bg-accent" }}
+                  className="rounded-md px-3 py-2 hover:bg-muted"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </details>
+        </nav>
       </header>
       <main className="mx-auto max-w-5xl px-5 py-8 text-base">{children}</main>
     </div>

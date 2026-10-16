@@ -180,7 +180,10 @@ function WidgetSettings({ widget, onChange }: { widget: Widget; onChange: (w: Wi
 
   return (
     <div className="space-y-3">
-      <label htmlFor="widget-domains" className="block font-medium">
+      <label
+        htmlFor="widget-domains"
+        className="block text-sm font-semibold uppercase tracking-wide text-muted-foreground"
+      >
         Allowed websites
       </label>
       <p className="text-sm text-muted-foreground">
