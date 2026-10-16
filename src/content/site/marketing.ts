@@ -1,112 +1,119 @@
-import type { SitePage } from "./types";
+import { PRIMARY_CTA, SECONDARY_CTA } from "@/components/site/layout";
+import type { SitePage, UseCase } from "./types";
 
-// Marketing pages: the home page, products, solutions, pricing, company pages and forms.
-// Every capability states its real status. Nothing here claims a feature is live
-// unless the product supports it today.
+// Marketing pages. Plain language, short copy, and an honest status on every capability.
+// Use cases are illustrative examples of the intended workflow, not customers or results.
 
-const ASK = { label: "Get started", to: "/auth/sign-in" };
-const SAMPLE = { label: "See the sample workspace", to: "/app" };
+const USE_CASES: UseCase[] = [
+  {
+    industry: "Dental clinic",
+    problem: "Patients message at night about hours and treatments",
+    assistant:
+      "answers from the clinic's own FAQ, then collects a name, phone number and preferred time.",
+    team: "gets a request to confirm the next morning. The assistant never confirms appointments.",
+  },
+  {
+    industry: "Plumbing and heating",
+    problem: "Callers ask about service areas and call-out fees mid-job",
+    assistant:
+      "explains the areas and fees you have published, then takes the address and a job summary.",
+    team: "gets a lead with the job details, ready to dispatch.",
+  },
+  {
+    industry: "Fitness studio",
+    problem: "The same questions about classes, trials and memberships",
+    assistant: "answers from your timetable and price list, and offers a trial booking request.",
+    team: "gets interested prospects in one inbox, and fewer repeat questions at the front desk.",
+  },
+  {
+    industry: "Online shop",
+    problem: "Shoppers ask about delivery times, returns and sizing",
+    assistant: "answers from your policy pages and passes order-specific problems to a person.",
+    team: "gets a short list of questions that need a human, and sees which questions come up most.",
+  },
+  {
+    industry: "Accountancy or law practice",
+    problem: "Prospects want to know if you can take on their matter",
+    assistant:
+      "describes your practice areas and what to prepare. It gives no legal or tax advice.",
+    team: "gets a structured intake summary to review.",
+  },
+  {
+    industry: "Letting agency",
+    problem: "Tenants ask about deposits, pets and the application steps",
+    assistant: "answers from your written policies and takes viewing requests.",
+    team: "gets viewing requests in the inbox, and a record of common questions for your listings.",
+  },
+];
+
+const ASK = SECONDARY_CTA;
+const DEMO = PRIMARY_CTA;
 
 export const marketingPages: SitePage[] = [
   {
     kind: "landing",
     path: "/",
-    title: "OraOne | AI chat for your website and customers",
-    eyebrow: "AI chat for businesses",
+    title: "OraOne | AI chat for your website",
+    eyebrow: "AI chat for your business",
     hero: {
-      title: "Answer customers from your own information, any time of day.",
-      lead: "OraOne turns the information you already have into an AI assistant for your website. It answers questions, collects enquiries and sends them to your team.",
-      primary: ASK,
-      secondary: SAMPLE,
-      note: "Website chat, the team inbox and leads are available today. Phone and WhatsApp are in development.",
+      title: "Answer website questions, any time of day",
+      lead: "OraOne's assistant answers your customers from your own documents, collects their details and passes the rest to your team.",
+      primary: DEMO,
+      secondary: ASK,
+      note: "AI Chat is in active development. Phone and WhatsApp are planned.",
     },
-    statusLine: [
-      { title: "Website chat", text: "", status: "available" },
-      { title: "Team inbox and leads", text: "", status: "available" },
-      { title: "Phone and WhatsApp", text: "", status: "in-development" },
-    ],
-    outcomes: [
-      {
-        title: "Reply at any hour",
-        text: "Your assistant answers the questions you already answer every day, so visitors don't wait for office hours.",
-      },
-      {
-        title: "Capture every enquiry",
-        text: "Visitors can leave their details. Each enquiry lands in your inbox with the conversation attached.",
-      },
-      {
-        title: "Stay in control",
-        text: "You write the instructions, upload the documents and decide which websites can show the chat.",
-      },
-    ],
+    statusLine: [],
+    outcomes: [],
     steps: [
+      { title: "Add your information", text: "Upload PDF, Word, text or Markdown files." },
+      { title: "Test the answers", text: "Ask the questions your customers ask and adjust." },
       {
-        title: "Teach it your business",
-        text: "Upload PDF, Word, text or Markdown files and describe how the assistant should behave.",
-      },
-      {
-        title: "Test it in the playground",
-        text: "Ask the questions your customers ask. Adjust the answers until they are right.",
-      },
-      {
-        title: "Add it to your website",
-        text: "Paste one line of code, allow your domain and publish. Visitors can chat straight away.",
+        title: "Add the chat to your site",
+        text: "Allow your domain and publish when you are ready.",
       },
     ],
     capabilities: [
       {
-        title: "Website chat widget",
-        text: "A chat bubble for your site, styled in your colours, with suggested questions and a welcome message.",
+        title: "Website chat",
+        text: "A chat bubble for your site, with suggested questions.",
         status: "available",
       },
       {
-        title: "Answers from your knowledge",
-        text: "Replies are grounded in the documents you upload. The assistant shows its sources.",
+        title: "Answers from your documents",
+        text: "Replies cite the document they came from.",
         status: "available",
       },
       {
-        title: "Team inbox",
-        text: "Every conversation in one place, with its full history and the assistant that answered.",
-        status: "available",
-      },
-      {
-        title: "Leads",
-        text: "Enquiries from the chat, with status and a lead score for your team to follow up.",
+        title: "Team inbox and leads",
+        text: "Every conversation and enquiry, with its history.",
         status: "available",
       },
       {
         title: "Staff replies from the inbox",
-        text: "Your team writing back to a visitor from the inbox is not available yet.",
-        status: "in-development",
-      },
-      {
-        title: "Phone calls and WhatsApp",
-        text: "Answering calls and WhatsApp messages with the same assistant.",
+        text: "Writing back to a visitor from OraOne.",
         status: "in-development",
       },
     ],
+    useCases: USE_CASES.slice(0, 6),
     faqs: [
       {
-        q: "Do I need a developer to add the chat to my website?",
-        a: "No. Copy one line of code and paste it before the closing body tag of your site. A developer can also use the browser SDK, React component or REST API.",
+        q: "Do I need a developer?",
+        a: "No. Paste one line of code into your site. A developer can use the browser SDK or REST API instead.",
       },
       {
         q: "Where do the answers come from?",
-        a: "From the documents and information you upload. The assistant says when it cannot find an answer and does not invent one.",
+        a: "From the documents you upload. If the documents do not cover a question, the assistant says so.",
       },
       {
-        q: "Can visitors reach a real person?",
-        a: "The assistant can hand a conversation to your team. Replying from the inbox is still in development.",
-      },
-      {
-        q: "Is it free?",
-        a: "OraOne is free during this access period. No payment details are collected.",
+        q: "Is the chat live today?",
+        a: "AI Chat is in active development. The demo workspace shows how it works, and you can sign in to try it.",
       },
     ],
+    showcase: true,
     cta: {
-      title: "Put a helpful assistant on your website today",
-      text: "Start with the sample workspace to see how it works, then connect your own information.",
-      primary: ASK,
+      title: "See how it works",
+      text: "Explore the demo workspace, then sign in when you are ready.",
+      primary: DEMO,
     },
   },
   {
@@ -114,112 +121,83 @@ export const marketingPages: SitePage[] = [
     path: "/products",
     title: "Products | OraOne",
     eyebrow: "Products",
-    lead: "AI Chat is available today. Other products in the OraOne plan are in development and are labelled as such.",
-    cards: [
-      {
-        title: "AI Chat",
-        text: "Website chat, knowledge answers, the team inbox and leads.",
-        to: "/products/ai-chat",
-        status: "available",
-      },
-      {
-        title: "Phone and voice",
-        text: "Answer calls and missed-call enquiries with an AI assistant.",
-        to: "/roadmap",
-        status: "in-development",
-      },
-      {
-        title: "WhatsApp",
-        text: "Chat with customers and leads on WhatsApp, including voice notes and documents.",
-        to: "/roadmap",
-        status: "in-development",
-      },
-      {
-        title: "Automation and follow-up",
-        text: "Reminders, tasks, meeting booking and follow-up sequences.",
-        to: "/roadmap",
-        status: "planned",
-      },
-    ],
+    lead: "Ten products make up the OraOne family. AI Chat is in active development. The rest are planned or a long-term vision.",
+    cards: [],
   },
   {
     kind: "product",
     path: "/products/ai-chat",
     title: "AI Chat | OraOne",
-    eyebrow: "Product 1",
+    eyebrow: "Product 1 · In active development",
     hero: {
       title: "AI Chat for your website",
-      lead: "An assistant that answers from your information, shares it in your team inbox and turns enquiries into leads.",
-      primary: ASK,
-      secondary: { label: "Read the docs", to: "/docs" },
+      lead: "An assistant that answers from your documents, shares the conversation with your team and captures leads.",
+      primary: DEMO,
+      secondary: ASK,
     },
     problem:
-      "Customers ask the same questions again and again, and enquiries arrive when nobody is free to answer. Important leads wait in an unread inbox.",
+      "Customers ask the same questions again and again. Enquiries arrive when nobody is free, and good leads go cold.",
     outcomes: [
       "Visitors get an answer straight away",
-      "Each enquiry is saved with the conversation",
-      "Your team sees the leads that need a reply",
+      "Each enquiry is saved with its conversation",
+      "Your team sees who needs a reply",
     ],
     capabilities: [
       {
         title: "Assistants",
-        text: "Write instructions, choose a model and test answers in the playground.",
+        text: "Write instructions and test answers in the playground.",
         status: "available",
       },
       {
         title: "Knowledge",
-        text: "Upload PDF, Word, text and Markdown files. Replies cite the source.",
+        text: "Upload documents. Replies cite their source.",
         status: "available",
       },
       {
         title: "Website widget",
-        text: "Script tag, browser SDK and React snippet. Allow domains and publish when ready.",
+        text: "Script tag, browser SDK or React component.",
         status: "available",
       },
       {
         title: "Team inbox and leads",
-        text: "Read conversations, follow the history and track each lead's status.",
-        status: "available",
-      },
-      {
-        title: "Team and access",
-        text: "Invite colleagues and choose what each person can change.",
+        text: "Read history and track each lead's status.",
         status: "available",
       },
       {
         title: "REST API and webhooks",
-        text: "Send chat from your own systems and receive events at your endpoints.",
+        text: "Send chat from your systems and receive events.",
         status: "available",
       },
-    ],
-    steps: [
       {
-        title: "Create an assistant",
-        text: "Name it, describe its job and write the first instructions.",
+        title: "Staff replies",
+        text: "Reply to a visitor from the inbox.",
+        status: "in-development",
       },
+    ],
+    useCases: USE_CASES.slice(0, 3),
+    steps: [
+      { title: "Create an assistant", text: "Name it and write its first instructions." },
       {
         title: "Add knowledge",
-        text: "Upload the files that answer your customers' questions.",
+        text: "Upload the files your customers' questions are answered from.",
       },
-      {
-        title: "Install on your site",
-        text: "Allow your domain, copy the code and publish the widget.",
-      },
+      { title: "Add it to your site", text: "Allow your domain, copy the code and publish." },
     ],
     faqs: [
       {
         q: "Which AI models are used?",
-        a: "Replies come from OpenRouter-hosted models. The plan you are on decides which models are available.",
+        a: "Models are hosted through OpenRouter. Your plan decides which models are available.",
       },
       {
         q: "Can I see what the assistant said?",
-        a: "Yes. Every conversation is saved in the inbox with the sources used for each answer.",
+        a: "Yes. Every conversation is in the inbox, with the sources used for each answer.",
       },
     ],
+    showcase: true,
     cta: {
-      title: "Build your first assistant",
-      text: "It takes a few minutes to create one and try it in the playground.",
-      primary: ASK,
+      title: "Try the demo workspace",
+      text: "See the inbox, leads and widget with sample data.",
+      primary: DEMO,
     },
   },
   {
@@ -227,12 +205,12 @@ export const marketingPages: SitePage[] = [
     path: "/features",
     title: "Features | OraOne",
     eyebrow: "Features",
-    lead: "Everything in AI Chat, with its current status. Nothing is shown as live unless it works today.",
+    lead: "Every AI Chat feature with its current status.",
     items: [
       {
         id: "f1",
         title: "Website chat widget",
-        text: "Bubble, welcome message, suggested questions and branding options.",
+        text: "Bubble, welcome message and suggested questions.",
         status: "available",
       },
       {
@@ -250,13 +228,13 @@ export const marketingPages: SitePage[] = [
       {
         id: "f4",
         title: "Team inbox",
-        text: "Conversation history and status for every chat.",
+        text: "Conversation history and status.",
         status: "available",
       },
       {
         id: "f5",
         title: "Leads",
-        text: "Enquiries from the chat with status and score.",
+        text: "Enquiries from the chat, with status and score.",
         status: "available",
       },
       {
@@ -268,55 +246,37 @@ export const marketingPages: SitePage[] = [
       {
         id: "f7",
         title: "Team invitations",
-        text: "Invite colleagues and manage access.",
+        text: "Invite colleagues and manage their access.",
         status: "available",
       },
       {
         id: "f8",
-        title: "REST API and API keys",
-        text: "Chat from your own systems with a scoped key.",
+        title: "REST API and webhooks",
+        text: "Scoped API keys and event delivery.",
         status: "available",
       },
       {
         id: "f9",
-        title: "Webhooks",
-        text: "Receive conversation, lead and document events.",
-        status: "available",
-      },
-      {
-        id: "f10",
         title: "Staff replies",
         text: "Reply to a visitor from the inbox.",
         status: "in-development",
       },
       {
-        id: "f11",
+        id: "f10",
         title: "Phone calls",
         text: "Answer calls with an AI assistant.",
-        status: "in-development",
+        status: "planned",
+      },
+      {
+        id: "f11",
+        title: "WhatsApp",
+        text: "Chat on WhatsApp, with voice notes and documents.",
+        status: "planned",
       },
       {
         id: "f12",
-        title: "WhatsApp",
-        text: "Chat on WhatsApp, including voice notes and documents.",
-        status: "in-development",
-      },
-      {
-        id: "f13",
-        title: "CV and document parsing",
-        text: "Pull names, skills and experience from uploaded files.",
-        status: "planned",
-      },
-      {
-        id: "f14",
         title: "Meeting booking",
-        text: "Book meetings from a conversation.",
-        status: "planned",
-      },
-      {
-        id: "f15",
-        title: "Follow-up reminders",
-        text: "Tasks and sequences over WhatsApp, email or SMS.",
+        text: "Book a meeting from a conversation.",
         status: "planned",
       },
     ],
@@ -326,31 +286,25 @@ export const marketingPages: SitePage[] = [
     path: "/platform",
     title: "Platform | OraOne",
     eyebrow: "Platform",
-    lead: "How OraOne fits into your business: one place for every conversation, with an AI or a person answering.",
+    lead: "One place for every conversation, with an assistant answering first and your team taking over when needed.",
     updated: "October 2026",
     sections: [
       {
-        heading: "One place for every conversation",
+        heading: "One inbox",
         body: [
-          "OraOne records every conversation with its history, the details collected and the assistant that handled it. Your team works from one inbox instead of several tools.",
+          "Every conversation is recorded with its history, the details collected and the assistant that handled it.",
         ],
       },
       {
-        heading: "The assistant answers first",
+        heading: "Assistant first, people when needed",
         body: [
-          "Your assistant answers questions from your own documents, collects the details it needs and records the lead. It says so when it does not know an answer.",
+          "The assistant answers from your documents and says when it does not know. Conversations can be handed to your team.",
         ],
       },
       {
-        heading: "People stay in charge",
+        heading: "Connected to your tools",
         body: [
-          "Conversations can be handed to a person. Today that means reading the history and following up from your own tools; staff replies inside OraOne are in development.",
-        ],
-      },
-      {
-        heading: "Built to connect",
-        body: [
-          "The website widget, the browser SDK, the REST API and webhooks let OraOne work with the systems you already use.",
+          "The widget, browser SDK, REST API and webhooks connect OraOne to the systems you already use.",
         ],
       },
     ],
@@ -360,55 +314,53 @@ export const marketingPages: SitePage[] = [
     path: "/integrations",
     title: "Integrations | OraOne",
     eyebrow: "Integrations",
-    lead: "Connect OraOne to your website and your systems. These are the integrations available today.",
+    lead: "What you can connect today, and what is in development.",
     updated: "October 2026",
     sections: [
       {
-        heading: "Available today",
+        heading: "Available",
         body: [],
         list: [
-          "Website: a script tag, the browser SDK (window.OraOne) and a React or Next.js component",
-          "REST API: chat from your own servers with a scoped API key",
-          "Webhooks: conversation, message, lead and document events sent to your endpoint",
+          "Website: script tag, browser SDK and React component",
+          "REST API with scoped keys",
+          "Webhooks for conversation, lead and document events",
         ],
       },
       {
         heading: "In development",
         body: [],
-        list: ["WhatsApp", "Phone calls", "Email inbox", "Calendar booking"],
-      },
-      {
-        heading: "Planned",
-        body: [],
-        list: [
-          "npm package for the widget",
-          "Social media channels",
-          "Google Business and marketplaces",
-        ],
+        list: ["WhatsApp", "Phone calls", "Email", "Calendar booking"],
       },
     ],
   },
   {
-    kind: "landing",
+    kind: "hub",
     path: "/solutions",
     title: "Solutions | OraOne",
     eyebrow: "Solutions",
-    hero: {
-      title: "Find the way OraOne helps your team",
-      lead: "Each solution shows how a business uses the AI assistant day to day.",
-      primary: ASK,
-      secondary: { label: "See pricing", to: "/pricing" },
-    },
-    statusLine: [],
-    outcomes: [],
-    steps: [],
-    capabilities: [],
-    faqs: [],
-    cta: {
-      title: "Not sure where to start?",
-      text: "Book a short demo and we will show you the setup that fits your business.",
-      primary: { label: "Book a demo", to: "/demo" },
-    },
+    lead: "How businesses use an assistant day to day.",
+    cards: [
+      {
+        title: "Customer support",
+        text: "Answer common questions and pass on the rest.",
+        to: "/solutions/customer-support",
+      },
+      {
+        title: "Lead generation",
+        text: "Capture enquiries while visitors are still on the page.",
+        to: "/solutions/lead-generation",
+      },
+      {
+        title: "Sales",
+        text: "Answer product questions from your own material.",
+        to: "/solutions/sales",
+      },
+      {
+        title: "Small business",
+        text: "A simple front desk that is open outside hours.",
+        to: "/solutions/small-business",
+      },
+    ],
   },
   {
     kind: "product",
@@ -416,64 +368,47 @@ export const marketingPages: SitePage[] = [
     title: "Customer support | OraOne",
     eyebrow: "Solution",
     hero: {
-      title: "Answer support questions before they become tickets",
-      lead: "Your assistant handles the common questions from your help content and passes the rest to your team.",
-      primary: ASK,
-      secondary: SAMPLE,
+      title: "Answer common questions before they become tickets",
+      lead: "Your assistant answers from your help content and gives your team the conversations that need a person.",
+      primary: DEMO,
+      secondary: ASK,
     },
     problem:
-      "Support teams spend their day on questions that are already answered in a document. Customers wait, and the team cannot focus on the hard cases.",
+      "Support teams spend much of the day on questions that are already answered in a document.",
     outcomes: [
       "Common questions answered from your help content",
-      "Full conversation history for the team",
-      "Hard cases routed to a person",
+      "Full history for the team",
+      "Hard cases passed to a person",
     ],
     capabilities: [
       {
-        title: "Answers from your help content",
+        title: "Answers from help content",
         text: "Upload guides, FAQs and policies.",
         status: "available",
       },
+      { title: "Shared inbox", text: "Read every chat and its history.", status: "available" },
       {
-        title: "Shared inbox",
-        text: "Read every support chat and its history.",
+        title: "Handover to a person",
+        text: "Mark a conversation for your team.",
         status: "available",
-      },
-      {
-        title: "Human handover",
-        text: "Mark a conversation for a person to take over.",
-        status: "available",
-      },
-      {
-        title: "Staff replies in the inbox",
-        text: "Reply from OraOne itself.",
-        status: "in-development",
       },
     ],
+    useCases: USE_CASES.slice(3, 4),
     steps: [
-      {
-        title: "Upload your help content",
-        text: "Guides, FAQs, return policies and opening hours.",
-      },
-      {
-        title: "Test the common questions",
-        text: "Ask what your customers ask and check the answers.",
-      },
-      {
-        title: "Publish on your help pages",
-        text: "Add the widget where customers look for help.",
-      },
+      { title: "Upload help content", text: "Guides, FAQs, returns and opening hours." },
+      { title: "Test common questions", text: "Ask what customers ask and check the answers." },
+      { title: "Publish", text: "Add the chat where customers look for help." },
     ],
     faqs: [
       {
-        q: "What happens to a question the assistant can't answer?",
-        a: "It says so and the conversation is marked for your team.",
+        q: "What happens to a question the assistant cannot answer?",
+        a: "It says so, and the conversation is marked for your team.",
       },
     ],
     cta: {
       title: "Try it with your own help content",
-      text: "Create an assistant and upload one document.",
-      primary: ASK,
+      text: "Explore the demo, then sign in.",
+      primary: DEMO,
     },
   },
   {
@@ -482,17 +417,16 @@ export const marketingPages: SitePage[] = [
     title: "Lead generation | OraOne",
     eyebrow: "Solution",
     hero: {
-      title: "Turn website visitors into leads you can follow up",
-      lead: "The assistant asks the right questions, records the details and gives each lead a score for your team.",
-      primary: ASK,
-      secondary: SAMPLE,
+      title: "Turn website visitors into leads",
+      lead: "The assistant asks the right questions, records the details and scores each lead for your team.",
+      primary: DEMO,
+      secondary: ASK,
     },
-    problem:
-      "Visitors leave without a trace, or send an enquiry that nobody answers for a day. Good leads go cold.",
+    problem: "Visitors leave without a trace, or an enquiry waits a day for a reply.",
     outcomes: [
-      "Enquiries captured while visitors are still on the page",
-      "Each lead scored and marked with its status",
-      "A clear list of who needs a reply today",
+      "Enquiries captured while visitors are on the page",
+      "Each lead scored and tracked",
+      "A clear list of who needs a reply",
     ],
     capabilities: [
       {
@@ -505,33 +439,21 @@ export const marketingPages: SitePage[] = [
         text: "Track new, qualified and won leads.",
         status: "available",
       },
-      {
-        title: "Lead webhooks",
-        text: "Send new leads to your CRM through a webhook.",
-        status: "available",
-      },
-      {
-        title: "Automatic follow-up",
-        text: "Reminders and sequences for leads.",
-        status: "planned",
-      },
+      { title: "Lead webhooks", text: "Send new leads to your CRM.", status: "available" },
     ],
+    useCases: USE_CASES.slice(1, 2),
     steps: [
-      { title: "Decide what to ask", text: "Choose the details the assistant should collect." },
-      { title: "Publish the widget", text: "Place it on the pages that bring the most enquiries." },
-      { title: "Follow up from the leads list", text: "Work through new leads each day." },
+      { title: "Choose what to ask", text: "Decide the details the assistant collects." },
+      { title: "Publish the widget", text: "Place it where enquiries come from." },
+      { title: "Work the list", text: "Follow up qualified leads each day." },
     ],
     faqs: [
       {
         q: "Can leads go to my CRM?",
-        a: "Yes, through webhooks, which send a lead event to your endpoint.",
+        a: "Yes, through webhooks that send a lead event to your endpoint.",
       },
     ],
-    cta: {
-      title: "Start capturing leads",
-      text: "Set up the widget in a few minutes.",
-      primary: ASK,
-    },
+    cta: { title: "Start capturing leads", text: "Explore the demo, then sign in.", primary: DEMO },
   },
   {
     kind: "product",
@@ -539,15 +461,16 @@ export const marketingPages: SitePage[] = [
     title: "Sales | OraOne",
     eyebrow: "Solution",
     hero: {
-      title: "Qualify enquiries before your sales team spends time on them",
-      lead: "Your assistant answers pricing and product questions from your materials and records what each prospect needs.",
-      primary: ASK,
-      secondary: SAMPLE,
+      title: "Qualify enquiries before your team calls",
+      lead: "The assistant answers product questions from your material and records what each prospect needs.",
+      primary: DEMO,
+      secondary: ASK,
     },
-    problem: "Sales teams lose time on enquiries that are not a fit, and miss the ones that are.",
+    problem:
+      "Sales teams lose time on enquiries that are not a fit, and can miss the ones that are.",
     outcomes: [
-      "Product questions answered from your sales material",
-      "Prospects described by what they need",
+      "Product questions answered from your material",
+      "Prospects described by their need",
       "Your team talks to the right people first",
     ],
     capabilities: [
@@ -558,30 +481,27 @@ export const marketingPages: SitePage[] = [
       },
       {
         title: "Qualification notes",
-        text: "Each lead records the details collected in chat.",
+        text: "Each lead records the details from the chat.",
         status: "available",
       },
-      {
-        title: "Meeting booking",
-        text: "Book a call straight from the conversation.",
-        status: "planned",
-      },
+      { title: "Meeting booking", text: "Book a call from the conversation.", status: "planned" },
     ],
+    useCases: USE_CASES.slice(4, 5),
     steps: [
       { title: "Upload sales material", text: "Brochures, price lists and case summaries." },
-      { title: "Set the qualifying questions", text: "Decide what a good enquiry looks like." },
-      { title: "Work the qualified leads", text: "Start with the leads marked qualified." },
+      { title: "Set qualifying questions", text: "Decide what a good enquiry looks like." },
+      { title: "Work qualified leads", text: "Start with leads marked qualified." },
     ],
     faqs: [
       {
         q: "Does the assistant quote prices?",
-        a: "Only if the price is in the documents you upload.",
+        a: "Only prices that are in the documents you upload.",
       },
     ],
     cta: {
-      title: "See it with your sales material",
-      text: "Book a demo with your own documents.",
-      primary: { label: "Book a demo", to: "/demo" },
+      title: "Explore with your own material",
+      text: "Try the demo, then sign in.",
+      primary: DEMO,
     },
   },
   {
@@ -590,52 +510,46 @@ export const marketingPages: SitePage[] = [
     title: "Small business | OraOne",
     eyebrow: "Solution",
     hero: {
-      title: "A front desk that never closes, for a small team",
-      lead: "Set it up in an afternoon, keep your own information in charge, and answer customers while you run the business.",
-      primary: ASK,
-      secondary: SAMPLE,
+      title: "A front desk that is open outside hours",
+      lead: "Set it up in an afternoon with your own information, and keep answering customers while you work.",
+      primary: DEMO,
+      secondary: ASK,
     },
-    problem: "A small team cannot be online all day, and each missed message is a lost customer.",
+    problem:
+      "A small team cannot be online all day, and every missed message can be a lost customer.",
     outcomes: [
       "Customers answered outside working hours",
       "No technical setup needed",
-      "Your information stays under your control",
+      "Your information stays in your control",
     ],
     capabilities: [
+      { title: "Simple setup", text: "Add documents and publish the widget.", status: "available" },
+      { title: "Team access", text: "Invite the people who read the inbox.", status: "available" },
       {
-        title: "Simple setup",
-        text: "Create an assistant, add documents and publish the widget.",
-        status: "available",
-      },
-      {
-        title: "Team access",
-        text: "Invite the people who need to see the inbox.",
-        status: "available",
-      },
-      {
-        title: "Usage you can see",
-        text: "Track conversations and leads in analytics.",
+        title: "Usage overview",
+        text: "Conversations and leads in analytics.",
         status: "available",
       },
     ],
+    useCases: USE_CASES.slice(2, 3),
     steps: [
       {
         title: "Describe your business",
-        text: "Opening hours, services and how you like to be contacted.",
+        text: "Hours, services and how you like to be contacted.",
       },
-      { title: "Upload your information", text: "Price lists, menus or service details." },
-      { title: "Publish", text: "Allow your domain and put the chat on your site." },
+      { title: "Add your information", text: "Price lists, menus or service details." },
+      { title: "Publish", text: "Allow your domain and add the chat to your site." },
     ],
     faqs: [
       {
         q: "Do I need technical skills?",
-        a: "No. A developer can help, but the setup is designed for business owners.",
+        a: "No. A developer can help, but setup is designed for business owners.",
       },
     ],
     cta: {
       title: "Set up your front desk",
-      text: "Create your first assistant in minutes.",
-      primary: ASK,
+      text: "Explore the demo, then sign in.",
+      primary: DEMO,
     },
   },
   {
@@ -643,66 +557,108 @@ export const marketingPages: SitePage[] = [
     path: "/pricing",
     title: "Pricing | OraOne",
     eyebrow: "Pricing",
-    lead: "OraOne is free during this access period. You can use every AI Chat feature without entering payment details.",
+    lead: "Free access while AI Chat is in active development. No payment details are collected.",
     plans: [
       {
         name: "Free access",
         price: "Free",
-        summary: "For testing and early use of AI Chat.",
+        summary: "Everything in AI Chat while it is in development.",
         items: [
-          "Assistants, knowledge uploads and the playground",
+          "Assistants and knowledge uploads",
           "Website widget and browser SDK",
           "Team inbox, leads and analytics",
           "REST API keys and webhooks",
         ],
-        cta: ASK,
+        cta: DEMO,
       },
     ],
     notes: [
       "No payment details are collected during free access.",
       "Usage limits will be published before any paid plan starts.",
-      "Model availability depends on your plan. Some models are reserved for higher plans.",
     ],
     faqs: [
       {
         q: "Will I be charged later?",
-        a: "Not without notice. Paid plans, if introduced, will be announced in advance.",
+        a: "Not without notice. Any paid plan will be announced in advance.",
       },
       {
-        q: "Can I move my data if plans change?",
+        q: "Can I keep my data if plans change?",
         a: "Yes. Your conversations and documents stay in your account.",
       },
     ],
   },
   {
-    kind: "article",
+    kind: "list",
     path: "/roadmap",
     title: "Roadmap | OraOne",
     eyebrow: "Roadmap",
-    lead: "What is available now, what is in development and what is planned. Dates are not promised.",
-    updated: "October 2026",
-    sections: [
+    lead: "What is in development, what is planned and what is a long-term vision. No dates are promised.",
+    items: [
       {
-        heading: "Available",
-        body: [],
-        list: ["AI Chat: website widget, knowledge, inbox, leads, analytics, API and webhooks"],
+        id: "r1",
+        title: "AI Chat",
+        text: "Website assistants, knowledge, inbox, leads, API and webhooks.",
+        status: "active",
       },
       {
-        heading: "In development",
-        body: [],
-        list: ["Staff replies from the inbox", "Phone calls", "WhatsApp", "Email"],
+        id: "r2",
+        title: "Staff replies in the inbox",
+        text: "Reply to visitors from OraOne.",
+        status: "in-development",
       },
       {
-        heading: "Planned",
-        body: [],
-        list: [
-          "npm package",
-          "CV and document parsing",
-          "Meeting booking",
-          "Follow-up sequences",
-          "Tasks and reminders",
-          "Social media channels",
-        ],
+        id: "r3",
+        title: "AI Voice Platform",
+        text: "Assistants that answer phone calls.",
+        status: "planned",
+      },
+      {
+        id: "r4",
+        title: "WhatsApp Platform",
+        text: "Messaging and automation on WhatsApp.",
+        status: "planned",
+      },
+      {
+        id: "r5",
+        title: "Omnichannel Communication Hub",
+        text: "One inbox for every channel.",
+        status: "planned",
+      },
+      {
+        id: "r6",
+        title: "Workflow Automation Platform",
+        text: "Triggers and actions for follow-ups.",
+        status: "planned",
+      },
+      {
+        id: "r7",
+        title: "AI Studio & Agent Builder",
+        text: "Build and configure your own agents.",
+        status: "planned",
+      },
+      {
+        id: "r8",
+        title: "Marketplace",
+        text: "Agents, templates and connectors.",
+        status: "planned",
+      },
+      {
+        id: "r9",
+        title: "Mobile Applications",
+        text: "Run the business from a phone.",
+        status: "planned",
+      },
+      {
+        id: "r10",
+        title: "Enterprise Edition",
+        text: "Governance and deployment for larger organisations.",
+        status: "planned",
+      },
+      {
+        id: "r11",
+        title: "OraOne OS",
+        text: "A long-term operating layer for AI and business communication.",
+        status: "vision",
       },
     ],
   },
@@ -711,19 +667,16 @@ export const marketingPages: SitePage[] = [
     path: "/status",
     title: "Status | OraOne",
     eyebrow: "Status",
-    lead: "The current state of OraOne Product 1.",
+    lead: "The current state of OraOne.",
     updated: "October 2026",
     sections: [
       {
-        heading: "Product 1: AI Chat",
+        heading: "AI Chat",
         body: [
-          "The sample workspace and the widget are available for testing. Live services are being connected, so this page does not show uptime history yet.",
+          "AI Chat is in active development. The demo workspace and the widget can be tried. Live services are still being connected, so uptime history is not shown yet.",
         ],
       },
-      {
-        heading: "Incidents",
-        body: ["No incidents are recorded on this page yet."],
-      },
+      { heading: "Incidents", body: ["No incidents are recorded here."] },
     ],
   },
   {
@@ -737,32 +690,26 @@ export const marketingPages: SitePage[] = [
       {
         heading: "Sign-in",
         body: [
-          "OraOne uses one-time email codes instead of passwords. Codes expire after ten minutes and can be used once.",
-          "Sessions use short-lived access tokens and rotating refresh tokens, stored in secure, httpOnly cookies that scripts cannot read.",
+          "Sign-in uses one-time email codes, not passwords. Codes expire after ten minutes and work once.",
+          "Sessions use short-lived tokens in httpOnly cookies that scripts cannot read.",
         ],
       },
       {
         heading: "Separation of business data",
         body: [
-          "Each organization and workspace is separated on the server. Requests are checked against the signed-in member's role before any data is read or changed.",
+          "Each organization and workspace is separated on the server. Every request is checked against the member's role.",
         ],
       },
       {
         heading: "Protection against abuse",
         body: [
-          "Sign-in and API endpoints are rate-limited. Website chat checks each visitor's domain and request rate.",
+          "Sign-in and API endpoints are rate-limited. The website chat checks each visitor's domain and request rate.",
         ],
       },
       {
-        heading: "What we have not claimed",
+        heading: "Certifications",
         body: [
-          "OraOne does not yet hold formal certifications. Certification and penetration test results will be published here when they exist.",
-        ],
-      },
-      {
-        heading: "Report a concern",
-        body: [
-          "Contact the team through the contact page. Please do not include passwords or live credentials.",
+          "OraOne does not hold formal certifications yet. Certifications and test results will be published here when they exist.",
         ],
       },
     ],
@@ -772,19 +719,19 @@ export const marketingPages: SitePage[] = [
     path: "/about",
     title: "About | OraOne",
     eyebrow: "About",
-    lead: "OraOne helps businesses answer customers well, at any hour, with their own information.",
+    lead: "OraOne helps businesses answer customers well, at any hour, from their own information.",
     updated: "October 2026",
     sections: [
       {
         heading: "What we are building",
         body: [
-          "AI assistants that understand a business from its own documents, talk with customers on the channels they use, and hand every enquiry to the team with its details.",
+          "Assistants that learn a business from its own documents, talk with customers in the channels they use, and hand every enquiry to the team with its details.",
         ],
       },
       {
         heading: "Where we are",
         body: [
-          "AI Chat is the first product and is available for testing. Other channels and products are in development and are labelled as such on every page.",
+          "AI Chat is in active development. Other products are planned or a long-term vision, and each is labelled as such.",
         ],
       },
     ],
@@ -794,14 +741,12 @@ export const marketingPages: SitePage[] = [
     path: "/changelog",
     title: "Changelog | OraOne",
     eyebrow: "Changelog",
-    lead: "Notes on what changed in OraOne.",
+    lead: "What has changed in OraOne.",
     updated: "October 2026",
     sections: [
       {
         heading: "No public releases yet",
-        body: [
-          "OraOne Product 1 is in development. Release notes will appear here when a version is published.",
-        ],
+        body: ["Release notes will appear here when a version is published."],
       },
     ],
   },
@@ -814,19 +759,17 @@ export const marketingPages: SitePage[] = [
     fields: ["name", "email", "company", "message"],
     messageLabel: "Your message",
     submitLabel: "Review message",
-    notice:
-      "Message delivery is not connected yet, so nothing is sent from this form. Your details are checked on this page only.",
+    notice: "Message delivery is not connected yet, so nothing is sent from this form.",
   },
   {
     kind: "form",
     path: "/demo",
     title: "Book a demo | OraOne",
     eyebrow: "Demo",
-    lead: "Choose a time to see AI Chat with your own documents and website.",
+    lead: "Tell us what you would like to see. We will show AI Chat with your documents and website.",
     fields: ["name", "email", "company", "message"],
     messageLabel: "What would you like to see?",
     submitLabel: "Review request",
-    notice:
-      "Demo booking is not connected yet, so no request is sent from this form. Your details are checked on this page only.",
+    notice: "Demo booking is not connected yet, so no request is sent from this form.",
   },
 ];

@@ -2,13 +2,16 @@
 // one of the templates in components/site, so copy and layout stay separate.
 
 /** How far a capability has got. Shown as a labelled badge, never by colour alone. */
-export type Status = "available" | "beta" | "in-development" | "planned";
+/** available: works today. active: Product 1 is in active development. in-development: not live yet. planned: on the roadmap. vision: long-term. */
+export type Status = "available" | "active" | "beta" | "in-development" | "planned" | "vision";
 
 export type Capability = { title: string; text: string; status: Status };
 
 export type Step = { title: string; text: string };
 
 export type Faq = { q: string; a: string };
+
+export type UseCase = { industry: string; problem: string; assistant: string; team: string };
 
 export type Link = { label: string; to: string };
 
@@ -40,8 +43,10 @@ export type LandingPage = Base & {
   outcomes: { title: string; text: string }[];
   steps: Step[];
   capabilities: Capability[];
+  useCases: UseCase[];
   faqs: Faq[];
   cta: { title: string; text: string; primary: Link };
+  showcase?: boolean;
 };
 
 export type ProductPage = Base & {
@@ -51,9 +56,11 @@ export type ProductPage = Base & {
   problem: string;
   outcomes: string[];
   capabilities: Capability[];
+  useCases: UseCase[];
   steps: Step[];
   faqs: Faq[];
   cta: { title: string; text: string; primary: Link };
+  showcase?: boolean;
 };
 
 export type PricingPage = Base & {

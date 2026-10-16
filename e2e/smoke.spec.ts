@@ -19,13 +19,10 @@ test.describe("@smoke core pages render", () => {
       .toBeGreaterThan(0);
   });
 
-  test("hero image loads on the home page @smoke", async ({ page }) => {
+  test("hero illustration is shown on the home page @smoke", async ({ page }) => {
     await page.goto("/");
-    const hero = page.locator("main figure img").first();
+    const hero = page.getByRole("img", { name: /Illustration: a visitor/ });
     await expect(hero).toBeVisible();
-    await expect
-      .poll(() => hero.evaluate((img: HTMLImageElement) => img.naturalWidth))
-      .toBeGreaterThan(0);
   });
 
   test("sign-in page offers the email code form @smoke", async ({ page }) => {

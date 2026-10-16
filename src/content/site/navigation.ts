@@ -1,12 +1,11 @@
 import type { Link, Status } from "./types";
+import { PORTFOLIO } from "./portfolio";
 
-// Top navigation: five destinations at most, with Products and Solutions as menus.
-export const PRODUCT_LINKS: Link[] = [
-  { label: "AI Chat", to: "/products/ai-chat" },
-  { label: "All products", to: "/products" },
-  { label: "Features", to: "/features" },
-  { label: "Platform", to: "/platform" },
-];
+// Top navigation. Products lists the whole family, so every visitor sees all ten products.
+export const PRODUCT_LINKS: Link[] = PORTFOLIO.map((p) => ({
+  label: `${p.id}. ${p.name}`,
+  to: p.id === 1 ? "/products/ai-chat" : "/products",
+}));
 
 export const SOLUTION_LINKS: Link[] = [
   { label: "Customer support", to: "/solutions/customer-support" },
@@ -26,6 +25,7 @@ export const FOOTER_GROUPS: { title: string; links: Link[] }[] = [
     title: "Product",
     links: [
       { label: "AI Chat", to: "/products/ai-chat" },
+      { label: "All ten products", to: "/products" },
       { label: "Integrations", to: "/integrations" },
       { label: "Pricing", to: "/pricing" },
       { label: "Roadmap", to: "/roadmap" },
@@ -102,7 +102,9 @@ export const DOCS_TREE: { group: string; links: Link[] }[] = [
 
 export const STATUS_LABEL: Record<Status, string> = {
   available: "Available",
+  active: "In active development",
   beta: "Beta",
   "in-development": "In development",
   planned: "Planned",
+  vision: "Long-term vision",
 };

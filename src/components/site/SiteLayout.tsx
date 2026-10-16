@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,25 +18,25 @@ import {
   TOP_LINKS,
 } from "@/content/site/navigation";
 import type { Link as SiteLink } from "@/content/site/types";
-import type { ReactNode } from "react";
+import { CONTAINER, PRIMARY_CTA, SECONDARY_CTA } from "./layout";
 
-// The shell shared by every public page: a header with five destinations, a mobile
-// menu in a dialog (focus is trapped and Escape closes it), and a footer.
+// The shell shared by every public page. The header, every section and the footer use
+// the same container, so all content starts at the logo's left edge.
 
 function MenuDisclosure({ label, items }: { label: string; items: SiteLink[] }) {
   return (
     <details className="group relative">
-      <summary className="flex cursor-pointer list-none items-center gap-1 rounded-md px-3 py-2 text-[15px] font-medium text-foreground hover:bg-muted [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center gap-1 rounded-md px-3 py-2 text-[15px] font-medium hover:bg-muted [&::-webkit-details-marker]:hidden">
         {label}
         <ChevronDown
           className="size-4 transition-transform group-open:rotate-180"
           aria-hidden="true"
         />
       </summary>
-      <div className="absolute left-0 top-full z-30 mt-2 grid w-64 gap-1 rounded-xl border border-border bg-background p-2 shadow-xl">
+      <div className="absolute left-0 top-full z-30 mt-2 grid w-80 gap-1 rounded-xl border border-border bg-background p-2 shadow-xl">
         {items.map((item) => (
           <Link
-            key={item.to}
+            key={item.to + item.label}
             to={item.to}
             className="rounded-lg px-3 py-2.5 text-[15px] hover:bg-muted"
           >
@@ -60,7 +60,7 @@ function MobileMenu() {
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden"
+        className="size-11 lg:hidden"
         aria-label="Open menu"
         onClick={() => setOpen(true)}
       >
@@ -74,7 +74,7 @@ function MobileMenu() {
             </span>
           </DialogTitle>
           <DialogClose asChild>
-            <Button variant="ghost" size="icon" aria-label="Close menu">
+            <Button variant="ghost" size="icon" className="size-11" aria-label="Close menu">
               <X className="size-6" aria-hidden="true" />
             </Button>
           </DialogClose>
@@ -88,7 +88,7 @@ function MobileMenu() {
               </p>
               <ul className="mt-3 grid gap-1">
                 {group.items.map((item) => (
-                  <li key={item.to}>
+                  <li key={item.to + item.label}>
                     <Link
                       to={item.to}
                       onClick={() => setOpen(false)}
@@ -103,15 +103,14 @@ function MobileMenu() {
           ))}
         </nav>
         <div className="mt-10 grid gap-3">
-          <Button asChild variant="outline" size="lg">
-            <Link to="/auth/sign-in" onClick={() => setOpen(false)}>
-              Sign in
+          <Button asChild size="lg" className="h-12 text-base">
+            <Link to={PRIMARY_CTA.to} onClick={() => setOpen(false)}>
+              {PRIMARY_CTA.label}
             </Link>
           </Button>
-          <Button asChild size="lg">
-            <Link to="/auth/sign-in" onClick={() => setOpen(false)}>
-              Get started
-              <ArrowRight aria-hidden="true" />
+          <Button asChild variant="outline" size="lg" className="h-12 text-base">
+            <Link to={SECONDARY_CTA.to} onClick={() => setOpen(false)}>
+              {SECONDARY_CTA.label}
             </Link>
           </Button>
         </div>
@@ -123,7 +122,7 @@ function MobileMenu() {
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-5 md:px-8">
+      <div className={`${CONTAINER} flex h-16 items-center justify-between gap-4`}>
         <Link to="/" aria-label="OraOne home" className="shrink-0">
           <Brand />
         </Link>
@@ -141,14 +140,11 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" className="hidden sm:inline-flex">
-            <Link to="/auth/sign-in">Sign in</Link>
+          <Button asChild variant="ghost" className="hidden h-10 sm:inline-flex">
+            <Link to={SECONDARY_CTA.to}>{SECONDARY_CTA.label}</Link>
           </Button>
-          <Button asChild className="hidden sm:inline-flex">
-            <Link to="/auth/sign-in">
-              Get started
-              <ArrowRight aria-hidden="true" />
-            </Link>
+          <Button asChild className="hidden h-10 sm:inline-flex">
+            <Link to={PRIMARY_CTA.to}>{PRIMARY_CTA.label}</Link>
           </Button>
           <MobileMenu />
         </div>
@@ -160,11 +156,12 @@ export function SiteHeader() {
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-muted/40">
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 md:px-8 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
-        <div>
+      <div className={`${CONTAINER} grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-6`}>
+        <div className="sm:col-span-2 lg:col-span-2">
           <Brand />
-          <p className="mt-4 max-w-xs text-[15px] text-muted-foreground">
-            AI chat that answers your customers from your own information.
+          <p className="mt-4 max-w-sm text-[15px] text-muted-foreground">
+            AI chat that answers your customers from your own information, and hands the rest to
+            your team.
           </p>
         </div>
         {FOOTER_GROUPS.map((group) => (
@@ -172,7 +169,7 @@ export function SiteFooter() {
             <p className="text-sm font-semibold">{group.title}</p>
             <ul className="mt-4 grid gap-3">
               {group.links.map((item) => (
-                <li key={item.to}>
+                <li key={item.to + item.label}>
                   <Link
                     to={item.to}
                     className="text-[15px] text-muted-foreground hover:text-foreground"
@@ -186,7 +183,9 @@ export function SiteFooter() {
         ))}
       </div>
       <div className="border-t border-border">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-6 text-sm text-muted-foreground md:px-8">
+        <div
+          className={`${CONTAINER} flex flex-wrap items-center justify-between gap-4 py-6 text-sm text-muted-foreground`}
+        >
           <p>© 2026 OraOne. All rights reserved.</p>
           <nav aria-label="Legal" className="flex flex-wrap gap-x-5 gap-y-2">
             {LEGAL_LINKS.map((item) => (
