@@ -1,0 +1,45 @@
+# Local development infrastructure: PostgreSQL (pgvector) and Redis.
+# The application itself runs from the host; see README.md.
+# Host ports can be overridden (e.g. POSTGRES_HOST_PORT=5545) when another
+# local stack already uses the defaults.
+services:
+  postgres:
+    # pgvector/pgvector ships Postgres + the pgvector extension pre-built —
+    # the app's RAG/embeddings schema requires `CREATE EXTENSION vector`,
+    # which a plain postgres:16 image does not provide.
+    image: pgvector/pgvector:pg16
+    container_name: oraone-prod-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: oraone_admin
+      POSTGRES_PASSWORD: oraone_dev_password
+      POSTGRES_DB: oraone
+    ports:
+      # Host port 5433 so this never conflicts with a native Postgres install
+      # already listening on 5432.
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      - oraone_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oraone_admin -d oraone"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: oraone-prod-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
+    volumes:
+      - oraone_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  oraone_postgres_data:
+  oraone_redis_data:

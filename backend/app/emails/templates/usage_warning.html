@@ -1,0 +1,15 @@
+<h1 style="margin:0 0 16px 0; font-size:24px; line-height:32px; font-weight:800; color:#0F172A;">You're approaching your {{ metric_label }} limit</h1>
+<p style="margin:0 0 20px 0; font-size:15px; line-height:24px; color:#334155;">
+  Your workspace <strong>{{ org_name }}</strong> has used <strong>{{ used }}</strong> of <strong>{{ limit }}</strong> {{ metric_label }} ({{ percent }}%) on the <strong>{{ plan_name }}</strong> plan.
+</p>
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 24px 0;">
+  <tr><td style="background-color:#E2E8F0; border-radius:999px; height:10px; padding:0;">
+    <table role="presentation" cellpadding="0" cellspacing="0" width="{{ percent }}%" style="height:10px;">
+      <tr><td style="background:linear-gradient(135deg,#2563EB 0%,#4F46E5 100%); border-radius:999px; height:10px; font-size:0; line-height:0;">&nbsp;</td></tr>
+    </table>
+  </td></tr>
+</table>
+<p style="margin:0 0 24px 0; font-size:15px; line-height:24px; color:#334155;">
+  Upgrade to keep everything running without interruption when you hit the cap.
+</p>
+<a href="{{ cta_url }}" style="display:inline-block; background:linear-gradient(135deg,#2563EB 0%,#4F46E5 100%); color:#FFFFFF; text-decoration:none; font-weight:600; font-size:15px; padding:12px 28px; border-radius:10px;">View plans</a>

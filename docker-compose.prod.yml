@@ -1,0 +1,130 @@
+# Production-like stack: PostgreSQL, Redis, API, background worker, web app and
+# the Caddy edge proxy. Every secret is required and supplied by the operator's
+# environment. Only Caddy publishes ports; everything else stays on the internal
+# Compose network.
+#
+# Usage:
+#   docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
+x-backend-environment: &backend-environment
+  ENVIRONMENT: production
+  ORAONE_VERSION: ${ORAONE_VERSION:-v1.0.0}
+  DATABASE_URL: postgresql+asyncpg://oraone_admin:${DB_PASSWORD:?DB_PASSWORD is required}@postgres:5432/oraone
+  ALEMBIC_DATABASE_URL: postgresql+psycopg2://oraone_admin:${DB_PASSWORD:?DB_PASSWORD is required}@postgres:5432/oraone
+  REDIS_URL: redis://redis:6379/0
+  ENTITLEMENTS_CACHE_BACKEND: redis
+  UPLOAD_DIR: /var/lib/oraone/uploads
+  OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?OPENROUTER_API_KEY is required}
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: oraone-prod-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: oraone_admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      POSTGRES_DB: oraone
+    volumes:
+      - oraone_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oraone_admin -d oraone"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: oraone-prod-redis
+    restart: unless-stopped
+    volumes:
+      - oraone_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      args:
+        APP_VERSION: ${ORAONE_VERSION:-v1.0.0}
+    image: oraone-backend:${ORAONE_VERSION:-v1.0.0}
+    container_name: oraone-prod-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      <<: *backend-environment
+      RUN_BACKGROUND_WORKERS: "false"
+    volumes:
+      - oraone_uploads:/var/lib/oraone/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/api/health/ready"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+  workers:
+    # Same image as the API, built once by the backend service.
+    image: oraone-backend:${ORAONE_VERSION:-v1.0.0}
+    container_name: oraone-prod-workers
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      <<: *backend-environment
+      RUN_BACKGROUND_WORKERS: "true"
+    command: ["python", "worker.py"]
+    volumes:
+      - oraone_uploads:/var/lib/oraone/uploads
+    # Workers have no HTTP endpoint; Compose supervises the process instead.
+    healthcheck:
+      disable: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+      args:
+        APP_VERSION: ${ORAONE_VERSION:-v1.0.0}
+    image: oraone-frontend:${ORAONE_VERSION:-v1.0.0}
+    container_name: oraone-prod-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  proxy:
+    # Single public entry point: TLS termination, compression and security headers.
+    image: caddy:2-alpine
+    container_name: oraone-prod-proxy
+    restart: unless-stopped
+    environment:
+      CADDY_DOMAIN: ${CADDY_DOMAIN:?CADDY_DOMAIN is required}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - oraone_caddy_data:/data
+    depends_on:
+      - backend
+      - frontend
+      - workers
+
+volumes:
+  oraone_postgres_data:
+  oraone_redis_data:
+  oraone_uploads:
+  oraone_caddy_data:

@@ -1,0 +1,33 @@
+# Troubleshooting
+
+## Sign-in code never arrives
+
+Sign-in codes are sent only when `SMTP_HOST` is configured. Without it, the API logs
+the code as not sent. Check `backend/.env`, then restart the API. In local development,
+use the developer sign-in panel (or `POST /api/auth/dev-login`) with the seeded accounts.
+
+## Assistant replies fail with a provider error
+
+Set `OPENROUTER_API_KEY` in `backend/.env` and restart the API. Also check that no
+other `OPENROUTER_API_KEY` is set in your operating-system environment, because the
+environment value takes precedence over the file.
+
+## Dashboard shows "could not load"
+
+The API is probably not running. Check <http://127.0.0.1:8000/api/health>. The web
+dev server forwards `/api` to `API_PROXY_TARGET`, which defaults to port 8000.
+
+## Uploads fail
+
+`UPLOAD_DIR` must be writable and owned by the user that runs the API. It must not be
+a symbolic link.
+
+## Database errors after an update
+
+Run `alembic upgrade head` from the `backend` folder. Confirm the database is at the
+latest revision with `alembic current`.
+
+## Port already in use
+
+Change `POSTGRES_HOST_PORT`, `REDIS_HOST_PORT`, the API port or the web port, and update
+the matching `.env` values.

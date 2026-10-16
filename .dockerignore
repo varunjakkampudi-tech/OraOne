@@ -1,0 +1,12 @@
+# Keep the web image context small; the backend has its own build context.
+node_modules
+.output
+.wrangler
+dist
+backend
+docs
+.git
+.env
+.env.*
+!.env.example
+*.log

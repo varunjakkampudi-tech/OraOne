@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="color-scheme" content="light" />
+  <title>{{ subject }}</title>
+</head>
+<body style="margin:0; padding:0; background-color:#F1F5F9; -webkit-font-smoothing:antialiased; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <!-- preheader (hidden) -->
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent; height:0; width:0;">{{ preheader }}</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F1F5F9;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px; max-width:600px; background-color:#FFFFFF; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(15,23,42,0.08);">
+
+          <!-- header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#2563EB 0%,#4F46E5 100%); padding:22px 32px;">
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="vertical-align:middle;">
+                    <img src="https://oraone.in/assets/oraone-app-icon.png" width="34" height="34" alt="OraOne" style="display:block; border-radius:9px; border:0; outline:none; text-decoration:none;" />
+                  </td>
+                  <td style="padding-left:11px; vertical-align:middle;">
+                    <span style="font-size:21px; font-weight:800; letter-spacing:-0.02em; color:#FFFFFF;">OraOne</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- body -->
+          <tr>
+            <td style="padding:32px;">
+              __CONTENT__
+            </td>
+          </tr>
+
+          <!-- footer -->
+          <tr>
+            <td style="padding:24px 32px; background-color:#F8FAFC; border-top:1px solid #E2E8F0;">
+              <p style="margin:0 0 8px 0; font-size:13px; line-height:20px; color:#64748B;">
+                You're receiving this email because you have an OraOne account.
+              </p>
+              <p style="margin:0; font-size:13px; line-height:20px; color:#94A3B8;">
+                &copy; {{ year }} OraOne &middot;
+                <a href="{{ app_url }}" style="color:#2563EB; text-decoration:none;">Dashboard</a> &middot;
+                <a href="{{ app_url }}/documentation" style="color:#2563EB; text-decoration:none;">Docs</a> &middot;
+                <a href="{{ app_url }}/data-deletion" style="color:#94A3B8; text-decoration:none;">Unsubscribe</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+        <p style="margin:16px 0 0 0; font-size:12px; color:#94A3B8;">OraOne &mdash; AI chat agents for your website.</p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,1456 @@
+/* Shared readability and page-family layout refinements. */
+:root {
+  --muted-foreground: oklch(0.45 0.025 257);
+  --header-muted: oklch(0.8 0.018 257);
+  --success: oklch(0.45 0.13 160);
+  --amber: oklch(0.46 0.13 60);
+  --cyan: oklch(0.47 0.1 220);
+  --violet: oklch(0.48 0.17 302);
+  --hero-scrim: linear-gradient(
+    90deg,
+    oklch(0.19 0.025 260 / 0.94),
+    oklch(0.19 0.025 260 / 0.58) 55%,
+    oklch(0.19 0.025 260 / 0.06)
+  );
+}
+body {
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+:where(input, textarea, select) {
+  font-size: 16px;
+}
+:where(button, a[role="button"]) {
+  min-height: 44px;
+}
+.workspace-shell {
+  --sidebar-width: 252px;
+  min-height: 100dvh;
+}
+.workspace-main {
+  min-height: 100dvh;
+}
+.page-content {
+  padding: 24px 28px 32px;
+}
+.page-heading {
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.page-heading > div:first-child,
+.admin-page-heading > div {
+  min-width: 0;
+}
+.page-heading h1 {
+  font-size: 28px;
+}
+.page-heading p,
+.service-notice {
+  font-size: 14px;
+}
+.page-actions {
+  flex-wrap: wrap;
+}
+.page-actions button,
+.select-control,
+.select-control select {
+  font-size: 13px;
+  min-height: 44px;
+  height: auto;
+}
+.nav-item,
+.subnav-item {
+  font-size: 14px;
+  min-height: 42px;
+  height: auto;
+  padding-block: 10px;
+}
+.topbar .global-search {
+  font-size: 13px;
+}
+.setup-step strong,
+.attention-card h3,
+.assistant-summary h3 {
+  font-size: 14px;
+}
+.setup-step small,
+.setup-panel > p,
+.metric-card > p,
+.attention-card p,
+.assistant-summary p {
+  font-size: 13px;
+}
+.setup-steps {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.setup-step {
+  min-height: 78px;
+}
+.setup-title h2,
+.panel-heading h2 {
+  font-size: 18px;
+}
+.metric-top h3 {
+  font-size: 12px;
+  white-space: normal;
+}
+.metric-value {
+  font-size: 30px;
+  flex-wrap: wrap;
+}
+.metric-card {
+  padding: 20px 16px;
+  min-width: 0;
+}
+.metric-bottom {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.metric-bottom a,
+.metric-footnote,
+.flag-label,
+.flag-label small {
+  font-size: 12px;
+  white-space: normal;
+}
+.flag-label {
+  flex-wrap: wrap;
+}
+.attention-card {
+  padding: 16px;
+  min-height: 190px;
+}
+.attention-grid {
+  gap: 14px;
+}
+.segmented-control button {
+  min-height: 36px;
+  font-size: 13px;
+}
+.panel-heading p,
+.chart-legend {
+  font-size: 13px;
+}
+.page-tabs a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+}
+.status-pill {
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: normal;
+}
+.admin-sidebar nav a {
+  font-size: 14px;
+  min-height: 44px;
+}
+.admin-sidebar nav h3,
+.admin-label {
+  font-size: 12px;
+}
+.admin-page-heading p,
+.admin-access-notice p,
+.admin-section > p,
+.admin-empty p,
+.admin-metrics p,
+.admin-summary-grid p,
+.admin-settings-grid p {
+  font-size: 14px;
+}
+.admin-access-notice strong,
+.admin-metrics article > div {
+  font-size: 14px;
+}
+.admin-table-scroll td,
+.admin-table-scroll th,
+.admin-table-scroll th button,
+.admin-filter select {
+  font-size: 14px;
+}
+.admin-table-scroll td small {
+  font-size: 13px;
+}
+.admin-table-scroll th button {
+  min-height: 44px;
+}
+.admin-access-notice {
+  margin-bottom: 20px;
+}
+.admin-section {
+  padding: 24px 0;
+}
+.admin-main > header strong {
+  overflow-wrap: anywhere;
+}
+.admin-empty {
+  padding: 32px 20px;
+}
+.marketing-section {
+  padding-block: 56px;
+}
+.marketing-section-heading {
+  margin-bottom: 28px;
+}
+.marketing-feature-grid {
+  gap: 24px;
+}
+.marketing-surface p,
+.marketing-feature-grid p,
+.marketing-product p,
+.marketing-solution-grid p {
+  font-size: 16px;
+}
+.marketing-footer a {
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+}
+.marketing-inner > .marketing-section {
+  padding-block: 44px;
+}
+.marketing-page-heading {
+  padding: 32px 0 24px;
+}
+.marketing-contact-layout {
+  gap: 40px;
+}
+.marketing-contact-form input,
+.marketing-contact-form textarea,
+.phase-auth input:not([type="checkbox"]) {
+  font-size: 16px;
+  min-height: 48px;
+}
+.marketing-home-hero {
+  position: relative;
+  isolation: isolate;
+  max-width: none;
+  margin: 0;
+  padding: 48px max(24px, calc((100% - 1120px) / 2));
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  color: var(--header-foreground);
+}
+.marketing-hero-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+.marketing-home-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--hero-scrim);
+  z-index: -1;
+}
+.marketing-hero-copy {
+  margin: 0;
+  max-width: 620px;
+  text-align: left;
+}
+.marketing-home-hero h1 {
+  font-size: 64px;
+  color: var(--primary-foreground);
+}
+.marketing-home-hero h2 {
+  font-size: 36px;
+  color: var(--header-foreground);
+  margin-top: 16px;
+}
+.marketing-home-hero p {
+  color: var(--header-foreground);
+  font-size: 18px;
+  margin: 20px 0;
+  max-width: 560px;
+}
+.marketing-hero-copy .marketing-ctas {
+  justify-content: flex-start;
+  margin: 24px 0 16px;
+}
+.marketing-home-hero .hero-footnote {
+  color: var(--header-foreground);
+  font-size: 13px;
+}
+.marketing-home-hero .marketing-announcement {
+  color: var(--primary-foreground);
+  background: var(--header-hover);
+  border-color: var(--header-muted);
+  font-size: 13px;
+}
+.app-tour-section {
+  max-width: 1184px;
+  margin: auto;
+  padding: 48px 32px;
+}
+.app-tour-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.app-tour-heading h2 {
+  font-size: 30px;
+}
+.app-tour-heading p {
+  margin-top: 12px;
+  max-width: 640px;
+}
+.app-tour-video {
+  width: 100%;
+  aspect-ratio: 1280/900;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: block;
+  max-height: 620px;
+  object-fit: contain;
+}
+.app-tour-start {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--background);
+  cursor: pointer;
+}
+.app-tour-start img {
+  width: 100%;
+  height: auto;
+  max-height: 620px;
+  object-fit: contain;
+  display: block;
+}
+.app-tour-start-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--background) 45%, transparent);
+}
+.app-tour-start-label svg {
+  width: 20px;
+  height: 20px;
+}
+.app-tour-start:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+.app-tour-section figcaption {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  margin-top: 12px;
+}
+.marketing-context-photo {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  display: block;
+  margin: 24px 0;
+  border-radius: 6px;
+}
+.phase-auth {
+  background: var(--card);
+  min-height: 100dvh;
+}
+.auth-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  flex: 1;
+  width: 100%;
+  max-width: 1440px;
+  margin: auto;
+}
+.auth-editorial {
+  background: var(--background);
+  border-right: 1px solid var(--border);
+  padding: 56px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+  min-width: 0;
+}
+.auth-editorial h2 {
+  font-size: 36px;
+  max-width: 460px;
+  line-height: 1.25;
+}
+.auth-editorial > p {
+  font-size: 16px;
+  max-width: 440px;
+  color: var(--muted-foreground);
+}
+.auth-editorial img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1280/850;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-top: 8px;
+}
+.auth-editorial small {
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+.phase-auth-main {
+  width: 420px;
+  max-width: calc(100% - 48px);
+  margin: 48px auto;
+  align-self: center;
+  flex: initial;
+}
+.phase-auth-symbol {
+  margin: 0 0 20px;
+  background: var(--primary-soft);
+  border: 0;
+}
+.phase-auth-main h1,
+.phase-auth-description {
+  text-align: left;
+}
+.phase-auth-main h1 {
+  font-size: 32px;
+}
+.phase-auth-description {
+  font-size: 16px;
+  margin: 12px 0 28px;
+}
+.auth-field {
+  margin-bottom: 18px;
+}
+.auth-field > label {
+  font-size: 14px;
+  font-weight: 600;
+}
+.auth-password-wrap button {
+  min-width: 44px;
+  min-height: 44px;
+  top: 2px;
+}
+.auth-submit {
+  min-height: 48px;
+  font-size: 15px;
+}
+.auth-consent,
+.phase-auth-switch,
+.phase-auth-options,
+.phase-auth-preview > span,
+.form-feedback {
+  font-size: 14px;
+}
+.phase-auth-preview {
+  gap: 12px;
+  padding-top: 18px;
+}
+.auth-error-summary {
+  font-size: 14px;
+  color: var(--destructive);
+  margin-bottom: 18px;
+}
+.mobile-navigation-dialog {
+  top: 0 !important;
+  left: 0 !important;
+  right: auto !important;
+  bottom: 0 !important;
+  translate: none !important;
+  transform: none !important;
+  animation: none !important;
+  max-width: 320px;
+  width: calc(100% - 32px);
+  height: 100dvh;
+  border-radius: 0;
+  padding: 56px 20px 24px;
+  overflow: auto;
+  display: block;
+  background: var(--card);
+  color: var(--foreground);
+}
+.mobile-navigation-dialog .marketing-mobile-nav {
+  position: static;
+  padding: 12px 0;
+  overflow: visible;
+  background: transparent;
+}
+.mobile-navigation-dialog .admin-sidebar {
+  position: static;
+  transform: none;
+  width: 100%;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  color: var(--foreground);
+}
+.admin-navigation-dialog {
+  background: var(--header-surface);
+  color: var(--header-foreground);
+}
+@media (min-width: 1600px) {
+  .marketing-home-hero {
+    min-height: 560px;
+  }
+}
+@media (max-width: 1150px) {
+  .metric-grid,
+  .attention-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .auth-editorial {
+    padding: 40px 28px;
+  }
+  .auth-editorial h2 {
+    font-size: 30px;
+  }
+  .topbar {
+    gap: 10px;
+  }
+}
+@media (max-width: 767px) {
+  .workspace-shell {
+    --sidebar-width: 252px;
+  }
+  .workspace-main {
+    margin-left: 0;
+  }
+  .page-content {
+    padding: 20px 16px 28px;
+  }
+  .page-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .page-heading h1 {
+    font-size: 26px;
+  }
+  .setup-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .setup-step:last-child {
+    grid-column: 1/-1;
+  }
+  .setup-title {
+    min-width: 0;
+  }
+  .panel-heading {
+    flex-wrap: wrap;
+  }
+  .metric-card {
+    padding: 18px 14px;
+  }
+  .metric-value {
+    font-size: 28px;
+  }
+  .metric-bottom a {
+    white-space: normal;
+  }
+  .marketing-home-hero {
+    min-height: 520px;
+    padding: 40px 24px;
+    align-items: center;
+  }
+  .marketing-hero-copy {
+    max-width: 500px;
+  }
+  .marketing-home-hero h1 {
+    font-size: 48px;
+  }
+  .marketing-home-hero h2 {
+    font-size: 30px;
+  }
+  .marketing-home-hero p {
+    font-size: 16px;
+  }
+  .marketing-hero-photo {
+    object-position: 60% center;
+  }
+  .app-tour-section {
+    padding: 36px 20px;
+  }
+  .app-tour-heading {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app-tour-heading h2 {
+    font-size: 26px;
+  }
+  .auth-stage {
+    grid-template-columns: 1fr;
+  }
+  .auth-editorial {
+    display: none;
+  }
+  .phase-auth-main {
+    margin: 32px auto;
+  }
+  .admin-main > header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+  .admin-main > main {
+    padding: 20px 16px;
+  }
+  .admin-access-state {
+    font-size: 12px;
+  }
+  .admin-service-list > div {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    padding: 14px 12px;
+    gap: 10px;
+  }
+  .marketing-footer-bottom a {
+    font-size: 13px;
+  }
+  .marketing-capability-strip > div {
+    font-size: 13px;
+  }
+}
+@media (max-width: 480px) {
+  .metric-grid,
+  .attention-grid,
+  .admin-metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .setup-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .setup-title h2 {
+    font-size: 16px;
+  }
+  .setup-title .completion-tag {
+    margin-left: 0;
+    font-size: 12px;
+  }
+  .metric-top h3 {
+    font-size: 13px;
+  }
+  .metric-card {
+    min-height: initial;
+  }
+  .flag-label {
+    font-size: 12px;
+  }
+  .marketing-home-hero h1 {
+    font-size: 44px;
+  }
+  .marketing-home-hero h2 {
+    font-size: 28px;
+  }
+  .marketing-ctas a {
+    font-size: 14px;
+  }
+  .marketing-section {
+    padding-block: 36px;
+  }
+  .marketing-surface h1 {
+    overflow-wrap: anywhere;
+  }
+  .admin-access-notice > div {
+    min-width: 0;
+  }
+  .admin-access-notice {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+  }
+  .admin-access-notice > a {
+    grid-column: 2;
+  }
+  .admin-settings-grid > div {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+  }
+  .phase-auth-main h1 {
+    font-size: 28px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+/* Legacy text styles normalized across all screen sizes. */
+:is(.workspace-shell, .phase-admin) .production-tag {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .profile-label strong {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .profile-label small {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .nav-item {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .nav-badge {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .planned-nav {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .subnav-item {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .subnav-item small {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .page-heading p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .page-actions button {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .completion-tag {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .setup-panel > p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .setup-step strong {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .setup-step small {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .section-eyebrow {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .sample-label {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .metric-top h3 {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .metric-change {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .metric-card > p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .metric-bottom a {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .metric-footnote {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .attention-title h2 {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .attention-badge {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .attention-title p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .acknowledge {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .attention-card h3 {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .attention-card p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .attention-card a {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .assistant-summary h3 {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .assistant-summary p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .page-footer {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .page-tabs a {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .product-card p,
+:is(.workspace-shell, .phase-admin) .assistant-card > p,
+:is(.workspace-shell, .phase-admin) .integration-card > p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .assistant-stats {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .assistant-card-actions > a {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .settings-form label,
+:is(.workspace-shell, .phase-admin) .auth-form label,
+:is(.workspace-shell, .phase-admin) .field-label {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .settings-form input:not([type="checkbox"]),
+:is(.workspace-shell, .phase-admin) .settings-form select,
+:is(.workspace-shell, .phase-admin) .settings-form textarea,
+:is(.workspace-shell, .phase-admin) .auth-form input:not([type="checkbox"]),
+:is(.workspace-shell, .phase-admin) .context-aside textarea {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .settings-form .checkbox-field,
+:is(.workspace-shell, .phase-admin) .auth-form .checkbox-field {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .context-aside dt,
+:is(.workspace-shell, .phase-admin) .customer-sidebar dt {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .context-aside dd,
+:is(.workspace-shell, .phase-admin) .customer-sidebar dd {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .assistant-detail-title p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .widget-head strong {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .widget-head small {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .widget-message {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .widget-time {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .widget-powered {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .knowledge-stats span {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .table-header {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .table-row {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .table-row strong {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .table-row small {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .table-footer {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .conversation-list > .search-field input {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .conversation-row .avatar {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .conversation-row-body strong {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .conversation-row-body small {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .conversation-preview {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .conversation-row-body .status-pill {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .conversation-header h2 {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .conversation-header p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .conversation-header .status-pill {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .customer-message,
+:is(.workspace-shell, .phase-admin) .assistant-message {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .customer-message small,
+:is(.workspace-shell, .phase-admin) .assistant-message small {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .customer-sidebar > h3 {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .customer-sidebar > h2 {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .customer-sidebar > p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .customer-sidebar > a {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .customer-profile p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .analytics-metrics span {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .analytics-metrics small {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .integration-card .eyebrow {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .integration-card > a,
+:is(.workspace-shell, .phase-admin) .integration-card > button {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .billing-overview p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-unavailable > p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .reply-composer .sample-label {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .sidebar nav .nav-item {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .sidebar .subnav-item {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .setup-title h2 {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .setup-title .completion-tag {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .product-card p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .settings-form label {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .table-row .status-pill {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .customer-name strong {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .customer-name small {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .customer-name .avatar {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .conversation-row-body .conversation-preview {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .docs-search input,
+:is(.workspace-shell, .phase-admin) .admin-search input {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .marketing-docs aside nav a {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .onboarding-unavailable label {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .setup-summary {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-label {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-environment {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-environment small {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-sidebar nav h3 {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-sidebar nav a {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-sidebar > a:last-child {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-main > header > div {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-access-state {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-page-heading p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-access-notice strong {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-access-notice p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-access-notice > a {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-metrics article > div {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-metrics p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-section > p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-summary-grid p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-filter {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-filter select {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-table-scroll th {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-table-scroll th button {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-table-scroll td {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-table-scroll td small {
+  font-size: 12px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-empty p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-empty > span {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-pagination {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-telemetry-empty p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-scope-grid p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-scope-grid li {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-details-grid span {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-details-grid strong {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-settings-grid p {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-main > footer {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-main > header strong {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-settings-grid h3 {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+:is(.workspace-shell, .phase-admin) .admin-settings-grid button {
+  font-size: 14px !important;
+  letter-spacing: 0;
+}
+
+/* Ensure unlayered anchor resets do not override design-system button contrast. */
+:is(.marketing-surface, .phase-auth, .phase-admin, .workspace-shell)
+  .bg-primary.text-primary-foreground {
+  color: var(--primary-foreground) !important;
+}
+.marketing-home-hero .bg-secondary {
+  color: var(--foreground) !important;
+}
+.mobile-navigation-dialog .bg-primary.text-primary-foreground {
+  color: var(--primary-foreground) !important;
+}
+:is(.workspace-shell, .phase-admin) .production-tag {
+  color: var(--header-foreground) !important;
+}
+.phase-auth-main {
+  min-width: 0;
+  width: min(420px, calc(100% - 48px));
+}
+.auth-stage {
+  min-width: 0;
+}
+.segmented-control {
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+.phase-auth {
+  justify-content: flex-start;
+}
+.auth-stage {
+  flex: initial;
+  margin: 0 auto;
+  min-height: 640px;
+}
+.phase-auth > footer {
+  margin-top: auto;
+}
+.workspace-navigation-dialog .sidebar {
+  position: static;
+  transform: none;
+  width: 100%;
+  padding: 16px 0;
+  box-shadow: none;
+  height: auto;
+  max-height: none;
+}
+.workspace-navigation-dialog .sidebar-heading > .mobile-menu {
+  display: none;
+}
+.workspace-navigation-dialog .sidebar-heading {
+  margin-bottom: 8px;
+}
+.workspace-navigation-dialog .sidebar-footer {
+  margin-top: 16px;
+}
+@media (max-width: 767px) {
+  .workspace-navigation-dialog .sidebar {
+    display: block;
+  }
+  .workspace-navigation-dialog .collapse-control {
+    display: none;
+  }
+  .admin-navigation-dialog .admin-sidebar {
+    color: var(--header-foreground);
+  }
+}
+
+/* Dark footers share the header palette and keep links readable. */
+.marketing-footer,
+.phase-auth > footer,
+.admin-main > footer {
+  background: var(--header-surface);
+  color: var(--header-foreground);
+}
+.marketing-footer :is(.brand, h3),
+.marketing-footer :is(a, p),
+.marketing-footer-bottom,
+.phase-auth > footer a {
+  color: var(--header-foreground);
+}
+.marketing-footer-bottom {
+  border-color: var(--header-hover);
+}
+.marketing-footer a:hover,
+.phase-auth > footer a:hover {
+  color: var(--header-muted);
+  text-decoration: underline;
+}
+.marketing-home-hero {
+  background: var(--header-surface);
+  min-height: 600px;
+  align-items: flex-start;
+}
+.marketing-hero-photo {
+  inset: auto 24px 24px auto;
+  width: 54%;
+  height: 82%;
+  object-fit: contain;
+  object-position: right bottom;
+}
+.marketing-home-hero::before {
+  background: var(--hero-scrim);
+}
+.marketing-hero-copy {
+  max-width: 45%;
+}
+@media (max-width: 1000px) {
+  .marketing-hero-copy {
+    max-width: 100%;
+    max-width: 560px;
+  }
+  .marketing-home-hero {
+    min-height: 820px;
+    padding-bottom: 320px;
+  }
+  .marketing-hero-photo {
+    inset: auto 24px 24px;
+    width: calc(100% - 48px);
+    height: 290px;
+  }
+  .marketing-home-hero::before {
+    background: var(--header-hover);
+  }
+}
+.inbox-toolbar {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.inbox-toolbar > .sample-label {
+  max-width: 600px;
+  white-space: normal;
+}
+@media (max-width: 767px) {
+  .marketing-home-hero {
+    min-height: 680px;
+    padding-bottom: 260px;
+  }
+  .marketing-hero-photo {
+    inset: auto 20px 20px;
+    width: calc(100% - 40px);
+    height: 250px;
+    object-position: center bottom;
+  }
+  .marketing-home-hero::before {
+    background: var(--header-hover);
+  }
+  .workspace-switcher button {
+    min-width: 0;
+  }
+  .workspace-switcher button > span:nth-child(2) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+:is(
+  .workspace-main,
+  .admin-main,
+  .page-content,
+  .form-layout,
+  .widget-editor,
+  .inbox-layout,
+  .conversation-detail,
+  .context-aside,
+  .customer-sidebar
+) {
+  min-width: 0;
+  max-width: 100%;
+}
+:is(.settings-form, .context-aside, .customer-sidebar, .conversation-row-body) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+:is(.data-table, .admin-table-scroll, .page-tabs, .code-panel) {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+.floating-menu {
+  max-width: calc(100vw - 24px);
+}
+@media (max-width: 767px) {
+  .page-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+  .page-actions > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .page-actions select {
+    min-width: 0;
+    width: 100%;
+  }
+  .setup-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .marketing-footer-bottom {
+    flex-wrap: wrap;
+  }
+}
+.admin-preview-frame {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+.admin-preview-frame > .phase-admin {
+  flex: 1;
+  min-height: 0;
+}
+.admin-preview-frame .admin-main {
+  min-height: 0;
+}
+.admin-preview-frame > [role="status"] {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  position: relative;
+  z-index: 61;
+}
+@media (min-width: 1024px) {
+  .admin-preview-frame .admin-sidebar {
+    top: 60px;
+  }
+}
+.admin-preview-frame > .phase-admin {
+  display: flex;
+  flex-direction: column;
+}
+.admin-preview-frame .admin-main {
+  flex: 1 0 auto;
+}
+.phase-admin .admin-main {
+  display: flex;
+  flex-direction: column;
+}
+.phase-admin .admin-main > footer {
+  margin-top: auto;
+}

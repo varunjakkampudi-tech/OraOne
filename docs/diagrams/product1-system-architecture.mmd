@@ -1,0 +1,19 @@
+flowchart LR
+  Visitor[Website visitor] --> Widget[Embeddable widget]
+  Operator[Business operator] --> Browser[React dashboard]
+  Widget --> Edge[Caddy edge]
+  Browser --> Edge
+  Edge --> Frontend[React frontend]
+  Edge --> API[FastAPI backend]
+  API --> Auth[Email-code sign-in]
+  API --> Router[OpenAI-compatible provider]
+  API --> DB[(PostgreSQL and pgvector)]
+  API --> Redis[(Redis)]
+  API --> Uploads[(Local upload volume)]
+  API -. enqueues durable work .-> Outbox[(Transactional outbox)]
+  Worker[Independent worker process] --> Outbox
+  Worker --> DB
+  Worker --> Redis
+  Worker --> Uploads
+  API --> Integrations[Configured integrations and webhooks]
+  External[External provider services] --> Integrations

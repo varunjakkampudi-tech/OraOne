@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build and tooling output
+dist/
+dist-ssr/
+.output/
+.vinxi/
+.nitro/
+.tanstack/
+.wrangler/
+coverage/
+*.tsbuildinfo
+
+# Environment and secrets — only the .example templates are tracked
+.env
+.env.*
+!.env.example
+*.local
+.dev.vars
+backend/.env
+
+# Python backend
+backend/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+backend/output/
+backend/backups/
+
+# Logs and editor files
+*.log
+npm-debug.log*
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+
+# Playwright output
+test-results/
+playwright-report/

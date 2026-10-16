@@ -1,0 +1,18 @@
+flowchart TB
+  DNS[oraone.in DNS] --> HTTPS[Public HTTPS traffic]
+  HTTPS --> Caddy[Caddy on Hostinger VPS]
+  subgraph PrivateNetwork[Private Compose network]
+    Caddy --> Frontend[Frontend container]
+    Caddy --> Backend[Backend container]
+    Backend -. writes durable outbox .-> DB
+    Worker[Independent worker container] --> DB
+    Backend --> DB[(PostgreSQL volume)]
+    Backend --> Redis[(Redis volume)]
+    Backend --> Uploads[(Local upload volume)]
+    Worker --> Redis
+  end
+  Backend -. outbound AI and email requests .-> OpenRouter[OpenRouter and SMTP]
+  Backend -. outbound model requests .-> OpenRouter[External OpenRouter service]
+  Volumes[Persistent Docker volumes] -. persist .-> DB
+  Volumes -. persist .-> Redis
+  Volumes -. persist .-> Uploads

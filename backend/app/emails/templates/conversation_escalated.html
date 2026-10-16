@@ -1,0 +1,11 @@
+<h1 style="margin:0 0 16px 0; font-size:24px; line-height:32px; font-weight:800; color:#0F172A;">A conversation needs a human</h1>
+<p style="margin:0 0 24px 0; font-size:15px; line-height:24px; color:#334155;">
+  Agent <strong>{{ agent_name }}</strong> escalated a {{ channel }} conversation with <strong>{{ customer_name }}</strong>. Reason: {{ reason }}.
+</p>
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 24px 0; background-color:#FFF7ED; border:1px solid #FED7AA; border-radius:12px;">
+  <tr><td style="padding:16px; font-size:14px; line-height:22px; color:#9A3412;">&ldquo;{{ last_message }}&rdquo;</td></tr>
+</table>
+<a href="{{ cta_url }}" style="display:inline-block; background:linear-gradient(135deg,#2563EB 0%,#4F46E5 100%); color:#FFFFFF; text-decoration:none; font-weight:600; font-size:15px; padding:12px 28px; border-radius:10px;">Open conversation</a>
+<p style="margin:28px 0 0 0; font-size:13px; line-height:20px; color:#94A3B8;">
+  Escalated at {{ escalated_at }}. Respond quickly to keep the customer engaged.
+</p>

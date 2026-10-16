@@ -1,0 +1,18 @@
+# Keep the backend build context small and never bake secrets/dev artifacts
+# into the image.
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.env.*
+!.env.example
+*.pem
+*.log
+*.err
+*.out
+tests/
+scripts/
+.git/
+.github/
