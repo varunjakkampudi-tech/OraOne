@@ -82,6 +82,13 @@ class LeadRead(BaseModel):
     notes: Optional[str] = None
     tags: list[str] = []
 
+    # Read-only consent provenance, derived from ``extra``. Not in LeadCreate or
+    # LeadUpdate, so the API cannot write them.
+    consent: Optional[str] = None
+    consent_source: Optional[str] = None
+    consent_note: Optional[str] = None
+    consent_recorded_at: Optional[datetime] = None
+
     created_at: datetime
     updated_at: datetime
 
@@ -114,3 +121,46 @@ class LeadConversationRead(BaseModel):
     status: Optional[str] = None
     started_at: Optional[datetime] = None
     messages: list[LeadConversationMessage] = []
+
+
+class LeadImportColumn(BaseModel):
+    """One spreadsheet column and the lead field it was matched to (null = ignored)."""
+
+    column: str
+    field: Optional[str] = None
+
+
+class LeadImportRow(BaseModel):
+    row_number: int
+    # valid | duplicate_existing | duplicate_in_file | invalid
+    status: str
+    reason: Optional[str] = None
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    company: Optional[str] = None
+    consent: Optional[str] = None
+
+
+class LeadImportPreview(BaseModel):
+    """Result of a dry run. Nothing has been saved."""
+
+    file_name: str
+    file_format: str
+    total_rows: int
+    valid: int
+    duplicate_existing: int
+    duplicate_in_file: int
+    invalid: int
+    columns: list[LeadImportColumn]
+    warnings: list[str] = []
+    rows: list[LeadImportRow]
+
+
+class LeadImportCommit(BaseModel):
+    upload_id: uuid.UUID
+    total_rows: int
+    saved: int
+    skipped_duplicate_existing: int
+    skipped_duplicate_in_file: int
+    skipped_invalid: int

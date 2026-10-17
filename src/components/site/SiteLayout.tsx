@@ -83,7 +83,7 @@ function MobileMenu() {
         <nav aria-label="Mobile site navigation" className="mt-8 grid gap-8">
           {groups.map((group) => (
             <div key={group.title}>
-              <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="text-sm font-semibold uppercase tracking-wide text-foreground/75">
                 {group.title}
               </p>
               <ul className="mt-3 grid gap-1">
@@ -143,7 +143,7 @@ export function SiteHeader() {
           <Button asChild variant="ghost" className="hidden h-10 sm:inline-flex">
             <Link to={SECONDARY_CTA.to}>{SECONDARY_CTA.label}</Link>
           </Button>
-          <Button asChild className="hidden h-10 sm:inline-flex">
+          <Button asChild className="h-9 px-3 text-sm sm:h-10 sm:px-4 sm:text-base">
             <Link to={PRIMARY_CTA.to}>{PRIMARY_CTA.label}</Link>
           </Button>
           <MobileMenu />
@@ -156,12 +156,12 @@ export function SiteHeader() {
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-muted/40">
-      <div className={`${CONTAINER} grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-6`}>
-        <div className="sm:col-span-2 lg:col-span-2">
+      <div className={`${CONTAINER} grid grid-cols-2 gap-x-6 gap-y-10 py-12 lg:grid-cols-6`}>
+        <div className="col-span-2 lg:col-span-2">
           <Brand />
-          <p className="mt-4 max-w-sm text-[15px] text-muted-foreground">
-            AI chat that answers your customers from your own information, and hands the rest to
-            your team.
+          <p className="mt-4 max-w-sm text-[15px] text-foreground/75">
+            One AI for every conversation. AI Chat is in active development, and it is designed to
+            answer from your own information and hand the rest to your team.
           </p>
         </div>
         {FOOTER_GROUPS.map((group) => (
@@ -172,7 +172,7 @@ export function SiteFooter() {
                 <li key={item.to + item.label}>
                   <Link
                     to={item.to}
-                    className="text-[15px] text-muted-foreground hover:text-foreground"
+                    className="text-[15px] text-foreground/75 hover:text-foreground"
                   >
                     {item.label}
                   </Link>
@@ -184,7 +184,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-border">
         <div
-          className={`${CONTAINER} flex flex-wrap items-center justify-between gap-4 py-6 text-sm text-muted-foreground`}
+          className={`${CONTAINER} grid grid-cols-2 gap-x-6 gap-y-3 py-6 text-sm text-foreground/75 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-4`}
         >
           <p>© 2026 OraOne. All rights reserved.</p>
           <nav aria-label="Legal" className="flex flex-wrap gap-x-5 gap-y-2">

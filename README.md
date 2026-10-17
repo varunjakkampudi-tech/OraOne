@@ -19,9 +19,11 @@ leads. **Product 1, the OraOne AI Chat Platform, is this repository.**
 | Public marketing site, documentation and legal pages  | Available                                                         |
 | Staff console                                         | Available to platform administrators                              |
 
-Other OraOne products (voice, WhatsApp, omnichannel, automation, AI Studio,
-marketplace, mobile, enterprise and OraOne OS) are planned and are not part of
-this repository.
+The repository also contains code for AI voice, WhatsApp, Instagram, the omnichannel
+inbox, workflows, marketing campaigns, the marketplace, integrations and calls. Several of
+these need a setup step that is not yet available in Studio. Mobile applications are not in
+this repository, and OraOne OS is a long-term vision. The status and blockers of each are in
+[PRODUCTS](docs/guides/PRODUCTS.md) and [PRODUCT-PORTFOLIO](docs/PRODUCT-PORTFOLIO.md).
 
 ## Architecture
 

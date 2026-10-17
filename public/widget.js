@@ -26,6 +26,8 @@
 
   var VERSION = "1.0.0";
   var STORAGE_PREFIX = "oraone:visitor:";
+  var SESSION_PREFIX = "oraone:session:";
+  var SESSION_HEADER = "X-Widget-Session";
   var DEFAULT_SUGGESTIONS = [];
 
   var script = document.currentScript || document.querySelector("script[data-widget-id]");
@@ -51,9 +53,54 @@
     host: null,
     root: null,
     refs: {},
+    sessionToken: null,
   };
 
+  var restored = storedSession();
+  if (restored) {
+    state.visitorId = restored.visitorId;
+    state.sessionToken = restored.token;
+  }
+
   // ───────────────────────── helpers ─────────────────────────
+
+  // The session token is kept in sessionStorage (per tab, per widget key), never
+  // in localStorage. It is stored with the visitor id it was issued for.
+  function storedSession() {
+    try {
+      var raw = window.sessionStorage.getItem(SESSION_PREFIX + publicKey);
+      var saved = raw ? JSON.parse(raw) : null;
+      return saved && saved.visitorId && saved.token ? saved : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function rememberSession(visitorIdValue, token) {
+    state.visitorId = visitorIdValue;
+    state.sessionToken = token;
+    try {
+      window.sessionStorage.setItem(
+        SESSION_PREFIX + publicKey,
+        JSON.stringify({ visitorId: visitorIdValue, token: token }),
+      );
+    } catch (err) {
+      // Storage can be blocked. The token still works for this page load.
+    }
+  }
+
+  // Drop the token so the next message starts a fresh visitor session.
+  function forgetSession() {
+    state.sessionToken = null;
+    state.sessionId = null;
+    state.conversationId = null;
+    sessionPromise = null;
+    try {
+      window.sessionStorage.removeItem(SESSION_PREFIX + publicKey);
+    } catch (err) {
+      // Nothing to clean up when storage is unavailable.
+    }
+  }
 
   function visitorId() {
     var key = STORAGE_PREFIX + publicKey;
@@ -84,9 +131,11 @@
   }
 
   function request(path, body) {
+    var headers = { "Content-Type": "application/json" };
+    if (state.sessionToken) headers[SESSION_HEADER] = state.sessionToken;
     var options = {
       method: body ? "POST" : "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: headers,
       credentials: "omit",
     };
     if (body) options.body = JSON.stringify(body);
@@ -100,6 +149,10 @@
           if (!response.ok) {
             var error = new Error(data.detail || "Request failed.");
             error.status = response.status;
+            // A rejected token means this visitor session is no longer valid.
+            if ((response.status === 401 || response.status === 403) && state.sessionToken) {
+              forgetSession();
+            }
             throw error;
           }
           return data;
@@ -338,7 +391,11 @@
       function (data) {
         state.sessionId = data.session_id;
         state.conversationId = data.conversation_id;
-        state.visitorId = data.visitor_id || state.visitorId;
+        if (data.session_token) {
+          rememberSession(data.visitor_id || state.visitorId, data.session_token);
+        } else if (data.visitor_id) {
+          state.visitorId = data.visitor_id;
+        }
         var history = data.messages || [];
         if (history.length) {
           history.forEach(function (m) {
@@ -404,6 +461,7 @@
       .then(function (data) {
         state.sessionId = data.session_id || state.sessionId;
         state.conversationId = data.conversation_id || state.conversationId;
+        if (data.session_token) rememberSession(state.visitorId, data.session_token);
         thinking.textContent = data.answer || "";
         renderSuggestions(data.related_questions);
       })

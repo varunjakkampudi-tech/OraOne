@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { messageOf } from "@/lib/api/client";
 import {
@@ -8,6 +9,7 @@ import {
   syncIntegration,
   type IntegrationCatalogEntry,
 } from "@/lib/api/integrations";
+import { canSync, primaryAction, rowStatusLabel, setupStatusTone } from "@/lib/integration-status";
 import {
   createWebhook,
   deleteWebhook,
@@ -21,12 +23,119 @@ import {
   type WebhookEventInfo,
   type WebhookWithSecret,
 } from "@/lib/api/webhooks";
+import { ProductGuide } from "./product-guide";
 import { Loading, Notice } from "./studio-ui";
 import { when, useWorkspaceId } from "@/lib/studio-helpers";
 import { StudioFrame } from "./studio";
 
 // Live integrations and webhooks under /studio. Connecting uses the provider's
 // real OAuth flow; nothing is marked connected unless the API says so.
+
+const OAUTH_ERROR_MESSAGES: Record<string, string> = {
+  not_configured:
+    "This integration is not configured yet. An administrator must add its OAuth app credentials on the server. Nothing was connected.",
+  provider_denied: "The provider did not grant access. Nothing was connected.",
+  invalid_state: "This connection link expired or was already used. Start the connection again.",
+  token_exchange_failed: "The provider rejected the connection. Nothing was connected; try again.",
+  unknown_provider: "This integration is not available. Nothing was connected.",
+  missing_code: "The connection could not be completed. Nothing was connected.",
+};
+
+const OAUTH_ERROR_DEFAULT = "The connection could not be completed. Nothing was connected.";
+
+type ConnectGuide = { whatItDoes: string; steps: [string, ...string[]] };
+
+// What the user creates in each provider's console. Setting names come from the
+// server (required_settings); values are never shown or stored in the browser.
+const CONNECT_GUIDES: Record<string, ConnectGuide> = {
+  google_calendar: {
+    whatItDoes:
+      "Links a Google account so OraOne can create and update calendar events. Event sync is planned, so connecting only links the account.",
+    steps: [
+      "In Google Cloud Console, pick or create a project, enable the Google Calendar API, and set up the OAuth consent screen.",
+      "Create an OAuth client ID of type Web application. Add the redirect URI /api/integrations/oauth/callback on your OraOne host.",
+    ],
+  },
+  google_sheets: {
+    whatItDoes:
+      "Links a Google account so OraOne can export captured leads to a spreadsheet. Export is planned, so connecting only links the account.",
+    steps: [
+      "In Google Cloud Console, pick or create a project, enable the Google Sheets API, and set up the OAuth consent screen.",
+      "Create an OAuth client ID of type Web application. Add the redirect URI /api/integrations/oauth/callback on your OraOne host.",
+    ],
+  },
+  slack: {
+    whatItDoes:
+      "Links a Slack workspace so OraOne can post notifications to a channel. Posting is planned, so connecting only links the workspace.",
+    steps: [
+      "At api.slack.com/apps, create an app for your workspace.",
+      "Under OAuth & Permissions, add the redirect URL /api/integrations/oauth/callback and the chat:write bot scope.",
+    ],
+  },
+  hubspot: {
+    whatItDoes:
+      "Links a HubSpot account so OraOne can sync contacts. Contact sync is planned, so connecting only links the account.",
+    steps: [
+      "At developers.hubspot.com, create a public app.",
+      "Add the redirect URL /api/integrations/oauth/callback and request the crm.objects.contacts read and write scopes.",
+    ],
+  },
+  notion: {
+    whatItDoes:
+      "Links a Notion workspace so OraOne can read pages you share with it. Page sync is planned, so connecting only links the workspace.",
+    steps: [
+      "At notion.so/my-integrations, create a public integration and turn on OAuth.",
+      "Set the redirect URI to /api/integrations/oauth/callback on your OraOne host.",
+    ],
+  },
+  zapier: {
+    whatItDoes: "Zapier is planned. Inbound Zap triggers are not available yet.",
+    steps: ["Until this ships, send events to a Zapier catch hook from the Webhooks page."],
+  },
+  make: {
+    whatItDoes: "Make is planned. Inbound scenario triggers are not available yet.",
+    steps: ["Until this ships, send events to a Make custom webhook from the Webhooks page."],
+  },
+  generic_webhook: {
+    whatItDoes:
+      "The signed webhook sender is planned for per-workspace setup. Today, use the Webhooks page.",
+    steps: [
+      "Your endpoint must be a public HTTPS URL.",
+      "Verify X-OraOne-Signature (sha256 HMAC over timestamp, delivery id and body) and reject timestamps older than five minutes.",
+    ],
+  },
+};
+
+const DEFAULT_GUIDE: ConnectGuide = {
+  whatItDoes: "This connector is planned. Setup steps appear here when it is available.",
+  steps: ["No setup is needed yet."],
+};
+
+function connectGuideFor(entry: IntegrationCatalogEntry): ConnectGuide {
+  const guide = Object.prototype.hasOwnProperty.call(CONNECT_GUIDES, entry.catalog.provider)
+    ? CONNECT_GUIDES[entry.catalog.provider]
+    : undefined;
+  return guide ?? DEFAULT_GUIDE;
+}
+
+function HowToConnect({ entry }: { entry: IntegrationCatalogEntry }) {
+  const guide = connectGuideFor(entry);
+  const settings = entry.catalog.required_settings;
+  const needs: [string, ...string[]] = [...guide.steps];
+  if (settings.length > 0) {
+    needs.push(
+      `On the OraOne server, set ${settings.join(" and ")}. Their values are never shown here.`,
+    );
+  }
+  return (
+    <details className="mt-3 text-sm">
+      <summary className="cursor-pointer font-medium">How to connect</summary>
+      <div className="mt-2">
+        <ProductGuide whatItDoes={guide.whatItDoes} needs={needs} />
+      </div>
+    </details>
+  );
+}
 
 function StatusPill({ tone, children }: { tone: "ok" | "muted" | "warn"; children: string }) {
   const cls =
@@ -80,6 +189,25 @@ export function IntegrationsPage() {
       cancelled = true;
     };
   }, [workspace.id, reloadKey]);
+
+  // The OAuth callback returns here with ?connected=… or ?error=… (see the API).
+  // Show what actually happened, then clear the query so a reload doesn't repeat it.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const connectedProvider = params.get("connected");
+    const failure = params.get("error");
+    if (!connectedProvider && !failure) return;
+    if (connectedProvider) {
+      setNotice("The connection was approved. The status below reflects the saved connection.");
+    } else if (failure) {
+      setError(
+        Object.prototype.hasOwnProperty.call(OAUTH_ERROR_MESSAGES, failure)
+          ? (OAUTH_ERROR_MESSAGES[failure] ?? OAUTH_ERROR_DEFAULT)
+          : OAUTH_ERROR_DEFAULT,
+      );
+    }
+    window.history.replaceState(null, "", window.location.pathname);
+  }, []);
 
   async function connect(entry: IntegrationCatalogEntry) {
     if (!workspace.id) return;
@@ -138,12 +266,35 @@ export function IntegrationsPage() {
 
   return (
     <StudioFrame>
-      <span className="marketing-eyebrow">LIVE · INTEGRATIONS</span>
-      <h1 className="mt-2 text-3xl font-semibold">Integrations</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Integrations</h1>
       <p className="mt-2 text-muted-foreground">
-        Connect the tools that feed your assistants. Only providers marked available can be
-        connected.
+        Connect the tools that feed your assistants. Status comes from the server: providers that
+        are planned or still need setup cannot be connected yet.
       </p>
+      <ProductGuide
+        whatItDoes="Lists the tools that can be linked to your workspace, with the status of each one. Only tools marked Connected are linked right now."
+        needs={[
+          "Some tools need account setup on the server before they can be connected. Those show Needs setup.",
+          "Planned tools are not available yet and cannot be connected.",
+          "To connect a tool, press its Connect button and finish the sign-in it asks for.",
+        ]}
+        terms={[
+          {
+            term: "Connected",
+            meaning: "The tool is linked to your workspace. You can disconnect it at any time.",
+          },
+          {
+            term: "Not connected",
+            meaning: "The tool can be connected now. Nothing is linked yet.",
+          },
+          {
+            term: "Needs setup",
+            meaning: "The tool cannot be connected yet. It needs account setup first.",
+          },
+          { term: "Planned", meaning: "The tool is not available yet and cannot be connected." },
+        ]}
+        termsHeading="Status meanings"
+      />
       <WorkspaceGate workspace={workspace}>
         {error && (
           <div className="mt-4">
@@ -181,17 +332,20 @@ export function IntegrationsPage() {
                           {catalog.category} · {catalog.type}
                         </span>
                       </div>
-                      {integration ? (
-                        <StatusPill tone={connected ? "ok" : "warn"}>
-                          {connected ? "Connected" : integration.status}
-                        </StatusPill>
-                      ) : (
-                        <StatusPill tone="muted">
-                          {catalog.available ? "Not connected" : "Unavailable"}
-                        </StatusPill>
-                      )}
+                      <StatusPill
+                        tone={
+                          integration && !connected ? "warn" : setupStatusTone(entry.setup_status)
+                        }
+                      >
+                        {rowStatusLabel(entry)}
+                      </StatusPill>
                     </div>
                     <p className="mt-2 text-sm text-muted-foreground">{catalog.description}</p>
+                    {!integration &&
+                      (entry.setup_status !== "not_connected" || catalog.auth === "webhook") && (
+                        <p className="mt-2 text-sm text-muted-foreground">{entry.setup_message}</p>
+                      )}
+                    <HowToConnect entry={entry} />
                     {integration && (
                       <dl className="mt-3 grid gap-1 text-sm text-muted-foreground">
                         <div>Account: {integration.external_account || "—"}</div>
@@ -204,14 +358,20 @@ export function IntegrationsPage() {
                     <div className="mt-4 flex flex-wrap gap-2">
                       {integration ? (
                         <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={isBusy || !connected}
-                            onClick={() => sync(entry)}
-                          >
-                            Sync now
-                          </Button>
+                          {catalog.sync_available ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={isBusy || !canSync(entry)}
+                              onClick={() => sync(entry)}
+                            >
+                              Sync now
+                            </Button>
+                          ) : (
+                            <Button variant="outline" size="sm" disabled>
+                              Sync planned
+                            </Button>
+                          )}
                           {confirmProvider === catalog.provider ? (
                             <>
                               <Button
@@ -241,13 +401,17 @@ export function IntegrationsPage() {
                             </Button>
                           )}
                         </>
+                      ) : primaryAction(entry) === "connect" ? (
+                        <Button size="sm" disabled={isBusy} onClick={() => connect(entry)}>
+                          {isBusy ? "Connecting…" : "Connect"}
+                        </Button>
+                      ) : primaryAction(entry) === "set_up_on_webhooks" ? (
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to="/studio/webhooks">Set up on Webhooks</Link>
+                        </Button>
                       ) : (
-                        <Button
-                          size="sm"
-                          disabled={isBusy || !catalog.available}
-                          onClick={() => connect(entry)}
-                        >
-                          {isBusy ? "Connecting…" : catalog.available ? "Connect" : "Not available"}
+                        <Button size="sm" disabled>
+                          {primaryAction(entry) === "needs_setup" ? "Needs setup" : "Planned"}
                         </Button>
                       )}
                     </div>
@@ -394,8 +558,7 @@ export function WebhooksPage() {
 
   return (
     <StudioFrame>
-      <span className="marketing-eyebrow">LIVE · WEBHOOKS</span>
-      <h1 className="mt-2 text-3xl font-semibold">Webhooks</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Webhooks</h1>
       <p className="mt-2 text-muted-foreground">
         Send workspace events to your own systems. Each request is signed with the endpoint&apos;s
         secret.

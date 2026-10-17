@@ -1,0 +1,86 @@
+OraOne - BLOCKERS (things only you can do)
+==========================================
+Last updated: 2026-10-18. I will keep this file current. Each item says what I need and why.
+
+ACCOUNTS AND SECRETS (I cannot create accounts, enter passwords, or accept terms/payments)
+
+1. Email delivery (sign-in codes depend on this)
+   - Create mailbox noreply@oraone.in in Hostinger email.
+   - On the server, add to /opt/oraone/backend/.env:
+     SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM, SMTP_USE_SSL
+   - Then restart backend:  cd /opt/oraone && docker compose -f docker-compose.prod.yml up -d backend workers
+
+2. Meta (WhatsApp + Instagram)
+   - Finish "Step 2. Production setup" in the Meta app dashboard:
+     a) Register the WhatsApp phone number (needs the SMS/voice code, only you can receive it)
+     b) Add payment method for business-initiated messages (your payment, your choice)
+     c) Configure Webhooks: Callback URL = https://oraone.in/api/channels/meta/inbound
+        Verify token = META_WHATSAPP_VERIFY_TOKEN value from your local backend/.env
+        Subscribe to the "messages" field.
+   - Instagram: create/enable the Instagram messaging permission and an Instagram-scoped
+     page token; give me the token name only (set META_INSTAGRAM_ACCESS_TOKEN on the server).
+   - Business verification (Meta may require it for production messaging).
+
+3. Twilio (calls, SMS, AI voice)
+   - Add to server /opt/oraone/backend/.env:  PUBLIC_API_BASE_URL=https://oraone.in  (already set)
+   - In Twilio console, on your phone number set webhooks:
+     Voice:            https://oraone.in/api/voice/inbound
+     Messaging (SMS/WhatsApp): https://oraone.in/api/channels/twilio/inbound
+     Status callback:  https://oraone.in/api/voice/status
+
+4. ElevenLabs (human-like voice for AI calls)
+   - Create an ElevenLabs account, copy your API key and choose a voice ID.
+   - Add to server .env:  ELEVENLABS_API_KEY=...  and  ELEVENLABS_VOICE_ID=...
+   - Also set REDIS_URL=redis://redis:6379/0 in server .env (for voice audio across workers).
+
+5. GitHub (automated tests and deployment)
+   - Create a GitHub repository (private) for OraOne.
+   - Tell me the repo name (owner/name). I will push code only after you approve the push.
+   - Add repository secrets (Settings -> Secrets and variables -> Actions):
+     DEPLOY_HOST = 200.141.14.57
+     DEPLOY_USER = root
+     DEPLOY_SSH_KEY = contents of the private key file ~/.ssh/oraone_vps
+       (I will tell you the exact file path to copy; do NOT paste it into chat)
+   - Optional: DEPLOY_PATH = /opt/oraone
+
+6. Google / Slack / HubSpot / Notion / Google Sheets / Calendar integrations (optional)
+   - Create OAuth apps in each provider's developer console, then add client ID and
+     secret to the server .env (names listed in docs/operations/CONFIGURATION.md).
+   - Until then, those integrations correctly show "not configured yet".
+
+7. Marketing (email campaigns)
+   - Choose an email delivery provider for campaign mail (for example Hostinger SMTP or a
+     transactional provider) and give me the provider name. I will wire it after you add
+     the credentials to the server .env.
+   - WhatsApp marketing outside the 24-hour window needs approved message templates in Meta.
+
+8. First admin user
+   - Sign in once at https://oraone.in with your own email (code arrives by email).
+   - Tell me the email. I will grant the platform super-admin role on the server.
+
+DECISIONS I NEED FROM YOU
+
+9. Free access: production currently runs ORAONE_FREE_ACCESS_ONLY=true (billing off).
+   Confirm this stays on until pricing is ready.
+
+10. Beta testers: give me the list of beta tester email addresses (or say "none yet").
+    I will add the beta feature flags when you confirm the list.
+
+11. Vision and mission text for the docs: confirm the wording below, or send your own.
+    Draft: "OraOne is one AI operating system for every conversation: every channel,
+    every customer, and every follow-up in one place, with an AI that answers from your
+    own information and hands over to your team when needed."
+
+12. Privacy: confirm you want the data policy to say that OraOne does not use customer
+    data to train models, and that data is stored in India (Mumbai server).
+
+ITEMS I WILL DO WITHOUT YOU (for your awareness)
+- Code quality (lint, prettier, structure), security audit and fixes, dependency audit
+  and updates, logging and log download for admins, admin config drafts that only admins
+  can publish, beta feature flags, high-level analytics, removing dummy data from the
+  public site, product test suites (unit, API, end-to-end, smoke, regression, critical),
+  GitHub Actions workflows (manual deploy from main), documentation updates.
+
+NOT IN THIS RELEASE (planned)
+- YouTube and Instagram marketing for end users: needs YouTube Data API and Meta
+  Marketing API approvals. Will be built after those approvals.

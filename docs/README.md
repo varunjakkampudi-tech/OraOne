@@ -15,6 +15,11 @@
 | Release gate                   | [Release checklist](operations/RELEASE-CHECKLIST.md)                               |
 | Security report                | [SECURITY.md](../SECURITY.md)                                                      |
 | Planned work                   | [Roadmap](ROADMAP.md)                                                              |
+| Every product, plainly         | [Products guide](guides/PRODUCTS.md)                                               |
+| Every setting, with defaults   | [Configuration reference](operations/CONFIGURATION.md)                             |
+| Common problems and fixes      | [Runbook](operations/RUNBOOK.md)                                                   |
+| Admin console and secrets      | [Admin and configuration guide](guides/ADMIN-CONFIG.md)                            |
+| Product status and blockers    | [Product portfolio](PRODUCT-PORTFOLIO.md)                                          |
 
 RBAC and security records remain authoritative for their named scope.
 

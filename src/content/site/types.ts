@@ -87,6 +87,7 @@ export type ArticlePage = Base & {
   lead: string;
   updated: string;
   draft?: boolean;
+  pullquote?: string;
   sections: Section[];
 };
 

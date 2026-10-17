@@ -1,0 +1,129 @@
+/* Admin-only refinements. Loaded from admin.tsx after the shared theme stylesheet. */
+
+/* Keep the page column at the width left beside the sidebar. Without this, main sizes to its
+   widest table toolbar at tablet widths and pushes the page past the viewport. */
+.admin-main > main,
+.admin-main > header,
+.admin-main > footer {
+  width: 100%;
+  min-width: 0;
+}
+
+.admin-table-summary {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+  margin: 0 0 16px;
+  max-width: 64ch;
+}
+
+.admin-table-toolbar > .admin-export {
+  margin-left: auto;
+  display: inline-flex;
+}
+
+.admin-danger-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.admin-danger-trigger {
+  color: var(--destructive);
+  border-color: var(--destructive);
+}
+
+.admin-danger-note {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  margin: 4px 0 0;
+}
+
+.admin-pagination {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 639px) {
+  /* Tables become stacked rows: the header is hidden and each cell shows its column name. */
+  .admin-table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .admin-search {
+    max-width: none;
+    width: 100%;
+  }
+  .admin-filter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .admin-filter select {
+    width: 100%;
+  }
+  .admin-table-toolbar > .admin-export,
+  .admin-table-toolbar > .admin-export > button {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .admin-table-scroll {
+    padding: 12px;
+  }
+  .admin-table-scroll table {
+    min-width: 0;
+    display: block;
+  }
+  .admin-table-scroll thead {
+    display: none;
+  }
+  .admin-table-scroll tbody {
+    display: block;
+  }
+  .admin-table-scroll tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--background);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .admin-table-scroll tbody tr:last-child {
+    margin-bottom: 0;
+  }
+  .admin-table-scroll td {
+    display: block;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+  .admin-table-scroll td:first-child {
+    grid-column: 1 / -1;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .admin-table-scroll td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 11px;
+    color: var(--muted-foreground);
+    margin-bottom: 2px;
+  }
+  .admin-table-scroll td:first-child::before {
+    display: none;
+  }
+  .admin-table-scroll td small {
+    max-width: none;
+  }
+  .admin-table-scroll td .status-pill,
+  .admin-table-scroll td button {
+    max-width: 100%;
+  }
+
+  .admin-danger-actions > * {
+    flex: 1 1 100%;
+  }
+}

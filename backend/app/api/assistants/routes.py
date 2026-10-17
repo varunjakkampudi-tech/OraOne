@@ -16,6 +16,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from app.middleware.org_context import OrgContext, get_current_organization
+from app.core.permissions import Permission
+from app.middleware.org_context import require_permission
 from app.services import assistants
 from app.services.audit import audit
 
@@ -39,7 +41,11 @@ async def list_assistants(
     return assistants.catalog()
 
 
-@router.post("/{kind}/run", response_model=AssistantRunOut)
+@router.post(
+    "/{kind}/run",
+    response_model=AssistantRunOut,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
+)
 async def run_assistant(
     kind: str,
     payload: AssistantRunIn,

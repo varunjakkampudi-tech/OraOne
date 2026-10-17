@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import uuid
-import ipaddress
-import socket
 from datetime import datetime
 from typing import List, Optional
 from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from app.services.egress_guard import (
+    REASON_UNRESOLVABLE,
+    UnsafeDestinationError,
+    resolve_public_addresses,
+)
 
 
 class WebhookEventInfo(BaseModel):
@@ -20,10 +24,12 @@ class WebhookEventInfo(BaseModel):
 def validate_public_webhook_url(value: str) -> str:
     """Allow only publicly routable HTTP(S) destinations.
 
-    This validation is repeated by the delivery service immediately before
-    every request. That closes the common DNS-rebinding window between endpoint
-    registration and delivery; redirects are disabled at the HTTP client.
-    Network-level egress restrictions must still be applied by deployment.
+    This is registration-time validation. The delivery service resolves the
+    host again immediately before each request and connects to the validated
+    IP (see ``app.services.egress_guard``), which closes the DNS-rebinding
+    window between registration and delivery. Redirects are disabled at the
+    HTTP client. Network-level egress restrictions must still be applied by
+    deployment.
     """
     value = value.strip()
     parsed = urlsplit(value)
@@ -38,29 +44,15 @@ def validate_public_webhook_url(value: str) -> str:
         (".local", ".internal")
     ):
         raise ValueError("Private and internal hosts are not allowed")
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
     try:
-        ipaddress.ip_address(host)
-        addresses = [host]
-    except ValueError:
-        try:
-            addresses = list({info[4][0] for info in socket.getaddrinfo(host, None)})
-        except (OSError, UnicodeError):
+        resolve_public_addresses(host, port)
+    except UnsafeDestinationError as exc:
+        if exc.reason == REASON_UNRESOLVABLE:
             raise ValueError("Webhook hostname could not be resolved") from None
-    if not addresses:
-        raise ValueError("Webhook hostname could not be resolved")
-    for address in addresses:
-        ip = ipaddress.ip_address(address)
-        if (
-            ip.is_private
-            or ip.is_loopback
-            or ip.is_link_local
-            or ip.is_reserved
-            or ip.is_multicast
-            or ip.is_unspecified
-        ):
-            raise ValueError(
-                "Private, loopback, reserved, or link-local destinations are not allowed"
-            )
+        raise ValueError(
+            "Private, loopback, reserved, or link-local destinations are not allowed"
+        ) from None
     return value
 
 

@@ -38,6 +38,8 @@ from app.middleware.org_context import (
     get_current_organization,
     require_role,
 )
+from app.core.permissions import Permission
+from app.middleware.org_context import require_permission
 from app.middleware.project_context import ProjectContext, get_current_project
 from app.schemas.agents import (
     AgentCreate,
@@ -292,6 +294,7 @@ async def list_agents(
     status_code=status.HTTP_201_CREATED,
     summary="Create an agent",
     description="Create a new agent and its 1:1 `agent_configs` sidecar in a single transaction.",
+    dependencies=[Depends(require_permission(Permission.AGENTS_WRITE))],
 )
 async def create_agent(
     payload: AgentCreate,
@@ -459,6 +462,7 @@ async def get_agent(
         "Updates to `system_prompt`, `temperature`, `voice`, `language`, "
         "`greeting`, or `max_tokens` are applied to the 1:1 `agent_configs` row."
     ),
+    dependencies=[Depends(require_permission(Permission.AGENTS_WRITE))],
 )
 async def update_agent(
     agent_id: uuid.UUID,

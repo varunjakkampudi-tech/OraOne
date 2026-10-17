@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- Build stage: install Python deps into an isolated venv ----
-FROM python:3.11-slim AS builder
+FROM python:3.12.15-slim AS builder
 
 WORKDIR /build
 
@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # ---- Runtime stage: slim image, no compilers, non-root user ----
-FROM python:3.11-slim AS runtime
+FROM python:3.12.15-slim AS runtime
 
 # Only the shared library pgvector/psycopg2 need at runtime (not the -dev headers).
 RUN apt-get update && apt-get install -y --no-install-recommends \

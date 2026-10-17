@@ -157,10 +157,12 @@ def _personalize_fb(p):
 
 
 def _experiment_fb(p):
+    # No comparison was produced, so no variant is recommended. Never default
+    # to a fixed winner: callers must treat a null recommendation as "no result".
     return {
-        "recommended_variant": "A",
-        "confidence": "low",
-        "rationale": "AI comparison unavailable — defaulting to control.",
+        "recommended_variant": None,
+        "confidence": "none",
+        "rationale": "No comparison was produced: the AI model is not available right now.",
         "suggestions": [],
     }
 

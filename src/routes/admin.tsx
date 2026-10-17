@@ -12,10 +12,19 @@ export const Route = createFileRoute("/admin")({
   component: AdminGate,
 });
 
+// The design preview renders sample screens without any sign-in. It exists only for
+// local development; production builds always show the restricted notice.
+const PREVIEW_ALLOWED = import.meta.env.DEV;
+
 function AdminGate() {
   const { preview } = Route.useSearch();
   const [mode, setMode] = useState<"checking" | "preview" | "locked">("checking");
   useEffect(() => {
+    if (!PREVIEW_ALLOWED) {
+      sessionStorage.removeItem(KEY);
+      setMode("locked");
+      return;
+    }
     if (preview === "design") sessionStorage.setItem(KEY, "1");
     setMode(sessionStorage.getItem(KEY) === "1" ? "preview" : "locked");
   }, [preview]);
@@ -34,9 +43,11 @@ function AdminGate() {
           <Link to="/" className="btn btn-primary">
             Back to home
           </Link>
-          <Link to="/admin" search={{ preview: "design" }} className="btn">
-            Open design preview
-          </Link>
+          {PREVIEW_ALLOWED ? (
+            <Link to="/admin" search={{ preview: "design" }} className="btn">
+              Open design preview
+            </Link>
+          ) : null}
         </p>
       </main>
     );

@@ -31,6 +31,8 @@ from app.database.models.knowledge_base import KnowledgeBase
 from app.database.models.knowledge_folder import KnowledgeFolder
 from app.database.session import get_db
 from app.middleware.org_context import OrgContext, get_current_organization
+from app.core.permissions import Permission
+from app.middleware.org_context import require_permission
 from app.schemas.knowledge import DocumentRead
 from app.services import storage
 from app.services.audit import audit
@@ -271,6 +273,7 @@ async def list_source_types(
     "/api/knowledge/sources/website",
     response_model=DocumentRead,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission(Permission.KB_WRITE))],
 )
 async def ingest_website(
     payload: WebsiteSourceIn,
@@ -316,6 +319,7 @@ async def ingest_website(
     "/api/knowledge/sources/text",
     response_model=DocumentRead,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission(Permission.KB_WRITE))],
 )
 async def ingest_text(
     payload: TextSourceIn,

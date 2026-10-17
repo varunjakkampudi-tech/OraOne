@@ -47,6 +47,13 @@ from app.database.models.document_chunk import DocumentChunk
 from app.database.models.website import CrawlMode, Website, WebsiteStatus
 from app.database.models.website_page import PageStatus, WebsitePage
 from app.services import crawler_queue
+from app.services.egress_guard import (
+    REASON_UNRESOLVABLE,
+    PinnedTarget,
+    UnsafeDestinationError,
+    pinned_request,
+    resolve_public_target,
+)
 from app.services.document_processing import (
     ExtractedPage,
     _embed_chunks,
@@ -367,6 +374,18 @@ def classify_url(url: str) -> Optional[str]:
 # ────────────────────────── robots + sitemap ──────────────────────────
 
 
+async def _pin_public_target(url: str) -> PinnedTarget:
+    """Resolve and validate a crawl hop, returning a connection pinned to it."""
+    try:
+        return await asyncio.to_thread(resolve_public_target, url)
+    except UnsafeDestinationError as exc:
+        if exc.reason == REASON_UNRESOLVABLE:
+            raise URLValidationError("URL host could not be resolved.") from exc
+        raise URLValidationError(
+            "URL host is not reachable on the public internet (or is a private address)."
+        ) from exc
+
+
 async def _fetch(client, url: str) -> tuple[int, str, str]:
     """GET a URL with SSRF validation on every redirect hop.
 
@@ -374,16 +393,20 @@ async def _fetch(client, url: str) -> tuple[int, str, str]:
     redirect a public URL to loopback/private/link-local space. Each target is
     resolved and checked before the next request.
     """
-    current = validate_url(url)
+    current = validate_url(url, require_safe_host=False)
     resp = None
     for _ in range(5):
-        resp = await client.get(current, follow_redirects=False)
+        # Resolve once, validate every address, and connect to that address.
+        # The connection cannot be rebound to a private IP between the check
+        # and the request because the request never resolves the hostname.
+        target = await _pin_public_target(current)
+        resp = await pinned_request(client, "GET", target, follow_redirects=False)
         if resp.status_code not in {301, 302, 303, 307, 308}:
             break
         location = resp.headers.get("location")
         if not location:
             break
-        current = validate_url(urljoin(current, location))
+        current = validate_url(urljoin(current, location), require_safe_host=False)
     if resp is None:
         raise URLValidationError("No response received.")
     ctype = resp.headers.get("content-type", "")

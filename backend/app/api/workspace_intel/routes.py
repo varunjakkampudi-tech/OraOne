@@ -17,6 +17,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db
 from app.middleware.org_context import OrgContext, get_current_organization
+from app.core.permissions import Permission
+from app.middleware.org_context import require_permission
 from app.services import workspace_intelligence as wi
 from app.services.audit import audit
 
@@ -125,7 +127,9 @@ async def list_sim_scenarios(
 
 
 @router.post(
-    "/simulator/run", summary="Run the conversation simulator against an agent"
+    "/simulator/run",
+    summary="Run the conversation simulator against an agent",
+    dependencies=[Depends(require_permission(Permission.AGENTS_WRITE))],
 )
 async def run_simulator(
     payload: SimulateRequest,

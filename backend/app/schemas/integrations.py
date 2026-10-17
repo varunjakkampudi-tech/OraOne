@@ -28,6 +28,10 @@ class ProviderCatalogItem(BaseModel):
     color: str
     description: str
     available: bool
+    # Provider data sync is implemented. False means sync is planned.
+    sync_available: bool = False
+    # Names only (never values) of the server settings OAuth needs.
+    required_settings: list[str] = Field(default_factory=list)
 
 
 # ──────────────── Integrations ────────────────
@@ -57,6 +61,9 @@ class IntegrationCatalogEntry(BaseModel):
 
     catalog: ProviderCatalogItem
     integration: Optional[IntegrationRead] = None
+    # connected | not_connected | requires_account_setup | planned
+    setup_status: str = "planned"
+    setup_message: str = ""
 
 
 class IntegrationCatalogResponse(BaseModel):

@@ -28,7 +28,8 @@ Enforcement policy:
     * Subscription and quota policies are **evaluated and observable** but only
       *deny* when their env switch is on (``AUTHZ_ENFORCE_SUBSCRIPTION`` /
       ``AUTHZ_ENFORCE_QUOTAS``). This lets us design + monitor them now and turn
-      enforcement on deliberately, without bricking existing tenants.
+      enforcement on deliberately, without bricking existing tenants. The one
+      exception: a quota with no measurement source fails closed in production.
 
 Plan resolution: an org with no subscription row is **not** special-cased — it
 resolves to the default Free plan and is evaluated like every other plan, so
@@ -83,6 +84,7 @@ class AuthzOutcome:
     TRIAL_EXPIRED = "trial_expired"
     SUBSCRIPTION_EXPIRED = "subscription_expired"
     USAGE_EXCEEDED = "usage_exceeded"
+    QUOTA_UNAVAILABLE = "quota_unavailable"
     UNAUTHENTICATED = "unauthenticated"
 
 
@@ -95,6 +97,7 @@ OUTCOME_STATUS: dict[str, int] = {
     AuthzOutcome.TRIAL_EXPIRED: 402,
     AuthzOutcome.SUBSCRIPTION_EXPIRED: 402,
     AuthzOutcome.USAGE_EXCEEDED: 429,
+    AuthzOutcome.QUOTA_UNAVAILABLE: 503,
     AuthzOutcome.UNAUTHENTICATED: 401,
 }
 
@@ -449,6 +452,14 @@ class QuotaPolicy(Policy):
         }
         if qd.allowed:
             return PolicyEval(PolicyResult.ALLOW, detail=actx.meta["quota"])
+        if qd.outcome == "unmeasured":
+            # Fail closed in production: an unmeasured limit is never silently
+            # allowed, regardless of the enforcement switch.
+            return PolicyEval(
+                PolicyResult.DENY,
+                AuthzOutcome.QUOTA_UNAVAILABLE,
+                qd.meta.get("reason", quotas.UNMEASURED_REASON),
+            )
         metrics.inc("quota_exceeded_total", quota=actx.quota)
         if ENFORCE_QUOTAS:
             return PolicyEval(

@@ -1,7 +1,17 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
-/** Local development account seeded by backend/scripts/seed_dev_users.py. */
-export const DEV_USER = { email: "varun@oraone.in", password: "varun@oraone.in" } as const;
+/**
+ * Local development account seeded by backend/scripts/seed_dev_users.py.
+ * Credentials come from the environment and are never committed. Specs that
+ * need them are skipped when they are unset.
+ */
+export const DEV_USER = {
+  email: process.env["E2E_DEV_EMAIL"] ?? "",
+  password: process.env["E2E_DEV_PASSWORD"] ?? "",
+} as const;
+
+export const DEV_USER_SKIP_REASON =
+  "Set E2E_DEV_EMAIL and E2E_DEV_PASSWORD to a seeded local development account to run this spec.";
 
 /**
  * Sign in through the development endpoint. The browser context receives the
@@ -11,6 +21,7 @@ export async function signInAsDevUser(
   page: Page,
   account: { readonly email: string; readonly password: string } = DEV_USER,
 ): Promise<void> {
+  test.skip(!account.email || !account.password, DEV_USER_SKIP_REASON);
   const response = await page.request.post("/api/auth/dev-login", {
     data: { email: account.email, password: account.password },
   });

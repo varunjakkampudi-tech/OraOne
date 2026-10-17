@@ -18,12 +18,18 @@ if (!assistantId) {
   console.error("usage: bun scripts/capture-media.ts <assistantId>");
   process.exit(1);
 }
+const DEV_EMAIL = process.env["E2E_DEV_EMAIL"] ?? "";
+const DEV_PASSWORD = process.env["E2E_DEV_PASSWORD"] ?? "";
+if (!DEV_EMAIL || !DEV_PASSWORD) {
+  console.error("Set E2E_DEV_EMAIL and E2E_DEV_PASSWORD for a seeded local development account.");
+  process.exit(1);
+}
 const OUT = resolve(import.meta.dirname, "../public/media");
 mkdirSync(OUT, { recursive: true });
 
 async function signIn(context: BrowserContext) {
   const res = await context.request.post(`${APP}/api/auth/dev-login`, {
-    data: { email: "varun@oraone.in", password: "varun@oraone.in" },
+    data: { email: DEV_EMAIL, password: DEV_PASSWORD },
   });
   if (res.status() !== 200) throw new Error(`dev-login failed: ${res.status()}`);
 }

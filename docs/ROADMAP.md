@@ -12,18 +12,18 @@ Product numbers identify the portfolio and do not prescribe a release sequence. 
 
 ## Portfolio status
 
-| Product                       | Status                |
-| ----------------------------- | --------------------- |
-| OraOne AI Chat Platform       | In active development |
-| OraOne AI Voice Platform      | Planned               |
-| OraOne WhatsApp Platform      | Planned               |
-| Omnichannel Communication Hub | Planned               |
-| Workflow Automation Platform  | Planned               |
-| AI Studio & Agent Builder     | Planned               |
-| Marketplace                   | Planned               |
-| Mobile Applications           | Planned               |
-| Enterprise Edition            | Planned               |
-| OraOne OS                     | Long-term vision      |
+| Product                       | Status (see the portfolio for blockers)  |
+| ----------------------------- | ---------------------------------------- |
+| OraOne AI Chat Platform       | In active development                    |
+| OraOne AI Voice Platform      | Blocked by a setup gap (voice binding)   |
+| OraOne WhatsApp Platform      | Blocked by a setup gap (channel binding) |
+| Omnichannel Communication Hub | Partly available                         |
+| Workflow Automation Platform  | Partly available                         |
+| AI Studio & Agent Builder     | Partly available                         |
+| Marketplace                   | Partly available                         |
+| Mobile Applications           | Not built in this repository             |
+| Enterprise Edition            | Partly available                         |
+| OraOne OS                     | Long-term vision                         |
 
 ## Shared foundations
 

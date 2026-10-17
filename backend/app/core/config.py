@@ -18,6 +18,14 @@ from dotenv import load_dotenv
 _BACKEND_ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(_BACKEND_ROOT / ".env", override=False)
 
+# Values saved from the admin configuration console take effect at start-up,
+# before the settings below are read. Failures never block start-up.
+from app.core.config_overrides import (  # noqa: E402
+    apply_stored_overrides_at_startup,
+)
+
+apply_stored_overrides_at_startup()
+
 _PRODUCTION_ENVIRONMENTS = {"production", "prod", "staging"}
 _MIN_JWT_SECRET_LENGTH = 32
 
@@ -25,7 +33,9 @@ _MIN_JWT_SECRET_LENGTH = 32
 class Settings:
     """Typed view over environment variables used by the backend."""
 
-    environment: str = os.environ.get("ENVIRONMENT", "development").strip().lower()
+    # Unset ENVIRONMENT is treated as production (fail closed). Local work must
+    # set ENVIRONMENT=development explicitly to enable development-only paths.
+    environment: str = os.environ.get("ENVIRONMENT", "").strip().lower() or "production"
 
     # Self-hosted authentication: Argon2 password hashes and HS256 JWTs.
     jwt_secret_key: str = os.environ.get("JWT_SECRET_KEY", "")

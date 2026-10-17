@@ -6,11 +6,13 @@ import { messageOf } from "@/lib/api/client";
 import { getAgent, type Agent } from "@/lib/api/studio";
 import {
   createWidget,
+  getWidgetAnalytics,
   listWidgets,
   setWidgetPublished,
   updateWidgetDomains,
   type Widget,
 } from "@/lib/api/widgets";
+import { ProductGuide } from "./product-guide";
 import { Loading, Notice } from "./studio-ui";
 import { when, useWorkspaceId } from "@/lib/studio-helpers";
 import { StudioFrame } from "./studio";
@@ -187,7 +189,10 @@ function WidgetSettings({ widget, onChange }: { widget: Widget; onChange: (w: Wi
         Allowed websites
       </label>
       <p className="text-sm text-muted-foreground">
-        One domain per line, for example <code>example.com</code>. Leave empty to allow any site.
+        One domain per line, for example <code>example.com</code>.{" "}
+        {widget.allowed_domains_required
+          ? "The widget only loads on these domains and subdomains, so add each site that will show it."
+          : "Leave empty to allow any site in this environment."}
       </p>
       <textarea
         id="widget-domains"
@@ -242,6 +247,73 @@ function Publishing({ widget, onChange }: { widget: Widget; onChange: (w: Widget
       </Button>
       {error && <Notice kind="error">{error}</Notice>}
     </div>
+  );
+}
+
+// Verification comes from the server: "installed" only after the widget loader has
+// recorded a real visit. Until then the page says it is waiting, and it polls.
+function InstallCheck({ widget }: { widget: Widget }) {
+  const [lastLoaded, setLastLoaded] = useState<string | null | undefined>(undefined);
+  const [error, setError] = useState("");
+  const [checking, setChecking] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  const verified = Boolean(lastLoaded);
+
+  useEffect(() => {
+    if (verified) return;
+    let cancelled = false;
+    const run = () => {
+      setChecking(true);
+      getWidgetAnalytics(widget.id)
+        .then((analytics) => {
+          if (cancelled) return;
+          setLastLoaded(analytics.last_loaded_at);
+          setError("");
+        })
+        .catch((err) => {
+          if (!cancelled) setError(messageOf(err, "Couldn't check for visits. Try again."));
+        })
+        .finally(() => {
+          if (!cancelled) setChecking(false);
+        });
+    };
+    run();
+    const timer = window.setInterval(run, 15000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [widget.id, reloadKey, verified]);
+
+  return (
+    <section className="space-y-4">
+      <h2 className="text-xl font-semibold">Step 4 · Verify the install</h2>
+      {verified ? (
+        <Notice>{`Installed. The widget loaded on your website ${when(lastLoaded)}.`}</Notice>
+      ) : (
+        <div className="space-y-3 rounded-xl border border-border p-5">
+          <p className="font-semibold" role="status">
+            {lastLoaded === undefined && !error
+              ? "Checking for visits…"
+              : "Waiting for first visit"}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {widget.status === "published"
+              ? "Open a page where you pasted the code. This check runs every 15 seconds and reports success only after a real visit is recorded."
+              : "Publish the widget in Step 3. Visits are only recorded for live widgets."}
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={checking}
+            onClick={() => setReloadKey((k) => k + 1)}
+          >
+            {checking ? "Checking…" : "Check again"}
+          </Button>
+        </div>
+      )}
+      {error && <Notice kind="error">{error}</Notice>}
+    </section>
   );
 }
 
@@ -338,6 +410,37 @@ export function StudioInstall({ assistantId }: { assistantId: string }) {
           </p>
         </header>
 
+        <ProductGuide
+          whatItDoes="Gives you one line of code that loads this assistant's chat on your website. The check at Step 4 tells you when a real visit has loaded it."
+          needs={[
+            "Access to the code of each page where the chat should appear.",
+            "Your website addresses, listed under Allowed websites in Step 1.",
+            "The widget published in Step 3. Visits are only recorded for live widgets.",
+          ]}
+          terms={[
+            {
+              term: "Allowed websites",
+              meaning:
+                "When this list is required, the chat only loads on these websites and their subdomains.",
+            },
+            {
+              term: "Script line",
+              meaning:
+                "The line of code that loads the chat. Paste it just before the closing </body> tag.",
+            },
+            {
+              term: "Waiting for first visit",
+              meaning:
+                "No visit has been recorded yet. The check runs every 15 seconds and succeeds only after a real visit.",
+            },
+            {
+              term: "Installed",
+              meaning: "A visit to a live page with the code was recorded.",
+            },
+          ]}
+          termsHeading="Install terms"
+        />
+
         {error && <Notice kind="error">{error}</Notice>}
 
         {!widget ? (
@@ -362,12 +465,19 @@ export function StudioInstall({ assistantId }: { assistantId: string }) {
             </section>
             <section className="space-y-4">
               <h2 className="text-xl font-semibold">Step 3 · Publish</h2>
+              {widget.allowed_domains_required && widget.domains.length === 0 && (
+                <Notice kind="error">
+                  Add at least one allowed website in Step 1. Until then, visitors on your site will
+                  see nothing.
+                </Notice>
+              )}
               <Publishing widget={widget} onChange={setWidget} />
               <p className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Globe className="size-4" aria-hidden="true" />
                 Need a server-side or REST integration? Create a key under API keys.
               </p>
             </section>
+            <InstallCheck widget={widget} />
           </>
         )}
       </div>

@@ -33,6 +33,9 @@ max_requests_jitter = int(os.environ.get("GUNICORN_MAX_REQUESTS_JITTER", "200"))
 graceful_timeout = int(os.environ.get("GUNICORN_GRACEFUL_TIMEOUT_SECONDS", "30"))
 keepalive = int(os.environ.get("GUNICORN_KEEPALIVE_SECONDS", "5"))
 
-accesslog = "-"  # stdout — combined with the app's own structured access log
+# Gunicorn's access log writes the raw request line, which includes
+# path-borne credentials (Telegram bot token, share tokens). Disabled by
+# default; the app's structured access log records route templates only.
+accesslog = "-" if os.environ.get("GUNICORN_RAW_ACCESS_LOG") == "1" else None
 errorlog = "-"  # stderr
 loglevel = os.environ.get("GUNICORN_LOG_LEVEL", "info")

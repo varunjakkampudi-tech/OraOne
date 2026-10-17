@@ -13,16 +13,10 @@ import {
   ChevronDown,
   ArrowRight,
   ArrowUpRight,
-  ArrowUp,
-  TriangleAlert,
-  Zap,
-  Phone,
   CheckCheck,
   MoreHorizontal,
   BookOpen,
-  Globe,
   ShieldCheck,
-  CircleHelp,
   Activity,
 } from "lucide-react";
 const PerformanceChart = lazy(() => import("./performance-chart"));
@@ -30,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/lib/workspace-context";
 import { products } from "@/lib/oraone";
 import { ChartSkeleton } from "./loading";
+import { StatusBadge } from "./status-badge";
 
 const chartData = [
   { day: "Oct 6", conversations: 1250, resolved: 900 },
@@ -40,12 +35,15 @@ const chartData = [
   { day: "Oct 11", conversations: 2210, resolved: 1620 },
   { day: "Oct 12", conversations: 2286, resolved: 2188 },
 ];
+const CHART_TABS = ["Conversation volume", "Answered by AI", "Response time"] as const;
+type ChartTab = (typeof CHART_TABS)[number];
+
+// Sample values only. No trend or percentage change is shown because there is no real comparison.
 const metrics = [
   {
-    label: "TOTAL CONVERSATIONS",
+    label: "Total conversations",
     value: "12,486",
-    change: "14.2%",
-    note: "vs previous 7-day window",
+    note: "Website and AI Chat conversations",
     icon: MessageSquare,
     theme: "blue",
     link: "/app/inbox",
@@ -53,10 +51,9 @@ const metrics = [
     points: "0,24 14,22 28,17 42,20 56,13 70,16 88,9",
   },
   {
-    label: "AI RESOLUTION RATE",
+    label: "Answered without a person",
     value: "78.4%",
-    change: "3.1%",
-    note: "Automated without human escalation",
+    note: "Answered by an assistant with no handoff",
     icon: Bot,
     theme: "cyan",
     link: "/app/products/chat/assistants",
@@ -64,10 +61,9 @@ const metrics = [
     points: "0,25 14,21 28,23 42,15 56,17 70,9 88,5",
   },
   {
-    label: "QUALIFIED LEADS",
+    label: "Qualified leads",
     value: "326",
-    change: "8.4%",
-    note: "2.6% conversion rate · 48 synced to CRM",
+    note: "2.6% conversion rate · 48 sent to your CRM",
     icon: UserRoundCheck,
     theme: "amber",
     link: "/app/leads",
@@ -75,9 +71,8 @@ const metrics = [
     points: "0,24 14,26 28,17 42,20 56,11 70,14 88,5",
   },
   {
-    label: "APPOINTMENTS BOOKED",
+    label: "Appointments booked",
     value: "94",
-    change: "18",
     note: "82% via AI Chat website assistants",
     icon: CalendarCheck,
     theme: "violet",
@@ -86,27 +81,28 @@ const metrics = [
     points: "0,27 14,22 28,25 42,18 56,19 70,9 88,3",
   },
 ] as const;
+
 export const Dashboard = memo(function Dashboard() {
   const { workspace, sample } = useWorkspace();
   const [setup, setSetup] = useState(true);
   const [acknowledged, setAcknowledged] = useState(false);
   const [days, setDays] = useState("Last 7 Days");
-  const [chartTab, setChartTab] = useState("Conversation Volume");
+  const [chartTab, setChartTab] = useState<ChartTab>("Conversation volume");
   const [channel, setChannel] = useState("All Channels & Products");
   const performanceData = useMemo(
     () =>
       chartData.map((d) => ({
         ...d,
         conversations:
-          chartTab === "Resolution %"
+          chartTab === "Answered by AI"
             ? 78 + (d.conversations % 8)
-            : chartTab === "Response Latency"
+            : chartTab === "Response time"
               ? 1.2 + (d.conversations % 5) / 10
               : d.conversations,
         resolved:
-          chartTab === "Resolution %"
+          chartTab === "Answered by AI"
             ? 70 + (d.resolved % 8)
-            : chartTab === "Response Latency"
+            : chartTab === "Response time"
               ? 0.8 + (d.resolved % 4) / 10
               : d.resolved,
       })),
@@ -125,18 +121,20 @@ export const Dashboard = memo(function Dashboard() {
   }
   return (
     <div className="page-content dashboard-content">
-      <div className="breadcrumb">
-        HOME <span>/</span> <strong>DASHBOARD</strong>
-      </div>
       <div className="page-heading dashboard-heading">
         <div>
           <h1>
             Good morning, Alex <span className="greeting-dot" />
           </h1>
-          <p>Here’s what’s happening at {workspace} today.</p>
+          <p>
+            {sample
+              ? `A sample overview of ${workspace}.`
+              : `Overview for ${workspace}. No services are connected yet.`}
+          </p>
         </div>
         <div className="page-actions">
           <label className="select-control">
+            <span className="sr-only">Date range</span>
             <select aria-label="Date range" value={days} onChange={(e) => setDays(e.target.value)}>
               <option>Last 7 Days</option>
               <option>Last 14 Days</option>
@@ -157,19 +155,30 @@ export const Dashboard = memo(function Dashboard() {
           </label>
           <Button variant="outline" size="sm" onClick={exportReport}>
             <Download />
-            Export Report
+            Export report
           </Button>
         </div>
       </div>
-      {setup && (
+      {sample ? (
+        <div className="service-notice dashboard-notice" role="note">
+          <ShieldCheck />
+          <span>You are viewing a sample workspace. Changes are not saved.</span>
+        </div>
+      ) : (
+        <div className="service-notice dashboard-notice" role="note">
+          <ShieldCheck />
+          <span>No services are connected to this workspace, so no figures are shown.</span>
+        </div>
+      )}
+      {setup && sample && (
         <section className="setup-panel">
           <div className="setup-heading">
             <div className="setup-title">
               <span className="setup-icon">
                 <CheckCircle2 />
               </span>
-              <h2>Complete your workspace setup</h2>
-              <span className="completion-tag">3 of 5 steps completed</span>
+              <h2>Finish your workspace setup</h2>
+              <span className="completion-tag">Sample: 3 of 5 steps done</span>
             </div>
             <Button
               variant="link"
@@ -235,7 +244,7 @@ export const Dashboard = memo(function Dashboard() {
         <span>WORKSPACE PERFORMANCE</span>
         <span className="sample-label">
           {sample
-            ? "Illustrative aggregates · Not totals of loaded sample records"
+            ? "Illustrative totals · Not summed from loaded sample records"
             : "No live workspace data connected"}{" "}
           · {days}
         </span>
@@ -247,6 +256,11 @@ export const Dashboard = memo(function Dashboard() {
               <h3>{m.label}</h3>
               <m.icon />
             </div>
+            {sample ? (
+              <span className="status-pill is-demo sample-badge">Sample data</span>
+            ) : (
+              <span className="status-pill is-planned sample-badge">Unavailable</span>
+            )}
             <div className="metric-value">
               {sample
                 ? days === "Last 7 Days"
@@ -257,12 +271,8 @@ export const Dashboard = memo(function Dashboard() {
                         Number(m.value.replace(",", "")) * (days === "Last 14 Days" ? 2 : 4)
                       ).toLocaleString()
                 : "—"}
-              <span className={`metric-change ${i === 2 ? "neutral-change" : ""}`}>
-                <ArrowUp />
-                {sample ? m.change : "—"}
-              </span>
             </div>
-            <p>{sample ? m.note : "No connected data"}</p>
+            <p>{sample ? m.note : "No connected data yet"}</p>
             <div className="metric-bottom">
               {!sample ? (
                 <span className="metric-footnote">Not measured</span>
@@ -270,6 +280,7 @@ export const Dashboard = memo(function Dashboard() {
                 <svg
                   className="mini-chart"
                   viewBox="0 0 90 34"
+                  role="img"
                   aria-label="Sample conversation trend"
                 >
                   <polyline points={m.points} />
@@ -279,7 +290,7 @@ export const Dashboard = memo(function Dashboard() {
                   {i === 1 ? (
                     <>
                       <span className="resolution-ring" />
-                      9,788 autonomous
+                      9,788 answered by AI
                     </>
                   ) : i === 2 ? (
                     <>
@@ -306,9 +317,9 @@ export const Dashboard = memo(function Dashboard() {
               <span className="attention-symbol">✳</span>
               <div>
                 <h2>
-                  Attention Required <span className="attention-badge">4 sample flags</span>
+                  Needs your attention <span className="attention-badge">4 sample items</span>
                 </h2>
-                <p>Operational events that need a closer look.</p>
+                <p>Sample items that may need a closer look.</p>
               </div>
             </div>
             <Button
@@ -317,14 +328,14 @@ export const Dashboard = memo(function Dashboard() {
               className="acknowledge"
               onClick={() => setAcknowledged(true)}
             >
-              Acknowledge All <CheckCheck />
+              Mark all as reviewed <CheckCheck />
             </Button>
           </div>
           <div className="attention-grid">
             <article className="attention-card danger">
               <div className="flag-label">
                 <span className="status-dot" />
-                HUMAN ESCALATION<small>Immediate</small>
+                Waiting for a person<small>Urgent</small>
               </div>
               <h3>8 conversations awaiting a teammate</h3>
               <p>Website conversations ready for human follow-up.</p>
@@ -336,7 +347,7 @@ export const Dashboard = memo(function Dashboard() {
             <article className="attention-card warning">
               <div className="flag-label">
                 <span className="status-dot" />
-                KNOWLEDGE REVIEW<small>Pending</small>
+                Knowledge to review<small>Pending</small>
               </div>
               <h3>3 sources need your review</h3>
               <p>Keep your assistant’s answers accurate and up to date.</p>
@@ -348,7 +359,7 @@ export const Dashboard = memo(function Dashboard() {
             <article className="attention-card info">
               <div className="flag-label">
                 <span className="status-dot" />
-                HIGH-FIT LEADS<small>Score &gt;85</small>
+                Strong leads<small>Score 85+</small>
               </div>
               <h3>12 leads requiring follow-up</h3>
               <p>Enterprise inquiries ready for your sales team.</p>
@@ -360,7 +371,7 @@ export const Dashboard = memo(function Dashboard() {
             <article className="attention-card neutral">
               <div className="flag-label">
                 <span className="status-dot" />
-                CONNECTION REVIEW<small>Check needed</small>
+                Connection check<small>Check needed</small>
               </div>
               <h3>1 connection needs attention</h3>
               <p>Review the sample CRM connection configuration.</p>
@@ -375,11 +386,11 @@ export const Dashboard = memo(function Dashboard() {
       <section className="chart-panel">
         <div className="panel-heading">
           <div>
-            <h2>Operational Performance & Resolution Trends</h2>
-            <p>Customer conversations and AI-assisted resolutions over time.</p>
+            <h2>Conversations and answers over time</h2>
+            <p>Sample daily totals for conversations and AI answers.</p>
           </div>
           <div className="segmented-control">
-            {["Conversation Volume", "Resolution %", "Response Latency"].map((tab) => (
+            {CHART_TABS.map((tab) => (
               <Button
                 key={tab}
                 variant="ghost"
@@ -395,11 +406,11 @@ export const Dashboard = memo(function Dashboard() {
         <div className="chart-legend">
           <span>
             <i className="legend-blue" />
-            Total Conversations <strong>{sample ? "12,486" : "—"}</strong>
+            Total conversations <strong>{sample ? "12,486" : "—"}</strong>
           </span>
           <span>
             <i className="legend-cyan" />
-            AI Resolved <strong>{sample ? "9,788 (78.4%)" : "—"}</strong>
+            Answered by AI <strong>{sample ? "9,788 (78.4%)" : "—"}</strong>
           </span>
           <span className="live-caption">
             <span className="status-dot" />
@@ -414,8 +425,14 @@ export const Dashboard = memo(function Dashboard() {
           ) : (
             <div className="empty-state">
               <Activity />
-              <h3>Your workspace insights will appear here</h3>
-              <p>Connect a website assistant to start collecting real activity.</p>
+              <h3>No conversations yet</h3>
+              <p>Add the website chat widget to start receiving customer messages.</p>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/app/products/chat/assistants/$id/widget" params={{ id: "support" }}>
+                  Set up the widget
+                  <ArrowRight />
+                </Link>
+              </Button>
             </div>
           )}
         </div>
@@ -427,7 +444,7 @@ export const Dashboard = memo(function Dashboard() {
               <div className="panel-heading">
                 <div>
                   <h2>Your AI assistants</h2>
-                  <p>Connected knowledge. Consistent answers.</p>
+                  <p>Sample assistants and the knowledge they use.</p>
                 </div>
                 <Button variant="link" asChild size="sm">
                   <Link to="/app/products/chat/assistants">
@@ -444,7 +461,7 @@ export const Dashboard = memo(function Dashboard() {
                   <h3>Customer Support</h3>
                   <p>Website assistant · 142 sample sources</p>
                 </div>
-                <span className="status-pill">Sample</span>
+                <span className="status-pill is-demo">Sample</span>
                 <Button asChild variant="ghost" size="icon" title="Open support assistant">
                   <Link to="/app/products/chat/assistants/$id" params={{ id: "support" }}>
                     <ArrowUpRight />
@@ -459,7 +476,7 @@ export const Dashboard = memo(function Dashboard() {
                   <h3>Sales Assistant</h3>
                   <p>Lead qualification · 28 sample sources</p>
                 </div>
-                <span className="status-pill">Sample</span>
+                <span className="status-pill is-demo">Sample</span>
                 <Button asChild variant="ghost" size="icon" title="Open sales assistant">
                   <Link to="/app/products/chat/assistants/$id" params={{ id: "sales" }}>
                     <ArrowUpRight />
@@ -503,14 +520,21 @@ export const Dashboard = memo(function Dashboard() {
           </>
         ) : (
           <div className="empty-state">
-            <h3>No assistants or activity in this demo workspace</h3>
+            <h3>No assistants or activity yet</h3>
+            <p>Create an assistant to see its activity here.</p>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/app/products/chat/assistants/new">
+                Create an assistant
+                <ArrowRight />
+              </Link>
+            </Button>
           </div>
         )}
       </div>
       <section className="product-directory-section">
         <div className="panel-heading">
           <div>
-            <h2>One workspace. A connected product ecosystem.</h2>
+            <h2>Products</h2>
             <p>Your OraOne products, all in one place.</p>
           </div>
           <Button asChild variant="link" size="sm">
@@ -525,9 +549,7 @@ export const Dashboard = memo(function Dashboard() {
             <div key={p.slug}>
               <span className="product-number">{String(i + 1).padStart(2, "0")}</span>
               <strong>{p.name}</strong>
-              <span className={`status-pill ${p.slug === "chat" ? "" : "planned"}`}>
-                {p.status}
-              </span>
+              <StatusBadge status={p.slug === "chat" ? "available" : "planned"} />
             </div>
           ))}
         </div>

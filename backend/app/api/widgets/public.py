@@ -3,9 +3,17 @@
 These endpoints back the embedded chat experience. They are reachable
 without a logged-in user (visitors are anonymous), so every request is
 guarded by:
+* the widget's **public key** (required; unknown keys are 404),
 * the widget's **published** status,
-* an optional **domain allow-list** (Origin/Referer must match),
-* a per-visitor **rate limit**,
+* an optional **domain allow-list** (Origin/Referer must match). This is a
+  browser courtesy check only: Origin is client-controlled outside browsers,
+  so it is never the authentication control,
+* a per-**client IP** and per-widget rate limit (chat-start, chat, stream,
+  lead, escalate, event, feedback), so rotating ``visitor_id`` values does not
+  bypass throttling, plus the existing per-visitor message limit,
+* a per-**visitor session token**: the server issues a random token when a
+  visitor session is created and stores only its SHA-256 digest. Transcript,
+  escalation and lead-update calls must present it in ``X-Widget-Session``,
 * strict **input length** caps.
 
 Answers are produced by the Enterprise RAG engine (R4), grounded in the
@@ -16,7 +24,11 @@ provider is offline.
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import hmac
 import json
+import os
+import secrets
 import uuid
 from typing import Optional
 
@@ -37,6 +49,7 @@ from app.database.models.widget import Widget, WidgetStatus
 from app.database.models.widget_event import WidgetEventType
 from app.database.models.widget_session import WidgetSession
 from app.database.session import get_db
+from app.middleware.rate_limit import _client_ip
 from app.schemas.widget import (
     WidgetChatRequest,
     WidgetChatResponse,
@@ -80,6 +93,13 @@ async def _load_live_widget(
     referer: Optional[str],
     require_published: bool = True,
 ) -> Widget:
+    """Resolve a live widget by its public key and apply the domain check.
+
+    The public key is required and is the widget identifier. The domain check
+    reads Origin/Referer, which only browsers set honestly: any other client
+    can forge them. It is kept as a browser-side guard, not as authentication.
+    Visitor data is protected by the per-visitor session token instead.
+    """
     widget = await widget_service.get_widget_by_key(session, public_key)
     if widget is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Widget not found.")
@@ -87,7 +107,9 @@ async def _load_live_widget(
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Widget is not live.")
     domains = await widget_service.widget_domains(session, widget.id)
     host = widget_service.origin_host(origin, referer)
-    if not widget_service.domain_allowed(domains, host):
+    if not widget_service.domain_allowed(
+        domains, host, require_allow_list=widget_service.domains_required()
+    ):
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
             "This widget is not authorized for this domain.",
@@ -104,6 +126,58 @@ def _check_rate(widget: Widget, visitor_id: str) -> None:
             status.HTTP_429_TOO_MANY_REQUESTS,
             "Too many messages — please slow down.",
         )
+
+
+def _ip_rate_limit_per_min() -> int:
+    try:
+        return int(os.environ.get("WIDGET_IP_RATE_LIMIT_PER_MIN", "60"))
+    except ValueError:
+        return 60
+
+
+def _check_ip_rate(request: Request, widget: Widget, route: str) -> None:
+    """Throttle one client IP per widget key and route, independent of visitor_id.
+
+    Visitor ids are client-chosen, so a per-visitor limit alone can be bypassed
+    by rotating ids. The client IP honours TRUSTED_PROXY_IPS exactly like the
+    global middleware. Call this before any write so rejected requests create
+    nothing.
+    """
+    key = f"ip:{_client_ip(request)}:{widget.public_key}:{route}"
+    if widget_service.rate_limited(
+        key, limit=max(1, _ip_rate_limit_per_min()), window_seconds=60
+    ):
+        raise HTTPException(
+            status.HTTP_429_TOO_MANY_REQUESTS,
+            "Too many requests — please slow down.",
+        )
+
+
+# ─────────────────── visitor session tokens ───────────────────
+
+# Header carrying the visitor session token on every public call after start.
+SESSION_HEADER = "X-Widget-Session"
+_SESSION_DENIED = "A valid widget session token is required."
+
+
+def _hash_session_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def _session_token_matches(ws: WidgetSession, presented: Optional[str]) -> bool:
+    """True only when the presented token hashes to the visitor's stored digest.
+
+    Rows without a digest (created before the token rollout) never match, so
+    legacy visitors fail closed.
+    """
+    if not ws.session_token_hash or not presented:
+        return False
+    return hmac.compare_digest(ws.session_token_hash, _hash_session_token(presented))
+
+
+def _presented_token(request: Request) -> Optional[str]:
+    value = request.headers.get(SESSION_HEADER)
+    return value.strip() if value and value.strip() else None
 
 
 def _sanitize_context(ctx: dict) -> dict:
@@ -170,7 +244,9 @@ async def widget_config(
     if widget.status == WidgetStatus.published:
         domains = await widget_service.widget_domains(session, widget.id)
         host = widget_service.origin_host(origin, referer)
-        if not widget_service.domain_allowed(domains, host):
+        if not widget_service.domain_allowed(
+            domains, host, require_allow_list=widget_service.domains_required()
+        ):
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN,
                 "This widget is not authorized for this domain.",
@@ -181,7 +257,19 @@ async def widget_config(
 # ─────────────────── session ───────────────────
 
 
-async def _get_or_create_session(
+async def _find_visitor_session(
+    session: AsyncSession, widget: Widget, visitor_id: str
+) -> Optional[WidgetSession]:
+    return await session.scalar(
+        select(WidgetSession)
+        .where(WidgetSession.widget_id == widget.id)
+        .where(WidgetSession.visitor_id == visitor_id)
+        .order_by(WidgetSession.started_at.desc())
+        .limit(1)
+    )
+
+
+async def _create_visitor_session(
     session: AsyncSession,
     widget: Widget,
     *,
@@ -189,34 +277,72 @@ async def _get_or_create_session(
     user_context: dict,
     referer: Optional[str] = None,
     user_agent: Optional[str] = None,
-) -> WidgetSession:
-    ws = await session.scalar(
-        select(WidgetSession)
-        .where(WidgetSession.widget_id == widget.id)
-        .where(WidgetSession.visitor_id == visitor_id)
-        .order_by(WidgetSession.started_at.desc())
-        .limit(1)
+) -> tuple[WidgetSession, str]:
+    """Create a visitor session and return it with its token (shown once)."""
+    token = secrets.token_urlsafe(32)
+    ws = WidgetSession(
+        widget_id=widget.id,
+        organization_id=widget.organization_id,
+        visitor_id=visitor_id,
+        user_context=_sanitize_context(user_context),
+        referer=(referer or "")[:2048] or None,
+        user_agent=(user_agent or "")[:512] or None,
+        last_active_at=widget_service.now_utc(),
+        session_token_hash=_hash_session_token(token),
     )
-    if ws is None:
-        ws = WidgetSession(
-            widget_id=widget.id,
-            organization_id=widget.organization_id,
-            visitor_id=visitor_id,
-            user_context=_sanitize_context(user_context),
-            referer=(referer or "")[:2048] or None,
-            user_agent=(user_agent or "")[:512] or None,
-            last_active_at=widget_service.now_utc(),
-        )
-        session.add(ws)
-        await session.flush()
-    else:
-        if user_context:
-            ws.user_context = {
-                **(ws.user_context or {}),
-                **_sanitize_context(user_context),
-            }
-        ws.last_active_at = widget_service.now_utc()
+    session.add(ws)
+    await session.flush()
+    return ws, token
+
+
+def _refresh_visitor_session(ws: WidgetSession, user_context: dict) -> None:
+    if user_context:
+        ws.user_context = {
+            **(ws.user_context or {}),
+            **_sanitize_context(user_context),
+        }
+    ws.last_active_at = widget_service.now_utc()
+
+
+async def _authorized_visitor_session(
+    session: AsyncSession, widget: Widget, visitor_id: str, presented: Optional[str]
+) -> WidgetSession:
+    """Return the visitor's session only when the caller holds its token.
+
+    A missing visitor and a wrong token produce the same response, so the
+    endpoint does not reveal which visitor ids exist.
+    """
+    ws = await _find_visitor_session(session, widget, visitor_id)
+    if ws is None or not _session_token_matches(ws, presented):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, _SESSION_DENIED)
     return ws
+
+
+async def _chat_visitor_session(
+    session: AsyncSession,
+    widget: Widget,
+    *,
+    visitor_id: str,
+    user_context: dict,
+    presented: Optional[str],
+    referer: Optional[str],
+    user_agent: Optional[str],
+) -> tuple[WidgetSession, Optional[str]]:
+    """Chat entry: a new visitor gets a token; an existing one must present it."""
+    ws = await _find_visitor_session(session, widget, visitor_id)
+    if ws is None:
+        return await _create_visitor_session(
+            session,
+            widget,
+            visitor_id=visitor_id,
+            user_context=user_context,
+            referer=referer,
+            user_agent=user_agent,
+        )
+    if not _session_token_matches(ws, presented):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, _SESSION_DENIED)
+    _refresh_visitor_session(ws, user_context)
+    return ws, None
 
 
 @public_router.post(
@@ -234,22 +360,43 @@ async def start_session(
     widget = await _load_live_widget(
         session, payload.public_key, origin=origin, referer=referer
     )
-    visitor_id = (payload.visitor_id or f"v_{uuid.uuid4().hex[:16]}").strip()[:80]
-    ws = await _get_or_create_session(
-        session,
-        widget,
-        visitor_id=visitor_id,
-        user_context=payload.user_context,
-        referer=referer,
-        user_agent=request.headers.get("user-agent"),
+    _check_ip_rate(request, widget, "session")
+    requested_id = (payload.visitor_id or "").strip()[:80]
+    existing = (
+        await _find_visitor_session(session, widget, requested_id)
+        if requested_id
+        else None
     )
+    session_token: Optional[str] = None
+    if existing is not None and _session_token_matches(
+        existing, _presented_token(request)
+    ):
+        # Restore the caller's own visitor: transcript is returned below.
+        ws = existing
+        _refresh_visitor_session(ws, payload.user_context)
+    else:
+        # Unknown, legacy, or unauthenticated visitor ids never reveal a
+        # transcript; a fresh visitor is started instead.
+        visitor_id = (
+            requested_id
+            if existing is None and requested_id
+            else f"v_{uuid.uuid4().hex[:16]}"
+        )
+        ws, session_token = await _create_visitor_session(
+            session,
+            widget,
+            visitor_id=visitor_id,
+            user_context=payload.user_context,
+            referer=referer,
+            user_agent=request.headers.get("user-agent"),
+        )
     await widget_service.log_event(
         session, widget=widget, event=WidgetEventType.loaded, session_id=ws.id
     )
 
     # Restore prior transcript if a conversation is attached.
     messages: list[dict] = []
-    if ws.conversation_id is not None:
+    if session_token is None and ws.conversation_id is not None:
         rows = (
             await session.scalars(
                 select(Message)
@@ -274,6 +421,7 @@ async def start_session(
         visitor_id=ws.visitor_id,
         conversation_id=ws.conversation_id,
         messages=messages,
+        session_token=session_token,
     )
 
 
@@ -315,6 +463,7 @@ async def _persist_and_answer(
                     "confidence": 0.0,
                     "related_questions": [],
                     "grounded": False,
+                    "generated": False,
                     "conversation_id": ws.conversation_id,
                     "message_id": None,
                 }
@@ -405,6 +554,8 @@ async def _persist_and_answer(
         model=agent_model,
     )
 
+    # False when the reply is a fallback (no model produced it). Carried to the response and metadata.
+    generated = bool(result.get("generated", False))
     answer_msg: Optional[Message] = None
     if conversation is not None:
         answer_msg = Message(
@@ -415,6 +566,7 @@ async def _persist_and_answer(
                 "grounded": result.get("grounded"),
                 "confidence": result.get("confidence"),
                 "model": result.get("model"),
+                "generated": generated,
             },
         )
         session.add(answer_msg)
@@ -465,6 +617,7 @@ async def _persist_and_answer(
         "confidence": result.get("confidence", 0.0),
         "related_questions": result.get("related_questions", []),
         "grounded": result.get("grounded", False),
+        "generated": generated,
         "conversation_id": ws.conversation_id,
         "message_id": answer_msg.id if answer_msg is not None else None,
     }
@@ -485,16 +638,18 @@ async def widget_chat(
     widget = await _load_live_widget(
         session, payload.public_key, origin=origin, referer=referer
     )
+    _check_ip_rate(request, widget, "chat")
     _check_rate(widget, payload.visitor_id)
     text = payload.message.strip()
     if not text:
         raise HTTPException(422, "Message is empty.")
 
-    ws = await _get_or_create_session(
+    ws, session_token = await _chat_visitor_session(
         session,
         widget,
         visitor_id=payload.visitor_id,
         user_context=payload.user_context,
+        presented=_presented_token(request),
         referer=referer,
         user_agent=request.headers.get("user-agent"),
     )
@@ -506,9 +661,11 @@ async def widget_chat(
         confidence=out["confidence"],
         related_questions=out["related_questions"],
         grounded=out["grounded"],
+        generated=out.get("generated", False),
         session_id=ws.id,
         conversation_id=out["conversation_id"],
         message_id=out["message_id"],
+        session_token=session_token,
     )
 
 
@@ -526,16 +683,18 @@ async def widget_stream(
     widget = await _load_live_widget(
         session, payload.public_key, origin=origin, referer=referer
     )
+    _check_ip_rate(request, widget, "stream")
     _check_rate(widget, payload.visitor_id)
     text = payload.message.strip()
     if not text:
         raise HTTPException(422, "Message is empty.")
 
-    ws = await _get_or_create_session(
+    ws, session_token = await _chat_visitor_session(
         session,
         widget,
         visitor_id=payload.visitor_id,
         user_context=payload.user_context,
+        presented=_presented_token(request),
         referer=referer,
         user_agent=request.headers.get("user-agent"),
     )
@@ -544,7 +703,11 @@ async def widget_stream(
 
     async def event_stream():
         # Emit a 'meta' frame, then the answer in word chunks, then 'done'.
-        yield f"data: {json.dumps({'type': 'meta', 'session_id': str(ws.id)})}\n\n"
+        # The session token is included only when this request created the session.
+        meta = {"type": "meta", "session_id": str(ws.id)}
+        if session_token is not None:
+            meta["session_token"] = session_token
+        yield f"data: {json.dumps(meta)}\n\n"
         words = out["answer"].split(" ")
         buf = ""
         for i, w in enumerate(words):
@@ -560,6 +723,7 @@ async def widget_stream(
             "confidence": out["confidence"],
             "related_questions": out["related_questions"],
             "grounded": out["grounded"],
+            "generated": out.get("generated", False),
             "conversation_id": str(out["conversation_id"])
             if out["conversation_id"]
             else None,
@@ -580,6 +744,7 @@ async def widget_stream(
 @public_router.post("/lead", response_model=WidgetOk, summary="Capture a lead")
 async def widget_lead(
     payload: WidgetLeadRequest,
+    request: Request,
     origin: Optional[str] = Header(default=None),
     referer: Optional[str] = Header(default=None),
     session: AsyncSession = Depends(get_db),
@@ -587,12 +752,15 @@ async def widget_lead(
     widget = await _load_live_widget(
         session, payload.public_key, origin=origin, referer=referer
     )
+    _check_ip_rate(request, widget, "lead")
     _check_rate(widget, payload.visitor_id)
     if not (payload.email or payload.phone):
         raise HTTPException(422, "Provide at least an email or phone.")
 
-    ws = await _get_or_create_session(
-        session, widget, visitor_id=payload.visitor_id, user_context={}
+    # Rejected requests must not create or enrich a lead, so the token is
+    # checked before any write.
+    ws = await _authorized_visitor_session(
+        session, widget, payload.visitor_id, _presented_token(request)
     )
     conversation_id = ws.conversation_id
     if ws.conversation_id is not None:
@@ -641,6 +809,7 @@ async def widget_lead(
 @public_router.post("/escalate", response_model=WidgetOk, summary="Escalate to a human")
 async def widget_escalate(
     payload: WidgetEscalateRequest,
+    request: Request,
     origin: Optional[str] = Header(default=None),
     referer: Optional[str] = Header(default=None),
     session: AsyncSession = Depends(get_db),
@@ -648,9 +817,10 @@ async def widget_escalate(
     widget = await _load_live_widget(
         session, payload.public_key, origin=origin, referer=referer
     )
+    _check_ip_rate(request, widget, "escalate")
     _check_rate(widget, payload.visitor_id)
-    ws = await _get_or_create_session(
-        session, widget, visitor_id=payload.visitor_id, user_context={}
+    ws = await _authorized_visitor_session(
+        session, widget, payload.visitor_id, _presented_token(request)
     )
     ws.escalated = True
     if ws.conversation_id is not None:
@@ -678,6 +848,7 @@ async def widget_escalate(
 )
 async def widget_feedback(
     payload: WidgetFeedbackRequest,
+    request: Request,
     origin: Optional[str] = Header(default=None),
     referer: Optional[str] = Header(default=None),
     session: AsyncSession = Depends(get_db),
@@ -685,13 +856,12 @@ async def widget_feedback(
     widget = await _load_live_widget(
         session, payload.public_key, origin=origin, referer=referer
     )
-    ws = await session.scalar(
-        select(WidgetSession)
-        .where(WidgetSession.widget_id == widget.id)
-        .where(WidgetSession.visitor_id == payload.visitor_id)
-        .order_by(WidgetSession.started_at.desc())
-        .limit(1)
-    )
+    _check_ip_rate(request, widget, "feedback")
+    # Feedback is stored either way; it is linked to a visitor session only
+    # when the caller proves it holds that session's token.
+    ws = await _find_visitor_session(session, widget, payload.visitor_id)
+    if ws is not None and not _session_token_matches(ws, _presented_token(request)):
+        ws = None
     await widget_service.log_event(
         session,
         widget=widget,
@@ -712,6 +882,7 @@ async def widget_feedback(
 )
 async def widget_event(
     payload: WidgetEventRequest,
+    request: Request,
     origin: Optional[str] = Header(default=None),
     referer: Optional[str] = Header(default=None),
     session: AsyncSession = Depends(get_db),
@@ -723,23 +894,25 @@ async def widget_event(
         referer=referer,
         require_published=False,
     )
+    _check_ip_rate(request, widget, "event")
     event = (
         payload.event
         if payload.event in WidgetEventType.ALL
         else WidgetEventType.opened
     )
+    # Link the event to a session only with that visitor's token.
     ws = None
-    if payload.session_id is not None:
-        ws = await session.scalar(
+    if payload.session_id is not None and payload.visitor_id:
+        candidate = await session.scalar(
             select(WidgetSession)
             .where(WidgetSession.id == payload.session_id)
             .where(WidgetSession.widget_id == widget.id)
-            .where(
-                WidgetSession.visitor_id == payload.visitor_id
-                if payload.visitor_id
-                else True
-            )
+            .where(WidgetSession.visitor_id == payload.visitor_id)
         )
+        if candidate is not None and _session_token_matches(
+            candidate, _presented_token(request)
+        ):
+            ws = candidate
     await widget_service.log_event(
         session,
         widget=widget,

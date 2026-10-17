@@ -12,6 +12,7 @@ SameSite=Lax stops them being sent on cross-site requests.
 from __future__ import annotations
 
 import os
+from collections.abc import Mapping
 
 from fastapi import Response
 
@@ -20,13 +21,40 @@ from app.core.config import settings
 ACCESS_COOKIE_NAME = "oraone_access_token"
 REFRESH_COOKIE_NAME = "oraone_refresh_token"
 
+UNSAFE_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE"})
+
 
 def _is_production() -> bool:
-    return os.environ.get("ENVIRONMENT", "").strip().lower() in (
-        "production",
-        "prod",
-        "staging",
-    )
+    """Unset ENVIRONMENT counts as production, so the secure defaults apply."""
+    raw = os.environ.get("ENVIRONMENT", "")
+    if not raw.strip():
+        return True
+    return raw.strip().lower() in ("production", "prod", "staging")
+
+
+def cookie_origin_refused(
+    *,
+    method: str,
+    headers: Mapping[str, str],
+    cookies: Mapping[str, str],
+    allowed_origins,
+) -> bool:
+    """True when a cookie-authenticated unsafe request comes from a foreign origin.
+
+    Only requests that authenticate through the session cookies are checked:
+    a request carrying a bearer token is not CSRF-able, so it is not affected.
+    A request with no Origin header (non-browser clients) is not refused here.
+    """
+    if method.upper() not in UNSAFE_METHODS:
+        return False
+    if headers.get("authorization", "").lower().startswith("bearer "):
+        return False
+    if ACCESS_COOKIE_NAME not in cookies and REFRESH_COOKIE_NAME not in cookies:
+        return False
+    origin = headers.get("origin")
+    if origin is None:
+        return False
+    return origin.strip() not in set(allowed_origins)
 
 
 def _secure_flag() -> bool:

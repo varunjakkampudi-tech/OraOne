@@ -34,6 +34,7 @@ from app.database.models.organization_member import (
 )
 from app.database.models.user import User
 from app.database.session import get_db
+from app.middleware.access_log import request_route_label
 from app.middleware.jwt_auth import get_current_user_claims
 
 log = logging.getLogger("app.org_context")
@@ -179,7 +180,7 @@ async def get_current_organization(
         ctx.user_id,
         ctx.organization_id,
         ctx.membership_role,
-        request.url.path,
+        request_route_label(request),
     )
     return ctx
 

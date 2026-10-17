@@ -67,9 +67,7 @@ redis>=5.0,<6.0
 anyio>=4.14.2,<5.0
 urllib3>=2.8.0,<3.0
 
-# ---- Dev / test (safe to leave installed in prod, very small footprint) ----
-pytest>=9.0.3,<10.0             # PYSEC-2026-1845 fixed in 9.0.3
-pytest-asyncio>=0.23,<2.0
+# Test and lint tools live in requirements-dev.txt (not installed in the image).
 
 # ---- Structured logging ----
 structlog>=24.1,<25.0
@@ -81,3 +79,6 @@ opentelemetry-sdk>=1.27,<2.0
 opentelemetry-instrumentation-fastapi>=0.48b0
 opentelemetry-instrumentation-httpx>=0.48b0
 opentelemetry-exporter-otlp-proto-grpc>=1.27,<2.0
+
+# Twilio request signature validation (official SDK validator)
+twilio==9.4.6

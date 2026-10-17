@@ -45,14 +45,6 @@ def verify_password(plain_password: str, password_hash: str) -> bool:
         return False
 
 
-def needs_rehash(password_hash: str) -> bool:
-    """True if the hash was made with weaker/outdated Argon2 parameters."""
-    try:
-        return _hasher.check_needs_rehash(password_hash)
-    except Exception:  # noqa: BLE001
-        return False
-
-
 # ─────────────────────────── JWT access tokens ───────────────────────────
 
 TOKEN_USE_ACCESS = "access"

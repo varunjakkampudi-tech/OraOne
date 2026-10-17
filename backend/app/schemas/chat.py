@@ -141,3 +141,7 @@ class SendMessageResult(BaseModel):
         default_factory=list,
         description="Citations for the retrieved context: document, page, section, score.",
     )
+    generated: bool = Field(
+        default=True,
+        description="False when the reply is a fallback because no model produced it.",
+    )

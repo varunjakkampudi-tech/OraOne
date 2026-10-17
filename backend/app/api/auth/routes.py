@@ -15,7 +15,6 @@ Routes stay thin: the rules live in :mod:`app.services.auth_service`.
 """
 
 import logging
-import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -44,52 +43,6 @@ from app.services import IdentityService, auth_service, user_service
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 log = logging.getLogger("app.auth.identity")
-
-
-def _degraded_identity_response(
-    *, sub: str, email: str, full_name: Optional[str]
-) -> IdentityResponse:
-    """Return a minimal identity when the database is briefly unavailable.
-
-    Keeps the signed-in experience usable during a short outage. The ids are
-    deterministic per subject, so the client keeps a stable workspace context.
-    """
-    now = datetime.now(timezone.utc)
-    org_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"oraone:org:{sub}"))
-    membership_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"oraone:membership:{sub}"))
-    slug = f"workspace-{sub.replace('-', '')[:8]}"
-
-    return IdentityResponse(
-        user=IdentityUser(
-            id=sub,
-            auth_subject=sub,
-            email=email,
-            full_name=full_name,
-            avatar_url=None,
-            role="user",
-            platform_role="user",
-            status="active",
-            created_at=now,
-            last_login_at=now,
-        ),
-        organization=IdentityOrganization(
-            id=org_id,
-            name=(full_name or "Personal") + "'s Workspace",
-            slug=slug,
-            plan="free",
-            owner_user_id=sub,
-            created_at=now,
-        ),
-        membership=IdentityMembership(
-            id=membership_id,
-            organization_id=org_id,
-            user_id=sub,
-            role="owner",
-            status="active",
-            joined_at=now,
-        ),
-        is_new_user=False,
-    )
 
 
 # ── Passwordless sign-in ──────────────────────────────────────────────────
@@ -274,7 +227,7 @@ async def identity(
             detail="Your account has no email address.",
         )
 
-    log.info("identity_resolve sub=%s email=%s", sub, email)
+    log.info("identity_resolve sub=%s", sub)
 
     svc = IdentityService(session)
     try:
@@ -324,12 +277,14 @@ async def identity(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(exc)
         ) from exc
-    except Exception as exc:  # noqa: BLE001 - keep sign-in working through a DB blip
+    except Exception as exc:  # noqa: BLE001 - never invent a workspace on failure
         await session.rollback()
         log.warning(
-            "identity_degraded_fallback sub=%s reason=%s: %s",
+            "identity_unavailable sub=%s reason=%s",
             sub,
             type(exc).__name__,
-            exc,
         )
-        return _degraded_identity_response(sub=sub, email=email, full_name=full_name)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Workspace is temporarily unavailable. Please try again shortly.",
+        ) from exc

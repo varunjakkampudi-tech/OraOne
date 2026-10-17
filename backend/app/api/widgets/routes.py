@@ -77,6 +77,7 @@ async def _read(session: AsyncSession, widget: Widget) -> WidgetRead:
         "domains": domains,
         "embed_snippet": widget_service.build_embed_snippet(widget.public_key),
         "sessions_count": sessions_count,
+        "allowed_domains_required": widget_service.domains_required(),
     }
     return WidgetRead.model_validate(data)
 
@@ -455,6 +456,13 @@ async def widget_analytics(
     ).all()
     by_event = {ev: int(cnt) for ev, cnt in rows}
 
+    # Verification signal for the install page: the newest recorded embed load.
+    last_loaded_at = await session.scalar(
+        select(func.max(WidgetEvent.created_at))
+        .where(WidgetEvent.widget_id == widget.id)
+        .where(WidgetEvent.event == WidgetEventType.loaded)
+    )
+
     # Average CSAT from feedback events.
     avg_csat = await session.scalar(
         select(func.avg(cast(WidgetEvent.event_metadata["rating"].astext, Float)))
@@ -476,4 +484,5 @@ async def widget_analytics(
         avg_csat=round(float(avg_csat), 2) if avg_csat is not None else None,
         by_event=by_event,
         top_questions=[],
+        last_loaded_at=last_loaded_at,
     )

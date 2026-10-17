@@ -29,13 +29,15 @@ async def db_health() -> dict:
             await conn.execute(text("SELECT 1"))
         return {"status": "healthy", "database": "connected"}
     except Exception as e:
+        # Driver and network error text can name hosts, users or schema details.
+        # Keep it in server logs only and return a fixed message to the client.
         log.warning("DB health probe failed: %s: %s", type(e).__name__, e)
         raise HTTPException(
             status_code=503,
             detail={
                 "status": "unhealthy",
                 "database": "disconnected",
-                "error": f"{type(e).__name__}: {e}",
+                "error": "database unavailable",
             },
         )
 

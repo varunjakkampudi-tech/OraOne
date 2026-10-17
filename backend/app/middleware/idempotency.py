@@ -12,6 +12,12 @@ Flow:
         -> hit?  replay cached (status, body, content-type)
         -> miss? acquire short lock -> run -> cache response -> return
 
+Responses are scoped to the calling principal: the verified user (JWT
+``sub``), otherwise a digest of the presented credential, otherwise the client
+IP for anonymous callers. A cached response is therefore never replayed to a
+different principal. ``/api/auth/*`` is never cached, since those responses
+set session cookies and carry one-time tokens.
+
 Backed by app.services.cache.get_shared_cache("idempotency") (Redis when
 REDIS_URL is set, in-process otherwise). Never blocks requests that don't
 send the header — this is strictly opt-in per the API contract.
@@ -19,8 +25,11 @@ send the header — this is strictly opt-in per the API contract.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
+
+from app.core.log_redaction import route_label
 
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
@@ -39,15 +48,47 @@ def _cache():
     return get_shared_cache("idempotency")
 
 
-def _scope_key(request: Request, idem_key: str) -> str:
-    # Namespaced by path + caller so the same key from two different users
-    # (or two different endpoints) can never collide.
+_NEVER_CACHED_PREFIX = "/api/auth"
+
+
+def _principal(request: Request) -> str:
+    """Identify the caller for scoping. Never trusts an unverified subject."""
+    from app.core.cookies import ACCESS_COOKIE_NAME
+
     auth = request.headers.get("authorization", "")
-    return f"{request.url.path}:{auth[-24:]}:{idem_key}"
+    token = (
+        auth[7:].strip()
+        if auth.lower().startswith("bearer ")
+        else request.cookies.get(ACCESS_COOKIE_NAME, "")
+    )
+    if token:
+        try:
+            from app.core.security import decode_access_token
+
+            sub = decode_access_token(token).get("sub")
+            if sub:
+                return f"user:{sub}"
+        except Exception:  # noqa: BLE001 - not a valid local access token
+            pass
+        # API keys and other credentials: digest of the full credential.
+        return "cred:" + hashlib.sha256(token.encode()).hexdigest()
+    from app.middleware.rate_limit import _client_ip
+
+    return f"anon:{_client_ip(request)}"
+
+
+def _scope_key(request: Request, idem_key: str) -> str:
+    # Namespaced by path + verified principal so the same key from two
+    # different users (or two different endpoints) can never collide.
+    return f"{request.url.path}:{_principal(request)}:{idem_key}"
 
 
 async def idempotency_middleware(request: Request, call_next):
     if request.method not in _METHODS:
+        return await call_next(request)
+
+    path = request.url.path
+    if path == _NEVER_CACHED_PREFIX or path.startswith(_NEVER_CACHED_PREFIX + "/"):
         return await call_next(request)
 
     idem_key = request.headers.get(_HEADER)
@@ -64,7 +105,9 @@ async def idempotency_middleware(request: Request, call_next):
     try:
         cached = cache.get(f"resp:{scoped_key}")
     except Exception as e:  # noqa: BLE001
-        log.error("idempotency_cache_unavailable path=%s err=%s", request.url.path, e)
+        log.error(
+            "idempotency_cache_unavailable path=%s err=%s", route_label(request), e
+        )
         return JSONResponse(
             status_code=503,
             content={
@@ -89,7 +132,9 @@ async def idempotency_middleware(request: Request, call_next):
             f"lock:{scoped_key}", True, ttl_seconds=_LOCK_TTL_SECONDS
         )
     except Exception as e:  # noqa: BLE001
-        log.error("idempotency_cache_unavailable path=%s err=%s", request.url.path, e)
+        log.error(
+            "idempotency_cache_unavailable path=%s err=%s", route_label(request), e
+        )
         return JSONResponse(
             status_code=503,
             content={
@@ -136,7 +181,7 @@ async def idempotency_middleware(request: Request, call_next):
                 except Exception as e:  # noqa: BLE001 — mutation already succeeded; don't fail the response over a cache write
                     log.warning(
                         "idempotency_cache_write_failed path=%s err=%s",
-                        request.url.path,
+                        route_label(request),
                         e,
                     )
 
@@ -151,5 +196,7 @@ async def idempotency_middleware(request: Request, call_next):
             cache.delete(lock_key)
         except Exception as e:  # noqa: BLE001 — lock will still expire via its own TTL
             log.warning(
-                "idempotency_lock_release_failed path=%s err=%s", request.url.path, e
+                "idempotency_lock_release_failed path=%s err=%s",
+                route_label(request),
+                e,
             )

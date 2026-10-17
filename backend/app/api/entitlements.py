@@ -20,6 +20,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db
 from app.middleware.org_context import OrgContext, get_current_organization
+from app.core.permissions import Permission
+from app.middleware.org_context import require_permission
 from app.services import entitlements as ent
 from app.services.audit import audit
 
@@ -42,7 +44,10 @@ class AccessRequest(BaseModel):
     reason: Optional[str] = Field(default=None, max_length=500)
 
 
-@router.post("/request-access")
+@router.post(
+    "/request-access",
+    dependencies=[Depends(require_permission(Permission.BILLING_MANAGE))],
+)
 async def request_access(
     body: AccessRequest,
     request: Request,

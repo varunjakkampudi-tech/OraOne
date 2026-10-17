@@ -2,13 +2,11 @@
 
 * ``GET  /api/usage``          — usage-vs-limits snapshot for the org.
 * ``GET  /api/usage/check``    — quota check for a single metric.
-* ``POST /api/usage/record``   — record a metered event (gated, mainly
-  used by internal callers / instrumentation).
+* ``POST /api/usage/record``   — record a metered event. Internal only:
+  restricted to platform administrators (``get_platform_admin``). Tenant
+  users cannot inflate their own metered usage through the public API.
 
-Reads only require org membership. Recording requires ``billing.read``
-(any active member except viewers can be wired later; for now we accept
-authenticated org context and rely on the metric registry to ignore
-unknown metrics).
+Reads only require org membership.
 """
 
 from __future__ import annotations
@@ -17,6 +15,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db
+from app.api.super_admin.deps import PlatformAdminContext, get_platform_admin
 from app.middleware.org_context import OrgContext, get_current_organization
 from app.schemas.usage import (
     QuotaCheckResponse,
@@ -54,6 +53,7 @@ async def check_usage(
 @router.post("/api/usage/record", response_model=RecordUsageResponse)
 async def record_usage(
     payload: RecordUsageRequest,
+    _admin: PlatformAdminContext = Depends(get_platform_admin),
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
 ) -> RecordUsageResponse:

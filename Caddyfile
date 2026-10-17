@@ -24,5 +24,18 @@
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		# Clickjacking: the app is never meant to be framed. The embeddable chat
+		# widget is a plain script (public/widget.js) that uses Shadow DOM and
+		# does not need an iframe of this origin.
+		X-Frame-Options "DENY"
+		Cross-Origin-Opener-Policy "same-origin"
+		# No browser feature is used by the app. Microphone is not justified: the
+		# "voice" references are telephony channel settings handled server-side.
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), bluetooth=()"
+		# script-src keeps 'unsafe-inline': the TanStack Start streaming bootstrap
+		# is inline and its hash differs per route and per build, so sha256
+		# hashes cannot be maintained here. style-src keeps 'unsafe-inline' for
+		# React style props and style attributes.
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 	}
 }

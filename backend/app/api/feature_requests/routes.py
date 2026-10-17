@@ -33,6 +33,8 @@ from app.middleware.org_context import (
     get_current_organization,
     require_role,
 )
+from app.core.permissions import Permission
+from app.middleware.org_context import require_permission
 from app.schemas.feature_requests import (
     FeatureRequestCreate,
     FeatureRequestListResponse,
@@ -127,7 +129,12 @@ async def feature_request_stats(
     return FeatureRequestStats(total=len(rows), by_status=by_status, by_type=by_type)
 
 
-@router.post("", response_model=FeatureRequestRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=FeatureRequestRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))],
+)
 async def create_feature_request(
     payload: FeatureRequestCreate,
     ctx: OrgContext = Depends(get_current_organization),
@@ -171,7 +178,11 @@ async def _get_owned(
     return row
 
 
-@router.post("/{request_id}/vote", response_model=FeatureRequestRead)
+@router.post(
+    "/{request_id}/vote",
+    response_model=FeatureRequestRead,
+    dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))],
+)
 async def toggle_vote(
     request_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),
@@ -213,7 +224,11 @@ async def update_status(
     return _to_read(row, ctx.user_id)
 
 
-@router.delete("/{request_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{request_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))],
+)
 async def delete_feature_request(
     request_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),

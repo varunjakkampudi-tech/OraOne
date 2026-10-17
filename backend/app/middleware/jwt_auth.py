@@ -14,14 +14,16 @@ from jwt.exceptions import InvalidTokenError
 
 from app.core.cookies import ACCESS_COOKIE_NAME
 from app.core.security import decode_access_token
+from app.middleware.access_log import request_route_label
+from app.core.log_redaction import subject_fingerprint
 
 log = logging.getLogger("app.auth.jwt")
 
 
 def _unauthorized(reason: str, *, request: Request | None = None) -> HTTPException:
     """Log the real rejection reason and return the generic 401 to send."""
-    path = request.url.path if request is not None else "?"
-    log.warning("AUTH 401 path=%s reason=%s", path, reason)
+    path = request_route_label(request) if request is not None else "?"
+    log.warning("AUTH 401 route=%s reason=%s", path, reason)
     return HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Not authenticated.",
@@ -42,9 +44,9 @@ def verify_access_token(token: str, request: Request | None = None) -> Dict[str,
         ) from exc
 
     log.info(
-        "AUTH OK sub=%s path=%s",
-        claims.get("sub"),
-        request.url.path if request else "?",
+        "AUTH OK sub_hash=%s route=%s",
+        subject_fingerprint(claims.get("sub")),
+        request_route_label(request) if request is not None else "?",
     )
     return claims
 

@@ -35,6 +35,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { isWorkspaceDestinationActive, sampleWorkspaceName } from "@/lib/oraone";
 import { WorkspaceContext } from "@/lib/workspace-context";
 import logoUrl from "@/assets/oraone-logo-48.png";
+import { StatusBadge } from "./status-badge";
 
 export function Brand() {
   return (
@@ -197,7 +198,9 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
                     <ChevronDown className={chatOpen ? "rotate-180" : ""} />
                   </Button>
                 )}
-                {item.title !== "AI Chat" && <span className="planned-nav">Planned</span>}
+                {item.title !== "AI Chat" && (
+                  <StatusBadge status="planned" className="planned-nav" />
+                )}
               </div>
               {item.title === "AI Chat" && chatOpen && (
                 <div className="chat-subnav">
@@ -238,7 +241,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
       <footer className="sidebar-footer">
         <Link to="/status" className="system-status">
           <span className="status-dot" />
-          <span>Demo workspace</span>
+          <span>Service status</span>
           <small>Preview</small>
         </Link>
         <Link to="/help" className="support-link">

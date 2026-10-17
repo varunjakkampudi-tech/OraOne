@@ -87,25 +87,38 @@ def _issue(
     )
 
 
+def _used_key(refresh_token: str) -> str:
+    return f"used:{refresh_token}"
+
+
 def rotate(refresh_token: str) -> TokenPair:
     """Validate + rotate a refresh token. Raises ``ValueError`` if invalid/expired.
 
-    On reuse of an already-rotated (deleted) token, revokes the entire family
-    — a signal that a refresh token was stolen and the legitimate client
-    already moved on.
+    Rotation is single-winner: the live record is taken with an atomic
+    ``consume`` (Redis GETDEL / locked pop in-process), so two concurrent
+    refreshes with the same token cannot both succeed. The consumed token
+    leaves a tombstone carrying its family id. Presenting a tombstoned token
+    again is reuse, which revokes the whole family.
     """
-    record = _cache().get(f"token:{refresh_token}")
+    record = _cache().consume(f"token:{refresh_token}")
     if record is None:
+        tombstone = _cache().get(_used_key(refresh_token))
+        if isinstance(tombstone, dict) and tombstone.get("family_id"):
+            _revoke_family_id(tombstone["family_id"])
+            log.warning("refresh_reuse_detected family=%s", tombstone["family_id"])
         raise ValueError("invalid_or_reused_refresh_token")
 
-    _cache().delete(f"token:{refresh_token}")
-    pair = _issue(
+    _cache().set(
+        _used_key(refresh_token),
+        {"family_id": record["family_id"]},
+        ttl_seconds=_REFRESH_TTL_SECONDS(),
+    )
+    return _issue(
         user_id=record["user_id"],
         email=record["email"],
         name=record.get("name"),
         family_id=record["family_id"],
     )
-    return pair
 
 
 def revoke(refresh_token: str) -> None:
@@ -113,24 +126,29 @@ def revoke(refresh_token: str) -> None:
     _cache().delete(f"token:{refresh_token}")
 
 
+def _revoke_family_id(family_id: str) -> None:
+    """Delete every live and tombstoned token of one login family."""
+    family = _cache().get(_family_key(family_id)) or []
+    for tok in family:
+        _cache().delete(f"token:{tok}")
+        _cache().delete(_used_key(tok))
+    _cache().delete(_family_key(family_id))
+
+
 def revoke_all_for_family(refresh_token: str) -> None:
     """Revoke every token descended from the same login (logout everywhere)."""
     record = _cache().get(f"token:{refresh_token}")
     if not record:
+        tombstone = _cache().get(_used_key(refresh_token))
+        record = tombstone if isinstance(tombstone, dict) else None
+    if not record:
         return
-    family_id = record["family_id"]
-    family = _cache().get(_family_key(family_id)) or []
-    for tok in family:
-        _cache().delete(f"token:{tok}")
-    _cache().delete(_family_key(family_id))
+    _revoke_family_id(record["family_id"])
 
 
 def revoke_all_for_user(user_id: str) -> None:
     """Revoke every session for a user (password reset / security event)."""
     families = _cache().get(_user_families_key(user_id)) or []
     for family_id in families:
-        tokens = _cache().get(_family_key(family_id)) or []
-        for tok in tokens:
-            _cache().delete(f"token:{tok}")
-        _cache().delete(_family_key(family_id))
+        _revoke_family_id(family_id)
     _cache().delete(_user_families_key(user_id))

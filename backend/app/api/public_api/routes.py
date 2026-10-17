@@ -359,6 +359,7 @@ async def chat_v1(
         "confidence": result.get("confidence", 0.0),
         "related_questions": result.get("related_questions", []),
         "grounded": result.get("grounded", False),
+        "generated": result.get("generated", False),
         "model": result.get("model"),
         "usage": {
             "prompt_tokens": int(result.get("prompt_tokens") or 0),

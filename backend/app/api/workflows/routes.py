@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import logging
 import uuid
+from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -65,19 +66,36 @@ from app.schemas.workflows import (
 )
 from app.services.audit import audit
 from app.services import usage_service
-from app.services.workflow_engine import execute_run, resume_run
+from app.services.workflow_engine import (
+    ACTION_STEP_TYPES,
+    execute_run,
+    normalise_step_type,
+    resume_run,
+)
+from app.services.workflow_triggers import SUPPORTED_EVENTS
 
 log = logging.getLogger("app.workflows")
 
 router = APIRouter(tags=["workflows"])
 
-_VALID_STEP_TYPES = {t.value for t in StepType}
+_VALID_STEP_TYPES = {t.value for t in StepType} | set(ACTION_STEP_TYPES)
 _VALID_TRIGGERS = {t.value for t in WorkflowTrigger}
 _VALID_STATUSES = {s.value for s in WorkflowStatus}
 
 
 def _repo(session: AsyncSession, ctx: OrgContext) -> WorkflowRepository:
     return WorkflowRepository(session, ctx.organization_id)
+
+
+def _validate_trigger(trigger_type: str, trigger_config: Optional[dict]) -> None:
+    """Event triggers must name an event the engine can fire."""
+    if trigger_type == WorkflowTrigger.event.value:
+        event = (trigger_config or {}).get("event")
+        if event not in SUPPORTED_EVENTS:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Event triggers need trigger_config.event set to one of {list(SUPPORTED_EVENTS)}.",
+            )
 
 
 def _validate_step(step: StepCreate) -> None:
@@ -157,6 +175,7 @@ async def create_workflow(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Unknown trigger '{payload.trigger_type}'.",
         )
+    _validate_trigger(payload.trigger_type, payload.trigger_config)
     for step in payload.steps:
         _validate_step(step)
 
@@ -249,6 +268,13 @@ async def update_workflow(
     if workflow is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found."
+        )
+    if payload.trigger_type is not None or payload.trigger_config is not None:
+        _validate_trigger(
+            payload.trigger_type or workflow.trigger_type.value,
+            payload.trigger_config
+            if payload.trigger_config is not None
+            else workflow.trigger_config,
         )
 
     # Snapshot the current definition into version history before mutating.
@@ -624,14 +650,15 @@ def _materialise_steps(
 ) -> list[WorkflowStep]:
     out: list[WorkflowStep] = []
     for i, step in enumerate(steps):
+        stored_type, stored_config = normalise_step_type(step.type, step.config or {})
         out.append(
             WorkflowStep(
                 workflow_id=workflow.id,
                 organization_id=organization_id,
                 order_index=step.order_index if step.order_index is not None else i,
-                type=StepType(step.type),
+                type=stored_type,
                 name=step.name.strip(),
-                config=step.config or {},
+                config=stored_config,
             )
         )
     return out

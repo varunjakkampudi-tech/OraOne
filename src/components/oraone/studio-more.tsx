@@ -84,8 +84,7 @@ export function ApiKeysPage() {
 
   return (
     <StudioFrame>
-      <span className="marketing-eyebrow">LIVE · API KEYS</span>
-      <h1 className="mt-2 text-3xl font-semibold">API keys</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">API keys</h1>
       <p className="mt-2 text-muted-foreground">
         Keys let your own systems read and write this workspace. A key is shown once, when created.
       </p>
@@ -214,8 +213,7 @@ export function AnalyticsPage() {
 
   return (
     <StudioFrame>
-      <span className="marketing-eyebrow">LIVE · ANALYTICS</span>
-      <h1 className="mt-2 text-3xl font-semibold">Analytics</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Analytics</h1>
       <p className="mt-2 text-muted-foreground">
         Activity for this workspace over the selected period.
       </p>
@@ -344,8 +342,7 @@ export function AccountPage() {
 
   return (
     <StudioFrame>
-      <span className="marketing-eyebrow">LIVE · ACCOUNT</span>
-      <h1 className="mt-2 text-3xl font-semibold">Your account</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Your account</h1>
       {error && (
         <div className="mt-4">
           <Notice kind="error">{error}</Notice>

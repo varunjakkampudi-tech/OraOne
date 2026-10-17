@@ -21,6 +21,8 @@ from app.database.models.knowledge_base import KnowledgeBase
 from app.database.models.website import Website
 from app.database.session import get_db
 from app.middleware.org_context import OrgContext, get_current_organization
+from app.core.permissions import Permission
+from app.middleware.org_context import require_permission
 from app.schemas.rag import (
     RagQueryRequest,
     RagQueryResponse,
@@ -40,6 +42,7 @@ router = APIRouter(tags=["rag"])
     "/api/rag/query",
     response_model=RagQueryResponse,
     summary="Answer a question from the knowledge base (RAG)",
+    dependencies=[Depends(require_permission(Permission.KB_READ))],
 )
 async def rag_query(
     payload: RagQueryRequest,
@@ -72,6 +75,7 @@ async def rag_query(
     "/api/rag/search",
     response_model=RagSearchResponse,
     summary="Hybrid search over knowledge chunks (no answer generation)",
+    dependencies=[Depends(require_permission(Permission.KB_READ))],
 )
 async def rag_search(
     payload: RagSearchRequest,

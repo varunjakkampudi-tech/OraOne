@@ -21,14 +21,25 @@ Secrets are encrypted at rest and never returned in responses.
 
 from __future__ import annotations
 
+import hmac
 import logging
 import os
 import hashlib
+import secrets
 import time
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    status,
+)
 from fastapi.responses import RedirectResponse
 import jwt as jose_jwt
 from jwt.exceptions import InvalidTokenError as JWTError
@@ -117,7 +128,32 @@ def _state_secret() -> str:
     return secret
 
 
-def issue_oauth_state(*, provider: str, organization_id: uuid.UUID, user_id) -> str:
+# The state is also bound to the browser that started the flow. Connect sets a random
+# nonce in an httpOnly cookie and puts only its hash in the signed state. The callback
+# must present the cookie before it exchanges the code. A missing cookie fails closed.
+_NONCE_COOKIE = "oraone_oauth_nonce"
+_NONCE_COOKIE_PATH = "/api/integrations"
+_DEV_ENVIRONMENTS = {"development", "dev", "test", "local"}
+
+
+def _nonce_hash(nonce: str) -> str:
+    return hashlib.sha256(nonce.encode()).hexdigest()
+
+
+def _cookie_secure() -> bool:
+    """Secure cookies everywhere except local development and tests."""
+    return (
+        os.getenv("ENVIRONMENT", "development").strip().lower() not in _DEV_ENVIRONMENTS
+    )
+
+
+def issue_oauth_state(
+    *,
+    provider: str,
+    organization_id: uuid.UUID,
+    user_id,
+    nonce_hash: Optional[str] = None,
+) -> str:
     now = int(time.time())
     claims = {
         "provider": provider,
@@ -126,6 +162,8 @@ def issue_oauth_state(*, provider: str, organization_id: uuid.UUID, user_id) -> 
         "iat": now,
         "exp": now + _STATE_TTL_SECONDS,
     }
+    if nonce_hash:
+        claims["nonce_hash"] = nonce_hash
     token = jose_jwt.encode(claims, _state_secret(), algorithm=_STATE_ALG)
     get_shared_cache("oauth-state").set(
         f"state:{hashlib.sha256(token.encode()).hexdigest()}",
@@ -149,6 +187,27 @@ def _frontend_url() -> str:
     return os.environ.get("FRONTEND_URL", "http://localhost:3000").rstrip("/")
 
 
+# Where the browser lands after an OAuth round trip. This is the live Studio
+# page; the /app pages are a static sample and never reflect real connections.
+_STUDIO_INTEGRATIONS_PATH = "/studio/integrations"
+_LIVE_STATUSES = {IntegrationStatus.connected, IntegrationStatus.syncing}
+
+_SETUP_MESSAGES = {
+    registry.SETUP_CONNECTED: "Connected to this workspace.",
+    registry.SETUP_NOT_CONNECTED: "Ready to connect. You will be asked to approve access at {name}.",
+    registry.SETUP_REQUIRES_ACCOUNT_SETUP: (
+        "Not configured yet. An administrator must add the OAuth app credentials for "
+        "{name} on the server before it can be connected. Nothing has been connected."
+    ),
+    registry.SETUP_PLANNED: "Planned. This connector is not available yet.",
+}
+
+_WEBHOOK_SETUP_MESSAGE = (
+    "{name} has no OAuth connection. Nothing is linked here. Send events to it from the "
+    "Webhooks page instead."
+)
+
+
 # ─────────────────── helpers ───────────────────
 
 
@@ -163,6 +222,23 @@ def _catalog_item(spec) -> ProviderCatalogItem:
         color=spec.color,
         description=spec.description,
         available=spec.available,
+        sync_available=spec.sync_available,
+        required_settings=oauth_service.required_settings(spec.provider),
+    )
+
+
+def _setup_message(spec, setup: str) -> str:
+    if spec.auth == "webhook" and setup == registry.SETUP_NOT_CONNECTED:
+        return _WEBHOOK_SETUP_MESSAGE.format(name=spec.name)
+    return _SETUP_MESSAGES[setup].format(name=spec.name)
+
+
+def _not_configured_detail(spec) -> str:
+    """503 text for a missing OAuth app. Lists setting names only, never values."""
+    names = ", ".join(oauth_service.required_settings(spec.provider))
+    return (
+        f"{_SETUP_MESSAGES[registry.SETUP_REQUIRES_ACCOUNT_SETUP].format(name=spec.name)} "
+        f"Required settings: {names}."
     )
 
 
@@ -219,12 +295,20 @@ async def list_integrations(
         if category and spec.category != category:
             continue
         row = connected.get(spec.provider)
+        is_connected = row is not None and row.status in _LIVE_STATUSES
+        setup = registry.provider_setup_status(
+            spec,
+            connected=is_connected,
+            oauth_configured=oauth_service.is_configured(spec.provider),
+        )
         items.append(
             IntegrationCatalogEntry(
                 catalog=_catalog_item(spec),
                 integration=(
                     IntegrationRead.model_validate(row.__dict__) if row else None
                 ),
+                setup_status=setup,
+                setup_message=_setup_message(spec, setup),
             )
         )
     return IntegrationCatalogResponse(items=items, total=len(items))
@@ -261,6 +345,7 @@ async def get_integration(
 )
 async def connect_integration(
     payload: ConnectRequest,
+    response: Response,
     pctx: ProjectContext = Depends(get_current_project),
     session: AsyncSession = Depends(get_db),
 ) -> ConnectResponse:
@@ -273,6 +358,21 @@ async def connect_integration(
         )
 
     environment = os.getenv("ENVIRONMENT", "development").strip().lower()
+    if not spec.available:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"{spec.name} is planned and cannot be connected yet.",
+        )
+    if spec.auth == "webhook":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=_WEBHOOK_SETUP_MESSAGE.format(name=spec.name),
+        )
+    if not payload.mock and not oauth_service.is_configured(payload.provider):
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=_not_configured_detail(spec),
+        )
     real_oauth_ready = spec.available and oauth_service.is_configured(payload.provider)
     connection_type = _connection_mode(
         mock_requested=payload.mock,
@@ -283,15 +383,26 @@ async def connect_integration(
 
     # Real OAuth, first leg: hand back an authorize URL for the browser.
     if use_real and not payload.code:
+        nonce = secrets.token_urlsafe(32)
         state = issue_oauth_state(
             provider=payload.provider,
             organization_id=ctx.organization_id,
             user_id=ctx.user_id,
+            nonce_hash=_nonce_hash(nonce),
         )
         try:
             url = oauth_service.build_authorize_url(payload.provider, state=state)
         except ConnectorError as e:
             raise HTTPException(status_code=502, detail=str(e)) from e
+        response.set_cookie(
+            _NONCE_COOKIE,
+            nonce,
+            max_age=_STATE_TTL_SECONDS,
+            path=_NONCE_COOKIE_PATH,
+            httponly=True,
+            secure=_cookie_secure(),
+            samesite="lax",
+        )
         return ConnectResponse(authorize_url=url)
 
     # Resolve tokens — real OAuth or explicitly requested local/test mock.
@@ -348,11 +459,17 @@ async def connect_integration(
 
 
 @router.get(
+    "/api/integrations/oauth/callback",
+    summary="OAuth redirect target for providers other than Google Drive",
+    include_in_schema=False,
+)
+@router.get(
     "/api/integrations/google/callback",
     summary="Google OAuth redirect target — completes the connection",
     include_in_schema=False,
 )
 async def google_oauth_callback(
+    request: Request,
     code: Optional[str] = Query(default=None),
     state: Optional[str] = Query(default=None),
     error: Optional[str] = Query(default=None),
@@ -364,10 +481,10 @@ async def google_oauth_callback(
     exchanges the authorization code for tokens, persists the connection
     with encrypted secrets, then bounces the browser back to the app.
     """
-    base = f"{_frontend_url()}/app/integrations"
+    base = f"{_frontend_url()}{_STUDIO_INTEGRATIONS_PATH}"
 
     if error:
-        return RedirectResponse(f"{base}?error={error}", status_code=302)
+        return RedirectResponse(f"{base}?error=provider_denied", status_code=302)
     if not code or not state:
         return RedirectResponse(f"{base}?error=missing_code", status_code=302)
 
@@ -383,14 +500,27 @@ async def google_oauth_callback(
         return RedirectResponse(f"{base}?error=invalid_state", status_code=302)
     user_id = claims.get("sub", "system")
 
+    # Fail closed: the browser that started the flow must present its nonce cookie.
+    bound_hash = claims.get("nonce_hash")
+    cookie_nonce = request.cookies.get(_NONCE_COOKIE)
+    if (
+        not bound_hash
+        or not cookie_nonce
+        or not hmac.compare_digest(_nonce_hash(cookie_nonce), str(bound_hash))
+    ):
+        log.warning("oauth callback refused: nonce cookie missing or mismatched")
+        return RedirectResponse(f"{base}?error=invalid_state", status_code=302)
+
     spec = registry.get_spec(provider)
-    if spec is None:
+    if spec is None or not spec.available:
         return RedirectResponse(f"{base}?error=unknown_provider", status_code=302)
+    if not oauth_service.is_configured(provider):
+        return RedirectResponse(f"{base}?error=not_configured", status_code=302)
 
     try:
         result = oauth_service.complete_connect(provider, code=code)
     except ConnectorError as e:
-        log.warning("google oauth token exchange failed: %s", e)
+        log.warning("oauth token exchange failed for %s: %s", provider, e)
         return RedirectResponse(f"{base}?error=token_exchange_failed", status_code=302)
 
     row = await _by_provider(
@@ -437,7 +567,9 @@ async def google_oauth_callback(
             "external_account": row.external_account,
         },
     )
-    return RedirectResponse(f"{base}?connected={provider}", status_code=302)
+    done = RedirectResponse(f"{base}?connected={provider}", status_code=302)
+    done.delete_cookie(_NONCE_COOKIE, path=_NONCE_COOKIE_PATH)
+    return done
 
 
 # ─────────────────── sync ───────────────────
@@ -464,6 +596,13 @@ async def trigger_sync(
         )
     if row.status == IntegrationStatus.disconnected:
         raise HTTPException(status_code=409, detail="Integration is not connected.")
+    spec = registry.get_spec(row.provider)
+    if spec is None or not spec.sync_available:
+        name = spec.name if spec else row.provider
+        raise HTTPException(
+            status_code=409,
+            detail=f"Sync for {name} is planned and not available yet. Nothing was synced.",
+        )
 
     job = SyncJob(
         integration_id=row.id,
@@ -676,15 +815,19 @@ async def remove_synced_items(
     removed = 0
     for item in manifest_rows:
         if item.document_id is not None:
-            await session.execute(
-                delete(DocumentChunk).where(
-                    DocumentChunk.document_id == item.document_id
-                )
+            # Tenant-scoped lookup: the document must belong to this org.
+            doc = await session.scalar(
+                select(Document)
+                .where(Document.id == item.document_id)
+                .where(Document.organization_id == ctx.organization_id)
             )
-            doc = await session.get(Document, item.document_id)
-            if doc is not None and doc.deleted_at is None:
-                doc.deleted_at = datetime.now(timezone.utc)
-                removed += 1
+            if doc is not None:
+                await session.execute(
+                    delete(DocumentChunk).where(DocumentChunk.document_id == doc.id)
+                )
+                if doc.deleted_at is None:
+                    doc.deleted_at = datetime.now(timezone.utc)
+                    removed += 1
         item.selected = False
         item.status = IntegrationDocStatus.removed
 

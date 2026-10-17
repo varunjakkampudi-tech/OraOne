@@ -280,11 +280,12 @@ async def test_check_quota_unlimited_allows():
     assert d.limit == q.UNLIMITED
 
 
-async def test_check_quota_unmetered_allows():
-    # No usage source wired up yet -> "unmetered" but allowed.
-    d = await q.check_quota(None, uuid.uuid4(), q.QuotaKey.USERS, plan_code="free")
+async def test_check_quota_unmeasured_allows_in_development(monkeypatch):
+    # Storage has no complete measurement source -> "unmeasured". Development allows.
+    monkeypatch.setattr(q.settings, "environment", "development")
+    d = await q.check_quota(None, uuid.uuid4(), q.QuotaKey.STORAGE_MB, plan_code="free")
     assert d.allowed is True
-    assert d.outcome == "unmetered"
+    assert d.outcome == "unmeasured"
 
 
 # --------------------------------------------------------------------------- #

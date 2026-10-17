@@ -36,8 +36,12 @@ from app.database.models.webhook import (
     WebhookEventType,
     WebhookStatus,
 )
-from app.schemas.webhooks import validate_public_webhook_url
 from app.database.session import session_scope
+from app.services.egress_guard import (
+    UnsafeDestinationError,
+    pinned_request,
+    resolve_public_target,
+)
 
 logger = logging.getLogger("oraone.webhooks")
 
@@ -223,15 +227,20 @@ async def _deliver_once(
         "X-OraOne-Delivery": delivery_id or str(uuid.uuid4()),
     }
     try:
+        # Resolve and validate immediately before the request, then connect to
+        # the validated IP. Registration-time validation alone is vulnerable to
+        # DNS rebinding. Redirects are deliberately disabled so each hop must be
+        # explicitly registered and validated.
+        try:
+            target = await asyncio.to_thread(resolve_public_target, endpoint.url)
+        except UnsafeDestinationError as exc:
+            return False, None, f"destination rejected: {exc.reason}"
         async with httpx.AsyncClient(
             timeout=_TIMEOUT, follow_redirects=False
         ) as client:
-            # Re-resolve and reject unsafe destinations immediately before the
-            # request. Registration-time validation alone is vulnerable to DNS
-            # rebinding. Redirects are deliberately disabled so each hop must
-            # be explicitly registered and validated.
-            validate_public_webhook_url(endpoint.url)
-            resp = await client.post(endpoint.url, content=body, headers=headers)
+            resp = await pinned_request(
+                client, "POST", target, content=body, headers=headers
+            )
         ok = 200 <= resp.status_code < 300
         return ok, resp.status_code, None if ok else f"HTTP {resp.status_code}"
     except Exception as exc:  # noqa: BLE001 - report any transport error

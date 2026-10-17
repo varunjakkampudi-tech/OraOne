@@ -1,5 +1,9 @@
 # Environment configuration
 
+> The complete, code-verified list of variables, with defaults, required status and
+> console behaviour, is in [CONFIGURATION](../operations/CONFIGURATION.md). This page is a
+> short introduction, and that page takes precedence where they differ.
+
 Configuration comes from environment variables. For local work they are read from
 `backend/.env` and `.env.local` (both git-ignored). Production values are injected
 by the deployment platform and are never committed.

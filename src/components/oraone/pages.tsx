@@ -51,6 +51,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { WorkspaceShell, Brand } from "./shell";
 import { useWorkspace } from "@/lib/workspace-context";
 import { Dashboard } from "./dashboard";
+import { StatusBadge } from "./status-badge";
 import {
   demoAssistants,
   visibleConversationId,
@@ -77,10 +78,7 @@ function Notice({ children }: { children?: ReactNode }) {
   return (
     <div className="service-notice">
       <ShieldCheck />
-      <span>
-        {children ||
-          "Sample workspace. Live services are not connected; changes here are preview-only."}
-      </span>
+      <span>{children || "You are viewing a sample workspace. Changes are not saved."}</span>
     </div>
   );
 }
@@ -212,7 +210,7 @@ function WorkspaceContent({ title, pagePath }: PageProps) {
   const slug = pagePath.split("/")[3];
   const product = products.find((p) => p.slug === slug);
   if (product && product.slug !== "chat")
-    return <PlannedProduct product={product} pagePath={pagePath} title={title} />;
+    return <PlannedProduct product={product} pagePath={pagePath} />;
   if (
     !sample &&
     !pagePath.startsWith("/app/settings") &&
@@ -334,10 +332,7 @@ function PageAction({ pagePath }: { pagePath: string }) {
 function ProductDirectory() {
   return (
     <>
-      <Notice>
-        Product availability is separate from live service readiness. AI Chat is the current
-        portfolio product.
-      </Notice>
+      <Notice>AI Chat is available in this demo. The other products are planned.</Notice>
       <div className="product-grid">
         {products.map((p, i) => {
           const Icon = productIcons[i] || Boxes;
@@ -347,7 +342,7 @@ function ProductDirectory() {
                 <span className={`product-icon product-icon-${i % 4}`}>
                   <Icon />
                 </span>
-                <span className={`status-pill ${i ? "planned" : ""}`}>{p.status}</span>
+                <StatusBadge status={i ? "planned" : "available"} />
               </div>
               <h2>{p.name}</h2>
               <p>{p.description}</p>
@@ -372,42 +367,19 @@ function ProductDirectory() {
 function PlannedProduct({
   product,
   pagePath,
-  title,
 }: {
   product: (typeof products)[number];
   pagePath: string;
-  title: string;
 }) {
-  const index = products.findIndex((p) => p.slug === product.slug);
-  const Icon = productIcons[index] || Boxes;
   return (
     <div className="page-content">
       <PageHeader
         title={product.name}
         description={product.description}
-        action={<span className="status-pill planned">{product.status} · Not released</span>}
+        action={<StatusBadge status="planned" />}
       />
       <SectionNavigation pagePath={pagePath} />
-      <div className="vision-banner">
-        <span className="vision-icon">
-          <Icon />
-        </span>
-        <span className="eyebrow">THE ORAONE ECOSYSTEM</span>
-        <h2>A connected future for {product.short.toLowerCase()}.</h2>
-        <p>
-          {pagePath.split("/").length > 4
-            ? `${title} is part of the planned ${product.short} experience. `
-            : ""}
-          This product is not released. These are intended capabilities, not currently available
-          features.
-        </p>
-        <Button variant="outline" asChild>
-          <Link to="/roadmap">
-            View product roadmap
-            <ArrowRight />
-          </Link>
-        </Button>
-      </div>
+      <p className="muted-copy">Not available yet. We will tell you when it opens.</p>
       <h2 className="section-title">Planned capabilities</h2>
       <div className="feature-grid">
         {product.capabilities.map((c, i) => (
@@ -417,13 +389,13 @@ function PlannedProduct({
             <p>
               Designed to work within one shared OraOne identity, workspace and permission system.
             </p>
-            <span className="status-pill planned">Not yet available</span>
+            <StatusBadge status="planned" />
           </article>
         ))}
       </div>
       <Notice>
-        Release dates and access details have not been announced. No signup or waitlist service is
-        connected.
+        No release date or access details have been announced. No signup or waitlist is connected,
+        so there is nothing to join yet.
       </Notice>
       <div className="related-band">
         <BookOpen />
@@ -1877,7 +1849,7 @@ function ChatOverview() {
           <h2>Your knowledge. Your voice. Your AI assistants.</h2>
           <p>Build a consistent customer experience with knowledge-grounded website assistants.</p>
         </div>
-        <span className="status-pill">Current product</span>
+        <StatusBadge status="available" />
       </div>
       <Assistants />
       <div className="feature-grid section-spaced">

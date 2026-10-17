@@ -54,6 +54,10 @@ class WidgetSession(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     referer: Mapped[Optional[str]] = mapped_column(String(2048))
     user_agent: Mapped[Optional[str]] = mapped_column(String(512))
+    # SHA-256 hex digest of the visitor's session token (the token itself is
+    # returned to the browser once and never stored). NULL on legacy rows,
+    # which therefore cannot be accessed through the public API.
+    session_token_hash: Mapped[Optional[str]] = mapped_column(String(64))
 
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.utcnow()

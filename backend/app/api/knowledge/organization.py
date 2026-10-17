@@ -18,6 +18,8 @@ from app.database.models.knowledge_base import KnowledgeBase
 from app.database.models.knowledge_folder import KnowledgeFolder
 from app.database.session import get_db
 from app.middleware.org_context import OrgContext, get_current_organization
+from app.core.permissions import Permission
+from app.middleware.org_context import require_permission
 from app.schemas.knowledge import (
     BulkAction,
     BulkResult,
@@ -132,6 +134,7 @@ async def list_knowledge_folders(
     "/api/knowledge-folders",
     response_model=KnowledgeFolderOut,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission(Permission.KB_WRITE))],
 )
 async def create_knowledge_folder(
     payload: KnowledgeFolderCreate,
@@ -176,7 +179,11 @@ async def create_knowledge_folder(
     return await _folder_out(session, folder)
 
 
-@router.put("/api/knowledge-folders/{folder_id}", response_model=KnowledgeFolderOut)
+@router.put(
+    "/api/knowledge-folders/{folder_id}",
+    response_model=KnowledgeFolderOut,
+    dependencies=[Depends(require_permission(Permission.KB_WRITE))],
+)
 async def update_knowledge_folder(
     folder_id: uuid.UUID,
     payload: KnowledgeFolderUpdate,
@@ -202,7 +209,9 @@ async def update_knowledge_folder(
 
 
 @router.delete(
-    "/api/knowledge-folders/{folder_id}", status_code=status.HTTP_204_NO_CONTENT
+    "/api/knowledge-folders/{folder_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_permission(Permission.KB_DELETE))],
 )
 async def delete_knowledge_folder(
     folder_id: uuid.UUID,
@@ -240,7 +249,11 @@ async def delete_knowledge_folder(
 # ─────────────────────── Document organization ───────────────────────
 
 
-@router.patch("/api/documents/{document_id}", response_model=DocumentRead)
+@router.patch(
+    "/api/documents/{document_id}",
+    response_model=DocumentRead,
+    dependencies=[Depends(require_permission(Permission.KB_WRITE))],
+)
 async def patch_document(
     document_id: uuid.UUID,
     payload: DocumentPatch,
@@ -282,7 +295,11 @@ async def patch_document(
     return _doc_to_read(doc, chunk_count=await _doc_chunk_count(session, doc.id))
 
 
-@router.post("/api/documents/bulk", response_model=BulkResult)
+@router.post(
+    "/api/documents/bulk",
+    response_model=BulkResult,
+    dependencies=[Depends(require_permission(Permission.KB_WRITE))],
+)
 async def bulk_documents(
     payload: BulkAction,
     ctx: OrgContext = Depends(get_current_organization),
@@ -411,7 +428,11 @@ async def list_document_versions(
 # ─────────────────────── Knowledge search ───────────────────────
 
 
-@router.post("/api/knowledge/search", response_model=KnowledgeSearchResponse)
+@router.post(
+    "/api/knowledge/search",
+    response_model=KnowledgeSearchResponse,
+    dependencies=[Depends(require_permission(Permission.KB_READ))],
+)
 async def knowledge_search(
     payload: KnowledgeSearchRequest,
     ctx: OrgContext = Depends(get_current_organization),

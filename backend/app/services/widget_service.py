@@ -68,14 +68,38 @@ def build_embed_snippet(public_key: str) -> str:
 
 
 def origin_host(origin: Optional[str], referer: Optional[str]) -> str:
-    """Best host from the Origin header, falling back to Referer."""
+    """Best host from the Origin header, falling back to Referer.
+
+    NOT an authentication control. Origin and Referer are set by browsers, but
+    any HTTP client can send arbitrary values. The check only keeps the widget
+    on allowed sites in browsers. Public widget calls still require the widget
+    public key, and visitor data requires the per-visitor session token.
+    """
     return normalize_domain(origin or "") or normalize_domain(referer or "")
 
 
-def domain_allowed(allowed: list[str], host: str) -> bool:
-    """Allow if the list is empty (unrestricted) or host matches/sub-matches."""
+_PRODUCTION_LIKE_ENVIRONMENTS = {"production", "prod", "staging"}
+
+
+def domains_required() -> bool:
+    """True in production-like deployments, where an empty allow-list must fail closed."""
+    env = os.environ.get("ENVIRONMENT", "development").strip().lower()
+    return env in _PRODUCTION_LIKE_ENVIRONMENTS
+
+
+def domain_allowed(
+    allowed: list[str], host: str, *, require_allow_list: bool = False
+) -> bool:
+    """Allow when host matches/sub-matches an allowed domain.
+
+    An empty list means "unrestricted" only outside production-like settings.
+    With ``require_allow_list`` (production), an empty list denies every host.
+
+    Browser-side courtesy check only. ``host`` comes from a client-controlled
+    Origin/Referer header and is not authentication (see ``origin_host``).
+    """
     if not allowed:
-        return True
+        return not require_allow_list
     if not host:
         return False
     host = host.lower()

@@ -23,16 +23,18 @@ from datetime import timedelta
 from typing import Any, Optional
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.agent import Agent, AgentStatus
+from app.database.models.channel_inbound_receipt import ChannelInboundReceipt
 from app.database.models.conversation import (
     Conversation,
     ConversationChannel,
     ConversationStatus,
 )
 from app.database.models.message import Message, MessageSender
-from app.services import visitor_service
+from app.services import contact_policy_service, visitor_service, workflow_triggers
 from app.services.rag_answer import answer_query
 
 log = logging.getLogger("app.omnichannel")
@@ -63,6 +65,8 @@ class InboundMessage:
     handle: Optional[str] = None  # @username, page-scoped id, …
     external_id: Optional[str] = None  # provider's stable user id
     external_thread_id: Optional[str] = None  # provider conversation id
+    # Provider's namespaced message id (e.g. "telegram:123"); redeliveries are dropped.
+    provider_message_id: Optional[str] = None
     meta: dict[str, Any] = field(default_factory=dict)
 
 
@@ -74,7 +78,11 @@ class OutboundReply:
     conversation_id: Optional[uuid.UUID] = None
     grounded: bool = False
     confidence: float = 0.0
+    # False when the reply is a fallback. Recorded on the message metadata only; the text is sent as-is.
+    generated: bool = False
     handled: bool = True
+    # True when the message was a STOP-style opt-out: no AI reply is sent.
+    opted_out: bool = False
 
 
 def _channel_enum(channel: str) -> ConversationChannel:
@@ -150,6 +158,30 @@ async def _find_or_create_thread(
     return conversation
 
 
+async def _claim_provider_message(session: AsyncSession, msg: InboundMessage) -> bool:
+    """Record the provider's message id for this agent. False means it was already seen.
+
+    The unique insert runs in a savepoint, so a duplicate rolls back only this insert.
+    A first delivery that later fails keeps no receipt (the outer transaction rolls back),
+    so the provider's retry is still processed.
+    """
+    if not msg.provider_message_id:
+        return True
+    try:
+        async with session.begin_nested():
+            session.add(
+                ChannelInboundReceipt(
+                    organization_id=msg.organization_id,
+                    agent_id=msg.agent_id,
+                    message_key=msg.provider_message_id[:255],
+                )
+            )
+            await session.flush()
+    except IntegrityError:
+        return False
+    return True
+
+
 async def handle_inbound(session: AsyncSession, msg: InboundMessage) -> OutboundReply:
     """Resolve identity → thread → answer (RAG) → persist → share memory.
 
@@ -159,6 +191,11 @@ async def handle_inbound(session: AsyncSession, msg: InboundMessage) -> Outbound
     """
     text = (msg.text or "").strip()
     if not text:
+        return OutboundReply(text="", handled=False)
+
+    # A redelivered provider webhook gets no second turn and no second reply.
+    if not await _claim_provider_message(session, msg):
+        log.info("duplicate inbound ignored channel=%s", msg.channel)
         return OutboundReply(text="", handled=False)
 
     # Agent must be active — a paused agent never invokes the model.
@@ -187,13 +224,41 @@ async def handle_inbound(session: AsyncSession, msg: InboundMessage) -> Outbound
     visitor_service.link_conversation(profile, conversation, channel=msg.channel)
     digest = visitor_service.build_memory_digest(profile, current_channel=msg.channel)
 
-    # 3) Persist the customer's message.
-    session.add(
-        Message(
-            conversation_id=conversation.id,
-            sender=MessageSender.customer,
-            message=text,
+    # 3) Persist the customer's message, then let workflows see it.
+    customer_message = Message(
+        conversation_id=conversation.id,
+        sender=MessageSender.customer,
+        message=text,
+    )
+    session.add(customer_message)
+    await session.flush()
+
+    # 3b) STOP-style reply on any channel: record the opt-out and send no AI reply.
+    # Runs before workflows so no automation answers the contact after they opted out.
+    if contact_policy_service.is_opt_out_message(text):
+        added = await contact_policy_service.record_opt_out(
+            session,
+            organization_id=msg.organization_id,
+            values=[msg.phone, msg.email],
+            reason=f"STOP reply on {msg.channel}",
         )
+        if not (msg.phone or msg.email):
+            log.warning("opt-out on %s with no phone or email to record", msg.channel)
+        log.info("opt_out_recorded channel=%s entries_added=%s", msg.channel, added)
+        conversation.last_message_at = visitor_service.now_utc()
+        return OutboundReply(
+            text="",
+            conversation_id=conversation.id,
+            handled=False,
+            opted_out=True,
+        )
+
+    await workflow_triggers.fire_message_received(
+        session,
+        organization_id=msg.organization_id,
+        project_id=msg.project_id,
+        conversation_id=conversation.id,
+        message_id=customer_message.id,
     )
 
     # 4) Generate via the SAME RAG answer pipeline the website chat uses.
@@ -217,6 +282,7 @@ async def handle_inbound(session: AsyncSession, msg: InboundMessage) -> Outbound
                 "confidence": result.get("confidence"),
                 "model": result.get("model"),
                 "channel": msg.channel,
+                "generated": bool(result.get("generated", False)),
             },
         )
     )
@@ -231,5 +297,6 @@ async def handle_inbound(session: AsyncSession, msg: InboundMessage) -> Outbound
         conversation_id=conversation.id,
         grounded=bool(result.get("grounded")),
         confidence=float(result.get("confidence") or 0.0),
+        generated=bool(result.get("generated", False)),
         handled=True,
     )

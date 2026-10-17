@@ -10,6 +10,7 @@ from pydantic import ValidationError
 
 from app.schemas.webhooks import WebhookCreateRequest, WebhookUpdateRequest
 from app.services import webhook_service
+from app.services.egress_guard import PinnedTarget
 
 
 @pytest.mark.parametrize(
@@ -61,7 +62,9 @@ async def test_delivery_does_not_follow_redirects_and_marks_http_failure(
 
     monkeypatch.setattr(webhook_service.httpx, "AsyncClient", FakeClient)
     monkeypatch.setattr(
-        webhook_service, "validate_public_webhook_url", lambda value: value
+        webhook_service,
+        "resolve_public_target",
+        lambda url, **_: PinnedTarget(url=url),
     )
     endpoint = SimpleNamespace(
         url="https://public.example/hook",
@@ -95,7 +98,9 @@ async def test_delivery_records_connection_failure(monkeypatch):
 
     monkeypatch.setattr(webhook_service.httpx, "AsyncClient", FakeClient)
     monkeypatch.setattr(
-        webhook_service, "validate_public_webhook_url", lambda value: value
+        webhook_service,
+        "resolve_public_target",
+        lambda url, **_: PinnedTarget(url=url),
     )
     endpoint = SimpleNamespace(url="https://public.example/hook", secret="secret")
 

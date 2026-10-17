@@ -22,7 +22,8 @@ class ChannelType:
     whatsapp = "whatsapp"
     email = "email"
     api = "api"
-    ALL = {chat, whatsapp, email, api}
+    voice = "voice"
+    ALL = {chat, whatsapp, email, api, voice}
 
 
 class ChannelStatus:

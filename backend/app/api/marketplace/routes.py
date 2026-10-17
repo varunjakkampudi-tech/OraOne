@@ -24,22 +24,43 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.connectors import registry as connector_registry
 from app.database.models.agent import Agent, AgentStatus, AgentType
 from app.database.models.agent_config import AgentConfig
+from app.database.models.integration import Integration, IntegrationStatus
 from app.database.models.knowledge_base import KnowledgeBase, KnowledgeBaseStatus
 from app.database.models.marketplace import InstallStatus, MarketplaceInstallation
 from app.database.models.marketplace_review import MarketplaceReview
 from app.database.models.user import User
+from app.database.models.workflow import (
+    StepType,
+    Workflow,
+    WorkflowStatus,
+    WorkflowStep,
+    WorkflowTrigger,
+)
+from app.core.permissions import Permission
 from app.database.session import get_db
 from app.middleware.org_context import OrgContext, get_current_organization
 from app.middleware.project_context import ProjectContext, get_current_project
 from app.services import marketplace as catalog
+from app.services import oauth_service
 from app.services.audit import audit
+from app.services.authorization import require_permission
 
 router = APIRouter(prefix="/api/marketplace", tags=["marketplace"])
 
 
 # ─────────────────────────────── schemas ─────────────────────────────────────
+
+
+class RequirementRead(BaseModel):
+    kind: str
+    key: str
+    label: str
+    status: str
+    message: str
+    blocking: bool
 
 
 class ListingRead(BaseModel):
@@ -52,6 +73,8 @@ class ListingRead(BaseModel):
     author: str
     featured: bool
     installed: bool = False
+    installable: bool = True
+    requirements: list[RequirementRead] = Field(default_factory=list)
     rating: float = 0.0
     review_count: int = 0
 
@@ -100,9 +123,45 @@ class InstallationRead(BaseModel):
 class InstallResponse(BaseModel):
     installation: InstallationRead
     agent_id: Optional[uuid.UUID] = None
+    workflow_id: Optional[uuid.UUID] = None
+    requirements: list[RequirementRead] = Field(default_factory=list)
 
 
 # ─────────────────────────────── helpers ─────────────────────────────────────
+
+
+async def _integration_states(
+    db: AsyncSession, organization_id: uuid.UUID
+) -> dict[str, tuple[str, str]]:
+    """Per-provider setup state for this organization, from real rows and config.
+
+    A provider is "connected" only when a live integration row exists. Other
+    states come from the connector registry (planned / needs setup / not connected).
+    """
+    rows = await db.scalars(
+        select(Integration.provider)
+        .where(Integration.organization_id == organization_id)
+        .where(
+            Integration.status.in_(
+                [IntegrationStatus.connected, IntegrationStatus.syncing]
+            )
+        )
+        .where(Integration.deleted_at.is_(None))
+    )
+    connected = set(rows.all())
+    states: dict[str, tuple[str, str]] = {}
+    for spec in connector_registry.list_specs():
+        setup = connector_registry.provider_setup_status(
+            spec,
+            connected=spec.provider in connected,
+            oauth_configured=oauth_service.is_configured(spec.provider),
+        )
+        states[spec.provider] = (spec.name, setup)
+    return states
+
+
+def _requirement_reads(evaluation: catalog.Evaluation) -> list[RequirementRead]:
+    return [RequirementRead(**r.as_dict()) for r in evaluation.requirements]
 
 
 async def _installed_slugs(db: AsyncSession, organization_id: uuid.UUID) -> set[str]:
@@ -136,6 +195,7 @@ def _to_listing_read(
     item: dict[str, Any],
     installed: set[str],
     ratings: Optional[dict[str, dict[str, Any]]] = None,
+    evaluation: Optional[catalog.Evaluation] = None,
 ) -> ListingRead:
     agg = (ratings or {}).get(item["slug"], {})
     return ListingRead(
@@ -148,6 +208,8 @@ def _to_listing_read(
         author=item["author"],
         featured=bool(item.get("featured")),
         installed=item["slug"] in installed,
+        installable=evaluation.installable if evaluation else True,
+        requirements=_requirement_reads(evaluation) if evaluation else [],
         rating=agg.get("rating", 0.0),
         review_count=agg.get("review_count", 0),
     )
@@ -173,7 +235,11 @@ async def list_listings(
     installed = await _installed_slugs(db, ctx.organization_id)
     items = catalog.list_listings(category=category, q=q)
     ratings = await _ratings_for(db, [i["slug"] for i in items])
-    return [_to_listing_read(i, installed, ratings) for i in items]
+    states = await _integration_states(db, ctx.organization_id)
+    return [
+        _to_listing_read(i, installed, ratings, catalog.evaluate_listing(i, states))
+        for i in items
+    ]
 
 
 @router.get("/listings/{slug}", response_model=ListingDetail)
@@ -187,7 +253,10 @@ async def get_listing(
         raise HTTPException(status_code=404, detail="Listing not found.")
     installed = await _installed_slugs(db, ctx.organization_id)
     ratings = await _ratings_for(db, [slug])
-    base = _to_listing_read(item, installed, ratings)
+    states = await _integration_states(db, ctx.organization_id)
+    base = _to_listing_read(
+        item, installed, ratings, catalog.evaluate_listing(item, states)
+    )
     return ListingDetail(**base.model_dump(), blueprint=item.get("blueprint", {}))
 
 
@@ -212,6 +281,7 @@ async def list_installations(
 )
 async def install_listing(
     slug: str,
+    _: OrgContext = Depends(require_permission(Permission.AGENTS_WRITE)),
     pctx: ProjectContext = Depends(get_current_project),
     db: AsyncSession = Depends(get_db),
 ) -> InstallResponse:
@@ -233,8 +303,22 @@ async def install_listing(
             agent_id=existing.agent_id,
         )
 
+    # Gate on real capability: integrations must be connected, workflow blueprints
+    # must use only triggers and steps the engine supports. Nothing is installed
+    # silently when a requirement is missing.
+    states = await _integration_states(db, ctx.organization_id)
+    evaluation = catalog.evaluate_listing(item, states)
+    if not evaluation.installable:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=" ".join(evaluation.blocking_messages)
+            or "This listing cannot be installed yet.",
+        )
+
     blueprint = item.get("blueprint", {})
     agent_id: Optional[uuid.UUID] = None
+    workflow_id: Optional[uuid.UUID] = None
+    kb_id: Optional[str] = None
 
     # Agent templates provision a real, ready-to-use Agent in the active project.
     if item["category"] == "agent_template":
@@ -283,6 +367,35 @@ async def install_listing(
         except Exception:  # noqa: BLE001 — never block the agent install
             kb_id = None
 
+    # Supported workflow blueprints become a DRAFT workflow: the user reviews and
+    # activates it. Steps carry only their type, so they need configuration first.
+    if item["category"] == "workflow" and evaluation.creates_workflow:
+        workflow = Workflow(
+            organization_id=ctx.organization_id,
+            project_id=pctx.project_id,
+            name=item["name"],
+            description=item["summary"],
+            status=WorkflowStatus.draft,
+            trigger_type=WorkflowTrigger(blueprint["trigger"]),
+            trigger_config={},
+            created_by=ctx.user_id,
+        )
+        db.add(workflow)
+        await db.flush()
+        for order, step_type in enumerate(blueprint.get("steps") or []):
+            db.add(
+                WorkflowStep(
+                    workflow_id=workflow.id,
+                    organization_id=ctx.organization_id,
+                    order_index=order,
+                    type=StepType(step_type),
+                    name=step_type,
+                    config={},
+                )
+            )
+        workflow_id = workflow.id
+
+    requirement_snapshot = [r.as_dict() for r in evaluation.requirements]
     row = MarketplaceInstallation(
         organization_id=ctx.organization_id,
         project_id=pctx.project_id,
@@ -297,6 +410,8 @@ async def install_listing(
             "knowledge_base_id": kb_id
             if item["category"] == "agent_template"
             else None,
+            "workflow_id": str(workflow_id) if workflow_id else None,
+            "requirements": requirement_snapshot,
         },
     )
     db.add(row)
@@ -312,11 +427,14 @@ async def install_listing(
         meta={
             "category": item["category"],
             "agent_id": str(agent_id) if agent_id else None,
+            "workflow_id": str(workflow_id) if workflow_id else None,
         },
     )
     return InstallResponse(
         installation=InstallationRead.model_validate(row),
         agent_id=agent_id,
+        workflow_id=workflow_id,
+        requirements=_requirement_reads(evaluation),
     )
 
 
@@ -327,7 +445,7 @@ async def install_listing(
 )
 async def uninstall_listing(
     installation_id: uuid.UUID,
-    ctx: OrgContext = Depends(get_current_organization),
+    ctx: OrgContext = Depends(require_permission(Permission.AGENTS_WRITE)),
     db: AsyncSession = Depends(get_db),
 ) -> Response:
     row = await db.scalar(
@@ -352,13 +470,21 @@ async def uninstall_listing(
 # ─────────────────────────────── reviews ─────────────────────────────────────
 
 
+REVIEW_ANONYMOUS_NAME = "Verified user"
+
+
 def _author_name(u: Optional[User]) -> str:
+    """Public reviewer label. Only a display name the user set is shown.
+
+    Email addresses and text derived from them (such as the local part) are never
+    exposed, so a name that looks like an address is treated as not set.
+    """
     if u is None:
-        return "OraOne user"
-    name = (getattr(u, "full_name", None) or getattr(u, "name", None) or "").strip()
-    return name or (
-        u.email.split("@")[0] if getattr(u, "email", None) else "OraOne user"
-    )
+        return REVIEW_ANONYMOUS_NAME
+    name = (getattr(u, "full_name", None) or "").strip()
+    if not name or "@" in name:
+        return REVIEW_ANONYMOUS_NAME
+    return name[:160]
 
 
 def _to_review_read(
@@ -385,9 +511,11 @@ async def list_reviews(
     if catalog.get_listing(slug) is None:
         raise HTTPException(status_code=404, detail="Listing not found.")
 
+    # Reviews are written per organization, so the list only shows this organization's reviews.
     rows = (
         await db.scalars(
             select(MarketplaceReview)
+            .where(MarketplaceReview.organization_id == ctx.organization_id)
             .where(MarketplaceReview.listing_slug == slug)
             .order_by(desc(MarketplaceReview.created_at))
             .limit(100)
@@ -431,7 +559,7 @@ async def list_reviews(
 async def upsert_review(
     slug: str,
     payload: ReviewCreate,
-    ctx: OrgContext = Depends(get_current_organization),
+    ctx: OrgContext = Depends(require_permission(Permission.AGENTS_WRITE)),
     db: AsyncSession = Depends(get_db),
 ) -> ReviewRead:
     if catalog.get_listing(slug) is None:
@@ -481,7 +609,7 @@ async def upsert_review(
 )
 async def delete_review(
     slug: str,
-    ctx: OrgContext = Depends(get_current_organization),
+    ctx: OrgContext = Depends(require_permission(Permission.AGENTS_WRITE)),
     db: AsyncSession = Depends(get_db),
 ) -> Response:
     row = await db.scalar(

@@ -24,6 +24,8 @@ from email.mime.text import MIMEText
 from functools import lru_cache
 from pathlib import Path
 
+from app.core.log_redaction import redact_email
+
 log = logging.getLogger("app.email")
 
 _TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "emails" / "templates"
@@ -127,21 +129,21 @@ def send_email(
             log.info(
                 "email sent via SMTP (%s) → to=%s template=%r",
                 smtp_cfg["host"],
-                to,
+                redact_email(to),
                 template,
             )
             return True
         except Exception as exc:  # pragma: no cover - network/credential dependent
             log.warning(
                 "SMTP send failed → to=%s template=%r error_type=%s",
-                to,
+                redact_email(to),
                 template,
                 type(exc).__name__,
             )
 
     log.info(
         "email (SMTP_HOST not configured) → to=%s template=%r [not sent]",
-        to,
+        redact_email(to),
         template,
     )
     return False

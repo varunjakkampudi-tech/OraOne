@@ -11,6 +11,10 @@ export type IntegrationCatalog = {
   auth: string;
   description: string;
   available: boolean;
+  /** False means provider data sync is planned and cannot run yet. */
+  sync_available: boolean;
+  /** Names only (never values) of the server settings OAuth needs. */
+  required_settings: string[];
 };
 
 export type Integration = {
@@ -28,9 +32,15 @@ export type Integration = {
   updated_at: string;
 };
 
+// Set by the server from real state: "connected" only when this workspace has a live row.
+export type IntegrationSetupStatus =
+  "connected" | "not_connected" | "requires_account_setup" | "planned";
+
 export type IntegrationCatalogEntry = {
   catalog: IntegrationCatalog;
   integration: Integration | null;
+  setup_status: IntegrationSetupStatus;
+  setup_message: string;
 };
 
 export type IntegrationCatalogResponse = {

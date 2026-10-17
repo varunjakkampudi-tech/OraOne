@@ -1703,6 +1703,19 @@
     "accessibility": "Semantic controls; comprehensive audit not verified"
   },
   {
+    "path": "/admin/config",
+    "title": "Configuration",
+    "family": "admin",
+    "layout": "Admin",
+    "role": "Platform administrator",
+    "workspaceRequired": false,
+    "implementation": "Live when signed in as super-admin; otherwise shows sign-in required",
+    "backendDependency": "Super-admin configuration API (/api/admin/config)",
+    "desktop": "Implemented; sample-flow validation pending",
+    "mobile": "Implemented; sample-flow validation pending",
+    "accessibility": "Semantic controls; comprehensive audit not verified"
+  },
+  {
     "path": "/admin/subscriptions",
     "title": "Subscriptions",
     "family": "admin",

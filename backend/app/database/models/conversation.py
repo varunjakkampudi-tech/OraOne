@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 
 class ConversationChannel(str, enum.Enum):
+    voice = "voice"
     chat = "chat"
     whatsapp = "whatsapp"
     sms = "sms"

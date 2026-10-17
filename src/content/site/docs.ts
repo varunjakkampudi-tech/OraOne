@@ -106,7 +106,7 @@ export const docsPages: SitePage[] = [
         body: ["Choose a model for each assistant. The models available depend on your plan."],
       },
     ],
-    next: { label: "REST API", to: "/docs/api" },
+    next: { label: "Add to your website", to: "/docs/integrations" },
   },
   {
     kind: "docs",

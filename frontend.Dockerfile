@@ -2,7 +2,7 @@
 # Web application (TanStack Start, server-rendered by Nitro's node-server preset).
 # Caddy routes /api/* to the backend and everything else to this container.
 
-FROM node:22-alpine AS build
+FROM node:22.23.3-alpine3.24 AS build
 WORKDIR /app
 # bun.lock pins the exact versions the design was approved against.
 RUN npm install -g bun@1.4.2
@@ -12,7 +12,7 @@ COPY . .
 ENV NITRO_PRESET=node-server
 RUN bun run build && bun install --production --frozen-lockfile
 
-FROM node:22-alpine AS runtime
+FROM node:22.23.3-alpine3.24 AS runtime
 WORKDIR /app
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \

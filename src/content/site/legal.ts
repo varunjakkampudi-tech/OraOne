@@ -40,13 +40,19 @@ export const legalPages: SitePage[] = [
       {
         heading: "Retention and deletion",
         body: [
-          "You can delete documents, assistants and conversations from the studio. Deletion from backups follows our retention schedule, which will be published with the final notice.",
+          "You can delete documents, assistants and conversations from the studio. Retention periods, including backups, are being confirmed and will be listed here before this notice is final.",
         ],
       },
       {
         heading: "Your choices",
         body: [
           "You can ask to see, correct or delete personal information we hold about you by contacting us through the contact page.",
+        ],
+      },
+      {
+        heading: "Cookies, hosting and transfers",
+        body: [
+          "The cookies used, where data is hosted, the processors involved and any international transfers are being confirmed. They will be listed here before this notice is final.",
         ],
       },
     ],
@@ -69,7 +75,7 @@ export const legalPages: SitePage[] = [
       {
         heading: "Availability",
         body: [
-          "OraOne Product 1 is in development. Features are labelled by status, and features that are not labelled as available may change or not be released.",
+          "AI Chat is in active development. Features are labelled by status, and features that are not labelled as available may change or not be released.",
         ],
       },
       {
@@ -127,6 +133,12 @@ export const legalPages: SitePage[] = [
     draft: true,
     sections: [
       {
+        heading: "Scope",
+        body: [
+          "These rules apply to everyone who uses OraOne, including assistants built with it and the conversations they hold. The final scope is confirmed before this page is published.",
+        ],
+      },
+      {
         heading: "You may not",
         body: [],
         list: [
@@ -149,7 +161,7 @@ export const legalPages: SitePage[] = [
     path: "/refund-policy",
     title: "Refund policy | OraOne",
     eyebrow: "Legal",
-    lead: "OraOne does not charge during free access, so there is nothing to refund.",
+    lead: "How refunds will work once paid plans are available. Nothing is charged today.",
     updated: UPDATED,
     draft: true,
     sections: [

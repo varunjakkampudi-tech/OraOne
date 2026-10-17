@@ -45,6 +45,10 @@ async def lifespan(app: FastAPI):
     before the engine they depend on is disposed."""
     log = logging.getLogger(__name__)
     # ── startup ──
+    # Production-like environments refuse to boot with incomplete provider config.
+    from app.core.startup_checks import validate_startup_configuration
+
+    validate_startup_configuration()
     # Initialise the Postgres async engine lazily — won't crash boot if the DB
     # is unreachable (e.g. private VPC). Routes that need it fail individually.
     try:
@@ -298,6 +302,20 @@ app.include_router(channels_router)
 from app.api.omnichannel import router as omnichannel_router  # noqa: E402
 
 app.include_router(omnichannel_router)
+# Outbound calling queue (campaigns) and the Twilio status callback
+from app.api.calls import router as calls_router  # noqa: E402
+from app.api.calls import callback_router as calls_callback_router  # noqa: E402
+
+app.include_router(calls_router)
+app.include_router(calls_callback_router)
+# AI voice agent: inbound calls, speech turns and outbound TwiML
+from app.api.voice import router as voice_router  # noqa: E402
+
+app.include_router(voice_router)
+# Do-not-contact list (consent and opt-outs used by calls and messages)
+from app.api.contact_policy import router as contact_policy_router  # noqa: E402
+
+app.include_router(contact_policy_router)
 # R7 — Developer Platform: outbound webhooks (dashboard management)
 from app.api.webhooks.routes import router as webhooks_router  # noqa: E402
 
@@ -314,6 +332,9 @@ app.include_router(operations_router)
 from app.api.leads import router as leads_router  # noqa: E402
 
 app.include_router(leads_router)
+from app.api.marketing import router as marketing_router  # noqa: E402
+
+app.include_router(marketing_router)
 # Feature requests / feedback board (org-scoped) — ideas, bugs, feedback + voting
 from app.api.feature_requests import router as feature_requests_router  # noqa: E402
 
@@ -348,6 +369,11 @@ app.include_router(agent_versioning_router)
 from app.api.super_admin import super_admin_router  # noqa: E402
 
 app.include_router(super_admin_router)
+
+# Admin configuration console (super-admin only)
+from app.api.admin_config import router as admin_config_router  # noqa: E402
+
+app.include_router(admin_config_router)
 
 from app.core.cors import dashboard_origins  # noqa: E402
 
@@ -486,14 +512,9 @@ async def security_headers_mw(request, call_next):
 
 # ---------- Request correlation + structured access log ----------
 from app.core.logging import access_logger as _access_logger  # noqa: E402
+from app.middleware.access_log import request_route_label  # noqa: E402
+from app.middleware.upload_size_limit import UploadSizeLimitMiddleware  # noqa: E402
 from app.core.tracing import current_trace_id as _current_trace_id  # noqa: E402
-
-
-def _client_ip(request) -> str:
-    fwd = request.headers.get("x-forwarded-for")
-    if fwd:
-        return fwd.split(",")[0].strip()
-    return request.client.host if request.client else ""
 
 
 @app.middleware("http")
@@ -519,7 +540,8 @@ async def request_context_mw(request, call_next):
             request_id=request_id,
             trace_id=_current_trace_id(),
             method=request.method,
-            path=request.url.path,
+            # Route template only: concrete paths can carry bot/share tokens.
+            route=request_route_label(request),
             duration_ms=duration_ms,
             error=type(exc).__name__,
         )
@@ -531,11 +553,10 @@ async def request_context_mw(request, call_next):
         request_id=request_id,
         trace_id=_current_trace_id(),
         method=request.method,
-        path=request.url.path,
+        route=request_route_label(request),
         status_code=response.status_code,
         duration_ms=duration_ms,
         user_id=getattr(request.state, "user_id", None),
-        ip=_client_ip(request),
     )
     return response
 
@@ -610,7 +631,8 @@ async def api_v1_access_log_mw(request, call_next):
                             api_key_id=ctx.get("api_key_id"),
                             key_prefix=ctx.get("key_prefix"),
                             method=request.method,
-                            endpoint=request.url.path[:255],
+                            # Route template: never store path-borne tokens.
+                            endpoint=request_route_label(request)[:255],
                             status_code=response.status_code,
                             latency_ms=latency_ms,
                         )
@@ -620,6 +642,34 @@ async def api_v1_access_log_mw(request, call_next):
         pass
     return response
 
+
+# Cookie-authenticated unsafe requests must come from an allow-listed origin.
+@app.middleware("http")
+async def cookie_origin_mw(request, call_next):
+    from app.core.cookies import cookie_origin_refused
+
+    if cookie_origin_refused(
+        method=request.method,
+        headers=request.headers,
+        cookies=request.cookies,
+        allowed_origins=allow_origins,
+    ):
+        return _ErrJSONResponse(
+            status_code=403,
+            content={
+                "success": False,
+                "error": {
+                    "code": "FORBIDDEN",
+                    "message": "Request origin is not allowed for cookie-authenticated changes.",
+                },
+                "requestId": getattr(request.state, "request_id", None),
+            },
+        )
+    return await call_next(request)
+
+
+# Upload size precheck sits inside CORS so its 413 still carries CORS headers.
+app.add_middleware(UploadSizeLimitMiddleware)
 
 # Register CORS last so it wraps early rate-limit/idempotency responses too.
 # The outer widget policy still applies only to domain-checked public routes.

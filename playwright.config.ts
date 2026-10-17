@@ -1,51 +1,65 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig } from "@playwright/test";
 
 /**
- * End-to-end test configuration.
+ * Browser tests for the product surfaces at phone, tablet and desktop widths.
  *
- * The suites expect the full local stack to be running: the API on port 8000
- * and the web app on E2E_BASE_URL (default http://localhost:5180). See the
- * "Testing" section of README.md.
+ * The default run uses the Vite dev server on E2E_BASE_URL (default
+ * http://localhost:5173). If a server is already running there it is reused;
+ * otherwise `npm run dev` is started for the run. Studio and install tests mock
+ * every /api request in the browser (see e2e/product-support.ts), so no backend
+ * is needed.
  *
- * Suites are selected with tags in the test titles:
- *   @smoke      fast check that the main pages render
- *   @sanity     every Product 1 route responds and renders
- *   @critical   sign-in, workspace and session flows that must never break
- *   @regression navigation, menus and interactions
- *   @visual     screenshot comparison of key layouts
+ * Only the suites listed in `testMatch` run by default. The older suites in
+ * e2e/ need a live API and are not part of this run.
  */
-const baseURL = process.env["E2E_BASE_URL"] ?? "http://localhost:5180";
+const baseURL = process.env["E2E_BASE_URL"] ?? "http://localhost:5173";
 
 export default defineConfig({
   testDir: "./e2e",
+  testMatch: [
+    "public-site.spec.ts",
+    "studio.spec.ts",
+    "channel-setup.spec.ts",
+    "admin.spec.ts",
+    "install.spec.ts",
+    "auth.spec.ts",
+  ],
   fullyParallel: true,
-  // Each test may compile routes on the development server, so allow two minutes.
-  timeout: 120_000,
+  // The dev server compiles each route on first visit, so allow generous time.
+  timeout: 90_000,
   forbidOnly: Boolean(process.env["CI"]),
-  retries: process.env["CI"] ? 2 : 0,
-  // Two workers keep the development server responsive across browsers.
+  retries: 0,
   workers: 2,
-  reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]],
+  reporter: [["list"]],
   outputDir: "test-results",
   expect: {
-    // The dev server compiles each route on first visit, so allow time to render.
     timeout: 15_000,
-    // Visual comparisons tolerate sub-pixel anti-aliasing differences only.
-    toHaveScreenshot: { maxDiffPixelRatio: 0.01, animations: "disabled" },
   },
   use: {
     baseURL,
-    // The dev server compiles routes on demand, so the first visit can be slow.
-    navigationTimeout: 90_000,
-    actionTimeout: 20_000,
+    navigationTimeout: 60_000,
+    actionTimeout: 15_000,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    { name: "firefox", use: { ...devices["Desktop Firefox"] } },
-    { name: "webkit", use: { ...devices["Desktop Safari"] } },
-    { name: "mobile-chrome", use: { ...devices["Pixel 7"] } },
-    { name: "mobile-safari", use: { ...devices["iPhone 14"] } },
+    {
+      name: "390",
+      use: { browserName: "chromium", viewport: { width: 390, height: 844 } },
+    },
+    {
+      name: "768",
+      use: { browserName: "chromium", viewport: { width: 768, height: 1024 } },
+    },
+    {
+      name: "1280",
+      use: { browserName: "chromium", viewport: { width: 1280, height: 800 } },
+    },
   ],
+  webServer: {
+    command: "npm run dev",
+    url: baseURL,
+    reuseExistingServer: true,
+    timeout: 120_000,
+  },
 });

@@ -102,6 +102,8 @@ class WidgetRead(BaseModel):
     # Embed convenience
     embed_snippet: Optional[str] = None
     sessions_count: Optional[int] = None
+    # True in production-like settings: no allowed domains means the widget will not load.
+    allowed_domains_required: bool = False
 
 
 class WidgetListResponse(BaseModel):
@@ -141,6 +143,9 @@ class WidgetSessionRead(BaseModel):
     visitor_id: str
     conversation_id: Optional[uuid.UUID] = None
     messages: list[dict[str, Any]] = Field(default_factory=list)
+    # Returned once, when the visitor session is created. Send it back in the
+    # X-Widget-Session header on every later public call.
+    session_token: Optional[str] = None
 
 
 class WidgetChatRequest(BaseModel):
@@ -165,9 +170,13 @@ class WidgetChatResponse(BaseModel):
     confidence: float = 0.0
     related_questions: list[str] = Field(default_factory=list)
     grounded: bool = False
+    # False when the reply is a fallback because no model produced it.
+    generated: bool = True
     session_id: uuid.UUID
     conversation_id: Optional[uuid.UUID] = None
     message_id: Optional[uuid.UUID] = None
+    # Set only on the response that creates the visitor session.
+    session_token: Optional[str] = None
 
 
 # ──────────────── Public: escalate / lead / feedback / event ────────────────
@@ -232,3 +241,5 @@ class WidgetAnalytics(BaseModel):
     avg_csat: Optional[float] = None
     by_event: dict[str, int] = Field(default_factory=dict)
     top_questions: list[dict[str, Any]] = Field(default_factory=list)
+    # Most recent recorded visit from a loaded embed; None until a real event arrives.
+    last_loaded_at: Optional[datetime] = None

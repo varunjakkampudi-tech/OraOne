@@ -239,7 +239,11 @@ def _build_clarifying_questions(req: ClarifyRequest) -> List[ClarifyQuestion]:
     return questions
 
 
-@router.post("/api/ai/clarify", response_model=ClarifyResponse)
+@router.post(
+    "/api/ai/clarify",
+    response_model=ClarifyResponse,
+    dependencies=[Depends(require_permission(Permission.AGENTS_WRITE))],
+)
 async def clarify_agent(
     payload: ClarifyRequest,
     ctx: OrgContext = Depends(get_current_organization),

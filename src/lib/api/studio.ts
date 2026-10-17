@@ -53,6 +53,8 @@ export type Conversation = { id: string; agent_id: string; title: string | null 
 export type SendMessageResult = {
   conversation_id: string;
   assistant_message: ChatMessage;
+  /** False when the reply is a fallback because no model produced it. */
+  generated?: boolean;
 };
 
 export function listProjects() {

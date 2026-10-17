@@ -101,7 +101,7 @@ export const DOCS_TREE: { group: string; links: Link[] }[] = [
 ];
 
 export const STATUS_LABEL: Record<Status, string> = {
-  available: "Available",
+  available: "Available in demo",
   active: "In active development",
   beta: "Beta",
   "in-development": "In development",

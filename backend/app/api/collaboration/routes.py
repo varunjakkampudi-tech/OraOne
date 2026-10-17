@@ -225,7 +225,11 @@ async def remove_team_member(
 
 
 # ─────────────────────────── sharing / ACL ───────────────────────────
-@router.post("/api/collab/share", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/api/collab/share",
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))],
+)
 async def share_resource(
     payload: ShareRequest,
     ctx: OrgContext = Depends(get_current_organization),
@@ -285,7 +289,10 @@ async def share_resource(
     return {"id": str(grant.id), "permission": grant.permission}
 
 
-@router.delete("/api/collab/share/{grant_id}")
+@router.delete(
+    "/api/collab/share/{grant_id}",
+    dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))],
+)
 async def unshare_resource(
     grant_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),
@@ -328,7 +335,11 @@ async def list_comments(
     }
 
 
-@router.post("/api/collab/comments", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/api/collab/comments",
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))],
+)
 async def create_comment(
     payload: CommentCreateRequest,
     ctx: OrgContext = Depends(get_current_organization),
@@ -347,7 +358,10 @@ async def create_comment(
     return {"id": str(comment.id), "status": "created"}
 
 
-@router.post("/api/collab/comments/{comment_id}/resolve")
+@router.post(
+    "/api/collab/comments/{comment_id}/resolve",
+    dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))],
+)
 async def resolve_comment(
     comment_id: uuid.UUID,
     payload: CommentResolveRequest,
@@ -376,7 +390,10 @@ async def list_reactions(
     }
 
 
-@router.post("/api/collab/reactions")
+@router.post(
+    "/api/collab/reactions",
+    dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))],
+)
 async def toggle_reaction(
     payload: ReactionRequest,
     ctx: OrgContext = Depends(get_current_organization),
@@ -405,7 +422,10 @@ async def list_notifications(
     )
 
 
-@router.put("/api/notifications/{notif_id}/read")
+@router.put(
+    "/api/notifications/{notif_id}/read",
+    dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))],
+)
 async def mark_notification_read(
     notif_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),
@@ -419,7 +439,10 @@ async def mark_notification_read(
     return {"status": "read", "id": str(notif_id)}
 
 
-@router.post("/api/notifications/read-all")
+@router.post(
+    "/api/notifications/read-all",
+    dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))],
+)
 async def mark_all_read(
     ctx: OrgContext = Depends(get_current_organization),
     session: AsyncSession = Depends(get_db),
@@ -468,7 +491,11 @@ async def list_tasks(
     }
 
 
-@router.post("/api/tasks", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/api/tasks",
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))],
+)
 async def create_task(
     payload: TaskCreateRequest,
     ctx: OrgContext = Depends(get_current_organization),
@@ -489,7 +516,10 @@ async def create_task(
     return {"id": str(task.id), "status": "created"}
 
 
-@router.put("/api/tasks/{task_id}")
+@router.put(
+    "/api/tasks/{task_id}",
+    dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))],
+)
 async def update_task(
     task_id: uuid.UUID,
     payload: TaskUpdateRequest,
@@ -515,7 +545,11 @@ async def list_follows(
     }
 
 
-@router.post("/api/follow", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/api/follow",
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))],
+)
 async def follow_resource(
     payload: FollowRequest,
     ctx: OrgContext = Depends(get_current_organization),
@@ -531,7 +565,9 @@ async def follow_resource(
     return {"status": "following"}
 
 
-@router.delete("/api/follow")
+@router.delete(
+    "/api/follow", dependencies=[Depends(require_permission(Permission.COLLAB_WRITE))]
+)
 async def unfollow_resource(
     resource_type: str = Query(...),
     resource_id: str = Query(...),

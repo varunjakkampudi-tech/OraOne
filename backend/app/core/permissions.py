@@ -31,6 +31,11 @@ class Permission:
     # Conversations / leads
     LEADS_READ = "leads.read"
     LEADS_WRITE = "leads.write"
+    # Collaboration (comments, tasks, shares, follows, feature-request posts)
+    COLLAB_WRITE = "collab.write"
+    # Outbound calling campaigns
+    CALLS_READ = "calls.read"
+    CALLS_WRITE = "calls.write"
     # Workflows
     WORKFLOW_READ = "workflow.read"
     WORKFLOW_WRITE = "workflow.write"
@@ -69,6 +74,9 @@ ALL_PERMISSIONS: List[str] = [
     Permission.CHAT_USE,
     Permission.LEADS_READ,
     Permission.LEADS_WRITE,
+    Permission.COLLAB_WRITE,
+    Permission.CALLS_READ,
+    Permission.CALLS_WRITE,
     Permission.WORKFLOW_READ,
     Permission.WORKFLOW_WRITE,
     Permission.WORKFLOW_EXECUTE,
@@ -97,6 +105,7 @@ _READ_ONLY: FrozenSet[str] = frozenset(
         Permission.KB_READ,
         Permission.CHAT_USE,
         Permission.LEADS_READ,
+        Permission.CALLS_READ,
         Permission.WORKFLOW_READ,
         Permission.ANALYTICS_READ,
         Permission.INTEGRATIONS_READ,
@@ -113,6 +122,8 @@ _MEMBER: FrozenSet[str] = _READ_ONLY | frozenset(
         Permission.AGENTS_WRITE,
         Permission.KB_WRITE,
         Permission.LEADS_WRITE,
+        Permission.COLLAB_WRITE,
+        Permission.CALLS_WRITE,
         Permission.WORKFLOW_WRITE,
         Permission.WORKFLOW_EXECUTE,
     }

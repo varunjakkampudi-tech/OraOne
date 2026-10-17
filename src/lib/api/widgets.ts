@@ -16,9 +16,24 @@ export type Widget = {
   settings: Record<string, unknown>;
   theme: Record<string, unknown>;
   published_at: string | null;
+  // True when this deployment refuses to load a widget without an allowed-domain list.
+  allowed_domains_required: boolean;
 };
 
 export type WidgetList = { items: Widget[]; total: number };
+
+export type WidgetAnalytics = {
+  widget_id: string;
+  status: string;
+  sessions: number;
+  by_event: Record<string, number>;
+  // Newest recorded embed load. Null until a real visit reaches the widget.
+  last_loaded_at: string | null;
+};
+
+export function getWidgetAnalytics(widgetId: string) {
+  return apiRequest<WidgetAnalytics>(`/widgets/${widgetId}/analytics`);
+}
 
 export function listWidgets(projectId: string) {
   return apiRequest<WidgetList>("/widgets?limit=100", { projectId });

@@ -14,6 +14,10 @@ x-backend-environment: &backend-environment
   ENTITLEMENTS_CACHE_BACKEND: redis
   UPLOAD_DIR: /var/lib/oraone/uploads
   OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?OPENROUTER_API_KEY is required}
+  # Comma-separated IPs or CIDRs of the reverse proxy (the Caddy container) that
+  # may set X-Forwarded-For. Use the proxy's address on the Compose network.
+  # Client IPs from any other peer are ignored for rate limiting.
+  TRUSTED_PROXY_IPS: ${TRUSTED_PROXY_IPS:?TRUSTED_PROXY_IPS is required}
 
 services:
   postgres:
@@ -33,7 +37,7 @@ services:
       retries: 10
 
   redis:
-    image: redis:7-alpine
+    image: redis:7.4.11-alpine
     container_name: oraone-prod-redis
     restart: unless-stopped
     volumes:
@@ -43,6 +47,25 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  # One-shot schema migration. The API and workers start only after it exits 0.
+  migrate:
+    build:
+      context: ./backend
+      args:
+        APP_VERSION: ${ORAONE_VERSION:-v1.0.0}
+    image: oraone-backend:${ORAONE_VERSION:-v1.0.0}
+    container_name: oraone-prod-migrate
+    restart: "no"
+    env_file:
+      - ./backend/.env
+    environment:
+      <<: *backend-environment
+      RUN_BACKGROUND_WORKERS: "false"
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   backend:
     build:
@@ -60,6 +83,8 @@ services:
     volumes:
       - oraone_uploads:/var/lib/oraone/uploads
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -88,6 +113,8 @@ services:
     healthcheck:
       disable: true
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -107,7 +134,7 @@ services:
 
   proxy:
     # Single public entry point: TLS termination, compression and security headers.
-    image: caddy:2-alpine
+    image: caddy:2.11.7-alpine
     container_name: oraone-prod-proxy
     restart: unless-stopped
     environment:
@@ -121,7 +148,6 @@ services:
     depends_on:
       - backend
       - frontend
-      - workers
 
 volumes:
   oraone_postgres_data:

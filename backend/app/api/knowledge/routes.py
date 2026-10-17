@@ -50,6 +50,8 @@ from app.middleware.org_context import (
     get_current_organization,
     require_role,
 )
+from app.core.permissions import Permission
+from app.middleware.org_context import require_permission
 from app.middleware.project_context import ProjectContext, get_current_project
 from app.schemas.knowledge import (
     ChunkRead,
@@ -63,6 +65,7 @@ from app.schemas.knowledge import (
 )
 from app.services import storage
 from app.services import usage_service
+from app.services.upload_limits import assert_office_package_safe, read_capped
 from app.services.audit import audit
 from app.services.document_processing import compute_checksum, process_document
 
@@ -178,6 +181,7 @@ async def _chunk_counts_for_doc(
         "Creates an empty knowledge base. Documents are attached later via "
         "`POST /api/documents/upload`. Defaults `status` to `draft`."
     ),
+    dependencies=[Depends(require_permission(Permission.KB_WRITE))],
 )
 async def create_knowledge_base(
     payload: KnowledgeBaseCreate,
@@ -315,6 +319,7 @@ async def get_knowledge_base(
     response_model=KnowledgeBaseRead,
     summary="Update a knowledge base",
     description="Partial update — any omitted field is left unchanged.",
+    dependencies=[Depends(require_permission(Permission.KB_WRITE))],
 )
 async def update_knowledge_base(
     kb_id: uuid.UUID,
@@ -402,6 +407,7 @@ _DEFAULT_MAX_BYTES = 25 * 1024 * 1024  # 25 MiB
         "created in `pending` status — chunking + embedding happen in a "
         "later phase."
     ),
+    dependencies=[Depends(require_permission(Permission.KB_WRITE))],
 )
 async def upload_document(
     background_tasks: BackgroundTasks,
@@ -434,18 +440,15 @@ async def upload_document(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Folder not found."
             )
 
-    # Read the whole body so we can both size-check and stream into storage.
-    body = await file.read()
-    if len(body) > _DEFAULT_MAX_BYTES:
-        raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"File exceeds {_DEFAULT_MAX_BYTES} bytes.",
-        )
+    filename = file.filename or "upload.bin"
+    # Chunked read that stops at the cap: an oversized body is never buffered whole.
+    body = await read_capped(file, _DEFAULT_MAX_BYTES)
+    # OOXML packages (.docx/.xlsx/.pptx) are zip archives: refuse zip bombs.
+    assert_office_package_safe(filename, body)
 
     from io import BytesIO
 
     checksum = compute_checksum(body)
-    filename = file.filename or "upload.bin"
 
     # ── Duplicate / version detection ──
     # Identical bytes already present in this KB → dedup (return existing).
@@ -641,6 +644,7 @@ async def get_document(
         "`/chunks` for progress. Reprocessing wipes any existing chunks "
         "for this document and rebuilds them from the source file."
     ),
+    dependencies=[Depends(require_permission(Permission.KB_WRITE))],
 )
 async def process_document_endpoint(
     document_id: uuid.UUID,

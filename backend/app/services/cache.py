@@ -8,7 +8,7 @@ pub/sub) can be dropped in without touching call sites.
 
     :class:`CacheBackend`          — the interface every backend implements.
     :class:`InProcessCacheBackend` — default; a plain dict (no cross-node sync).
-    :class:`RedisCacheBackend`     — DESIGN STUB; native TTL + shared store.
+    :class:`RedisCacheBackend`     — shared store with native TTL (opt-in).
     :func:`get_cache_backend`      — env-driven factory (defaults to in-process).
 
 Selection is via ``ENTITLEMENTS_CACHE_BACKEND`` (``inprocess`` | ``redis``).
@@ -27,6 +27,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import threading
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
@@ -103,6 +104,7 @@ class InProcessCacheBackend(CacheBackend):
 
     def __init__(self) -> None:
         self._store: dict[str, Any] = {}
+        self._lock = threading.Lock()
 
     def get(self, key: str) -> Optional[Any]:
         return self._store.get(key)
@@ -110,10 +112,25 @@ class InProcessCacheBackend(CacheBackend):
     def set(self, key: str, value: Any, ttl_seconds: Optional[float] = None) -> None:
         self._store[key] = value
 
+    def consume(self, key: str) -> Optional[Any]:
+        """Atomically return and remove a value (single winner under threads)."""
+        with self._lock:
+            return self._store.pop(key, None)
+
+    def set_if_not_exists(
+        self, key: str, value: Any, ttl_seconds: Optional[float] = None
+    ) -> bool:
+        with self._lock:
+            if key in self._store:
+                return False
+            self._store[key] = value
+            return True
+
     def increment(self, key: str, ttl_seconds: Optional[float] = None) -> int:
-        value = int(self._store.get(key) or 0) + 1
-        self._store[key] = value
-        return value
+        with self._lock:
+            value = int(self._store.get(key) or 0) + 1
+            self._store[key] = value
+            return value
 
     def delete(self, key: str) -> None:
         self._store.pop(key, None)

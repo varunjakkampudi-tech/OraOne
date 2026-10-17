@@ -208,8 +208,7 @@ export function KnowledgePage() {
 
   return (
     <StudioFrame>
-      <span className="marketing-eyebrow">LIVE · KNOWLEDGE</span>
-      <h1 className="mt-2 text-3xl font-semibold">Knowledge</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Knowledge</h1>
       <p className="mt-2 text-muted-foreground">
         Documents your assistants answer from. Uploaded files are processed before they can be
         searched.

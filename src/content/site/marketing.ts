@@ -56,8 +56,8 @@ export const marketingPages: SitePage[] = [
     title: "OraOne | AI chat for your website",
     eyebrow: "AI chat for your business",
     hero: {
-      title: "Answer website questions, any time of day",
-      lead: "OraOne's assistant answers your customers from your own documents, collects their details and passes the rest to your team.",
+      title: "One AI for every conversation",
+      lead: "OraOne starts with your website: its assistant answers visitors from your own documents, captures their details and passes the rest to your team.",
       primary: DEMO,
       secondary: ASK,
       note: "AI Chat is in active development. Phone and WhatsApp are planned.",
@@ -105,14 +105,18 @@ export const marketingPages: SitePage[] = [
         a: "From the documents you upload. If the documents do not cover a question, the assistant says so.",
       },
       {
+        q: "How much does it cost?",
+        a: "See the pricing page for the current plans and what each includes.",
+      },
+      {
         q: "Is the chat live today?",
         a: "AI Chat is in active development. The demo workspace shows how it works, and you can sign in to try it.",
       },
     ],
     showcase: true,
     cta: {
-      title: "See how it works",
-      text: "Explore the demo workspace, then sign in when you are ready.",
+      title: "See how AI Chat could work on your website",
+      text: "Explore the demo workspace first. When you are ready to try AI Chat with your own information, sign in or talk to the team.",
       primary: DEMO,
     },
   },
@@ -121,14 +125,14 @@ export const marketingPages: SitePage[] = [
     path: "/products",
     title: "Capabilities | OraOne",
     eyebrow: "Platform",
-    lead: "Everything works with the same account, knowledge and inbox. Anything not yet available is labelled as such.",
+    lead: "Each capability, with its current status. Only AI Chat is in active development.",
     cards: [],
   },
   {
     kind: "product",
     path: "/products/ai-chat",
     title: "AI Chat | OraOne",
-    eyebrow: "Product 1 · In active development",
+    eyebrow: "AI Chat · In active development",
     hero: {
       title: "AI Chat for your website",
       lead: "An assistant that answers from your documents, shares the conversation with your team and captures leads.",
@@ -205,7 +209,7 @@ export const marketingPages: SitePage[] = [
     path: "/features",
     title: "Features | OraOne",
     eyebrow: "Features",
-    lead: "Every AI Chat feature with its current status.",
+    lead: "AI Chat is in active development. The features below can be explored in the demo, and general availability is not implied.",
     items: [
       {
         id: "f1",
@@ -286,7 +290,7 @@ export const marketingPages: SitePage[] = [
     path: "/platform",
     title: "Platform | OraOne",
     eyebrow: "Platform",
-    lead: "One place for every conversation, with an assistant answering first and your team taking over when needed.",
+    lead: "One place for every conversation, designed so an assistant answers first and your team takes over when needed. AI Chat is in active development; the rest of the platform is planned.",
     updated: "October 2026",
     sections: [
       {
@@ -314,7 +318,7 @@ export const marketingPages: SitePage[] = [
     path: "/integrations",
     title: "Integrations | OraOne",
     eyebrow: "Integrations",
-    lead: "What you can connect today, and what is in development.",
+    lead: "What is in development and what is planned. Nothing here is a live integration unless it is labelled as available in the demo.",
     updated: "October 2026",
     sections: [
       {
@@ -667,16 +671,21 @@ export const marketingPages: SitePage[] = [
     path: "/status",
     title: "Status | OraOne",
     eyebrow: "Status",
-    lead: "The current state of OraOne.",
+    lead: "Development status for AI Chat, and what is not published yet.",
     updated: "October 2026",
     sections: [
       {
-        heading: "AI Chat",
+        heading: "Development status: AI Chat",
         body: [
           "AI Chat is in active development. The demo workspace and the widget can be tried. Live services are still being connected, so uptime history is not shown yet.",
         ],
       },
-      { heading: "Incidents", body: ["No incidents are recorded here."] },
+      {
+        heading: "Public incident history",
+        body: [
+          "A public incident log is not available yet. No uptime or incident data is published on this page.",
+        ],
+      },
     ],
   },
   {
@@ -719,19 +728,27 @@ export const marketingPages: SitePage[] = [
     path: "/about",
     title: "About | OraOne",
     eyebrow: "About",
-    lead: "OraOne helps businesses answer customers well, at any hour, from their own information.",
+    lead: "OraOne is being built to answer customer questions from your information, and to hand unanswered or complex enquiries to your team.",
     updated: "October 2026",
+    pullquote:
+      "Knowledge, conversations and leads, designed to stay connected so that answers and handoffs make sense.",
     sections: [
       {
-        heading: "What we are building",
+        heading: "Why we are building it",
         body: [
-          "Assistants that learn a business from its own documents, talk with customers in the channels they use, and hand every enquiry to the team with its details.",
+          "Customers ask the same questions at any hour, and good enquiries are lost when nobody is free to reply. The assistant is designed to answer from your documents, then hand unanswered or complex enquiries to your team with their details.",
+        ],
+      },
+      {
+        heading: "How we approach it",
+        body: [
+          "Each capability is labelled with its real status, so you always know what you can use today. Knowledge, conversations and leads are meant to stay connected, whatever the channel.",
         ],
       },
       {
         heading: "Where we are",
         body: [
-          "AI Chat is in active development. Other products are planned or a long-term vision, and each is labelled as such.",
+          "AI Chat is in active development and can be explored in the demo workspace. Other products are planned or a long-term vision, and each is labelled as such.",
         ],
       },
     ],
@@ -755,21 +772,21 @@ export const marketingPages: SitePage[] = [
     path: "/contact",
     title: "Contact | OraOne",
     eyebrow: "Contact",
-    lead: "Tell us what you need. We reply to business enquiries.",
+    lead: "Tell us what you need, and what you would like help with.",
     fields: ["name", "email", "company", "message"],
     messageLabel: "Your message",
-    submitLabel: "Review message",
+    submitLabel: "Review preview",
     notice: "Message delivery is not connected yet, so nothing is sent from this form.",
   },
   {
     kind: "form",
     path: "/demo",
-    title: "Book a demo | OraOne",
+    title: "Demo request preview | OraOne",
     eyebrow: "Demo",
-    lead: "Tell us what you would like to see. We will show AI Chat with your documents and website.",
+    lead: "Tell us what you would like to see in AI Chat, with your own documents and website in mind.",
     fields: ["name", "email", "company", "message"],
     messageLabel: "What would you like to see?",
-    submitLabel: "Review request",
+    submitLabel: "Review preview",
     notice: "Demo booking is not connected yet, so no request is sent from this form.",
   },
 ];

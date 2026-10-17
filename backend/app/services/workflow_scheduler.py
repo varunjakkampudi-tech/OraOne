@@ -35,7 +35,7 @@ from app.database.models.workflow import (
     WorkflowTrigger,
 )
 from app.database.session import AsyncSessionLocal, init_engine
-from app.services.workflow_engine import execute_run
+from app.services.workflow_engine import execute_run, resume_due_waits
 
 log = logging.getLogger("app.workflow.scheduler")
 
@@ -101,11 +101,47 @@ async def _loop() -> None:
     # Small initial delay so app startup completes first.
     await asyncio.sleep(10)
     while True:
-        try:
-            await _tick()
-        except Exception as exc:  # pragma: no cover - resilience
-            log.warning("scheduler tick failed: %s", exc)
+        # Each job has its own guard so one failing job does not stop the others.
+        for name, job in (
+            ("schedule", _tick),
+            ("event runs", _dispatch_event_runs),
+            ("waits", resume_due_waits),
+        ):
+            try:
+                await job()
+            except Exception as exc:  # pragma: no cover - resilience
+                log.warning("scheduler %s step failed: %s", name, exc)
         await asyncio.sleep(_POLL_SECONDS)
+
+
+_inflight: set[asyncio.Task] = set()
+
+
+async def _dispatch_event_runs() -> None:
+    """Start queued event-triggered runs (lead.created, message.received).
+
+    Each run claims itself atomically in execute_run, so a run started here
+    cannot also be started by a later tick.
+    """
+    Maker = _maker()
+    async with Maker() as session:  # type: ignore[misc]
+        run_ids = list(
+            (
+                await session.scalars(
+                    select(WorkflowRun.id)
+                    .where(
+                        WorkflowRun.status == RunStatus.queued,
+                        WorkflowRun.trigger == WorkflowTrigger.event,
+                    )
+                    .order_by(WorkflowRun.created_at)
+                    .limit(100)
+                )
+            ).all()
+        )
+    for run_id in run_ids:
+        task = asyncio.create_task(execute_run(run_id))
+        _inflight.add(task)
+        task.add_done_callback(_inflight.discard)
 
 
 async def _tick() -> None:

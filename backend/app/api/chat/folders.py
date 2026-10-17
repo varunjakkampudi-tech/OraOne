@@ -15,6 +15,8 @@ from app.database.models.conversation_folder import ConversationFolder
 from app.database.models.message import Message
 from app.database.session import get_db
 from app.middleware.org_context import OrgContext, get_current_organization
+from app.core.permissions import Permission
+from app.middleware.org_context import require_permission
 from app.schemas.chat import (
     FolderCreate,
     FolderOut,
@@ -70,7 +72,12 @@ async def list_folders(
     return [await _to_out(session, f) for f in rows]
 
 
-@folders_router.post("", response_model=FolderOut, status_code=status.HTTP_201_CREATED)
+@folders_router.post(
+    "",
+    response_model=FolderOut,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
+)
 async def create_folder(
     payload: FolderCreate,
     ctx: OrgContext = Depends(get_current_organization),
@@ -108,7 +115,11 @@ async def _load_folder(
     )
 
 
-@folders_router.put("/{folder_id}", response_model=FolderOut)
+@folders_router.put(
+    "/{folder_id}",
+    response_model=FolderOut,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
+)
 async def update_folder(
     folder_id: uuid.UUID,
     payload: FolderUpdate,
@@ -129,7 +140,11 @@ async def update_folder(
     return await _to_out(session, folder)
 
 
-@folders_router.delete("/{folder_id}", status_code=status.HTTP_204_NO_CONTENT)
+@folders_router.delete(
+    "/{folder_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
+)
 async def delete_folder(
     folder_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),

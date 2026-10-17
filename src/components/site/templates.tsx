@@ -1,6 +1,18 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Check, CircleCheck, Clock, Hammer, Sparkles, Waypoints } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  Check,
+  CircleCheck,
+  Clock,
+  Hammer,
+  MessageSquare,
+  Sparkles,
+  Users,
+  Waypoints,
+  Zap,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DOCS_TREE, STATUS_LABEL } from "@/content/site/navigation";
 import { PORTFOLIO } from "@/content/site/portfolio";
@@ -22,10 +34,10 @@ import type {
   UseCase,
 } from "@/content/site/types";
 import { SiteLayout } from "./SiteLayout";
-import { CONTAINER, SECTION_Y } from "./layout";
+import { CONTAINER, PRIMARY_CTA, SECTION_Y } from "./layout";
 import { capabilityIcon, industryIcon, productIcon, stepIcon } from "./icons";
 import { IconTile } from "./IconTile";
-import { HERO_IMAGE, SCREENS, solutionImage, industryImage, FEATURE_IMAGE } from "./images";
+import { SCREENS, solutionImage } from "./images";
 
 // One template per page kind. Every page uses the same container, spacing, type scale and
 // status labels, so the public site reads as one product.
@@ -89,9 +101,7 @@ function Section({
         {title && (
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">{title}</h2>
-            {lead && (
-              <p className="mt-3 text-[17px] leading-relaxed text-muted-foreground">{lead}</p>
-            )}
+            {lead && <p className="mt-3 text-[17px] leading-relaxed text-foreground/75">{lead}</p>}
           </div>
         )}
         <div className={title ? "mt-8" : ""}>{children}</div>
@@ -129,7 +139,7 @@ function FlowDiagram({ dark = false }: { dark?: boolean }) {
   const node = dark
     ? "border-white/15 bg-white/5 text-white"
     : "border-border bg-background text-foreground";
-  const muted = dark ? "text-slate-300" : "text-muted-foreground";
+  const muted = dark ? "text-slate-300" : "text-foreground/75";
   return (
     <figure
       role="img"
@@ -139,7 +149,7 @@ function FlowDiagram({ dark = false }: { dark?: boolean }) {
       <div className="grid gap-4">
         <div className={`rounded-xl border p-4 ${node}`}>
           <p className="font-semibold">Visitor asks a question</p>
-          <p className={`mt-1 text-[15px] ${muted}`}>On your website, at any hour</p>
+          <p className={`mt-1 text-base md:text-[15px] ${muted}`}>On your website, at any hour</p>
         </div>
         <div className="flex justify-center" aria-hidden="true">
           <div className={`h-6 w-px ${dark ? "bg-white/30" : "bg-slate-300"}`} />
@@ -148,18 +158,22 @@ function FlowDiagram({ dark = false }: { dark?: boolean }) {
           className={`rounded-xl border-2 p-4 ${dark ? "border-sky-400 bg-sky-400/10" : "border-primary bg-primary/5"}`}
         >
           <p className="font-semibold">OraOne assistant</p>
-          <p className={`mt-1 text-[15px] ${muted}`}>
+          <p className={`mt-1 text-base md:text-[15px] ${muted}`}>
             Answers from your documents and cites its sources
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className={`rounded-xl border p-4 ${node}`}>
             <p className="font-semibold">Answered</p>
-            <p className={`mt-1 text-[15px] ${muted}`}>The visitor gets a clear reply</p>
+            <p className={`mt-1 text-base md:text-[15px] ${muted}`}>
+              The visitor gets a clear reply
+            </p>
           </div>
           <div className={`rounded-xl border p-4 ${node}`}>
             <p className="font-semibold">Handed to your team</p>
-            <p className={`mt-1 text-[15px] ${muted}`}>Lead and history in the inbox</p>
+            <p className={`mt-1 text-base md:text-[15px] ${muted}`}>
+              Lead and history in the inbox
+            </p>
           </div>
         </div>
       </div>
@@ -192,6 +206,54 @@ function BrowserFrame({ src, alt }: { src: string; alt: string }) {
   );
 }
 
+/** A visitor conversation on a website, with example data. It shows the answer, its source and the saved lead. */
+function ChatDemo() {
+  return (
+    <figure
+      className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900 shadow-2xl shadow-black/50 ring-1 ring-white/5"
+      aria-label="Example visitor conversation on a clinic website"
+    >
+      <figcaption className="flex items-center justify-between border-b border-white/10 bg-slate-800/80 px-5 py-3 text-sm text-slate-300">
+        <span className="font-medium text-white">Clinic website chat</span>
+        <span className="text-xs text-slate-400">Example conversation</span>
+      </figcaption>
+      <div className="flex flex-col gap-4 p-5 text-base md:text-[15px] leading-relaxed">
+        <p className="ml-auto max-w-[80%] rounded-2xl rounded-br-sm bg-sky-500 px-4 py-2.5 text-white">
+          What are your opening hours on Saturday?
+        </p>
+        <div className="max-w-[88%]">
+          <p className="rounded-2xl rounded-bl-sm bg-white/10 px-4 py-2.5 text-slate-100">
+            We are open from 9am to 1pm on Saturdays.
+          </p>
+          <p className="mt-1.5 pl-1 text-xs text-slate-400">Source: clinic FAQ</p>
+        </div>
+        <p className="ml-auto max-w-[80%] rounded-2xl rounded-br-sm bg-sky-500 px-4 py-2.5 text-white">
+          Can I book a clean and check-up?
+        </p>
+        <div className="max-w-[88%]">
+          <p className="rounded-2xl rounded-bl-sm bg-white/10 px-4 py-2.5 text-slate-100">
+            I can take your name, phone number and a preferred time. The team confirms the booking.
+          </p>
+        </div>
+        <p className="ml-auto max-w-[80%] rounded-2xl rounded-br-sm bg-sky-500 px-4 py-2.5 text-white">
+          I am Sam. Call me on 555 0100 on Saturday morning.
+        </p>
+        <div className="max-w-[88%]">
+          <p className="rounded-2xl rounded-bl-sm bg-white/10 px-4 py-2.5 text-slate-100">
+            Thanks, Sam. The team will confirm your Saturday appointment.
+          </p>
+        </div>
+        <div className="mt-1 flex items-center justify-between gap-3 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm">
+          <span className="text-emerald-100">Lead saved to the inbox</span>
+          <span className="rounded-full bg-emerald-400/20 px-2.5 py-0.5 text-xs font-medium text-emerald-100">
+            New
+          </span>
+        </div>
+      </div>
+    </figure>
+  );
+}
+
 function Hero({
   eyebrow,
   title,
@@ -199,9 +261,9 @@ function Hero({
   primary,
   secondary,
   note,
-  image,
   screen,
   screenAlt,
+  visual,
 }: {
   eyebrow?: string;
   title: string;
@@ -209,35 +271,31 @@ function Hero({
   primary: SiteLink;
   secondary?: SiteLink | undefined;
   note?: string | undefined;
-  image: string;
   screen: string;
   screenAlt: string;
+  visual?: ReactNode;
 }) {
   return (
     <section className="relative isolate overflow-hidden bg-slate-950 text-white">
-      <img
-        src={image}
-        alt=""
+      <div
         aria-hidden="true"
-        className="absolute inset-0 -z-20 h-full w-full object-cover opacity-60"
-        loading="eager"
-        decoding="async"
+        className="absolute inset-0 -z-10 bg-[radial-gradient(60%_80%_at_85%_20%,rgba(56,189,248,0.22),transparent_70%),radial-gradient(50%_60%_at_10%_90%,rgba(21,93,252,0.25),transparent_70%)]"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/30"
+        className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950 via-slate-950/80 to-slate-950/40"
       />
       <div
         className={`${CONTAINER} grid items-center gap-12 py-16 md:py-20 lg:grid-cols-12 lg:py-24`}
       >
-        <div className="lg:col-span-6">
+        <div className="lg:col-span-5">
           {eyebrow && (
             <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-sm font-medium text-sky-200">
               <span className="size-1.5 rounded-full bg-sky-400" aria-hidden="true" />
               {eyebrow}
             </p>
           )}
-          <h1 className="mt-6 text-5xl font-bold leading-[1.05] tracking-tight text-balance md:text-6xl">
+          <h1 className="mt-6 text-5xl font-bold leading-[1.05] tracking-tight text-balance md:text-7xl">
             {title}
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-300 md:text-xl">{lead}</p>
@@ -263,10 +321,10 @@ function Hero({
               </Button>
             )}
           </div>
-          {note && <p className="mt-6 max-w-xl text-[15px] text-slate-400">{note}</p>}
+          {note && <p className="mt-6 max-w-xl text-base md:text-[15px] text-slate-400">{note}</p>}
         </div>
-        <div className="lg:col-span-6">
-          <BrowserFrame src={screen} alt={screenAlt} />
+        <div className="lg:col-span-7">
+          {visual ?? <BrowserFrame src={screen} alt={screenAlt} />}
         </div>
       </div>
     </section>
@@ -286,42 +344,130 @@ function CapabilityGrid({ items }: { items: Capability[] }) {
             <StatusBadge status={item.status} />
           </div>
           <h3 className="text-xl font-semibold">{item.title}</h3>
-          <p className="text-[17px] leading-relaxed text-muted-foreground">{item.text}</p>
+          <p className="text-[17px] leading-relaxed text-foreground/75">{item.text}</p>
         </li>
       ))}
     </ul>
   );
 }
 
-/** Alternating image and text rows for the features that have imagery. */
-function FeatureRows({ items }: { items: Capability[] }) {
-  return (
-    <div className="grid gap-16">
-      {items.map((item, index) => (
-        <div
-          key={item.title}
-          className={`grid items-center gap-10 lg:grid-cols-12 ${index % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""}`}
-        >
-          <div className="lg:col-span-6">
-            <img
-              src={FEATURE_IMAGE[item.title]}
-              alt=""
-              aria-hidden="true"
-              width={1024}
-              height={768}
-              loading="lazy"
-              decoding="async"
-              className="w-full rounded-2xl border border-border shadow-lg"
-            />
-          </div>
-          <div className="lg:col-span-5 lg:col-start-8">
-            <StatusBadge status={item.status} />
-            <h3 className="mt-4 text-3xl font-bold tracking-tight">{item.title}</h3>
-            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{item.text}</p>
+const FEATURE_TITLES = new Set([
+  "Website chat",
+  "Answers from your documents",
+  "Team inbox and leads",
+]);
+
+/** Compact, real-looking interface previews for the feature cards. Example data only. */
+function FeaturePreview({ title }: { title: string }) {
+  if (title === "Website chat") {
+    return (
+      <div className="flex h-full flex-col justify-between gap-4 p-5" aria-hidden="true">
+        <div className="space-y-3">
+          <p className="text-sm font-semibold text-foreground">Clinic website chat</p>
+          <p className="max-w-[85%] rounded-2xl rounded-bl-sm bg-muted px-3 py-2 text-sm text-foreground">
+            Do you open on Saturdays?
+          </p>
+          <div className="max-w-[90%]">
+            <p className="rounded-2xl rounded-bl-sm bg-primary px-3 py-2 text-sm text-primary-foreground">
+              Yes, from 9am to 1pm.
+            </p>
+            <p className="mt-1 pl-1 text-xs text-foreground/70">Source: Clinic information.pdf</p>
           </div>
         </div>
+        <div className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5">
+          <span className="flex-1 text-sm text-foreground/70">Type a message</span>
+          <span className="size-6 rounded-full bg-primary" />
+        </div>
+      </div>
+    );
+  }
+  if (title === "Answers from your documents") {
+    const files = [
+      ["Clinic information.pdf", "Indexed"],
+      ["Treatments and prices.docx", "Indexed"],
+      ["FAQ.txt", "Processing"],
+    ];
+    return (
+      <div className="flex h-full flex-col gap-3 p-5" aria-hidden="true">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold text-foreground">Knowledge</p>
+          <span className="rounded-md border border-border px-2 py-0.5 text-xs text-foreground/70">
+            3 files
+          </span>
+        </div>
+        <ul className="grid gap-2">
+          {files.map(([name, state]) => (
+            <li
+              key={name}
+              className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm"
+            >
+              <span className="truncate text-foreground">{name}</span>
+              <span className="shrink-0 text-xs text-foreground/70">{state}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-auto rounded-lg bg-muted px-3 py-2 text-xs text-foreground/85">
+          Answers cite the file they came from.
+        </p>
+      </div>
+    );
+  }
+  if (title === "Team inbox and leads") {
+    const rows = [
+      ["Sam", "Lead: Saturday morning", "New", "10:24"],
+      ["Priya", "Do you accept new patients?", "Answered", "Yesterday"],
+      ["Alex", "Opening hours on Saturdays", "Answered", "Yesterday"],
+      ["Jordan", "Is there parking at the clinic?", "Answered", "Mon"],
+    ];
+    return (
+      <div className="flex h-full flex-col gap-3 p-5" aria-hidden="true">
+        <p className="text-sm font-semibold text-foreground">Inbox</p>
+        <ul className="grid gap-2">
+          {rows.map(([name, text, status, time], index) => (
+            <li
+              key={name}
+              className={`flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm ${index === 0 ? "bg-primary/5" : ""}`}
+            >
+              <span className="min-w-0">
+                <span className="block font-medium text-foreground">{name}</span>
+                <span className="block truncate text-foreground/75">{text}</span>
+              </span>
+              <span className="flex shrink-0 flex-col items-end gap-1 text-xs text-foreground/70">
+                <span
+                  className={`rounded-full px-2 py-0.5 ${status === "New" ? "bg-emerald-100 text-emerald-900" : "bg-muted text-foreground"}`}
+                >
+                  {status}
+                </span>
+                {time}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+  return null;
+}
+
+function FeatureRows({ items }: { items: Capability[] }) {
+  return (
+    <ul className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 lg:grid-cols-3">
+      {items.map((item) => (
+        <li
+          key={item.title}
+          className="flex w-[82%] shrink-0 snap-start flex-col gap-5 md:w-auto md:shrink md:last:col-span-2 lg:last:col-span-1"
+        >
+          <div className="overflow-hidden rounded-2xl border border-border bg-background shadow-lg lg:aspect-[4/3]">
+            <FeaturePreview title={item.title} />
+          </div>
+          <div>
+            <StatusBadge status={item.status} />
+            <h3 className="mt-3 text-2xl font-bold tracking-tight">{item.title}</h3>
+            <p className="mt-2 text-[17px] leading-relaxed text-foreground/80">{item.text}</p>
+          </div>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
 
@@ -331,16 +477,16 @@ function Steps({ steps }: { steps: Step[] }) {
       {steps.map((step, index) => (
         <li
           key={step.title}
-          className="flex flex-col gap-4 rounded-xl border border-border bg-background p-6 shadow-sm"
+          className="relative flex flex-col gap-4 rounded-xl border border-border bg-background p-6 shadow-sm"
         >
           <div className="flex items-center gap-3">
             <IconTile icon={stepIcon(index)} tone="muted" />
-            <span className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            <span className="text-sm font-semibold uppercase tracking-wide text-foreground/75">
               Step {index + 1}
             </span>
           </div>
           <h3 className="text-xl font-semibold">{step.title}</h3>
-          <p className="text-[17px] leading-relaxed text-muted-foreground">{step.text}</p>
+          <p className="text-[17px] leading-relaxed text-foreground/75">{step.text}</p>
         </li>
       ))}
     </ol>
@@ -351,36 +497,21 @@ function UseCaseGrid({ items }: { items: UseCase[] }) {
   return (
     <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => {
-        const image = industryImage(item.industry);
         return (
           <li
             key={item.industry}
-            className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-sm transition-shadow hover:shadow-lg"
+            className="flex flex-col rounded-2xl border border-border bg-background p-6 shadow-sm md:last:col-span-2 lg:last:col-span-1"
           >
-            {image && (
-              <div className="aspect-[4/3] overflow-hidden bg-slate-950">
-                <img
-                  src={image}
-                  alt=""
-                  aria-hidden="true"
-                  width={1024}
-                  height={768}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                />
-              </div>
-            )}
-            <div className="flex flex-1 flex-col gap-3 p-6">
+            <div className="flex flex-1 flex-col gap-3">
               <p className="text-sm font-semibold uppercase tracking-wide text-primary">
                 {item.industry}
               </p>
               <h3 className="text-xl font-semibold leading-snug">{item.problem}</h3>
-              <p className="text-[17px] leading-relaxed text-muted-foreground">
+              <p className="text-[17px] leading-relaxed text-foreground/75">
                 <span className="font-medium text-foreground">The assistant </span>
                 {item.assistant}
               </p>
-              <p className="text-[17px] leading-relaxed text-muted-foreground">
+              <p className="text-[17px] leading-relaxed text-foreground/75">
                 <span className="font-medium text-foreground">Your team </span>
                 {item.team}
               </p>
@@ -394,19 +525,19 @@ function UseCaseGrid({ items }: { items: UseCase[] }) {
 
 function Faqs({ items }: { items: Faq[] }) {
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-3 md:grid-cols-2 md:items-start">
       {items.map((item) => (
         <details key={item.q} className="group rounded-xl border border-border px-5 py-4">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-semibold [&::-webkit-details-marker]:hidden">
             {item.q}
             <span
               aria-hidden="true"
-              className="text-2xl leading-none text-muted-foreground transition-transform group-open:rotate-45"
+              className="text-2xl leading-none text-foreground/75 transition-transform group-open:rotate-45"
             >
               +
             </span>
           </summary>
-          <p className="mt-3 text-[17px] leading-relaxed text-muted-foreground">{item.a}</p>
+          <p className="mt-3 text-[17px] leading-relaxed text-foreground/75">{item.a}</p>
         </details>
       ))}
     </div>
@@ -414,11 +545,13 @@ function Faqs({ items }: { items: Faq[] }) {
 }
 
 /** The complete OraOne family, one row per product, with an honest status on each. */
-export function ProductFamily({ id = "products" }: { id?: string }) {
+export function ProductFamily({ id = "products", dark = false }: { id?: string; dark?: boolean }) {
+  const muted = dark ? "text-slate-300" : "text-foreground/75";
+  const box = dark ? "border-white/10 bg-white/5" : "border-border bg-background";
   const groups: { title: string; note: string; items: typeof PORTFOLIO }[] = [
     {
-      title: "Available now",
-      note: "Part of the platform today.",
+      title: "In active development",
+      note: "Usable in the demo today. Not yet generally available.",
       items: PORTFOLIO.filter((p) => p.status === "active"),
     },
     {
@@ -433,16 +566,22 @@ export function ProductFamily({ id = "products" }: { id?: string }) {
     },
   ];
   return (
-    <section id={id} className={`scroll-mt-20 ${SECTION_Y}`} aria-labelledby={`${id}-heading`}>
+    <section
+      id={id}
+      className={`scroll-mt-20 ${SECTION_Y} ${dark ? "bg-slate-950 text-white" : ""}`}
+      aria-labelledby={`${id}-heading`}
+    >
       <div className={CONTAINER}>
         <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-wider text-primary">
+          <p
+            className={`text-sm font-semibold uppercase tracking-wider ${dark ? "text-sky-300" : "text-primary"}`}
+          >
             One platform
           </p>
           <h2 id={`${id}-heading`} className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
             One AI for every conversation
           </h2>
-          <p className="mt-3 text-[17px] leading-relaxed text-muted-foreground">
+          <p className={`mt-3 text-[17px] leading-relaxed ${muted}`}>
             Every capability works with the same account, knowledge and inbox. Anything not yet
             available is labelled as such.
           </p>
@@ -451,12 +590,12 @@ export function ProductFamily({ id = "products" }: { id?: string }) {
           {groups.map((group) => (
             <div key={group.title}>
               <h3 className="text-lg font-semibold">{group.title}</h3>
-              <p className="text-[15px] text-muted-foreground">{group.note}</p>
-              <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <p className={`text-base md:text-[15px] ${muted}`}>{group.note}</p>
+              <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {group.items.map((product) => (
                   <li
                     key={product.id}
-                    className="flex items-center gap-4 rounded-xl border border-border bg-background p-4"
+                    className={`flex items-center gap-3 rounded-xl border p-3 sm:gap-4 sm:p-4 ${box}`}
                   >
                     <IconTile
                       icon={productIcon(product.id)}
@@ -486,82 +625,122 @@ export function ProductFamily({ id = "products" }: { id?: string }) {
 
 function CtaBand({ title, text, primary }: { title: string; text: string; primary: SiteLink }) {
   return (
-    <section className="pt-12 md:pt-16 pb-0">
+    <section className="py-12 md:py-16">
       <div className={CONTAINER}>
-        <div className="flex flex-col items-start justify-between gap-6 rounded-2xl bg-slate-950 p-8 text-white md:flex-row md:items-center md:p-12">
+        <div className="flex flex-col items-start justify-between gap-6 rounded-2xl bg-slate-950 p-8 text-white lg:flex-row lg:items-center md:p-12">
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">{title}</h2>
             <p className="mt-3 text-lg text-slate-300">{text}</p>
           </div>
-          <Button
-            asChild
-            size="lg"
-            className="h-12 bg-white px-6 text-base text-slate-950 hover:bg-slate-100"
-          >
-            <Link to={primary.to}>
-              {primary.label}
-              <ArrowRight aria-hidden="true" />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button
+              asChild
+              size="lg"
+              className="h-12 bg-white px-6 text-base text-slate-950 hover:bg-slate-100"
+            >
+              <Link to={primary.to}>
+                {primary.label}
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            </Button>
+            <Link
+              to="/contact"
+              className="inline-flex min-h-11 items-center whitespace-nowrap px-2 text-base font-medium text-slate-200 underline-offset-4 hover:text-white hover:underline"
+            >
+              Talk to the team
             </Link>
-          </Button>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-/** Real screens from the product and the widget demo. Video is opt-in: nothing loads until it is played. */
+/** The team view of the same booking conversation shown in the hero: the thread and the captured lead. Example data only. */
+function InboxPreview() {
+  const rows = [
+    { q: "Can I book a clean and check-up?", status: "Lead", time: "08:52", active: true },
+    {
+      q: "What are your opening hours on Saturday?",
+      status: "Answered",
+      time: "09:14",
+      active: false,
+    },
+    { q: "Do you accept new patients?", status: "Answered", time: "Yesterday", active: false },
+  ];
+  return (
+    <figure
+      className="overflow-hidden rounded-2xl border border-border bg-background shadow-xl shadow-slate-900/10"
+      aria-label="Example team inbox showing the booking conversation and the captured lead"
+    >
+      <div className="grid md:grid-cols-2 lg:grid-cols-12">
+        <ul className="border-b border-border md:border-b-0 md:border-r lg:col-span-4">
+          <li className="px-5 py-4 text-sm font-semibold text-foreground">Conversations</li>
+          {rows.map((row) => (
+            <li
+              key={row.q}
+              className={`border-t border-border px-5 py-4 ${row.active ? "bg-primary/5" : ""}`}
+            >
+              <p className="text-base md:text-[15px] font-medium text-foreground">{row.q}</p>
+              <div className="mt-1 flex items-center justify-between text-xs text-foreground/70">
+                <span>{row.status}</span>
+                <span>{row.time}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="hidden flex-col gap-3 p-6 lg:col-span-5 lg:flex">
+          <p className="text-sm font-semibold text-foreground">Clinic website chat</p>
+          <p className="max-w-[85%] rounded-2xl rounded-bl-sm bg-muted px-4 py-2.5 text-base md:text-[15px] text-foreground">
+            Can I book a clean and check-up?
+          </p>
+          <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-base md:text-[15px] text-primary-foreground">
+            I can take your name, phone number and a preferred time.
+          </p>
+          <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-sm bg-muted px-4 py-2.5 text-base md:text-[15px] text-foreground">
+            I am Sam. Call me on 555 0100 on Saturday morning.
+          </p>
+          <p className="max-w-[85%] rounded-2xl rounded-bl-sm bg-primary px-4 py-2.5 text-base md:text-[15px] text-primary-foreground">
+            Thanks, Sam. The team will confirm your Saturday appointment.
+          </p>
+        </div>
+        <aside className="border-t border-border p-6 md:border-l md:border-t-0 lg:col-span-3">
+          <p className="text-sm font-semibold text-foreground">Captured lead</p>
+          <dl className="mt-4 grid gap-3 text-sm">
+            <div>
+              <dt className="text-foreground/70">Name</dt>
+              <dd className="font-medium text-foreground">Sam</dd>
+            </div>
+            <div>
+              <dt className="text-foreground/70">Phone</dt>
+              <dd className="font-medium text-foreground">555 0100</dd>
+            </div>
+            <div>
+              <dt className="text-foreground/70">Preferred time</dt>
+              <dd className="font-medium text-foreground">Saturday morning</dd>
+            </div>
+            <div>
+              <dt className="text-foreground/70">Status</dt>
+              <dd className="mt-1">
+                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-900">
+                  Awaiting team confirmation
+                </span>
+              </dd>
+            </div>
+          </dl>
+        </aside>
+      </div>
+    </figure>
+  );
+}
+
 function Showcase() {
   return (
     <Section
-      title="See it in the product"
-      lead="Real screens from AI Chat, with example information. The video shows a visitor asking questions on a website."
+      title="From the chat to the team inbox"
+      lead="Conversations from your website are kept in one inbox, with the leads they capture. Example data from the demo workspace."
     >
-      <div className="grid gap-8 lg:grid-cols-12">
-        <figure className="lg:col-span-7">
-          <img
-            src="/media/studio-inbox.jpg"
-            alt="The team inbox listing each conversation with its assistant and time"
-            width={1280}
-            height={800}
-            loading="lazy"
-            decoding="async"
-            className="w-full rounded-xl border border-border"
-          />
-          <figcaption className="mt-3 text-[15px] text-muted-foreground">
-            Team inbox: every conversation, with its history.
-          </figcaption>
-        </figure>
-        <figure className="lg:col-span-5">
-          <img
-            src="/media/studio-install.jpg"
-            alt="The install screen showing the script tag to copy into a website"
-            width={1280}
-            height={800}
-            loading="lazy"
-            decoding="async"
-            className="w-full rounded-xl border border-border"
-          />
-          <figcaption className="mt-3 text-[15px] text-muted-foreground">
-            Install: one line of code for your site.
-          </figcaption>
-        </figure>
-        <figure className="lg:col-span-12">
-          <video
-            controls
-            preload="none"
-            playsInline
-            poster="/media/studio-inbox.jpg"
-            aria-label="Widget demo: a visitor asks about opening hours and booking on an example clinic website"
-            className="w-full rounded-xl border border-border bg-slate-950"
-          >
-            <source src="/media/widget-demo.webm" type="video/webm" />
-          </video>
-          <figcaption className="mt-3 text-[15px] text-muted-foreground">
-            A visitor chats on a website. Answers come from the example information in the knowledge
-            base.
-          </figcaption>
-        </figure>
-      </div>
+      <InboxPreview />
     </Section>
   );
 }
@@ -576,40 +755,78 @@ function LandingTemplate({ page }: { page: LandingPage }) {
         primary={page.hero.primary}
         secondary={page.hero.secondary}
         note={page.hero.note}
-        image={HERO_IMAGE[page.path] ?? `${"/media/generated"}/hero-product.webp`}
         screen={SCREENS.inbox}
         screenAlt="The OraOne team inbox with conversations and their history"
+        visual={<ChatDemo />}
       />
+      <Section
+        title="Better customer conversations."
+        lead="OraOne answers customer questions from your content and hands complex or unanswered enquiries to your team, in one connected conversation."
+        muted
+      >
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            {
+              icon: Zap,
+              title: "Faster responses",
+              text: "Customers get answers from your content as soon as they ask.",
+            },
+            {
+              icon: BookOpen,
+              title: "Grounded in your content",
+              text: "Answers come from your website, documents and resources.",
+            },
+            {
+              icon: Users,
+              title: "Seamless handoffs",
+              text: "Complex or unanswered enquiries pass to your team with the details.",
+            },
+            {
+              icon: MessageSquare,
+              title: "One shared conversation flow",
+              text: "The full context stays with the person who replies.",
+            },
+          ].map((item) => (
+            <li
+              key={item.title}
+              className="flex flex-col gap-3 rounded-xl border border-border bg-background p-6 shadow-sm"
+            >
+              <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <item.icon className="size-5" aria-hidden="true" />
+              </span>
+              <h3 className="text-lg font-semibold">{item.title}</h3>
+              <p className="text-[16px] leading-relaxed text-foreground/75">{item.text}</p>
+            </li>
+          ))}
+        </ul>
+      </Section>
       {page.showcase && <Showcase />}
       {page.steps.length > 0 && (
         <Section
           title="How it works"
           lead="Three steps. A developer is only needed if you add the chat with code."
+          muted
         >
           <Steps steps={page.steps} />
         </Section>
       )}
-      {page.capabilities.some((c) => FEATURE_IMAGE[c.title]) && (
+      {page.capabilities.some((c) => FEATURE_TITLES.has(c.title)) && (
         <Section title="Built for the way customers ask" lead="Each feature shows its real status.">
-          <FeatureRows items={page.capabilities.filter((c) => FEATURE_IMAGE[c.title])} />
-        </Section>
-      )}
-      {page.capabilities.some((c) => !FEATURE_IMAGE[c.title]) && (
-        <Section title="Also in AI Chat" muted>
-          <CapabilityGrid items={page.capabilities.filter((c) => !FEATURE_IMAGE[c.title])} />
+          <FeatureRows items={page.capabilities.filter((c) => FEATURE_TITLES.has(c.title))} />
         </Section>
       )}
       {page.useCases.length > 0 && (
         <Section
           title="Where it helps"
           lead="Illustrative examples of how a business might use an assistant. They describe the intended workflow, not real customers or results."
+          muted
         >
-          <UseCaseGrid items={page.useCases} />
+          <UseCaseGrid items={page.useCases.slice(0, 3)} />
         </Section>
       )}
-      <ProductFamily />
+      <ProductFamily dark />
       {page.faqs.length > 0 && (
-        <Section title="Questions" muted>
+        <Section title="Common questions" muted>
           <div className="max-w-3xl">
             <Faqs items={page.faqs} />
           </div>
@@ -629,9 +846,6 @@ function ProductTemplate({ page }: { page: ProductPage }) {
         lead={page.hero.lead}
         primary={page.hero.primary}
         secondary={page.hero.secondary}
-        image={
-          solutionImage(page.path) ?? HERO_IMAGE[page.path] ?? "/media/generated/hero-product.webp"
-        }
         screen={SCREENS.assistant}
         screenAlt="The OraOne assistant editor with instructions and knowledge"
       />
@@ -687,7 +901,7 @@ function PricingTemplate({ page }: { page: PricingPage }) {
             <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">
               Free access during development
             </h1>
-            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{page.lead}</p>
+            <p className="mt-4 text-lg leading-relaxed text-foreground/75">{page.lead}</p>
           </div>
           <div className="mt-8 grid gap-4 lg:max-w-3xl">
             {page.plans.map((plan) => (
@@ -696,7 +910,7 @@ function PricingTemplate({ page }: { page: PricingPage }) {
                   <h2 className="text-2xl font-semibold">{plan.name}</h2>
                   <p className="text-4xl font-bold">{plan.price}</p>
                 </div>
-                <p className="mt-2 text-[17px] text-muted-foreground">{plan.summary}</p>
+                <p className="mt-2 text-[17px] text-foreground/75">{plan.summary}</p>
                 <ul className="mt-6 grid gap-3 sm:grid-cols-2">
                   {plan.items.map((item) => (
                     <li key={item} className="flex items-start gap-3 text-[17px]">
@@ -711,7 +925,7 @@ function PricingTemplate({ page }: { page: PricingPage }) {
               </article>
             ))}
           </div>
-          <ul className="mt-8 grid gap-2 text-[17px] text-muted-foreground lg:max-w-3xl">
+          <ul className="mt-8 grid gap-2 text-[17px] text-foreground/75 lg:max-w-3xl">
             {page.notes.map((note) => (
               <li key={note}>{note}</li>
             ))}
@@ -729,21 +943,26 @@ function PricingTemplate({ page }: { page: PricingPage }) {
 
 function DocsTemplate({ page }: { page: DocsPage }) {
   return (
-    <div className={`${CONTAINER} grid gap-10 py-12 lg:grid-cols-[14rem_minmax(0,1fr)] lg:py-16`}>
-      <aside aria-label="Documentation" className="lg:sticky lg:top-24 lg:self-start">
-        <nav className="grid gap-6">
+    <div
+      className={`${CONTAINER} grid grid-cols-1 gap-10 py-12 lg:grid-cols-[14rem_minmax(0,1fr)] lg:py-16`}
+    >
+      <aside
+        aria-label="Documentation"
+        className="min-w-0 max-w-full overflow-hidden lg:sticky lg:top-24 lg:self-start lg:overflow-visible"
+      >
+        <nav className="grid gap-6 max-lg:-mx-1 max-lg:flex max-lg:gap-6 max-lg:overflow-x-auto max-lg:pb-2">
           {DOCS_TREE.map((group) => (
             <div key={group.group}>
-              <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="text-sm font-semibold uppercase tracking-wide text-foreground/75 max-lg:hidden">
                 {group.group}
               </p>
-              <ul className="mt-2 grid gap-1">
+              <ul className="mt-2 grid gap-1 max-lg:mt-0 max-lg:flex max-lg:shrink-0 max-lg:gap-2">
                 {group.links.map((item) => (
                   <li key={item.to}>
                     <Link
                       to={item.to}
                       aria-current={item.to === page.path ? "page" : undefined}
-                      className={`block rounded-lg px-3 py-2 text-[15px] ${item.to === page.path ? "bg-accent font-semibold text-accent-foreground" : "hover:bg-muted"}`}
+                      className={`block rounded-lg px-3 py-2 text-base md:text-[15px] ${item.to === page.path ? "bg-accent font-semibold text-accent-foreground" : "hover:bg-muted"}`}
                     >
                       {item.label}
                     </Link>
@@ -759,10 +978,17 @@ function DocsTemplate({ page }: { page: DocsPage }) {
         <h1 className="mt-3 text-4xl font-bold tracking-tight md:text-5xl">
           {page.title.split(" | ")[0]}
         </h1>
-        <p className="mt-4 text-xl leading-relaxed text-muted-foreground">{page.lead}</p>
+        <p
+          role="note"
+          className="mt-6 rounded-xl border border-border bg-muted/50 p-4 text-[16px] text-foreground/85"
+        >
+          Documentation status: AI Chat is in active development. These guides describe the intended
+          setup. Steps are not yet verified for production use.
+        </p>
+        <p className="mt-4 text-xl leading-relaxed text-foreground/75">{page.lead}</p>
         <div className="mt-10 grid gap-10">
           {page.sections.map((section, index) => (
-            <section key={section.heading} aria-labelledby={`sec-${index}`}>
+            <section key={section.heading} aria-labelledby={`sec-${index}`} className="min-w-0">
               <h2 id={`sec-${index}`} className="text-2xl font-semibold">
                 {section.heading}
               </h2>
@@ -772,10 +998,10 @@ function DocsTemplate({ page }: { page: DocsPage }) {
                 </p>
               ))}
               {section.list && (
-                <ul className="mt-4 grid gap-2">
+                <ul className="mt-4 grid min-w-0 gap-2">
                   {section.list.map((item) => (
-                    <li key={item}>
-                      <code className="block overflow-x-auto whitespace-pre rounded-lg bg-slate-950 px-4 py-3 text-[15px] leading-relaxed text-slate-100">
+                    <li key={item} className="min-w-0">
+                      <code className="block overflow-x-auto whitespace-pre rounded-lg bg-slate-950 px-4 py-3 text-base md:text-[15px] leading-relaxed text-slate-100">
                         {item}
                       </code>
                     </li>
@@ -796,7 +1022,7 @@ function DocsTemplate({ page }: { page: DocsPage }) {
         )}
         {page.next && (
           <div className="mt-10 border-t border-border pt-8">
-            <p className="text-sm text-muted-foreground">Next</p>
+            <p className="text-sm text-foreground/75">Next</p>
             <Link
               to={page.next.to}
               className="mt-2 inline-flex items-center gap-2 text-xl font-semibold text-primary hover:underline"
@@ -813,43 +1039,89 @@ function DocsTemplate({ page }: { page: DocsPage }) {
 
 function ArticleTemplate({ page }: { page: ArticlePage }) {
   return (
-    <div className={`${CONTAINER} py-12 md:py-16`}>
-      <div className="max-w-3xl">
-        <Eyebrow>{page.eyebrow}</Eyebrow>
-        <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">
-          {page.title.split(" | ")[0]}
-        </h1>
-        <p className="mt-4 text-xl leading-relaxed text-muted-foreground">{page.lead}</p>
-        <p className="mt-3 text-sm text-muted-foreground">Last updated {page.updated}</p>
-        {page.draft && (
-          <p
-            role="note"
-            className="mt-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-[16px] text-amber-950"
-          >
-            Draft for review. This text is not final until it has been reviewed and approved.
-          </p>
-        )}
-        <div className="mt-10 grid gap-10">
-          {page.sections.map((section) => (
-            <section key={section.heading}>
-              <h2 className="text-2xl font-semibold">{section.heading}</h2>
-              {section.body.map((p) => (
-                <p key={p} className="mt-3 text-[17px] leading-relaxed">
-                  {p}
-                </p>
-              ))}
-              {section.list && (
-                <ul className="mt-4 grid list-disc gap-2 pl-6 text-[17px] leading-relaxed">
-                  {section.list.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          ))}
+    <>
+      <div className="border-b border-border bg-muted/40">
+        <div className={`${CONTAINER} py-12 md:py-16`}>
+          <div className="max-w-3xl">
+            <Eyebrow>{page.eyebrow}</Eyebrow>
+            <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">
+              {page.title.split(" | ")[0]}
+            </h1>
+            <p className="mt-5 text-xl leading-relaxed text-foreground/80">{page.lead}</p>
+            <p className="mt-4 text-sm text-foreground/75">
+              {page.draft ? "Draft. Last revised " : "Page last reviewed "}
+              {page.updated}
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+      <div className={`${CONTAINER} grid gap-12 py-12 md:py-16 lg:grid-cols-12`}>
+        <div className="lg:col-span-8">
+          {page.draft && (
+            <p
+              role="note"
+              className="mb-10 rounded-xl border border-amber-300 bg-amber-50 p-4 text-[16px] text-amber-950"
+            >
+              Draft for review. This text is not final until it has been reviewed and approved.
+            </p>
+          )}
+          {page.pullquote && (
+            <p className="mb-12 border-l-4 border-primary pl-6 text-xl font-semibold leading-snug tracking-tight text-foreground md:text-3xl">
+              {page.pullquote}
+            </p>
+          )}
+          <div className="grid gap-12">
+            {page.sections.map((section) => (
+              <section key={section.heading}>
+                <h2 className="text-2xl font-semibold">{section.heading}</h2>
+                {section.body.map((p) => (
+                  <p key={p} className="mt-3 text-[17px] leading-relaxed text-foreground/85">
+                    {p}
+                  </p>
+                ))}
+                {section.list && (
+                  <ul className="mt-4 grid list-disc gap-2 pl-6 text-[17px] leading-relaxed">
+                    {section.list.map((item) => (
+                      <li key={item} className="min-w-0">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            ))}
+          </div>
+        </div>
+        <aside className="lg:col-span-4">
+          <div className="grid gap-6 rounded-2xl border border-border bg-background p-6 lg:sticky lg:top-24">
+            {page.draft ? (
+              <div>
+                <p className="text-xl font-semibold text-foreground">Questions about this page</p>
+                <p className="mt-2 text-[16px] leading-relaxed text-foreground/85">
+                  Contact us through the contact page with your question.
+                </p>
+                <div className="mt-4">
+                  <SecondaryLink link={{ label: "Contact us", to: "/contact" }} />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p className="text-xl font-semibold text-foreground">
+                  Explore what we are building
+                </p>
+                <p className="mt-2 text-[16px] leading-relaxed text-foreground/85">
+                  AI Chat is in active development. You can try the demo workspace today.
+                </p>
+                <div className="mt-4 flex flex-col gap-3">
+                  <PrimaryLink link={PRIMARY_CTA} />
+                  <SecondaryLink link={{ label: "Talk to the team", to: "/contact" }} />
+                </div>
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
+    </>
   );
 }
 
@@ -862,7 +1134,7 @@ function ListTemplate({ page }: { page: ListPage }) {
         <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">
           {page.title.split(" | ")[0]}
         </h1>
-        <p className="mt-4 text-xl leading-relaxed text-muted-foreground">{page.lead}</p>
+        <p className="mt-4 text-xl leading-relaxed text-foreground/75">{page.lead}</p>
       </div>
       <div className="mt-10 grid gap-10">
         {groups.map((status) => {
@@ -877,7 +1149,7 @@ function ListTemplate({ page }: { page: ListPage }) {
                 {items.map((item) => (
                   <li key={item.id} className="grid gap-1 p-5 md:grid-cols-[16rem_1fr] md:gap-6">
                     <span className="text-lg font-semibold">{item.title}</span>
-                    <span className="text-[17px] text-muted-foreground">{item.text}</span>
+                    <span className="text-[17px] text-foreground/75">{item.text}</span>
                   </li>
                 ))}
               </ul>
@@ -899,7 +1171,16 @@ function HubTemplate({ page }: { page: HubPage }) {
             <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">
               {page.title.split(" | ")[0]}
             </h1>
-            <p className="mt-4 text-xl leading-relaxed text-muted-foreground">{page.lead}</p>
+            <p className="mt-4 text-xl leading-relaxed text-foreground/75">{page.lead}</p>
+            {page.path.startsWith("/docs") && (
+              <p
+                role="note"
+                className="mt-6 rounded-xl border border-border bg-muted/50 p-4 text-[16px] text-foreground/85"
+              >
+                Documentation status: AI Chat is in active development. These guides describe the
+                intended setup. Steps are not yet verified for production use.
+              </p>
+            )}
           </div>
           <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {page.cards.map((card) => (
@@ -925,7 +1206,7 @@ function HubTemplate({ page }: { page: HubPage }) {
                   <span className="flex flex-1 flex-col gap-3 p-6">
                     {card.status && <StatusBadge status={card.status} />}
                     <span className="text-xl font-semibold">{card.title}</span>
-                    <span className="text-[17px] leading-relaxed text-muted-foreground">
+                    <span className="text-[17px] leading-relaxed text-foreground/75">
                       {card.text}
                     </span>
                     <span className="mt-auto inline-flex items-center gap-2 pt-2 font-medium text-primary">
@@ -942,7 +1223,7 @@ function HubTemplate({ page }: { page: HubPage }) {
           </ul>
         </div>
       </section>
-      <ProductFamily id="family" />
+      {page.path === "/products" && <ProductFamily id="family" />}
     </>
   );
 }
@@ -962,7 +1243,7 @@ function FormTemplate({ page }: { page: FormPage }) {
         <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">
           {page.title.split(" | ")[0]}
         </h1>
-        <p className="mt-4 text-xl leading-relaxed text-muted-foreground">{page.lead}</p>
+        <p className="mt-4 text-xl leading-relaxed text-foreground/75">{page.lead}</p>
         <p
           role="note"
           className="mt-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-[16px] text-amber-950"
@@ -1000,7 +1281,7 @@ function FormTemplate({ page }: { page: FormPage }) {
             <div key={field} className="grid gap-2">
               <label htmlFor={id} className="text-[16px] font-medium">
                 {label[field]}
-                {required && <span className="text-muted-foreground"> (required)</span>}
+                {required && <span className="text-foreground/75"> (required)</span>}
               </label>
               {field === "message" ? (
                 <textarea {...common} rows={5} />

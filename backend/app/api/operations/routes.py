@@ -96,7 +96,10 @@ async def security_meta(
     }
 
 
-@router.post("/api/security/scan")
+@router.post(
+    "/api/security/scan",
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
+)
 async def security_scan(
     payload: ScanRequest,
     request: Request,
@@ -137,7 +140,10 @@ async def security_scan(
     return result
 
 
-@router.post("/api/security/mask")
+@router.post(
+    "/api/security/mask",
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
+)
 async def security_mask(
     payload: ScanRequest,
     ctx: OrgContext = Depends(get_current_organization),

@@ -36,6 +36,8 @@ from app.database.models.conversation_folder import ConversationFolder
 from app.database.models.message import Message, MessageSender
 from app.database.session import get_db
 from app.middleware.org_context import OrgContext, get_current_organization
+from app.core.permissions import Permission
+from app.middleware.org_context import require_permission
 from app.providers import AIProviderError, estimate_tokens
 from app.providers.base import ChatMessage
 from app.schemas.chat import (
@@ -105,7 +107,10 @@ def _audit(
 
 
 @router.post(
-    "", response_model=ChatConversationOut, status_code=status.HTTP_201_CREATED
+    "",
+    response_model=ChatConversationOut,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
 )
 async def create_conversation(
     payload: ConversationCreate,
@@ -212,7 +217,11 @@ async def get_conversation(
     return conv
 
 
-@router.put("/{conversation_id}", response_model=ChatConversationOut)
+@router.put(
+    "/{conversation_id}",
+    response_model=ChatConversationOut,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
+)
 async def rename_conversation(
     conversation_id: uuid.UUID,
     payload: ConversationRename,
@@ -233,6 +242,7 @@ async def rename_conversation(
     "/{conversation_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
 )
 async def delete_conversation(
     conversation_id: uuid.UUID,
@@ -248,7 +258,11 @@ async def delete_conversation(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.patch("/{conversation_id}", response_model=ChatConversationOut)
+@router.patch(
+    "/{conversation_id}",
+    response_model=ChatConversationOut,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
+)
 async def patch_conversation(
     conversation_id: uuid.UUID,
     payload: ConversationPatch,
@@ -386,7 +400,11 @@ def _share_url(token: str) -> str:
     return f"/share/{token}"
 
 
-@router.post("/{conversation_id}/share", response_model=ShareResult)
+@router.post(
+    "/{conversation_id}/share",
+    response_model=ShareResult,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
+)
 async def enable_share(
     conversation_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),
@@ -409,7 +427,11 @@ async def enable_share(
     )
 
 
-@router.delete("/{conversation_id}/share", response_model=ShareResult)
+@router.delete(
+    "/{conversation_id}/share",
+    response_model=ShareResult,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
+)
 async def disable_share(
     conversation_id: uuid.UUID,
     ctx: OrgContext = Depends(get_current_organization),
@@ -485,7 +507,11 @@ async def suggested_questions(
 # ─────────────────────────── regenerate ────────────────────────
 
 
-@router.post("/{conversation_id}/regenerate", response_model=SendMessageResult)
+@router.post(
+    "/{conversation_id}/regenerate",
+    response_model=SendMessageResult,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
+)
 async def regenerate_last(
     conversation_id: uuid.UUID,
     use_knowledge: bool = Query(default=True),
@@ -571,6 +597,8 @@ async def regenerate_last(
         usage=ai.usage.as_dict(),
         context_used=len(retrieved),
         sources=sources,
+        # A model reply was produced; provider failures raise instead of falling back.
+        generated=True,
     )
 
 
@@ -630,6 +658,7 @@ def _provider_http_error(e: AIProviderError) -> HTTPException:
     "/{conversation_id}/messages",
     response_model=SendMessageResult,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
 )
 async def send_message(
     conversation_id: uuid.UUID,
@@ -736,6 +765,8 @@ async def send_message(
         usage=ai.usage.as_dict(),
         context_used=len(retrieved),
         sources=sources,
+        # A model reply was produced; provider failures raise instead of falling back.
+        generated=True,
     )
 
 
@@ -746,7 +777,10 @@ def _sse(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {json.dumps(data, default=str)}\n\n"
 
 
-@router.post("/{conversation_id}/stream")
+@router.post(
+    "/{conversation_id}/stream",
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
+)
 async def stream_message(
     conversation_id: uuid.UUID,
     payload: MessageSend,
@@ -848,12 +882,19 @@ async def stream_message(
                         "usage": assistant_msg.metadata_["usage"],
                         "context_used": len(retrieved),
                         "sources": sources,
+                        "generated": True,
                     },
                 )
             else:
                 yield _sse(
                     "done",
-                    {"content": "", "usage": {}, "context_used": 0, "sources": []},
+                    {
+                        "content": "",
+                        "usage": {},
+                        "context_used": 0,
+                        "sources": [],
+                        "generated": False,
+                    },
                 )
 
     return StreamingResponse(

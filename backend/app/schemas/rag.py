@@ -38,6 +38,10 @@ class RagQueryResponse(BaseModel):
     related_questions: list[str] = Field(default_factory=list)
     context_chunks: int = 0
     grounded: bool = False
+    generated: bool = Field(
+        default=False,
+        description="False when the answer is a fallback (extractive or refusal), not model output.",
+    )
     model: Optional[str] = None
 
 

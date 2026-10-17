@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Bot, Loader2, LogOut, Plus, Send } from "lucide-react";
+import { ArrowLeft, Bot, Loader2, LogOut, Menu, Plus, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { ApiError, messageOf } from "@/lib/api/client";
 import { getMe, logout } from "@/lib/api/auth";
 import {
@@ -17,12 +25,16 @@ import {
   type Agent,
   type Project,
 } from "@/lib/api/studio";
+import type { ChannelPageKey } from "@/lib/studio-os";
 import { Brand } from "./shell";
-import { Notice } from "./studio-ui";
+import { EmptyState, ErrorNotice, Notice, PageHeader } from "./studio-ui";
 
 type Workspace = { id: string; name: string; website: string | null };
 type Assistant = { id: string; name: string; purpose: string; instructions: string };
-type ChatTurn = { role: "user" | "assistant"; content: string };
+type ChatTurn = { role: "user" | "assistant"; content: string; generated?: boolean };
+
+const FALLBACK_REPLY_NOTICE =
+  "This reply was a fallback because the AI model is not available right now.";
 
 // Assistant purpose is stored as the agent description so no backend field is invented.
 const PURPOSES = ["Customer support", "Lead qualification", "Customer onboarding", "Other"];
@@ -40,27 +52,114 @@ const toAssistant = (a: Agent): Assistant => ({
   instructions: a.system_prompt ?? "",
 });
 
-// The main sections of the studio. Secondary screens live under "More" so the navigation stays short.
-const STUDIO_LINKS = [
-  { to: "/studio", label: "Assistants" },
-  { to: "/studio/inbox", label: "Inbox" },
-  { to: "/studio/leads", label: "Leads" },
-  { to: "/studio/knowledge", label: "Knowledge" },
-] as const;
+// Studio navigation, in four groups. Every route the studio had stays reachable; only the grouping
+// and labels changed. Marketing has no screen yet, so it is shown but cannot be opened.
+type NavItem =
+  | { label: string; to: StudioNavPath }
+  | { label: string; channel: ChannelPageKey }
+  | { label: string; to: null };
 
-const MORE_LINKS = [
-  { to: "/studio/integrations", label: "Integrations" },
-  { to: "/studio/webhooks", label: "Webhooks" },
-  { to: "/studio/team", label: "Team" },
-  { to: "/studio/analytics", label: "Analytics" },
-  { to: "/studio/billing", label: "Billing" },
-  { to: "/studio/api-keys", label: "API keys" },
-  { to: "/studio/account", label: "Account" },
-] as const;
+type StudioNavPath =
+  | "/studio/inbox"
+  | "/studio/calls"
+  | "/studio/marketing"
+  | "/studio/leads"
+  | "/studio/workflows"
+  | "/studio/analytics"
+  | "/studio/assistants"
+  | "/studio/knowledge"
+  | "/studio/marketplace"
+  | "/studio/integrations"
+  | "/studio/webhooks"
+  | "/studio/api-keys"
+  | "/studio/team"
+  | "/studio/billing"
+  | "/studio/account";
+
+const STUDIO_NAV_GROUPS: { title: string; items: NavItem[] }[] = [
+  {
+    title: "Conversations",
+    items: [
+      { label: "Inbox", to: "/studio/inbox" },
+      { label: "Calls", to: "/studio/calls" },
+    ],
+  },
+  {
+    title: "Channels",
+    items: [
+      { label: "Website chat", channel: "website-chat" },
+      { label: "WhatsApp", channel: "whatsapp" },
+      { label: "Instagram", channel: "instagram" },
+      { label: "Voice", channel: "voice" },
+    ],
+  },
+  {
+    title: "Grow",
+    items: [
+      { label: "Leads", to: "/studio/leads" },
+      { label: "Marketing", to: "/studio/marketing" },
+      { label: "Workflows", to: "/studio/workflows" },
+      { label: "Analytics", to: "/studio/analytics" },
+    ],
+  },
+  {
+    title: "Build",
+    items: [
+      { label: "AI Studio", to: "/studio/assistants" },
+      { label: "Knowledge", to: "/studio/knowledge" },
+      { label: "Marketplace", to: "/studio/marketplace" },
+      { label: "Integrations", to: "/studio/integrations" },
+      { label: "Webhooks", to: "/studio/webhooks" },
+      { label: "API keys", to: "/studio/api-keys" },
+      { label: "Team", to: "/studio/team" },
+      { label: "Billing", to: "/studio/billing" },
+      { label: "Settings", to: "/studio/account" },
+    ],
+  },
+];
+
+const NAV_ACTIVE = {
+  "aria-current": "page",
+  className: "bg-accent text-accent-foreground",
+} as const;
+
+function StudioNavItem({ item, onNavigate }: { item: NavItem; onNavigate?: () => void }) {
+  const className = "inline-block rounded-md px-3 py-2 hover:bg-muted";
+  if ("channel" in item) {
+    return (
+      <Link
+        to="/studio/channels/$channel"
+        params={{ channel: item.channel }}
+        onClick={onNavigate}
+        activeProps={NAV_ACTIVE}
+        className={className}
+      >
+        {item.label}
+      </Link>
+    );
+  }
+  if (item.to === null) {
+    return (
+      <span
+        aria-disabled="true"
+        title="Not connected yet"
+        className="inline-block rounded-md px-3 py-2 text-muted-foreground"
+      >
+        {item.label}
+      </span>
+    );
+  }
+  return (
+    <Link to={item.to} onClick={onNavigate} activeProps={NAV_ACTIVE} className={className}>
+      {item.label}
+    </Link>
+  );
+}
 
 export function StudioFrame({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     getMe()
       .then((me) => setEmail(me.email))
@@ -69,12 +168,12 @@ export function StudioFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh bg-background text-foreground">
       <header className="border-b border-border bg-background">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3">
-          <Link to="/studio" aria-label="My OraOne assistants" className="shrink-0">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
+          <Link to="/studio" aria-label="OraOne OS home" className="shrink-0">
             <Brand />
           </Link>
-          <div className="flex min-w-0 items-center gap-3 text-sm">
-            <span className="hidden truncate text-muted-foreground md:inline">{email}</span>
+          <div className="flex min-w-0 items-center gap-2 text-sm sm:gap-3">
+            <span className="hidden min-w-0 truncate text-muted-foreground lg:inline">{email}</span>
             <Button
               variant="outline"
               size="sm"
@@ -91,45 +190,61 @@ export function StudioFrame({ children }: { children: React.ReactNode }) {
         </div>
         <nav
           aria-label="Studio sections"
-          className="mx-auto flex max-w-5xl items-center gap-1 overflow-x-auto px-3 pb-2 text-sm font-medium [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="mx-auto max-w-5xl px-3 pb-2 text-sm font-medium"
         >
-          {STUDIO_LINKS.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              activeOptions={{ exact: item.to === "/studio" }}
-              activeProps={{
-                "aria-current": "page",
-                className: "bg-accent text-accent-foreground",
-              }}
-              className="shrink-0 rounded-md px-3 py-2 hover:bg-muted"
-            >
-              {item.label}
-            </Link>
-          ))}
-          <details className="relative shrink-0">
-            <summary
-              className="cursor-pointer list-none rounded-md px-3 py-2 hover:bg-muted"
-              aria-label="More studio sections"
-            >
-              More
-            </summary>
-            <div className="absolute left-0 z-20 mt-2 grid w-56 gap-1 rounded-lg border border-border bg-background p-2 shadow-lg">
-              {MORE_LINKS.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  activeProps={{ "aria-current": "page", className: "bg-accent" }}
-                  className="rounded-md px-3 py-2 hover:bg-muted"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </details>
+          <div className="hidden gap-x-6 gap-y-3 md:grid">
+            {STUDIO_NAV_GROUPS.map((group) => (
+              <section
+                key={group.title}
+                aria-label={group.title}
+                className="grid grid-cols-[7.5rem_1fr] items-baseline gap-2"
+              >
+                <p className="px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                  {group.title}
+                </p>
+                <ul className="flex flex-wrap gap-1">
+                  {group.items.map((item) => (
+                    <li key={item.label}>
+                      <StudioNavItem item={item} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+          <div className="flex justify-end md:hidden">
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Menu />
+                  Menu
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left">
+                <SheetHeader>
+                  <SheetTitle>Studio sections</SheetTitle>
+                  <SheetDescription>Choose where to go next.</SheetDescription>
+                </SheetHeader>
+                <nav aria-label="All studio sections" className="mt-4 grid gap-5">
+                  {STUDIO_NAV_GROUPS.map((group) => (
+                    <section key={group.title} aria-label={group.title} className="grid gap-1">
+                      <p className="px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                        {group.title}
+                      </p>
+                      {group.items.map((item) => (
+                        <div key={item.label}>
+                          <StudioNavItem item={item} onNavigate={() => setMenuOpen(false)} />
+                        </div>
+                      ))}
+                    </section>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
         </nav>
       </header>
-      <main className="mx-auto max-w-5xl px-5 py-8 text-base">{children}</main>
+      <main className="mx-auto w-full max-w-5xl px-4 py-8 text-base sm:px-5">{children}</main>
     </div>
   );
 }
@@ -145,6 +260,7 @@ export function StudioHome() {
   const [aName, setAName] = useState("");
   const [aPurpose, setAPurpose] = useState(PURPOSES[0]!);
   const [busy, setBusy] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const navigate = useNavigate();
 
   const load = useCallback(async () => {
@@ -160,7 +276,7 @@ export function StudioHome() {
   }, []);
   useEffect(() => {
     load();
-  }, [load]);
+  }, [load, reloadKey]);
 
   useEffect(() => {
     if (!selected) {
@@ -178,7 +294,12 @@ export function StudioHome() {
     return () => {
       cancelled = true;
     };
-  }, [selected]);
+  }, [selected, reloadKey]);
+
+  const retry = () => {
+    setError("");
+    setReloadKey((k) => k + 1);
+  };
 
   async function createWorkspace(e: React.FormEvent) {
     e.preventDefault();
@@ -225,23 +346,24 @@ export function StudioHome() {
   }
 
   const current = workspaces?.find((w) => w.id === selected);
+  // "Live" only when the workspace and assistant queries both returned data.
+  const live = workspaces !== null && workspaces.length > 0 && error === "";
   return (
     <StudioFrame>
-      <span className="marketing-eyebrow">LIVE · YOUR ACCOUNT</span>
-      <h1 className="mt-2 text-3xl font-semibold">Your assistants</h1>
-      <p className="mt-2 text-muted-foreground">
-        Create an assistant, teach it from your content and add it to your website. Everything is
-        saved to your account.
-      </p>
+      <PageHeader
+        title="Your assistants"
+        description="Create an assistant, teach it from your content and add it to your website. Everything is saved to your account."
+        live={live}
+      />
       {error && (
         <div className="mt-4">
-          <Notice kind="error">{error}</Notice>
+          <ErrorNotice message={`${error} Check your connection and try again.`} onRetry={retry} />
         </div>
       )}
       {workspaces === null ? (
-        <p className="mt-8 flex items-center gap-2">
-          <Loader2 className="animate-spin" />
-          Loading…
+        <p className="mt-8 flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          Loading your assistants…
         </p>
       ) : (
         <div className="mt-8 grid gap-8">
@@ -252,6 +374,7 @@ export function StudioHome() {
               </h2>
               {current && (
                 <Button
+                  className="w-full sm:w-auto"
                   onClick={() => setShowNewAssistant((open) => !open)}
                   aria-expanded={showNewAssistant}
                   aria-controls="new-assistant-form"
@@ -262,11 +385,24 @@ export function StudioHome() {
               )}
             </div>
             {!current ? (
-              <p className="text-muted-foreground">Setting up your workspace…</p>
+              <EmptyState title="No workspace yet.">
+                Open Workspaces below and add one. It holds your assistants and their leads.
+              </EmptyState>
             ) : assistants.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-border p-6 text-muted-foreground">
-                You don&apos;t have an assistant yet. Create one to start answering customers.
-              </p>
+              <EmptyState
+                title="No assistants yet."
+                action={
+                  <Button
+                    onClick={() => setShowNewAssistant(true)}
+                    aria-controls="new-assistant-form"
+                  >
+                    <Plus />
+                    Create your first assistant
+                  </Button>
+                }
+              >
+                Create one to start answering visitors on your website.
+              </EmptyState>
             ) : (
               <ul className="grid gap-3 md:grid-cols-2">
                 {assistants.map((a) => (
@@ -463,7 +599,14 @@ export function StudioAssistant({ id }: { id: string }) {
         setConversationId(convId);
       }
       const result = await sendMessage(convId, text);
-      setMessages((m) => [...m, { role: "assistant", content: result.assistant_message.content }]);
+      setMessages((m) => [
+        ...m,
+        {
+          role: "assistant",
+          content: result.assistant_message.content,
+          generated: result.generated !== false,
+        },
+      ]);
     } catch (err) {
       setChatError(messageOf(err, "Something went wrong. Please try again."));
     } finally {
@@ -487,22 +630,24 @@ export function StudioAssistant({ id }: { id: string }) {
           {loadError || "This assistant doesn't exist or you don't have access to it."}
         </Notice>
         <Button asChild variant="outline" className="mt-4">
-          <Link to="/studio">
+          <Link to="/studio/assistants">
             <ArrowLeft />
-            Back to workspaces
+            Back to assistants
           </Link>
         </Button>
       </StudioFrame>
     );
   return (
     <StudioFrame>
-      <Link to="/studio" className="inline-flex items-center gap-1 text-sm">
-        <ArrowLeft className="size-4" />
-        Workspaces
+      <Link to="/studio/assistants" className="inline-flex items-center gap-1 text-sm">
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        Back to assistants
       </Link>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-semibold">{assistant.name}</h1>
-        <Button asChild>
+        <h1 className="min-w-0 break-words text-2xl font-semibold tracking-tight sm:text-3xl">
+          {assistant.name}
+        </h1>
+        <Button asChild className="w-full sm:w-auto">
           <Link to="/studio/assistants/$id/install" params={{ id }}>
             Add to website
           </Link>
@@ -561,12 +706,7 @@ export function StudioAssistant({ id }: { id: string }) {
           className="flex min-h-[28rem] flex-col rounded-xl border border-border bg-card p-5"
           aria-label="Playground"
         >
-          <h2 className="text-xl font-semibold">
-            Playground{" "}
-            <span className="ml-2 rounded-full bg-accent px-2 py-0.5 text-sm font-medium">
-              Live AI
-            </span>
-          </h2>
+          <h2 className="text-xl font-semibold">Playground</h2>
           <p className="text-sm text-muted-foreground">
             Uses your saved configuration. Save changes before testing.
           </p>
@@ -580,6 +720,9 @@ export function StudioAssistant({ id }: { id: string }) {
                 className={`max-w-[85%] whitespace-pre-wrap rounded-lg px-3 py-2 ${m.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "bg-muted"}`}
               >
                 {m.content}
+                {m.generated === false && (
+                  <p className="mt-1 text-xs text-muted-foreground">{FALLBACK_REPLY_NOTICE}</p>
+                )}
               </div>
             ))}
             {thinking && (

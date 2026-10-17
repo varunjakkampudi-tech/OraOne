@@ -44,6 +44,8 @@ from app.middleware.org_context import (
     get_current_organization,
     require_role,
 )
+from app.core.permissions import Permission
+from app.middleware.org_context import require_permission
 from app.middleware.project_context import ProjectContext, get_current_project
 from app.services import usage_service
 from app.schemas.v2 import (
@@ -190,6 +192,7 @@ async def list_conversations(
     "/conversations",
     response_model=ConversationOut,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
 )
 async def create_conversation(
     payload: ConversationIn,
@@ -273,6 +276,7 @@ async def list_messages(
     "/conversations/{conversation_id}/messages",
     response_model=MessageOut,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_permission(Permission.CHAT_USE))],
 )
 async def create_message(
     conversation_id: uuid.UUID,

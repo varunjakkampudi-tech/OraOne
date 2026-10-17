@@ -14,7 +14,10 @@ Categories
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from dataclasses import dataclass, field
+from typing import Any, Mapping, Optional
+
+from app.database.models.workflow import StepType, WorkflowTrigger
 
 CATEGORIES = [
     {"value": "agent_template", "label": "Agent Templates"},
@@ -260,3 +263,166 @@ def list_listings(
 
 def get_listing(slug: str) -> Optional[dict[str, Any]]:
     return _BY_SLUG.get(slug)
+
+
+# ─────────────────────────── install gating ──────────────────────────────────
+# The workflow engine is the source of truth for what a blueprint may declare.
+SUPPORTED_WORKFLOW_TRIGGERS: frozenset[str] = frozenset(
+    t.value for t in WorkflowTrigger
+)
+SUPPORTED_WORKFLOW_STEPS: frozenset[str] = frozenset(t.value for t in StepType)
+
+REQ_SATISFIED = "satisfied"
+REQ_REQUIRES_INTEGRATION = "requires_integration"
+REQ_UNAVAILABLE = "unavailable"
+REQ_UNSUPPORTED = "unsupported"
+
+# provider -> (display label, setup status from app.connectors.registry)
+IntegrationStates = Mapping[str, tuple[str, str]]
+
+
+@dataclass(frozen=True)
+class Requirement:
+    kind: str  # "integration" | "workflow"
+    key: str
+    label: str
+    status: str  # satisfied | requires_integration | unavailable | unsupported
+    message: str
+    blocking: bool
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "kind": self.kind,
+            "key": self.key,
+            "label": self.label,
+            "status": self.status,
+            "message": self.message,
+            "blocking": self.blocking,
+        }
+
+
+@dataclass(frozen=True)
+class Evaluation:
+    installable: bool
+    requirements: list[Requirement] = field(default_factory=list)
+    # Only a supported workflow blueprint is materialised as a workflow.
+    creates_workflow: bool = False
+
+    @property
+    def blocking_messages(self) -> list[str]:
+        return [r.message for r in self.requirements if r.blocking]
+
+
+def integration_requirement(
+    provider: str, states: IntegrationStates, *, blocking: bool
+) -> Requirement:
+    label, setup = states.get(provider, (provider.replace("_", " ").title(), "planned"))
+    if setup == "connected":
+        return Requirement(
+            "integration",
+            provider,
+            label,
+            REQ_SATISFIED,
+            f"{label} is connected.",
+            blocking,
+        )
+    if setup == "not_connected":
+        return Requirement(
+            "integration",
+            provider,
+            label,
+            REQ_REQUIRES_INTEGRATION,
+            f"Requires {label}. Connect it on the Integrations page first.",
+            blocking,
+        )
+    if setup == "requires_account_setup":
+        return Requirement(
+            "integration",
+            provider,
+            label,
+            REQ_REQUIRES_INTEGRATION,
+            f"Requires {label}. An administrator must set up its OAuth app before it can be connected.",
+            blocking,
+        )
+    return Requirement(
+        "integration",
+        provider,
+        label,
+        REQ_UNAVAILABLE,
+        f"Requires {label}, which is not available yet.",
+        blocking,
+    )
+
+
+def workflow_requirements(
+    workflow: Mapping[str, Any], *, blocking: bool
+) -> list[Requirement]:
+    reqs: list[Requirement] = []
+    trigger = str(workflow.get("trigger") or "")
+    if trigger not in SUPPORTED_WORKFLOW_TRIGGERS:
+        reqs.append(
+            Requirement(
+                "workflow",
+                f"trigger:{trigger}",
+                f"Trigger '{trigger}'",
+                REQ_UNSUPPORTED,
+                f"The workflow engine does not support the '{trigger}' trigger yet.",
+                blocking,
+            )
+        )
+    for step in workflow.get("steps") or []:
+        if step not in SUPPORTED_WORKFLOW_STEPS:
+            reqs.append(
+                Requirement(
+                    "workflow",
+                    f"step:{step}",
+                    f"Step '{step}'",
+                    REQ_UNSUPPORTED,
+                    f"The workflow engine does not support the '{step}' step yet.",
+                    blocking,
+                )
+            )
+    if not reqs:
+        reqs.append(
+            Requirement(
+                "workflow",
+                "engine",
+                "Workflow engine",
+                REQ_SATISFIED,
+                "Every trigger and step is supported by the workflow engine.",
+                blocking,
+            )
+        )
+    return reqs
+
+
+def evaluate_listing(item: Mapping[str, Any], states: IntegrationStates) -> Evaluation:
+    """Decide whether a listing may be installed and what it still needs.
+
+    * ``integration``: installable only once the provider is actually connected.
+    * ``workflow``: installable only when the engine supports every trigger and step;
+      the install then creates a draft workflow (never an active one).
+    * ``agent_template``: the agent itself always installs. Unsupported automation and
+      unavailable suggested integrations are reported as non-blocking requirements so
+      they are never dropped silently.
+    """
+    category = item.get("category")
+    blueprint = item.get("blueprint") or {}
+
+    if category == "integration":
+        req = integration_requirement(
+            blueprint.get("provider", ""), states, blocking=True
+        )
+        return Evaluation(installable=req.status == REQ_SATISFIED, requirements=[req])
+
+    if category == "workflow":
+        reqs = workflow_requirements(blueprint, blocking=True)
+        ok = all(r.status == REQ_SATISFIED for r in reqs)
+        return Evaluation(installable=ok, requirements=reqs, creates_workflow=ok)
+
+    reqs = [
+        integration_requirement(p, states, blocking=False)
+        for p in blueprint.get("suggested_integrations") or []
+    ]
+    reqs += workflow_requirements(blueprint.get("workflow") or {}, blocking=False)
+    return Evaluation(installable=True, requirements=reqs)

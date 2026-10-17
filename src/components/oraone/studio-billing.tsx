@@ -8,6 +8,7 @@ import {
   type UsageSnapshot,
 } from "@/lib/api/billing";
 import { messageOf } from "@/lib/api/client";
+import { ProductGuide } from "./product-guide";
 import { Loading, Notice } from "./studio-ui";
 import { when } from "@/lib/studio-helpers";
 import { StudioFrame } from "./studio";
@@ -47,16 +48,28 @@ export function BillingPage() {
     getSubscription,
     "Couldn't load your subscription.",
   );
-  const usage = useSection<UsageSnapshot>(getUsage, "Couldn't load your usage.");
-  const plans = useSection<Plan[]>(async () => (await listPlans()).items, "Couldn't load plans.");
+  const usage = useSection<UsageSnapshot>(async () => {
+    const snapshot = await getUsage();
+    return { ...snapshot, metrics: Array.isArray(snapshot.metrics) ? snapshot.metrics : [] };
+  }, "Couldn't load your usage.");
+  const plans = useSection<Plan[]>(async () => {
+    const list = await listPlans();
+    return Array.isArray(list.items) ? list.items : [];
+  }, "Couldn't load plans.");
 
   const current = subscription.data;
 
   return (
     <StudioFrame>
-      <span className="marketing-eyebrow">LIVE · BILLING</span>
-      <h1 className="mt-2 text-3xl font-semibold">Billing</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Billing</h1>
       <p className="mt-2 text-muted-foreground">Your plan, subscription and usage this period.</p>
+      <ProductGuide
+        whatItDoes="Shows your current plan, subscription status, and usage for this billing period. Nothing on this screen changes your plan or charges you."
+        needs={[
+          "Nothing to set up here. This screen reads your current subscription and usage.",
+          "Plan changes and invoices are not available in the studio yet.",
+        ]}
+      />
 
       <section className="mt-8" aria-labelledby="subscription-heading">
         <h2 id="subscription-heading" className="text-xl font-semibold">
@@ -69,7 +82,7 @@ export function BillingPage() {
             <dl className="grid gap-3 rounded-lg border border-border bg-card p-4 text-sm sm:grid-cols-2">
               <div>
                 <dt className="text-muted-foreground">Plan</dt>
-                <dd className="font-medium">{current.plan.name}</dd>
+                <dd className="font-medium">{current.plan?.name ?? "Not available"}</dd>
               </div>
               <div>
                 <dt className="text-muted-foreground">Status</dt>

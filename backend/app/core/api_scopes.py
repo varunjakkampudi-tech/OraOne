@@ -85,10 +85,6 @@ API_SCOPES: dict[str, dict] = {
 ALL_SCOPES = tuple(API_SCOPES.keys())
 
 
-def is_valid_scope(scope: str) -> bool:
-    return scope in API_SCOPES
-
-
 def normalize_scopes(scopes: list[str]) -> list[str]:
     """Drop unknown/duplicate scopes, preserving registry order."""
     requested = {s for s in scopes if s in API_SCOPES}

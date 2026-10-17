@@ -24,17 +24,19 @@ from app.database.session import get_db
 from app.middleware.org_context import OrgContext, require_permission
 from app.schemas.branding import BrandingUpdate, BrandingView, PublicBranding
 from app.services import branding_service, storage
+from app.services.upload_limits import read_capped
 from app.services.audit import audit
 
 router = APIRouter(tags=["branding"])
 
-# Uploaded brand assets: small images only.
+# Uploaded brand assets: small raster images only. SVG is refused: it is
+# active markup (scripts, external references) and is served back from our
+# origin, so it cannot be made safe by content checks alone.
 _MAX_ASSET_BYTES = 2 * 1024 * 1024  # 2 MB
 _ALLOWED_IMAGE_TYPES = {
     "image/png": "png",
     "image/jpeg": "jpg",
     "image/jpg": "jpg",
-    "image/svg+xml": "svg",
     "image/webp": "webp",
     "image/gif": "gif",
 }
@@ -102,17 +104,14 @@ async def _upload_brand_asset(
     if not ext:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="Upload a PNG, JPG, SVG, WEBP or GIF image.",
+            detail="Upload a PNG, JPG, WEBP or GIF image.",
         )
-    body = await file.read()
+    body = await read_capped(
+        file, _MAX_ASSET_BYTES, detail="Image must be 2 MB or smaller."
+    )
     if len(body) == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Empty file."
-        )
-    if len(body) > _MAX_ASSET_BYTES:
-        raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail="Image must be 2 MB or smaller.",
         )
 
     key = f"org/{ctx.organization_id}/branding/{uuid.uuid4().hex}__{field}.{ext}"

@@ -1,15 +1,5 @@
 import { useEffect, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { LoaderCircle } from "lucide-react";
-
-export function BusyIndicator({ label = "Loading" }: { label?: string }) {
-  return (
-    <span className="busy-indicator" role="status">
-      <LoaderCircle aria-hidden="true" />
-      <span>{label}</span>
-    </span>
-  );
-}
 
 export function NavigationProgress() {
   // Render nothing on the server and first client pass so hydration matches the SSR markup.

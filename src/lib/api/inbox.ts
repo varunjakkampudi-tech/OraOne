@@ -6,6 +6,8 @@ import { apiRequest } from "./client";
 export type ConversationSummary = {
   id: string;
   agent_id: string;
+  /** Optional: the channel the conversation came from (e.g. "chat", "whatsapp"). Missing means website. */
+  channel?: string | null;
   title: string | null;
   status: string;
   created_at: string;

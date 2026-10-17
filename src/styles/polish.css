@@ -148,6 +148,29 @@ body {
   line-height: 1.5;
   white-space: normal;
 }
+/* Shared availability tones used by StatusBadge (labels come from STATUS_LABEL). */
+.status-pill.is-demo {
+  color: var(--foreground);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.status-pill.is-active {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+.status-pill.is-planned {
+  color: var(--muted-foreground);
+  background: var(--secondary);
+}
+.sample-badge {
+  margin-bottom: 10px;
+}
+.dashboard-notice {
+  margin-bottom: 18px;
+}
+.metric-card .sample-badge {
+  align-self: flex-start;
+}
 .admin-sidebar nav a {
   font-size: 14px;
   min-height: 44px;

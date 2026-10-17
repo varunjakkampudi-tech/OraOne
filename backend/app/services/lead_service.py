@@ -14,6 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.lead import Lead, LeadStatus, LeadTemperature
+from app.services import workflow_triggers
 
 
 # Intent keywords that signal buying interest → boost the score.
@@ -134,6 +135,7 @@ async def create_lead(
     )
     session.add(lead)
     await session.flush()
+    await workflow_triggers.fire_lead_created(session, lead)
     return lead
 
 

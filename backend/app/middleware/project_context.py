@@ -28,6 +28,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.project import Project, ProjectStatus
 from app.database.session import get_db
+from app.middleware.access_log import request_route_label
 from app.middleware.org_context import OrgContext, get_current_organization
 
 log = logging.getLogger("app.project_context")
@@ -133,7 +134,7 @@ async def get_current_project(
         pctx.organization_id,
         pctx.project_id,
         pctx.is_default_project,
-        request.url.path,
+        request_route_label(request),
     )
     return pctx
 

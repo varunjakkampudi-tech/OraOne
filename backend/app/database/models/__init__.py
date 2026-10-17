@@ -132,6 +132,8 @@ from app.database.models.operations import (
     DeploymentStatus,
 )
 from app.database.models.lead import Lead, LeadStatus, LeadTemperature
+from app.database.models.call_campaign import CallAttempt, CallCampaign
+from app.database.models.do_not_contact import ContactScope, ContactSource, DoNotContact
 from app.database.models.visitor_profile import VisitorProfile
 from app.database.models.feature_request import (
     FeatureRequest,
@@ -139,12 +141,14 @@ from app.database.models.feature_request import (
     FeatureRequestStatus,
 )
 from app.database.models.agent_channel import AgentChannel, ChannelType, ChannelStatus
+from app.database.models.channel_inbound_receipt import ChannelInboundReceipt
 from app.database.models.marketplace import (
     MarketplaceInstallation,
     InstallStatus,
 )
 from app.database.models.agent_prompt_version import AgentPromptVersion
 from app.database.models.marketplace_review import MarketplaceReview
+from app.database.models.marketing import MarketingCampaign, MarketingRecipient
 from app.database.models.product import (
     Product,
     ProductStatus,
@@ -169,6 +173,8 @@ __all__ = [
     "AgentConfig",
     "AgentPromptVersion",
     "MarketplaceReview",
+    "MarketingCampaign",
+    "MarketingRecipient",
     "Conversation",
     "ConversationChannel",
     "ConversationStatus",
@@ -278,6 +284,12 @@ __all__ = [
     "DeploymentStatus",
     # Leads (CRM)
     "Lead",
+    "CallCampaign",
+    "CallAttempt",
+    # Do-not-contact list (organization-wide suppression)
+    "DoNotContact",
+    "ContactScope",
+    "ContactSource",
     "LeadStatus",
     "LeadTemperature",
     # Unified cross-channel visitor identity
@@ -288,6 +300,7 @@ __all__ = [
     "FeatureRequestStatus",
     # Agent delivery channels (Website Chat, Widget, WhatsApp, SMS, API)
     "AgentChannel",
+    "ChannelInboundReceipt",
     "ChannelType",
     "ChannelStatus",
     "MarketplaceInstallation",

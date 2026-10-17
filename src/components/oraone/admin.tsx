@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Activity,
@@ -6,7 +6,6 @@ import {
   ArrowUpRight,
   Building2,
   ChartNoAxesCombined,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   CreditCard,
@@ -27,7 +26,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Brand } from "./shell";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { products } from "@/lib/oraone";
+import "./admin.css";
 
 const sections = [
   { name: "Overview", path: "/admin", icon: Layers, group: "PLATFORM" },
@@ -47,50 +58,90 @@ const sections = [
   { name: "Entitlements", path: "/admin/entitlements", icon: KeyRound, group: "CONTROL" },
   { name: "Security", path: "/admin/security", icon: ShieldCheck, group: "CONTROL" },
   { name: "Settings", path: "/admin/settings", icon: Settings, group: "CONTROL" },
+  { name: "Configuration", path: "/admin/config", icon: SlidersHorizontal, group: "CONTROL" },
 ];
-const tableDefinitions: Record<string, { columns: string[]; text: string; filters: string[] }> = {
+
+type TableDefinition = {
+  columns: string[];
+  summary: string;
+  text: string;
+  filterLabel: string;
+  filters: string[];
+};
+
+// A loaded row. cells line up with the table columns; cells[0] is the identifier and
+// status (when present) is matched against the active filter option.
+type AdminRecord = { id: string; cells: string[]; status?: string };
+
+const tableDefinitions: Record<string, TableDefinition> = {
   users: {
     columns: ["User", "Platform role", "Account status", "Organizations", "Last activity"],
+    summary: "Who can sign in and which organizations they belong to.",
     text: "User records require verified platform access and the identity directory service.",
+    filterLabel: "Account status",
     filters: ["All statuses", "Active", "Suspended"],
   },
   organizations: {
     columns: ["Organization", "Workspaces", "Members", "Access", "Last activity"],
+    summary: "Companies and teams that use OraOne, with their workspaces and members.",
     text: "Organization records require server-verified platform access and organization APIs.",
+    filterLabel: "Status",
     filters: ["All organizations", "Active", "Archived"],
   },
   subscriptions: {
     columns: ["Organization", "Plan", "Status", "Billing period", "Renewal"],
+    summary: "Which organizations have free access and when that access is reviewed.",
     text: "Subscription data and approved commercial plans are not connected.",
+    filterLabel: "Status",
     filters: ["All statuses", "Active", "Past due", "Canceled"],
   },
   billing: {
     columns: ["Invoice", "Organization", "Amount", "Payment status", "Issued"],
+    summary: "Invoices and payments. No paid plans are offered in the current product.",
     text: "No invoices or transactions are available without a connected billing service.",
+    filterLabel: "Payment status",
     filters: ["All statuses", "Paid", "Open", "Overdue"],
   },
   usage: {
-    columns: ["Workspace", "Product", "AI usage", "Consumption", "Period"],
+    columns: ["Workspace", "Product", "AI usage", "Amount used", "Period"],
+    summary: "How much each workspace has used each product in the selected period.",
     text: "Usage records require authorized metering APIs. No financial or consumption metrics are fabricated.",
+    filterLabel: "Product",
     filters: ["All products", "AI Chat", "Other products"],
   },
   errors: {
     columns: ["Error", "Service", "Severity", "Occurrences", "Last seen"],
+    summary: "Problems the platform has reported that someone should look at.",
     text: "Error events are unavailable until authorized observability services are connected.",
+    filterLabel: "Severity",
     filters: ["All severities", "Critical", "Warning", "Information"],
   },
   audit: {
     columns: ["Event", "Actor", "Scope", "Action", "Time"],
+    summary: "A record of changes made by platform staff and organization admins.",
     text: "Privileged activity requires a verified audit log service. No audit events are simulated.",
+    filterLabel: "Action type",
     filters: ["All actions", "Identity", "Membership", "Configuration"],
   },
   support: {
     columns: ["Ticket", "Organization", "Priority", "Status", "Updated"],
+    summary: "Requests from customers that the support team is working on.",
     text: "Support tickets require verified platform access and a connected support service.",
+    filterLabel: "Status",
     filters: ["All statuses", "Open", "In progress", "Resolved"],
   },
 };
-export function AdminPage({ title, pagePath }: { title: string; pagePath: string }) {
+
+export function AdminPage({
+  title,
+  pagePath,
+  children,
+}: {
+  title: string;
+  pagePath: string;
+  /** Replaces the sample body of a page when a page brings its own live content. */
+  children?: ReactNode;
+}) {
   const [mobile, setMobile] = useState(false);
   useEffect(() => {
     if (!mobile) return;
@@ -220,7 +271,9 @@ export function AdminPage({ title, pagePath }: { title: string; pagePath: string
               </Link>
             </Button>
           </div>
-          {["billing", "subscriptions"].includes(slug) ? (
+          {children ? (
+            children
+          ) : ["billing", "subscriptions"].includes(slug) ? (
             <section className="admin-section">
               <h2>Free access for everyone</h2>
               <p>
@@ -323,69 +376,92 @@ function AdminOverview() {
 }
 function AdminTable({
   definition,
+  records = [],
 }: {
-  definition: { columns: string[]; text: string; filters: string[] };
+  definition: TableDefinition;
+  records?: AdminRecord[];
 }) {
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState(definition.filters[0] || "All");
-  const [sort, setSort] = useState(definition.columns[0] || "");
+  const [filter, setFilter] = useState(definition.filters[0] ?? "");
+  const hasRecords = records.length > 0;
+  const visible = records.filter(
+    (r) =>
+      (!search || (r.cells[0] ?? "").toLowerCase().includes(search.trim().toLowerCase())) &&
+      (filter === definition.filters[0] || r.status === filter),
+  );
   return (
     <section className="admin-section">
+      <p className="admin-table-summary">{definition.summary}</p>
       <div className="admin-table-toolbar">
         <label className="admin-search">
           <Search />
           <input
             aria-label="Search records"
             value={search}
+            disabled={!hasRecords}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search records"
+            placeholder={hasRecords ? "Search records" : "Search available once records load"}
           />
         </label>
         <label className="admin-filter">
-          <span>Status</span>
-          <select
-            aria-label="Filter records"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          >
+          <span>{definition.filterLabel}</span>
+          <select value={filter} disabled={!hasRecords} onChange={(e) => setFilter(e.target.value)}>
             {definition.filters.map((f) => (
               <option key={f}>{f}</option>
             ))}
           </select>
         </label>
-        <Button disabled variant="outline">
-          Export unavailable
-        </Button>
+        <span
+          className="admin-export"
+          title="Export needs the records service, which is not connected."
+        >
+          <Button disabled variant="outline">
+            Export unavailable
+          </Button>
+        </span>
       </div>
       <div className="admin-table-scroll" tabIndex={0} aria-label="Records table">
         <table>
           <thead>
             <tr>
               {definition.columns.map((c) => (
-                <th key={c} aria-sort={sort === c ? "ascending" : "none"}>
-                  <Button variant="ghost" onClick={() => setSort(c)}>
-                    {c}
-                    <ChevronDown />
-                  </Button>
+                <th key={c} scope="col">
+                  {c}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody />
+          <tbody>
+            {visible.map((r) => (
+              <tr key={r.id}>
+                {r.cells.map((cell, i) => (
+                  <td key={i} data-label={definition.columns[i]}>
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
         </table>
-        <div className="admin-empty">
-          <LockKeyhole />
-          <h3>
-            {search || filter !== definition.filters[0]
-              ? "No authorized records to filter"
-              : "Records unavailable"}
-          </h3>
-          <p>{definition.text}</p>
-          <span>No private data loaded</span>
-        </div>
+        {visible.length === 0 && (
+          <div className="admin-empty">
+            <LockKeyhole />
+            <h3>{hasRecords ? "No records match these filters" : "No records loaded"}</h3>
+            <p>
+              {hasRecords ? "No loaded record matches your search or filter." : definition.text}
+            </p>
+            <span>
+              {hasRecords ? "Clear the search or filter to see more." : "Admin access is required."}
+            </span>
+          </div>
+        )}
       </div>
       <div className="admin-pagination">
-        <span>Records not loaded · Access required</span>
+        <span>
+          {hasRecords
+            ? `${visible.length} of ${records.length} records shown`
+            : "No records loaded · Data source not connected"}
+        </span>
         <div>
           <Button variant="outline" size="icon" disabled aria-label="Previous page">
             <ChevronLeft />
@@ -410,26 +486,26 @@ function AdminProducts() {
         <table>
           <thead>
             <tr>
-              <th>Product</th>
-              <th>Portfolio status</th>
-              <th>Workspace visibility</th>
-              <th>Management</th>
+              <th scope="col">Product</th>
+              <th scope="col">Portfolio status</th>
+              <th scope="col">Workspace visibility</th>
+              <th scope="col">Management</th>
             </tr>
           </thead>
           <tbody>
             {products.map((p) => (
               <tr key={p.slug}>
-                <td>
+                <td data-label="Product">
                   <strong>{p.name}</strong>
                   <small>{p.capabilities.join(" · ")}</small>
                 </td>
-                <td>
+                <td data-label="Portfolio status">
                   <span className={`status-pill ${p.slug === "chat" ? "" : "planned"}`}>
                     {p.status}
                   </span>
                 </td>
-                <td>Service verification required</td>
-                <td>
+                <td data-label="Workspace visibility">Service verification required</td>
+                <td data-label="Management">
                   <Button disabled variant="outline" size="sm">
                     Configure
                   </Button>
@@ -529,7 +605,9 @@ function AdminSecurity() {
       <AdminTable
         definition={{
           columns: ["Security event", "Actor", "Scope", "Result", "Time"],
+          summary: "Sign-ins, permission changes and sessions that need review.",
           text: "Verified security and privileged-access history is not connected.",
+          filterLabel: "Event type",
           filters: ["All events", "Privileged access", "Role changes", "Session events"],
         }}
       />
@@ -549,19 +627,19 @@ function AdminControls({ entitlements }: { entitlements: boolean }) {
         <table>
           <thead>
             <tr>
-              <th>Product</th>
-              <th>{entitlements ? "Workspace scope" : "Configuration"}</th>
-              <th>Status</th>
-              <th>Action</th>
+              <th scope="col">Product</th>
+              <th scope="col">{entitlements ? "Workspace scope" : "Configuration"}</th>
+              <th scope="col">Status</th>
+              <th scope="col">Action</th>
             </tr>
           </thead>
           <tbody>
             {products.map((p) => (
               <tr key={p.slug}>
-                <td>{p.name}</td>
-                <td>Not loaded</td>
-                <td>Access required</td>
-                <td>
+                <td data-label="Product">{p.name}</td>
+                <td data-label={entitlements ? "Workspace scope" : "Configuration"}>Not loaded</td>
+                <td data-label="Status">Access required</td>
+                <td data-label="Action">
                   <Button variant="outline" size="sm" disabled>
                     {entitlements ? "Manage access" : "Edit flags"}
                   </Button>
@@ -572,6 +650,43 @@ function AdminControls({ entitlements }: { entitlements: boolean }) {
         </table>
       </div>
     </section>
+  );
+}
+// Destructive actions open a confirmation that names the consequence. Cancel is the first
+// focusable control, so Radix focuses it when the dialog opens. The confirm button stays
+// disabled while no authorized service exists, so nothing is reported as changed.
+function ConfirmDestructiveAction({
+  trigger,
+  title,
+  consequence,
+  confirmLabel,
+}: {
+  trigger: string;
+  title: string;
+  consequence: string;
+  confirmLabel: string;
+}) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline" className="admin-danger-trigger">
+          {trigger}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{consequence}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction disabled>{confirmLabel}</AlertDialogAction>
+        </AlertDialogFooter>
+        <p className="admin-danger-note">
+          Not available in this preview. Nothing has been changed.
+        </p>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 function AdminDetails({ organization }: { organization: boolean }) {
@@ -590,14 +705,38 @@ function AdminDetails({ organization }: { organization: boolean }) {
             </div>
           ))}
         </div>
-        <Button disabled variant="outline">
-          Sensitive actions unavailable
-        </Button>
+        <div className="admin-danger-actions">
+          {organization ? (
+            <ConfirmDestructiveAction
+              trigger="Archive organization"
+              title="Archive this organization?"
+              consequence="Archiving hides its workspaces and stops new member sign-ins. Its records are kept. The organization service is not connected, so this would not change anything here."
+              confirmLabel="Archive organization"
+            />
+          ) : (
+            <>
+              <ConfirmDestructiveAction
+                trigger="Suspend account"
+                title="Suspend this account?"
+                consequence="Suspending blocks sign-in and ends active sessions in every organization. The account and its data are kept. The identity service is not connected, so this would not change anything here."
+                confirmLabel="Suspend account"
+              />
+              <ConfirmDestructiveAction
+                trigger="Sign out everywhere"
+                title="Sign this account out everywhere?"
+                consequence="The user is signed out of all devices right away and must sign in again with an email code. The identity service is not connected, so this would not change anything here."
+                confirmLabel="Sign out everywhere"
+              />
+            </>
+          )}
+        </div>
       </section>
       <AdminTable
         definition={{
           columns: ["Activity", "Actor", "Scope", "Time"],
+          summary: "Recent changes and sign-ins for this record.",
           text: "Details and activity require authorized access to this record. No personal or organizational data is exposed.",
+          filterLabel: "Activity type",
           filters: ["All activity", "Membership", "Access", "Configuration"],
         }}
       />

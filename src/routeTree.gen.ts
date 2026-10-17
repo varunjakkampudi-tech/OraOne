@@ -40,6 +40,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAiModelsRouteImport } from './routes/admin.ai-models'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminBillingRouteImport } from './routes/admin.billing'
+import { Route as AdminConfigRouteImport } from './routes/admin.config'
 import { Route as AdminEntitlementsRouteImport } from './routes/admin.entitlements'
 import { Route as AdminErrorsRouteImport } from './routes/admin.errors'
 import { Route as AdminFeatureFlagsRouteImport } from './routes/admin.feature-flags'
@@ -165,15 +166,21 @@ import { Route as AppWorkspacesNewRouteImport } from './routes/app.workspaces.ne
 import { Route as AuthenticatedStudioAccountIndexRouteImport } from './routes/_authenticated/studio.account.index'
 import { Route as AuthenticatedStudioAnalyticsIndexRouteImport } from './routes/_authenticated/studio.analytics.index'
 import { Route as AuthenticatedStudioApiKeysIndexRouteImport } from './routes/_authenticated/studio.api-keys.index'
+import { Route as AuthenticatedStudioAssistantsIndexRouteImport } from './routes/_authenticated/studio.assistants.index'
 import { Route as AuthenticatedStudioAssistantsIdRouteImport } from './routes/_authenticated/studio.assistants.$id'
 import { Route as AuthenticatedStudioBillingIndexRouteImport } from './routes/_authenticated/studio.billing.index'
+import { Route as AuthenticatedStudioCallsIndexRouteImport } from './routes/_authenticated/studio.calls.index'
+import { Route as AuthenticatedStudioChannelsChannelRouteImport } from './routes/_authenticated/studio.channels.$channel'
 import { Route as AuthenticatedStudioInboxIndexRouteImport } from './routes/_authenticated/studio.inbox.index'
 import { Route as AuthenticatedStudioInboxConversationIdRouteImport } from './routes/_authenticated/studio.inbox.$conversationId'
 import { Route as AuthenticatedStudioIntegrationsIndexRouteImport } from './routes/_authenticated/studio.integrations.index'
 import { Route as AuthenticatedStudioKnowledgeIndexRouteImport } from './routes/_authenticated/studio.knowledge.index'
 import { Route as AuthenticatedStudioLeadsIndexRouteImport } from './routes/_authenticated/studio.leads.index'
+import { Route as AuthenticatedStudioMarketingIndexRouteImport } from './routes/_authenticated/studio.marketing.index'
+import { Route as AuthenticatedStudioMarketplaceIndexRouteImport } from './routes/_authenticated/studio.marketplace.index'
 import { Route as AuthenticatedStudioTeamIndexRouteImport } from './routes/_authenticated/studio.team.index'
 import { Route as AuthenticatedStudioWebhooksIndexRouteImport } from './routes/_authenticated/studio.webhooks.index'
+import { Route as AuthenticatedStudioWorkflowsIndexRouteImport } from './routes/_authenticated/studio.workflows.index'
 import { Route as AppProductsChatIndexRouteImport } from './routes/app.products.chat.index'
 import { Route as AppProductsChatAnalyticsRouteImport } from './routes/app.products.chat.analytics'
 import { Route as AppProductsChatAssistantsRouteImport } from './routes/app.products.chat.assistants'
@@ -358,6 +365,11 @@ const AdminAuditRoute = AdminAuditRouteImport.update({
 const AdminBillingRoute = AdminBillingRouteImport.update({
   id: '/billing',
   path: '/billing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminConfigRoute = AdminConfigRouteImport.update({
+  id: '/config',
+  path: '/config',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminEntitlementsRoute = AdminEntitlementsRouteImport.update({
@@ -994,6 +1006,12 @@ const AuthenticatedStudioApiKeysIndexRoute =
     path: '/studio/api-keys/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedStudioAssistantsIndexRoute =
+  AuthenticatedStudioAssistantsIndexRouteImport.update({
+    id: '/studio/assistants/',
+    path: '/studio/assistants/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedStudioAssistantsIdRoute =
   AuthenticatedStudioAssistantsIdRouteImport.update({
     id: '/studio/assistants/$id',
@@ -1004,6 +1022,18 @@ const AuthenticatedStudioBillingIndexRoute =
   AuthenticatedStudioBillingIndexRouteImport.update({
     id: '/studio/billing/',
     path: '/studio/billing/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedStudioCallsIndexRoute =
+  AuthenticatedStudioCallsIndexRouteImport.update({
+    id: '/studio/calls/',
+    path: '/studio/calls/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedStudioChannelsChannelRoute =
+  AuthenticatedStudioChannelsChannelRouteImport.update({
+    id: '/studio/channels/$channel',
+    path: '/studio/channels/$channel',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedStudioInboxIndexRoute =
@@ -1036,6 +1066,18 @@ const AuthenticatedStudioLeadsIndexRoute =
     path: '/studio/leads/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedStudioMarketingIndexRoute =
+  AuthenticatedStudioMarketingIndexRouteImport.update({
+    id: '/studio/marketing/',
+    path: '/studio/marketing/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedStudioMarketplaceIndexRoute =
+  AuthenticatedStudioMarketplaceIndexRouteImport.update({
+    id: '/studio/marketplace/',
+    path: '/studio/marketplace/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedStudioTeamIndexRoute =
   AuthenticatedStudioTeamIndexRouteImport.update({
     id: '/studio/team/',
@@ -1046,6 +1088,12 @@ const AuthenticatedStudioWebhooksIndexRoute =
   AuthenticatedStudioWebhooksIndexRouteImport.update({
     id: '/studio/webhooks/',
     path: '/studio/webhooks/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedStudioWorkflowsIndexRoute =
+  AuthenticatedStudioWorkflowsIndexRouteImport.update({
+    id: '/studio/workflows/',
+    path: '/studio/workflows/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AppProductsChatIndexRoute = AppProductsChatIndexRouteImport.update({
@@ -1262,6 +1310,7 @@ export interface FileRoutesByFullPath {
   '/admin/ai-models': typeof AdminAiModelsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/billing': typeof AdminBillingRoute
+  '/admin/config': typeof AdminConfigRoute
   '/admin/entitlements': typeof AdminEntitlementsRoute
   '/admin/errors': typeof AdminErrorsRoute
   '/admin/feature-flags': typeof AdminFeatureFlagsRoute
@@ -1386,6 +1435,7 @@ export interface FileRoutesByFullPath {
   '/app/team/': typeof AppTeamIndexRoute
   '/app/workspaces/': typeof AppWorkspacesIndexRoute
   '/studio/assistants/$id': typeof AuthenticatedStudioAssistantsIdRoute
+  '/studio/channels/$channel': typeof AuthenticatedStudioChannelsChannelRoute
   '/studio/inbox/$conversationId': typeof AuthenticatedStudioInboxConversationIdRoute
   '/app/products/chat/analytics': typeof AppProductsChatAnalyticsRoute
   '/app/products/chat/assistants': typeof AppProductsChatAssistantsRouteWithChildren
@@ -1397,13 +1447,18 @@ export interface FileRoutesByFullPath {
   '/studio/account/': typeof AuthenticatedStudioAccountIndexRoute
   '/studio/analytics/': typeof AuthenticatedStudioAnalyticsIndexRoute
   '/studio/api-keys/': typeof AuthenticatedStudioApiKeysIndexRoute
+  '/studio/assistants/': typeof AuthenticatedStudioAssistantsIndexRoute
   '/studio/billing/': typeof AuthenticatedStudioBillingIndexRoute
+  '/studio/calls/': typeof AuthenticatedStudioCallsIndexRoute
   '/studio/inbox/': typeof AuthenticatedStudioInboxIndexRoute
   '/studio/integrations/': typeof AuthenticatedStudioIntegrationsIndexRoute
   '/studio/knowledge/': typeof AuthenticatedStudioKnowledgeIndexRoute
   '/studio/leads/': typeof AuthenticatedStudioLeadsIndexRoute
+  '/studio/marketing/': typeof AuthenticatedStudioMarketingIndexRoute
+  '/studio/marketplace/': typeof AuthenticatedStudioMarketplaceIndexRoute
   '/studio/team/': typeof AuthenticatedStudioTeamIndexRoute
   '/studio/webhooks/': typeof AuthenticatedStudioWebhooksIndexRoute
+  '/studio/workflows/': typeof AuthenticatedStudioWorkflowsIndexRoute
   '/app/products/chat/': typeof AppProductsChatIndexRoute
   '/studio/assistants/$id/install': typeof AuthenticatedStudioAssistantsIdInstallRoute
   '/app/products/chat/assistants/$id': typeof AppProductsChatAssistantsIdRouteWithChildren
@@ -1452,6 +1507,7 @@ export interface FileRoutesByTo {
   '/admin/ai-models': typeof AdminAiModelsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/billing': typeof AdminBillingRoute
+  '/admin/config': typeof AdminConfigRoute
   '/admin/entitlements': typeof AdminEntitlementsRoute
   '/admin/errors': typeof AdminErrorsRoute
   '/admin/feature-flags': typeof AdminFeatureFlagsRoute
@@ -1562,6 +1618,7 @@ export interface FileRoutesByTo {
   '/app/team': typeof AppTeamIndexRoute
   '/app/workspaces': typeof AppWorkspacesIndexRoute
   '/studio/assistants/$id': typeof AuthenticatedStudioAssistantsIdRoute
+  '/studio/channels/$channel': typeof AuthenticatedStudioChannelsChannelRoute
   '/studio/inbox/$conversationId': typeof AuthenticatedStudioInboxConversationIdRoute
   '/app/products/chat/analytics': typeof AppProductsChatAnalyticsRoute
   '/app/products/chat/conversations': typeof AppProductsChatConversationsRoute
@@ -1571,13 +1628,18 @@ export interface FileRoutesByTo {
   '/studio/account': typeof AuthenticatedStudioAccountIndexRoute
   '/studio/analytics': typeof AuthenticatedStudioAnalyticsIndexRoute
   '/studio/api-keys': typeof AuthenticatedStudioApiKeysIndexRoute
+  '/studio/assistants': typeof AuthenticatedStudioAssistantsIndexRoute
   '/studio/billing': typeof AuthenticatedStudioBillingIndexRoute
+  '/studio/calls': typeof AuthenticatedStudioCallsIndexRoute
   '/studio/inbox': typeof AuthenticatedStudioInboxIndexRoute
   '/studio/integrations': typeof AuthenticatedStudioIntegrationsIndexRoute
   '/studio/knowledge': typeof AuthenticatedStudioKnowledgeIndexRoute
   '/studio/leads': typeof AuthenticatedStudioLeadsIndexRoute
+  '/studio/marketing': typeof AuthenticatedStudioMarketingIndexRoute
+  '/studio/marketplace': typeof AuthenticatedStudioMarketplaceIndexRoute
   '/studio/team': typeof AuthenticatedStudioTeamIndexRoute
   '/studio/webhooks': typeof AuthenticatedStudioWebhooksIndexRoute
+  '/studio/workflows': typeof AuthenticatedStudioWorkflowsIndexRoute
   '/app/products/chat': typeof AppProductsChatIndexRoute
   '/studio/assistants/$id/install': typeof AuthenticatedStudioAssistantsIdInstallRoute
   '/app/products/chat/assistants/demo': typeof AppProductsChatAssistantsDemoRouteWithChildren
@@ -1634,6 +1696,7 @@ export interface FileRoutesById {
   '/admin/ai-models': typeof AdminAiModelsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/billing': typeof AdminBillingRoute
+  '/admin/config': typeof AdminConfigRoute
   '/admin/entitlements': typeof AdminEntitlementsRoute
   '/admin/errors': typeof AdminErrorsRoute
   '/admin/feature-flags': typeof AdminFeatureFlagsRoute
@@ -1758,6 +1821,7 @@ export interface FileRoutesById {
   '/app/team/': typeof AppTeamIndexRoute
   '/app/workspaces/': typeof AppWorkspacesIndexRoute
   '/_authenticated/studio/assistants/$id': typeof AuthenticatedStudioAssistantsIdRoute
+  '/_authenticated/studio/channels/$channel': typeof AuthenticatedStudioChannelsChannelRoute
   '/_authenticated/studio/inbox/$conversationId': typeof AuthenticatedStudioInboxConversationIdRoute
   '/app/products/chat/analytics': typeof AppProductsChatAnalyticsRoute
   '/app/products/chat/assistants': typeof AppProductsChatAssistantsRouteWithChildren
@@ -1769,13 +1833,18 @@ export interface FileRoutesById {
   '/_authenticated/studio/account/': typeof AuthenticatedStudioAccountIndexRoute
   '/_authenticated/studio/analytics/': typeof AuthenticatedStudioAnalyticsIndexRoute
   '/_authenticated/studio/api-keys/': typeof AuthenticatedStudioApiKeysIndexRoute
+  '/_authenticated/studio/assistants/': typeof AuthenticatedStudioAssistantsIndexRoute
   '/_authenticated/studio/billing/': typeof AuthenticatedStudioBillingIndexRoute
+  '/_authenticated/studio/calls/': typeof AuthenticatedStudioCallsIndexRoute
   '/_authenticated/studio/inbox/': typeof AuthenticatedStudioInboxIndexRoute
   '/_authenticated/studio/integrations/': typeof AuthenticatedStudioIntegrationsIndexRoute
   '/_authenticated/studio/knowledge/': typeof AuthenticatedStudioKnowledgeIndexRoute
   '/_authenticated/studio/leads/': typeof AuthenticatedStudioLeadsIndexRoute
+  '/_authenticated/studio/marketing/': typeof AuthenticatedStudioMarketingIndexRoute
+  '/_authenticated/studio/marketplace/': typeof AuthenticatedStudioMarketplaceIndexRoute
   '/_authenticated/studio/team/': typeof AuthenticatedStudioTeamIndexRoute
   '/_authenticated/studio/webhooks/': typeof AuthenticatedStudioWebhooksIndexRoute
+  '/_authenticated/studio/workflows/': typeof AuthenticatedStudioWorkflowsIndexRoute
   '/app/products/chat/': typeof AppProductsChatIndexRoute
   '/_authenticated/studio/assistants/$id_/install': typeof AuthenticatedStudioAssistantsIdInstallRoute
   '/app/products/chat/assistants/$id': typeof AppProductsChatAssistantsIdRouteWithChildren
@@ -1833,6 +1902,7 @@ export interface FileRouteTypes {
     | '/admin/ai-models'
     | '/admin/audit'
     | '/admin/billing'
+    | '/admin/config'
     | '/admin/entitlements'
     | '/admin/errors'
     | '/admin/feature-flags'
@@ -1957,6 +2027,7 @@ export interface FileRouteTypes {
     | '/app/team/'
     | '/app/workspaces/'
     | '/studio/assistants/$id'
+    | '/studio/channels/$channel'
     | '/studio/inbox/$conversationId'
     | '/app/products/chat/analytics'
     | '/app/products/chat/assistants'
@@ -1968,13 +2039,18 @@ export interface FileRouteTypes {
     | '/studio/account/'
     | '/studio/analytics/'
     | '/studio/api-keys/'
+    | '/studio/assistants/'
     | '/studio/billing/'
+    | '/studio/calls/'
     | '/studio/inbox/'
     | '/studio/integrations/'
     | '/studio/knowledge/'
     | '/studio/leads/'
+    | '/studio/marketing/'
+    | '/studio/marketplace/'
     | '/studio/team/'
     | '/studio/webhooks/'
+    | '/studio/workflows/'
     | '/app/products/chat/'
     | '/studio/assistants/$id/install'
     | '/app/products/chat/assistants/$id'
@@ -2023,6 +2099,7 @@ export interface FileRouteTypes {
     | '/admin/ai-models'
     | '/admin/audit'
     | '/admin/billing'
+    | '/admin/config'
     | '/admin/entitlements'
     | '/admin/errors'
     | '/admin/feature-flags'
@@ -2133,6 +2210,7 @@ export interface FileRouteTypes {
     | '/app/team'
     | '/app/workspaces'
     | '/studio/assistants/$id'
+    | '/studio/channels/$channel'
     | '/studio/inbox/$conversationId'
     | '/app/products/chat/analytics'
     | '/app/products/chat/conversations'
@@ -2142,13 +2220,18 @@ export interface FileRouteTypes {
     | '/studio/account'
     | '/studio/analytics'
     | '/studio/api-keys'
+    | '/studio/assistants'
     | '/studio/billing'
+    | '/studio/calls'
     | '/studio/inbox'
     | '/studio/integrations'
     | '/studio/knowledge'
     | '/studio/leads'
+    | '/studio/marketing'
+    | '/studio/marketplace'
     | '/studio/team'
     | '/studio/webhooks'
+    | '/studio/workflows'
     | '/app/products/chat'
     | '/studio/assistants/$id/install'
     | '/app/products/chat/assistants/demo'
@@ -2204,6 +2287,7 @@ export interface FileRouteTypes {
     | '/admin/ai-models'
     | '/admin/audit'
     | '/admin/billing'
+    | '/admin/config'
     | '/admin/entitlements'
     | '/admin/errors'
     | '/admin/feature-flags'
@@ -2328,6 +2412,7 @@ export interface FileRouteTypes {
     | '/app/team/'
     | '/app/workspaces/'
     | '/_authenticated/studio/assistants/$id'
+    | '/_authenticated/studio/channels/$channel'
     | '/_authenticated/studio/inbox/$conversationId'
     | '/app/products/chat/analytics'
     | '/app/products/chat/assistants'
@@ -2339,13 +2424,18 @@ export interface FileRouteTypes {
     | '/_authenticated/studio/account/'
     | '/_authenticated/studio/analytics/'
     | '/_authenticated/studio/api-keys/'
+    | '/_authenticated/studio/assistants/'
     | '/_authenticated/studio/billing/'
+    | '/_authenticated/studio/calls/'
     | '/_authenticated/studio/inbox/'
     | '/_authenticated/studio/integrations/'
     | '/_authenticated/studio/knowledge/'
     | '/_authenticated/studio/leads/'
+    | '/_authenticated/studio/marketing/'
+    | '/_authenticated/studio/marketplace/'
     | '/_authenticated/studio/team/'
     | '/_authenticated/studio/webhooks/'
+    | '/_authenticated/studio/workflows/'
     | '/app/products/chat/'
     | '/_authenticated/studio/assistants/$id_/install'
     | '/app/products/chat/assistants/$id'
@@ -2619,6 +2709,13 @@ declare module '@tanstack/react-router' {
       path: '/billing'
       fullPath: '/admin/billing'
       preLoaderRoute: typeof AdminBillingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/config': {
+      id: '/admin/config'
+      path: '/config'
+      fullPath: '/admin/config'
+      preLoaderRoute: typeof AdminConfigRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/entitlements': {
@@ -3496,6 +3593,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStudioApiKeysIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/studio/assistants/': {
+      id: '/_authenticated/studio/assistants/'
+      path: '/studio/assistants'
+      fullPath: '/studio/assistants/'
+      preLoaderRoute: typeof AuthenticatedStudioAssistantsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/studio/assistants/$id': {
       id: '/_authenticated/studio/assistants/$id'
       path: '/studio/assistants/$id'
@@ -3508,6 +3612,20 @@ declare module '@tanstack/react-router' {
       path: '/studio/billing'
       fullPath: '/studio/billing/'
       preLoaderRoute: typeof AuthenticatedStudioBillingIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/studio/calls/': {
+      id: '/_authenticated/studio/calls/'
+      path: '/studio/calls'
+      fullPath: '/studio/calls/'
+      preLoaderRoute: typeof AuthenticatedStudioCallsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/studio/channels/$channel': {
+      id: '/_authenticated/studio/channels/$channel'
+      path: '/studio/channels/$channel'
+      fullPath: '/studio/channels/$channel'
+      preLoaderRoute: typeof AuthenticatedStudioChannelsChannelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/studio/inbox/': {
@@ -3545,6 +3663,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStudioLeadsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/studio/marketing/': {
+      id: '/_authenticated/studio/marketing/'
+      path: '/studio/marketing'
+      fullPath: '/studio/marketing/'
+      preLoaderRoute: typeof AuthenticatedStudioMarketingIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/studio/marketplace/': {
+      id: '/_authenticated/studio/marketplace/'
+      path: '/studio/marketplace'
+      fullPath: '/studio/marketplace/'
+      preLoaderRoute: typeof AuthenticatedStudioMarketplaceIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/studio/team/': {
       id: '/_authenticated/studio/team/'
       path: '/studio/team'
@@ -3557,6 +3689,13 @@ declare module '@tanstack/react-router' {
       path: '/studio/webhooks'
       fullPath: '/studio/webhooks/'
       preLoaderRoute: typeof AuthenticatedStudioWebhooksIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/studio/workflows/': {
+      id: '/_authenticated/studio/workflows/'
+      path: '/studio/workflows'
+      fullPath: '/studio/workflows/'
+      preLoaderRoute: typeof AuthenticatedStudioWorkflowsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/app/products/chat/': {
@@ -3782,38 +3921,55 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedStudioIndexRoute: typeof AuthenticatedStudioIndexRoute
   AuthenticatedStudioAssistantsIdRoute: typeof AuthenticatedStudioAssistantsIdRoute
+  AuthenticatedStudioChannelsChannelRoute: typeof AuthenticatedStudioChannelsChannelRoute
   AuthenticatedStudioInboxConversationIdRoute: typeof AuthenticatedStudioInboxConversationIdRoute
   AuthenticatedStudioAccountIndexRoute: typeof AuthenticatedStudioAccountIndexRoute
   AuthenticatedStudioAnalyticsIndexRoute: typeof AuthenticatedStudioAnalyticsIndexRoute
   AuthenticatedStudioApiKeysIndexRoute: typeof AuthenticatedStudioApiKeysIndexRoute
+  AuthenticatedStudioAssistantsIndexRoute: typeof AuthenticatedStudioAssistantsIndexRoute
   AuthenticatedStudioBillingIndexRoute: typeof AuthenticatedStudioBillingIndexRoute
+  AuthenticatedStudioCallsIndexRoute: typeof AuthenticatedStudioCallsIndexRoute
   AuthenticatedStudioInboxIndexRoute: typeof AuthenticatedStudioInboxIndexRoute
   AuthenticatedStudioIntegrationsIndexRoute: typeof AuthenticatedStudioIntegrationsIndexRoute
   AuthenticatedStudioKnowledgeIndexRoute: typeof AuthenticatedStudioKnowledgeIndexRoute
   AuthenticatedStudioLeadsIndexRoute: typeof AuthenticatedStudioLeadsIndexRoute
+  AuthenticatedStudioMarketingIndexRoute: typeof AuthenticatedStudioMarketingIndexRoute
+  AuthenticatedStudioMarketplaceIndexRoute: typeof AuthenticatedStudioMarketplaceIndexRoute
   AuthenticatedStudioTeamIndexRoute: typeof AuthenticatedStudioTeamIndexRoute
   AuthenticatedStudioWebhooksIndexRoute: typeof AuthenticatedStudioWebhooksIndexRoute
+  AuthenticatedStudioWorkflowsIndexRoute: typeof AuthenticatedStudioWorkflowsIndexRoute
   AuthenticatedStudioAssistantsIdInstallRoute: typeof AuthenticatedStudioAssistantsIdInstallRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedStudioIndexRoute: AuthenticatedStudioIndexRoute,
   AuthenticatedStudioAssistantsIdRoute: AuthenticatedStudioAssistantsIdRoute,
+  AuthenticatedStudioChannelsChannelRoute:
+    AuthenticatedStudioChannelsChannelRoute,
   AuthenticatedStudioInboxConversationIdRoute:
     AuthenticatedStudioInboxConversationIdRoute,
   AuthenticatedStudioAccountIndexRoute: AuthenticatedStudioAccountIndexRoute,
   AuthenticatedStudioAnalyticsIndexRoute:
     AuthenticatedStudioAnalyticsIndexRoute,
   AuthenticatedStudioApiKeysIndexRoute: AuthenticatedStudioApiKeysIndexRoute,
+  AuthenticatedStudioAssistantsIndexRoute:
+    AuthenticatedStudioAssistantsIndexRoute,
   AuthenticatedStudioBillingIndexRoute: AuthenticatedStudioBillingIndexRoute,
+  AuthenticatedStudioCallsIndexRoute: AuthenticatedStudioCallsIndexRoute,
   AuthenticatedStudioInboxIndexRoute: AuthenticatedStudioInboxIndexRoute,
   AuthenticatedStudioIntegrationsIndexRoute:
     AuthenticatedStudioIntegrationsIndexRoute,
   AuthenticatedStudioKnowledgeIndexRoute:
     AuthenticatedStudioKnowledgeIndexRoute,
   AuthenticatedStudioLeadsIndexRoute: AuthenticatedStudioLeadsIndexRoute,
+  AuthenticatedStudioMarketingIndexRoute:
+    AuthenticatedStudioMarketingIndexRoute,
+  AuthenticatedStudioMarketplaceIndexRoute:
+    AuthenticatedStudioMarketplaceIndexRoute,
   AuthenticatedStudioTeamIndexRoute: AuthenticatedStudioTeamIndexRoute,
   AuthenticatedStudioWebhooksIndexRoute: AuthenticatedStudioWebhooksIndexRoute,
+  AuthenticatedStudioWorkflowsIndexRoute:
+    AuthenticatedStudioWorkflowsIndexRoute,
   AuthenticatedStudioAssistantsIdInstallRoute:
     AuthenticatedStudioAssistantsIdInstallRoute,
 }
@@ -3852,6 +4008,7 @@ interface AdminRouteChildren {
   AdminAiModelsRoute: typeof AdminAiModelsRoute
   AdminAuditRoute: typeof AdminAuditRoute
   AdminBillingRoute: typeof AdminBillingRoute
+  AdminConfigRoute: typeof AdminConfigRoute
   AdminEntitlementsRoute: typeof AdminEntitlementsRoute
   AdminErrorsRoute: typeof AdminErrorsRoute
   AdminFeatureFlagsRoute: typeof AdminFeatureFlagsRoute
@@ -3872,6 +4029,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAiModelsRoute: AdminAiModelsRoute,
   AdminAuditRoute: AdminAuditRoute,
   AdminBillingRoute: AdminBillingRoute,
+  AdminConfigRoute: AdminConfigRoute,
   AdminEntitlementsRoute: AdminEntitlementsRoute,
   AdminErrorsRoute: AdminErrorsRoute,
   AdminFeatureFlagsRoute: AdminFeatureFlagsRoute,

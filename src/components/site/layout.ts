@@ -5,7 +5,7 @@
 export const CONTAINER = "mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8";
 
 /** Vertical rhythm between sections. Never more than 64px on desktop. */
-export const SECTION_Y = "py-12 md:py-16";
+export const SECTION_Y = "py-10 md:py-16";
 
 /**
  * The primary action goes to the demo workspace, which exists today. Sign-up and trials

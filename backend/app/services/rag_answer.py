@@ -66,6 +66,7 @@ async def answer_query(
             "related_questions": [],
             "context_chunks": 0,
             "grounded": False,
+            "generated": False,
             "model": None,
             "latency_ms": 0,
             "prompt_tokens": 0,
@@ -120,6 +121,7 @@ async def answer_query(
             "related_questions": _fallback_questions(query, chunks),
             "context_chunks": 0,
             "grounded": False,
+            "generated": False,
             "model": None,
             "latency_ms": 0,
             "prompt_tokens": 0,
@@ -129,6 +131,7 @@ async def answer_query(
 
     context = rag_service.build_context(chunks, max_chars=6000)
     grounded = True
+    generated = False  # True only when the model itself produced the answer
     used_model = _effective_model(model)
     latency_ms = 0
     prompt_tokens = 0
@@ -179,6 +182,7 @@ async def answer_query(
         )
         latency_ms = int((time.perf_counter() - _t0) * 1000)
         answer = (resp.content or "").strip()
+        generated = bool(answer)
         used_model = resp.model or used_model
         usage = getattr(resp, "usage", None)
         if usage is not None:
@@ -210,6 +214,7 @@ async def answer_query(
         "related_questions": related,
         "context_chunks": len(chunks),
         "grounded": grounded,
+        "generated": generated,
         "model": used_model,
         "latency_ms": latency_ms,
         "prompt_tokens": prompt_tokens,
@@ -280,6 +285,7 @@ async def _persona_only_answer(
             "related_questions": [],
             "context_chunks": 0,
             "grounded": False,
+            "generated": True,
             "model": resp.model or (model or DEFAULT_MODEL),
             "latency_ms": latency_ms,
             "prompt_tokens": int(getattr(usage, "prompt_tokens", 0) or 0)
