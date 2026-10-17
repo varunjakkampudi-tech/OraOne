@@ -1,11 +1,11 @@
 import type { Link, Status } from "./types";
-import { PORTFOLIO } from "./portfolio";
 
-// Top navigation. Products lists the whole family, so every visitor sees all ten products.
-export const PRODUCT_LINKS: Link[] = PORTFOLIO.map((p) => ({
-  label: `${p.id}. ${p.name}`,
-  to: p.id === 1 ? "/products/ai-chat" : "/products",
-}));
+// Top navigation. OraOne is presented as one AI platform, so the menu shows one product and its capabilities.
+export const PRODUCT_LINKS: Link[] = [
+  { label: "AI Chat", to: "/products/ai-chat" },
+  { label: "Capabilities", to: "/products" },
+  { label: "Roadmap", to: "/roadmap" },
+];
 
 export const SOLUTION_LINKS: Link[] = [
   { label: "Customer support", to: "/solutions/customer-support" },
@@ -25,7 +25,7 @@ export const FOOTER_GROUPS: { title: string; links: Link[] }[] = [
     title: "Product",
     links: [
       { label: "AI Chat", to: "/products/ai-chat" },
-      { label: "All ten products", to: "/products" },
+      { label: "Capabilities", to: "/products" },
       { label: "Integrations", to: "/integrations" },
       { label: "Pricing", to: "/pricing" },
       { label: "Roadmap", to: "/roadmap" },

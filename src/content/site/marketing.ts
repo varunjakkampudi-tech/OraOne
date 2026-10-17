@@ -119,9 +119,9 @@ export const marketingPages: SitePage[] = [
   {
     kind: "hub",
     path: "/products",
-    title: "Products | OraOne",
-    eyebrow: "Products",
-    lead: "Ten products make up the OraOne family. AI Chat is in active development. The rest are planned or a long-term vision.",
+    title: "Capabilities | OraOne",
+    eyebrow: "Platform",
+    lead: "Everything works with the same account, knowledge and inbox. Anything not yet available is labelled as such.",
     cards: [],
   },
   {

@@ -415,45 +415,70 @@ function Faqs({ items }: { items: Faq[] }) {
 
 /** The complete OraOne family, one row per product, with an honest status on each. */
 export function ProductFamily({ id = "products" }: { id?: string }) {
+  const groups: { title: string; note: string; items: typeof PORTFOLIO }[] = [
+    {
+      title: "Available now",
+      note: "Part of the platform today.",
+      items: PORTFOLIO.filter((p) => p.status === "active"),
+    },
+    {
+      title: "Coming next",
+      note: "On the roadmap. No dates are promised.",
+      items: PORTFOLIO.filter((p) => p.status === "planned"),
+    },
+    {
+      title: "Longer term",
+      note: "Where the platform is heading.",
+      items: PORTFOLIO.filter((p) => p.status === "vision"),
+    },
+  ];
   return (
-    <section
-      id={id}
-      className={`scroll-mt-20 ${SECTION_Y} bg-muted/40`}
-      aria-labelledby={`${id}-heading`}
-    >
+    <section id={id} className={`scroll-mt-20 ${SECTION_Y}`} aria-labelledby={`${id}-heading`}>
       <div className={CONTAINER}>
         <div className="max-w-2xl">
-          <h2 id={`${id}-heading`} className="text-3xl font-bold tracking-tight md:text-4xl">
-            The OraOne product family
+          <p className="text-sm font-semibold uppercase tracking-wider text-primary">
+            One platform
+          </p>
+          <h2 id={`${id}-heading`} className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
+            One AI for every conversation
           </h2>
           <p className="mt-3 text-[17px] leading-relaxed text-muted-foreground">
-            AI Chat is in active development. Every other product is planned or a long-term vision,
-            and is labelled as such.
+            Every capability works with the same account, knowledge and inbox. Anything not yet
+            available is labelled as such.
           </p>
         </div>
-        <ol className="mt-8 divide-y divide-border rounded-xl border border-border bg-background">
-          {PORTFOLIO.map((product) => (
-            <li
-              key={product.id}
-              className="grid gap-3 p-5 md:grid-cols-[2.75rem_18rem_1fr_auto] md:items-center md:gap-6"
-            >
-              <IconTile
-                icon={productIcon(product.id)}
-                tone={product.status === "active" ? "brand" : "muted"}
-              />
-              <Link
-                to={product.id === 1 ? "/products/ai-chat" : "/roadmap"}
-                className="text-lg font-semibold hover:text-primary hover:underline"
-              >
-                {product.name}
-              </Link>
-              <span className="text-[17px] text-muted-foreground">{product.summary}</span>
-              <span className="md:justify-self-end">
-                <StatusBadge status={product.status} />
-              </span>
-            </li>
+        <div className="mt-10 grid gap-10">
+          {groups.map((group) => (
+            <div key={group.title}>
+              <h3 className="text-lg font-semibold">{group.title}</h3>
+              <p className="text-[15px] text-muted-foreground">{group.note}</p>
+              <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {group.items.map((product) => (
+                  <li
+                    key={product.id}
+                    className="flex items-center gap-4 rounded-xl border border-border bg-background p-4"
+                  >
+                    <IconTile
+                      icon={productIcon(product.id)}
+                      tone={product.status === "active" ? "brand" : "muted"}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        to={product.id === 1 ? "/products/ai-chat" : "/roadmap"}
+                        className="font-semibold hover:text-primary hover:underline"
+                      >
+                        {product.capability}
+                      </Link>
+                      <div className="mt-1">
+                        <StatusBadge status={product.status} />
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ol>
+        </div>
       </div>
     </section>
   );
@@ -461,7 +486,7 @@ export function ProductFamily({ id = "products" }: { id?: string }) {
 
 function CtaBand({ title, text, primary }: { title: string; text: string; primary: SiteLink }) {
   return (
-    <section className={SECTION_Y}>
+    <section className="pt-12 md:pt-16 pb-0">
       <div className={CONTAINER}>
         <div className="flex flex-col items-start justify-between gap-6 rounded-2xl bg-slate-950 p-8 text-white md:flex-row md:items-center md:p-12">
           <div className="max-w-2xl">
