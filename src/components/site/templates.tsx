@@ -25,6 +25,7 @@ import { SiteLayout } from "./SiteLayout";
 import { CONTAINER, SECTION_Y } from "./layout";
 import { capabilityIcon, industryIcon, productIcon, stepIcon } from "./icons";
 import { IconTile } from "./IconTile";
+import { HERO_IMAGE, SCREENS, solutionImage, industryImage, FEATURE_IMAGE } from "./images";
 
 // One template per page kind. Every page uses the same container, spacing, type scale and
 // status labels, so the public site reads as one product.
@@ -166,6 +167,31 @@ function FlowDiagram({ dark = false }: { dark?: boolean }) {
   );
 }
 
+function BrowserFrame({ src, alt }: { src: string; alt: string }) {
+  return (
+    <figure className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900 shadow-2xl shadow-black/50 ring-1 ring-white/5">
+      <div
+        className="flex items-center gap-1.5 border-b border-white/10 bg-slate-800/80 px-4 py-3"
+        aria-hidden="true"
+      >
+        <span className="size-2.5 rounded-full bg-slate-600" />
+        <span className="size-2.5 rounded-full bg-slate-600" />
+        <span className="size-2.5 rounded-full bg-slate-600" />
+        <span className="ml-3 h-5 flex-1 rounded-md bg-slate-900/80" />
+      </div>
+      <img
+        src={src}
+        alt={alt}
+        width={1280}
+        height={800}
+        loading="eager"
+        decoding="async"
+        className="block h-auto w-full"
+      />
+    </figure>
+  );
+}
+
 function Hero({
   eyebrow,
   title,
@@ -173,8 +199,9 @@ function Hero({
   primary,
   secondary,
   note,
-  dark = false,
-  visual = true,
+  image,
+  screen,
+  screenAlt,
 }: {
   eyebrow?: string;
   title: string;
@@ -182,47 +209,65 @@ function Hero({
   primary: SiteLink;
   secondary?: SiteLink | undefined;
   note?: string | undefined;
-  dark?: boolean;
-  visual?: boolean;
+  image: string;
+  screen: string;
+  screenAlt: string;
 }) {
   return (
-    <section
-      className={`relative isolate overflow-hidden ${SECTION_Y} ${dark ? "bg-slate-950 text-white" : ""}`}
-    >
-      {dark && (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 -top-40 -z-10 h-[32rem] bg-[radial-gradient(60%_50%_at_50%_0%,rgba(29,78,216,0.35),transparent)]"
-        />
-      )}
-      <div className={`${CONTAINER} grid items-center gap-12 ${visual ? "lg:grid-cols-12" : ""}`}>
-        <div className={visual ? "lg:col-span-6" : "max-w-3xl"}>
-          {eyebrow && <Eyebrow dark={dark}>{eyebrow}</Eyebrow>}
-          <h1 className="mt-4 text-4xl font-bold leading-[1.1] tracking-tight text-balance md:text-5xl lg:text-[56px]">
-            {title}
-          </h1>
-          <p
-            className={`mt-5 max-w-xl text-lg leading-relaxed md:text-xl ${dark ? "text-slate-300" : "text-muted-foreground"}`}
-          >
-            {lead}
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <PrimaryLink link={primary} />
-            {secondary && <SecondaryLink link={secondary} dark={dark} />}
-          </div>
-          {note && (
-            <p
-              className={`mt-6 max-w-xl text-[15px] ${dark ? "text-slate-400" : "text-muted-foreground"}`}
-            >
-              {note}
+    <section className="relative isolate overflow-hidden bg-slate-950 text-white">
+      <img
+        src={image}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 -z-20 h-full w-full object-cover opacity-60"
+        loading="eager"
+        decoding="async"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/30"
+      />
+      <div
+        className={`${CONTAINER} grid items-center gap-12 py-16 md:py-20 lg:grid-cols-12 lg:py-24`}
+      >
+        <div className="lg:col-span-6">
+          {eyebrow && (
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-sm font-medium text-sky-200">
+              <span className="size-1.5 rounded-full bg-sky-400" aria-hidden="true" />
+              {eyebrow}
             </p>
           )}
-        </div>
-        {visual && (
-          <div className="lg:col-span-6">
-            <FlowDiagram dark={dark} />
+          <h1 className="mt-6 text-5xl font-bold leading-[1.05] tracking-tight text-balance md:text-6xl">
+            {title}
+          </h1>
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-300 md:text-xl">{lead}</p>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+            <Button
+              asChild
+              size="lg"
+              className="h-12 bg-sky-500 px-6 text-base text-white hover:bg-sky-400"
+            >
+              <Link to={primary.to}>
+                {primary.label}
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            </Button>
+            {secondary && (
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="h-12 border-white/25 bg-transparent px-6 text-base text-white hover:bg-white/10 hover:text-white"
+              >
+                <Link to={secondary.to}>{secondary.label}</Link>
+              </Button>
+            )}
           </div>
-        )}
+          {note && <p className="mt-6 max-w-xl text-[15px] text-slate-400">{note}</p>}
+        </div>
+        <div className="lg:col-span-6">
+          <BrowserFrame src={screen} alt={screenAlt} />
+        </div>
       </div>
     </section>
   );
@@ -245,6 +290,38 @@ function CapabilityGrid({ items }: { items: Capability[] }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Alternating image and text rows for the features that have imagery. */
+function FeatureRows({ items }: { items: Capability[] }) {
+  return (
+    <div className="grid gap-16">
+      {items.map((item, index) => (
+        <div
+          key={item.title}
+          className={`grid items-center gap-10 lg:grid-cols-12 ${index % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""}`}
+        >
+          <div className="lg:col-span-6">
+            <img
+              src={FEATURE_IMAGE[item.title]}
+              alt=""
+              aria-hidden="true"
+              width={1024}
+              height={768}
+              loading="lazy"
+              decoding="async"
+              className="w-full rounded-2xl border border-border shadow-lg"
+            />
+          </div>
+          <div className="lg:col-span-5 lg:col-start-8">
+            <StatusBadge status={item.status} />
+            <h3 className="mt-4 text-3xl font-bold tracking-tight">{item.title}</h3>
+            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{item.text}</p>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -272,29 +349,45 @@ function Steps({ steps }: { steps: Step[] }) {
 
 function UseCaseGrid({ items }: { items: UseCase[] }) {
   return (
-    <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {items.map((item) => (
-        <li
-          key={item.industry}
-          className="flex flex-col gap-4 rounded-xl border border-border bg-background p-6 shadow-sm transition-shadow hover:shadow-md"
-        >
-          <div className="flex items-center gap-3">
-            <IconTile icon={industryIcon(item.industry)} />
-            <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              {item.industry}
-            </p>
-          </div>
-          <h3 className="text-xl font-semibold">{item.problem}</h3>
-          <p className="text-[17px] leading-relaxed text-muted-foreground">
-            <span className="font-medium text-foreground">The assistant </span>
-            {item.assistant}
-          </p>
-          <p className="text-[17px] leading-relaxed text-muted-foreground">
-            <span className="font-medium text-foreground">Your team </span>
-            {item.team}
-          </p>
-        </li>
-      ))}
+    <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {items.map((item) => {
+        const image = industryImage(item.industry);
+        return (
+          <li
+            key={item.industry}
+            className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-sm transition-shadow hover:shadow-lg"
+          >
+            {image && (
+              <div className="aspect-[4/3] overflow-hidden bg-slate-950">
+                <img
+                  src={image}
+                  alt=""
+                  aria-hidden="true"
+                  width={1024}
+                  height={768}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+              </div>
+            )}
+            <div className="flex flex-1 flex-col gap-3 p-6">
+              <p className="text-sm font-semibold uppercase tracking-wide text-primary">
+                {item.industry}
+              </p>
+              <h3 className="text-xl font-semibold leading-snug">{item.problem}</h3>
+              <p className="text-[17px] leading-relaxed text-muted-foreground">
+                <span className="font-medium text-foreground">The assistant </span>
+                {item.assistant}
+              </p>
+              <p className="text-[17px] leading-relaxed text-muted-foreground">
+                <span className="font-medium text-foreground">Your team </span>
+                {item.team}
+              </p>
+            </div>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -452,13 +545,15 @@ function LandingTemplate({ page }: { page: LandingPage }) {
   return (
     <>
       <Hero
-        dark
         eyebrow={page.eyebrow}
         title={page.hero.title}
         lead={page.hero.lead}
         primary={page.hero.primary}
         secondary={page.hero.secondary}
         note={page.hero.note}
+        image={HERO_IMAGE[page.path] ?? `${"/media/generated"}/hero-product.webp`}
+        screen={SCREENS.inbox}
+        screenAlt="The OraOne team inbox with conversations and their history"
       />
       {page.showcase && <Showcase />}
       {page.steps.length > 0 && (
@@ -469,9 +564,14 @@ function LandingTemplate({ page }: { page: LandingPage }) {
           <Steps steps={page.steps} />
         </Section>
       )}
-      {page.capabilities.length > 0 && (
-        <Section title="What you can use" lead="Each item shows its real status." muted>
-          <CapabilityGrid items={page.capabilities} />
+      {page.capabilities.some((c) => FEATURE_IMAGE[c.title]) && (
+        <Section title="Built for the way customers ask" lead="Each feature shows its real status.">
+          <FeatureRows items={page.capabilities.filter((c) => FEATURE_IMAGE[c.title])} />
+        </Section>
+      )}
+      {page.capabilities.some((c) => !FEATURE_IMAGE[c.title]) && (
+        <Section title="Also in AI Chat" muted>
+          <CapabilityGrid items={page.capabilities.filter((c) => !FEATURE_IMAGE[c.title])} />
         </Section>
       )}
       {page.useCases.length > 0 && (
@@ -504,6 +604,11 @@ function ProductTemplate({ page }: { page: ProductPage }) {
         lead={page.hero.lead}
         primary={page.hero.primary}
         secondary={page.hero.secondary}
+        image={
+          solutionImage(page.path) ?? HERO_IMAGE[page.path] ?? "/media/generated/hero-product.webp"
+        }
+        screen={SCREENS.assistant}
+        screenAlt="The OraOne assistant editor with instructions and knowledge"
       />
       {page.showcase && <Showcase />}
       <Section title="The problem it solves">
@@ -776,19 +881,35 @@ function HubTemplate({ page }: { page: HubPage }) {
               <li key={card.to + card.title}>
                 <Link
                   to={card.to}
-                  className="group flex h-full flex-col gap-3 rounded-xl border border-border p-6 transition-colors hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-sm transition-shadow hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                 >
-                  {card.status && <StatusBadge status={card.status} />}
-                  <span className="text-xl font-semibold">{card.title}</span>
-                  <span className="text-[17px] leading-relaxed text-muted-foreground">
-                    {card.text}
-                  </span>
-                  <span className="mt-auto inline-flex items-center gap-2 pt-2 font-medium text-primary">
-                    Open
-                    <ArrowRight
-                      className="size-4 transition-transform group-hover:translate-x-1"
-                      aria-hidden="true"
-                    />
+                  {solutionImage(card.to) && (
+                    <span className="block aspect-[4/3] overflow-hidden bg-slate-950">
+                      <img
+                        src={solutionImage(card.to)}
+                        alt=""
+                        aria-hidden="true"
+                        width={1024}
+                        height={768}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      />
+                    </span>
+                  )}
+                  <span className="flex flex-1 flex-col gap-3 p-6">
+                    {card.status && <StatusBadge status={card.status} />}
+                    <span className="text-xl font-semibold">{card.title}</span>
+                    <span className="text-[17px] leading-relaxed text-muted-foreground">
+                      {card.text}
+                    </span>
+                    <span className="mt-auto inline-flex items-center gap-2 pt-2 font-medium text-primary">
+                      Open
+                      <ArrowRight
+                        className="size-4 transition-transform group-hover:translate-x-1"
+                        aria-hidden="true"
+                      />
+                    </span>
                   </span>
                 </Link>
               </li>

@@ -21,7 +21,7 @@ test.describe("@smoke core pages render", () => {
 
   test("hero illustration is shown on the home page @smoke", async ({ page }) => {
     await page.goto("/");
-    const hero = page.getByRole("img", { name: /Illustration: a visitor/ });
+    const hero = page.getByRole("img", { name: /team inbox/i }).first();
     await expect(hero).toBeVisible();
   });
 
