@@ -94,6 +94,16 @@ async def stop_scheduler() -> None:
         await _task
     except asyncio.CancelledError:
         pass
+    # Let runs already dispatched finish their current step, up to a limit, so a
+    # deploy does not kill them mid-step.
+    if _inflight:
+        _done, pending = await asyncio.wait(
+            set(_inflight), timeout=_SHUTDOWN_GRACE_SECONDS
+        )
+        if pending:
+            log.warning(
+                "scheduler stopped with %d run(s) still in flight", len(pending)
+            )
     log.info("workflow scheduler stopped")
 
 
@@ -115,6 +125,7 @@ async def _loop() -> None:
 
 
 _inflight: set[asyncio.Task] = set()
+_SHUTDOWN_GRACE_SECONDS = 25
 
 
 async def _dispatch_event_runs() -> None:
@@ -213,4 +224,6 @@ async def _tick() -> None:
 
     # Dispatch outside the scan session; each run owns its own session.
     for run_id in due_run_ids:
-        asyncio.create_task(execute_run(run_id))
+        task = asyncio.create_task(execute_run(run_id))
+        _inflight.add(task)
+        task.add_done_callback(_inflight.discard)

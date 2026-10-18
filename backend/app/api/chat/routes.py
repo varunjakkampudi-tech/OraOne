@@ -565,7 +565,11 @@ async def regenerate_last(
     )
     sources = rag_service.dedupe_sources(retrieved)
     try:
-        ai = await runtime.generate_reply(agent, messages)
+        ai = await runtime.generate_reply(
+            agent,
+            messages,
+            passages=[c.content for c in retrieved],
+        )
     except AIProviderError as e:
         raise _provider_http_error(e) from e
 
@@ -707,7 +711,11 @@ async def send_message(
     await usage_service.enforce_quota(session, ctx.organization_id, "ai_messages")
 
     try:
-        ai = await runtime.generate_reply(agent, messages)
+        ai = await runtime.generate_reply(
+            agent,
+            messages,
+            passages=[c.content for c in retrieved],
+        )
     except AIProviderError as e:
         log.warning("provider error code=%s: %s", e.code, e)
         raise _provider_http_error(e) from e

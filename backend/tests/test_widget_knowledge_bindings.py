@@ -14,10 +14,11 @@ def _widget(knowledge_base_id=None):
     return SimpleNamespace(knowledge_base_id=knowledge_base_id)
 
 
-def test_widget_preserves_legacy_fallback_when_agent_binding_is_omitted():
+def test_widget_without_any_binding_fails_closed_for_visitors():
+    """A visitor must never reach every knowledge base in the project by default."""
     kb_id = uuid4()
 
-    assert _effective_knowledge_base_ids(_agent({}), _widget()) is None
+    assert _effective_knowledge_base_ids(_agent({}), _widget()) == []
     assert _effective_knowledge_base_ids(_agent({}), _widget(kb_id)) == [kb_id]
 
 

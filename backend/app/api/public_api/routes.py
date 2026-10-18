@@ -123,6 +123,34 @@ def _iso(dt: Optional[datetime]) -> Optional[str]:
     return dt.isoformat() if dt else None
 
 
+def _scoped(model: Any, key: ApiKey) -> list:
+    """Extra WHERE clauses that confine a query to the key's project.
+
+    Organization-wide keys (no project) see every project in the organization.
+    Project-scoped keys see only their project, on every read and write.
+    """
+    if key.project_id is None:
+        return []
+    return [model.project_id == key.project_id]
+
+
+def _owns(row: Any, key: ApiKey) -> bool:
+    """True when a fetched row belongs to the key's organization and, for a
+    project-scoped key, to its project."""
+    if row is None or row.organization_id != key.organization_id:
+        return False
+    return key.project_id is None or row.project_id == key.project_id
+
+
+def _org_wide_only(key: ApiKey) -> None:
+    """Usage and analytics are aggregated per organization, so project keys are refused."""
+    if key.project_id is not None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This endpoint is organization-wide. Use an organization-scoped key.",
+        )
+
+
 # ── request bodies ───────────────────────────────────────────────────────────
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=8000)
@@ -165,7 +193,11 @@ async def list_agents_v1(
 ) -> dict:
     rows = await session.scalars(
         select(Agent)
-        .where(Agent.organization_id == key.organization_id, Agent.deleted_at.is_(None))
+        .where(
+            Agent.organization_id == key.organization_id,
+            *_scoped(Agent, key),
+            Agent.deleted_at.is_(None),
+        )
         .order_by(Agent.created_at.desc())
         .limit(limit)
     )
@@ -186,7 +218,11 @@ async def list_agents_v1(
 
 # ── chat / RAG ───────────────────────────────────────────────────────────────
 async def _resolve_agent(
-    session: AsyncSession, organization_id: uuid.UUID, agent_id: Optional[uuid.UUID]
+    session: AsyncSession,
+    organization_id: uuid.UUID,
+    agent_id: Optional[uuid.UUID],
+    *,
+    project_id: Optional[uuid.UUID] = None,
 ) -> Optional[Agent]:
     if agent_id is not None:
         agent = await session.get(Agent, agent_id)
@@ -194,6 +230,7 @@ async def _resolve_agent(
             agent
             and agent.organization_id == organization_id
             and agent.deleted_at is None
+            and (project_id is None or agent.project_id == project_id)
         ):
             return agent
         return None
@@ -203,6 +240,7 @@ async def _resolve_agent(
             Agent.organization_id == organization_id,
             Agent.deleted_at.is_(None),
             Agent.status == AgentStatus.active,
+            *([Agent.project_id == project_id] if project_id is not None else []),
         )
         .order_by(Agent.created_at.asc())
         .limit(1)
@@ -235,16 +273,15 @@ async def chat_v1(
     )
 
     conversation_id: Optional[str] = None
-    agent = await _resolve_agent(session, key.organization_id, payload.agent_id)
+    agent = await _resolve_agent(
+        session, key.organization_id, payload.agent_id, project_id=key.project_id
+    )
     if agent is not None:
         conversation: Optional[Conversation] = None
         is_new = False
         if payload.conversation_id is not None:
             conversation = await session.get(Conversation, payload.conversation_id)
-            if (
-                conversation is not None
-                and conversation.organization_id != key.organization_id
-            ):
+            if conversation is not None and not _owns(conversation, key):
                 conversation = None
         if conversation is None:
             conversation = Conversation(
@@ -390,6 +427,7 @@ async def list_conversations_v1(
         select(Conversation)
         .where(
             Conversation.organization_id == key.organization_id,
+            *_scoped(Conversation, key),
             Conversation.deleted_at.is_(None),
         )
         .order_by(Conversation.started_at.desc())
@@ -417,11 +455,7 @@ async def get_conversation_v1(
     session: AsyncSession = Depends(get_db),
 ) -> dict:
     conv = await session.get(Conversation, conversation_id)
-    if (
-        conv is None
-        or conv.organization_id != key.organization_id
-        or conv.deleted_at is not None
-    ):
+    if conv is None or not _owns(conv, key) or conv.deleted_at is not None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found."
         )
@@ -461,6 +495,7 @@ async def list_kbs_v1(
         select(KnowledgeBase)
         .where(
             KnowledgeBase.organization_id == key.organization_id,
+            *_scoped(KnowledgeBase, key),
             KnowledgeBase.deleted_at.is_(None),
         )
         .order_by(KnowledgeBase.created_at.desc())
@@ -488,7 +523,9 @@ async def list_documents_v1(
     session: AsyncSession = Depends(get_db),
 ) -> dict:
     stmt = select(Document).where(
-        Document.organization_id == key.organization_id, Document.deleted_at.is_(None)
+        Document.organization_id == key.organization_id,
+        *_scoped(Document, key),
+        Document.deleted_at.is_(None),
     )
     if knowledge_base_id is not None:
         stmt = stmt.where(Document.knowledge_base_id == knowledge_base_id)
@@ -519,7 +556,9 @@ async def list_websites_v1(
     rows = await session.scalars(
         select(Website)
         .where(
-            Website.organization_id == key.organization_id, Website.deleted_at.is_(None)
+            Website.organization_id == key.organization_id,
+            *_scoped(Website, key),
+            Website.deleted_at.is_(None),
         )
         .order_by(Website.created_at.desc())
         .limit(limit)
@@ -581,6 +620,7 @@ async def list_workflows_v1(
         select(Workflow)
         .where(
             Workflow.organization_id == key.organization_id,
+            *_scoped(Workflow, key),
             Workflow.deleted_at.is_(None),
         )
         .order_by(Workflow.created_at.desc())
@@ -610,11 +650,7 @@ async def run_workflow_v1(
     session: AsyncSession = Depends(get_db),
 ) -> dict:
     workflow = await session.get(Workflow, workflow_id)
-    if (
-        workflow is None
-        or workflow.organization_id != key.organization_id
-        or workflow.deleted_at is not None
-    ):
+    if workflow is None or not _owns(workflow, key) or workflow.deleted_at is not None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found."
         )
@@ -670,7 +706,9 @@ async def list_widgets_v1(
     rows = await session.scalars(
         select(Widget)
         .where(
-            Widget.organization_id == key.organization_id, Widget.deleted_at.is_(None)
+            Widget.organization_id == key.organization_id,
+            *_scoped(Widget, key),
+            Widget.deleted_at.is_(None),
         )
         .order_by(Widget.created_at.desc())
         .limit(limit)
@@ -701,6 +739,7 @@ async def list_integrations_v1(
         select(Integration)
         .where(
             Integration.organization_id == key.organization_id,
+            *_scoped(Integration, key),
             Integration.deleted_at.is_(None),
         )
         .order_by(Integration.created_at.desc())
@@ -727,6 +766,7 @@ async def usage_v1(
     key: ApiKey = Depends(require_api_scope("usage:read")),
     session: AsyncSession = Depends(get_db),
 ) -> dict:
+    _org_wide_only(key)
     return await usage_service.usage_snapshot(session, key.organization_id)
 
 
@@ -736,6 +776,7 @@ async def analytics_v1(
     key: ApiKey = Depends(require_api_scope("analytics:read")),
     session: AsyncSession = Depends(get_db),
 ) -> dict:
+    _org_wide_only(key)
     return await analytics_service.org_overview(session, key.organization_id, days)
 
 
@@ -752,4 +793,5 @@ async def analytics_module_v1(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Unknown analytics module '{module}'.",
         )
+    _org_wide_only(key)
     return await fn(session, key.organization_id, days)

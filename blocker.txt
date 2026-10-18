@@ -170,3 +170,49 @@ UPDATE 2026-10-18 (audit round 3). What changed and what still needs you.
 23. Production image in CI: ADDED (job "Production images build and boot"). Verified locally: the
     frontend image builds and serves HTTP 200. Not verified: the backend container booting on a
     GitHub runner. Check the first run.
+
+ROUND 4 (2026-10-18): what is fixed in code, and what only you can complete.
+Fixed in code (see the pull request for the test evidence):
+- Public API keys bound to a project are confined to that project on every list, read and write.
+  Usage and analytics refuse project-scoped keys, because they aggregate across the organization.
+- Explicit widget escalation creates a queue item. One unresolved item per conversation.
+- Grounding: numeric and negation checks added. Replies that go beyond the retrieved passages
+  are replaced by passage text in the widget, omnichannel and signed-in chat paths.
+- API key rate limits use the shared store and fail closed (503) when it is unavailable.
+- Escalation delivery claims due rows with FOR UPDATE SKIP LOCKED and leases them before sending.
+- Migration rollback rehearsed on a scratch database (see docs/operations/BACKUP-RESTORE.md).
+
+Still needs you or a live environment:
+24. Off-host encrypted backup and restore into an isolated environment. Needs a backup destination
+    outside the server, a passphrase file, and approval of a cron change on the VPS (items 15 and 16).
+25. Production rate limits: set REDIS_URL on the server. Without it, production refuses to start the
+    shared cache for API keys, and every API request gets 503. Confirm the Redis service is up.
+26. Live SMTP: configure the mailbox (item 1). Then send one real escalation alert and one sign-in code.
+27. OpenRouter live check: run one real chat and one embedding call from the server, and record the
+    model names and monthly cost limit you accept.
+28. Semantic grounding (LLM entailment): not built. The current checks are lexical, numeric and
+    negation only, so they cannot judge paraphrase-level contradictions. Decide whether to add a
+    second model call per reply (extra cost, latency) or a human review queue for sampled replies.
+29. Streaming replies (the streaming chat route) are not grounding-checked, because text reaches the
+    visitor before the check can run. Decide: buffer streams and check, or accept the risk.
+30. Browser tests against a real backend: the browser job still uses mocked API responses. Owner
+    decision: approve adding PostgreSQL and Redis services to that CI job, and the 768 px project.
+31. Dashboard screen for the escalation queue (assign, resolve). The API exists at /api/escalations.
+32. Response-time target for human handoffs (item 21).
+33. Marketing campaigns still send directly during the campaign run, not from a durable queue with
+    delivery receipts. Needed before large campaigns.
+34. Cost caps: per-organization daily spending limits reserved before model calls are not built.
+    Needed before paid plans.
+35. Off-the-shelf market claims: competitor prices and features in the audit must be checked against
+    each vendor's public pricing page before any external use. Do not publish comparisons until then.
+
+ROUND 4 BRAINSTORM (report: docs/product/MARKET-AND-ROADMAP.md)
+36. Pricing decision: INR pricing, a free starter, and what the base plan includes (see the report).
+    Competitor prices were read from public pages on 18 Oct 2026; re-check before external use.
+37. Setup-friction features (business-hours and handoff step, test-before-embed, embed helper)
+    are not built. They are frontend work and need your approval of the wording.
+38. Public API subscription enforcement: decide whether v1 routes must also run the plan check
+    (authorization.authorize) and reject canceled organizations. The code change is small; the
+    behaviour change affects paying customers, so it needs your approval.
+39. Widget visitors now get no knowledge base until the owner binds one. Existing widgets without a
+    binding will hand off every question until a binding is set. Confirm this default.

@@ -146,8 +146,10 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - oraone_caddy_data:/data
     depends_on:
-      - backend
-      - frontend
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
 
 volumes:
   oraone_postgres_data:

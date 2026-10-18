@@ -70,6 +70,16 @@ def _sha(token: str) -> str:
 @pytest.fixture
 def env(monkeypatch):
     monkeypatch.setenv("ENVIRONMENT", "development")
+    # The fake environment has no project rows. Pin the organization default so
+    # the escalation path resolves a project, as it does in production.
+    from app.services import project_scope
+
+    default_project = uuid.uuid4()
+
+    async def _default(_session, _organization_id):
+        return default_project
+
+    monkeypatch.setattr(project_scope, "default_project_id", _default)
     monkeypatch.setenv("WIDGET_IP_RATE_LIMIT_PER_MIN", "1000")
     for name in (
         "WIDGET_CDN_BASE",

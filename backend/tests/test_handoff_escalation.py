@@ -292,3 +292,121 @@ async def test_escalations_are_scoped_to_their_project(db_session):
         .all()
     )
     assert rows == []
+
+
+@db_only
+@pytest.mark.asyncio
+async def test_repeat_handoffs_in_one_conversation_share_one_open_item(db_session):
+    from app.database.models.agent import Agent, AgentStatus, AgentType
+    from app.database.models.conversation import (
+        Conversation,
+        ConversationChannel,
+        ConversationStatus,
+    )
+
+    org, project = await _seed(db_session)
+    agent = Agent(
+        organization_id=org.id,
+        project_id=project.id,
+        name="Support",
+        type=AgentType.chat,
+        status=AgentStatus.active,
+        model="test/model",
+    )
+    db_session.add(agent)
+    await db_session.flush()
+    conversation = Conversation(
+        organization_id=org.id,
+        project_id=project.id,
+        agent_id=agent.id,
+        channel=ConversationChannel.chat,
+        status=ConversationStatus.active,
+        started_at=datetime.now(timezone.utc),
+    )
+    db_session.add(conversation)
+    await db_session.flush()
+
+    first = await _open_escalation(
+        db_session, org, project, conversation_id=conversation.id
+    )
+    second = await escalation_service.create_escalation(
+        db_session,
+        organization_id=org.id,
+        project_id=project.id,
+        channel="chat",
+        question="Please have someone call me.",
+        conversation_id=conversation.id,
+        email="pat@example.test",
+    )
+
+    assert second.id == first.id
+    assert second.has_contact is True
+    assert second.contact_email == "pat@example.test"
+
+
+@db_only
+@pytest.mark.asyncio
+async def test_retry_emails_only_the_admin_who_did_not_receive_the_alert(
+    db_session, monkeypatch
+):
+    from app.core.security import hash_password
+    from app.database.models.organization_member import (
+        MemberRole,
+        MemberStatus,
+        OrganizationMember,
+    )
+    from app.database.models.user import User
+
+    org, project = await _seed(db_session)
+    second_email = f"second-admin-{uuid.uuid4().hex[:6]}@example.test"
+    second = User(
+        auth_subject=f"sub-{uuid.uuid4()}",
+        email=second_email,
+        full_name="Second Admin",
+        password_hash=hash_password("not-used-in-this-test-6"),
+        is_email_verified=True,
+    )
+    db_session.add(second)
+    await db_session.flush()
+    db_session.add(
+        OrganizationMember(
+            organization_id=org.id,
+            user_id=second.id,
+            role=MemberRole.admin,
+            status=MemberStatus.active,
+        )
+    )
+    await db_session.flush()
+    row = await _open_escalation(db_session, org, project)
+    monkeypatch.setattr(
+        escalation_service.email_service, "delivery_configured", lambda: True
+    )
+
+    sent_to: list[str] = []
+    refuse = {"second": True}
+
+    def send(**kwargs):
+        sent_to.append(kwargs["to"])
+        return not (refuse["second"] and kwargs["to"] == second_email)
+
+    monkeypatch.setattr(escalation_service.email_service, "send_email", send)
+
+    # First pass: the second admin's delivery fails, the owner's succeeds.
+    await escalation_service.deliver_due(db_session, now=datetime.now(timezone.utc))
+    assert row.notify_status == "failed"
+    assert second_email not in row.notified_addresses
+    assert len(row.notified_addresses) == 1
+    first_owner = row.notified_addresses[0]
+
+    # Retry after the backoff, with delivery working again.
+    sent_to.clear()
+    refuse["second"] = False
+    await escalation_service.deliver_due(
+        db_session, now=row.next_attempt_at + timedelta(seconds=1)
+    )
+
+    assert row.notify_status == "sent"
+    assert sent_to == [second_email], (
+        "the owner already had the alert and must not get it again"
+    )
+    assert first_owner not in sent_to

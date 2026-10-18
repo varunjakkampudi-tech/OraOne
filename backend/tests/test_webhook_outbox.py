@@ -457,11 +457,26 @@ async def test_stale_processing_row_is_reclaimed_after_simulated_crash(
             "app.services.webhook_service.deliver_event", _fake_deliver_event
         )
 
-        # This tick should reclaim the stale PROCESSING row back to PENDING,
-        # then immediately claim + deliver it in the same pass.
+        # This tick reclaims the stale PROCESSING row. A reclaim counts as an
+        # attempt, so the row waits for its backoff before the next delivery.
         await webhook_outbox._tick()
 
         fresh = await db_session.get(type(row), row_id)
+        await db_session.refresh(fresh)
+        assert fresh.status == OutboxStatus.PENDING
+        assert fresh.attempts == 1
+        assert fresh.next_attempt_at is not None
+        assert calls == []
+
+        # Once the backoff has passed, the next tick delivers it.
+        await db_session.execute(
+            WebhookOutbox.__table__.update()
+            .where(WebhookOutbox.id == row_id)
+            .values(next_attempt_at=webhook_outbox._utcnow() - timedelta(seconds=1))
+        )
+        await db_session.commit()
+        await webhook_outbox._tick()
+
         await db_session.refresh(fresh)
         assert fresh.status == OutboxStatus.COMPLETED
         assert calls == ["agent.created"]

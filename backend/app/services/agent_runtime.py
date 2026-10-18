@@ -16,6 +16,7 @@ of Phase 8 can stay role-native without a schema rewrite.
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import os
 import re
@@ -30,7 +31,7 @@ from app.database.models.agent import Agent
 from app.database.models.message import Message, MessageSender
 from app.middleware.org_context import OrgContext
 from app.providers import AIResponse, ChatMessage, DEFAULT_MODEL, get_provider
-from app.services import model_router_service, rag_service
+from app.services import grounding, model_router_service, rag_service
 from app.services.rag_service import RetrievedChunk
 
 log = logging.getLogger("app.agent_runtime")
@@ -281,7 +282,11 @@ class AgentRuntime:
             return [model]
 
     async def generate_reply(
-        self, agent: Agent, messages: list[ChatMessage]
+        self,
+        agent: Agent,
+        messages: list[ChatMessage],
+        *,
+        passages: Optional[list[str]] = None,
     ) -> AIResponse:
         """Invoke the configured model provider with model-level fallback:
 
@@ -296,12 +301,22 @@ class AgentRuntime:
         last_error: Optional[Exception] = None
         for idx, candidate in enumerate(chain):
             try:
-                return await self.provider.chat(
+                resp = await self.provider.chat(
                     messages,
                     model=candidate,
                     temperature=temperature,
                     max_tokens=max_tokens,
                 )
+                if passages:
+                    # Same grounding rule as the public widget: no claim may go
+                    # beyond the retrieved passages.
+                    safe, changed = grounding.enforce_grounded(
+                        resp.content or "", passages
+                    )
+                    if changed:
+                        log.warning("agent_reply_unsupported; using passage text")
+                        resp = dataclasses.replace(resp, content=safe)
+                return resp
             except Exception as e:  # try the next model in the fallback chain
                 last_error = e
                 nxt = chain[idx + 1] if idx + 1 < len(chain) else None

@@ -196,3 +196,5 @@ class WebhookOutbox(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     last_error: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     processed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    # Earliest time the next delivery attempt may run (exponential backoff).
+    next_attempt_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))

@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -89,6 +89,10 @@ class Escalation(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     next_attempt_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
+    )
+    # Team addresses that already received the alert. A retry sends only to the rest.
+    notified_addresses: Mapped[list] = mapped_column(
+        JSONB, nullable=False, default=list, server_default="[]"
     )
     # Error class only (for example "delivery_failed"), never an address or body.
     last_error: Mapped[Optional[str]] = mapped_column(String(80))

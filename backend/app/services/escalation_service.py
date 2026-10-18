@@ -77,7 +77,28 @@ async def create_escalation(
     email: Optional[str] = None,
     phone: Optional[str] = None,
 ) -> Escalation:
-    """Store one open handoff. The team is notified by the worker, not here."""
+    """Store one open handoff. The team is notified by the worker, not here.
+
+    One conversation has at most one unresolved escalation. A repeat handoff, or
+    a manual request from the same chat, refreshes that item instead of adding a
+    second one, so the team sees one queue entry per conversation.
+    """
+    if conversation_id is not None:
+        existing = await session.scalar(
+            select(Escalation)
+            .where(Escalation.conversation_id == conversation_id)
+            .where(Escalation.status != EscalationStatus.resolved)
+            .order_by(Escalation.created_at.desc())
+            .limit(1)
+        )
+        if existing is not None:
+            existing.question = scrub_text(question or "", limit=QUESTION_CHARS)
+            existing.contact_name = (name or "").strip()[:160] or existing.contact_name
+            existing.contact_email = normalize_email(email) or existing.contact_email
+            existing.contact_phone = normalize_phone(phone) or existing.contact_phone
+            existing.has_contact = existing.has_contact or has_contact(email, phone)
+            await session.flush()
+            return existing
     row = Escalation(
         organization_id=organization_id,
         project_id=project_id,
@@ -132,6 +153,25 @@ def _alert_body(row: Escalation) -> dict:
     }
 
 
+LEASE = timedelta(minutes=5)
+
+
+def due_query(now: datetime, limit: int):
+    """Escalations ready for a send attempt. Rows are locked so that concurrent
+    workers each take a disjoint batch (SKIP LOCKED)."""
+    return (
+        select(Escalation)
+        .where(
+            Escalation.notify_status.in_([NotifyStatus.pending, NotifyStatus.failed])
+        )
+        .where(Escalation.next_attempt_at <= now)
+        .where(Escalation.notify_attempts < MAX_NOTIFY_ATTEMPTS)
+        .order_by(Escalation.next_attempt_at.asc())
+        .limit(limit)
+        .with_for_update(skip_locked=True, of=Escalation)
+    )
+
+
 async def deliver_due(
     session: AsyncSession, *, now: Optional[datetime] = None, limit: int = 50
 ) -> dict:
@@ -155,26 +195,13 @@ async def deliver_due(
         return counts
 
     now = now or _now()
-    due = (
-        (
-            await session.execute(
-                select(Escalation)
-                .where(
-                    Escalation.notify_status.in_(
-                        [NotifyStatus.pending, NotifyStatus.failed]
-                    )
-                )
-                .where(Escalation.next_attempt_at <= now)
-                .where(Escalation.notify_attempts < MAX_NOTIFY_ATTEMPTS)
-                .order_by(Escalation.next_attempt_at.asc())
-                .limit(limit)
-            )
-        )
-        .scalars()
-        .all()
-    )
+    due = (await session.execute(due_query(now, limit))).scalars().all()
 
     for row in due:
+        # Lease the row before any external call. The row lock held by this
+        # transaction stops other workers claiming it, and the lease keeps it out
+        # of the due set if this worker commits late.
+        row.next_attempt_at = now + LEASE
         recipients = await _recipients(session, row.organization_id)
         if not recipients:
             row.notify_status = NotifyStatus.no_recipients
@@ -182,18 +209,23 @@ async def deliver_due(
             counts["no_recipients"] += 1
             continue
 
+        # Send only to team members who have not received this alert yet, so a
+        # retry never duplicates an earlier successful send.
+        already = set(row.notified_addresses or [])
+        remaining = [address for address in recipients if address not in already]
         body = _alert_body(row)
-        results = [
-            email_service.send_email(
+        for address in remaining:
+            ok = email_service.send_email(
                 to=address,
                 subject="A visitor question needs your team",
                 template="escalation_alert.html",
                 preheader="The assistant could not answer a visitor question.",
                 context=body,
             )
-            for address in recipients
-        ]
-        if all(results):
+            if ok:
+                already.add(address)
+        row.notified_addresses = sorted(already)
+        if set(recipients) <= already:
             row.notify_status = NotifyStatus.sent
             row.last_error = None
             counts["sent"] += 1

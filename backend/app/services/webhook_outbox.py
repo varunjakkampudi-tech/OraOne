@@ -26,10 +26,10 @@ from __future__ import annotations
 import asyncio
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.webhook import OutboxStatus, WebhookOutbox
@@ -40,6 +40,19 @@ log = logging.getLogger("app.webhooks.outbox")
 _POLL_SECONDS = 5
 _BATCH_SIZE = 20
 _MAX_ATTEMPTS = 5
+# Failed deliveries wait 5s, 10s, 20s ... up to 15 minutes, so a short outage at
+# the customer's endpoint does not use up every attempt in half a minute.
+_BACKOFF_BASE_SECONDS = 5
+_BACKOFF_CAP_SECONDS = 15 * 60
+
+
+def _retry_at(attempts: int) -> datetime:
+    delay = min(
+        _BACKOFF_CAP_SECONDS, _BACKOFF_BASE_SECONDS * (2 ** max(0, attempts - 1))
+    )
+    return _utcnow() + timedelta(seconds=delay)
+
+
 _STALE_PROCESSING_SECONDS = (
     120  # reclaim rows stuck in PROCESSING (worker crashed mid-delivery)
 )
@@ -119,8 +132,6 @@ async def _tick() -> None:
         # what happens if the worker process crashes/is killed between
         # claiming a batch and finishing delivery. Without this, such rows
         # would be stuck forever since nothing else ever revisits PROCESSING.
-        from datetime import timedelta
-
         stale_cutoff = _utcnow() - timedelta(seconds=_STALE_PROCESSING_SECONDS)
         stale_rows = list(
             (
@@ -137,7 +148,16 @@ async def _tick() -> None:
                 "reclaiming stale PROCESSING outbox row id=%s (worker likely crashed mid-delivery)",
                 row.id,
             )
-            row.status = OutboxStatus.PENDING
+            # A reclaim counts as an attempt. A payload that crashes the worker every
+            # time must reach FAILED instead of looping forever.
+            row.attempts = (row.attempts or 0) + 1
+            row.last_error = "reclaimed after worker interruption"[:500]
+            if row.attempts >= _MAX_ATTEMPTS:
+                row.status = OutboxStatus.FAILED
+                row.processed_at = _utcnow()
+            else:
+                row.status = OutboxStatus.PENDING
+                row.next_attempt_at = _retry_at(row.attempts)
         if stale_rows:
             await session.commit()
 
@@ -146,6 +166,12 @@ async def _tick() -> None:
                 await session.scalars(
                     select(WebhookOutbox)
                     .where(WebhookOutbox.status == OutboxStatus.PENDING)
+                    .where(
+                        or_(
+                            WebhookOutbox.next_attempt_at.is_(None),
+                            WebhookOutbox.next_attempt_at <= _utcnow(),
+                        )
+                    )
                     .order_by(WebhookOutbox.created_at)
                     .with_for_update(skip_locked=True)
                     .limit(_BATCH_SIZE)
@@ -199,6 +225,8 @@ async def _deliver_outbox_row(outbox_id: uuid.UUID) -> None:
                 )
                 if row.status == OutboxStatus.FAILED:
                     row.processed_at = _utcnow()
+                else:
+                    row.next_attempt_at = _retry_at(row.attempts)
                 log.warning(
                     "outbox delivery incomplete id=%s event=%s succeeded=%d failed=%d attempt=%d",
                     row.id,
@@ -224,6 +252,8 @@ async def _deliver_outbox_row(outbox_id: uuid.UUID) -> None:
                 if row.attempts >= _MAX_ATTEMPTS
                 else OutboxStatus.PENDING
             )
+            if row.status == OutboxStatus.PENDING:
+                row.next_attempt_at = _retry_at(row.attempts)
             log.warning(
                 "outbox delivery failed id=%s event=%s attempt=%d err=%s",
                 row.id,

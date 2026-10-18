@@ -144,6 +144,26 @@ async def authenticate(session: AsyncSession, full_key: str) -> ApiKey:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="API key has expired."
         )
+    if row.project_id is not None:
+        # A key bound to a deleted or archived project must stop working at once.
+        from app.database.models.project import Project, ProjectStatus
+
+        project = (
+            await session.execute(
+                select(Project.status, Project.deleted_at).where(
+                    Project.id == row.project_id
+                )
+            )
+        ).first()
+        if (
+            project is None
+            or project.deleted_at is not None
+            or project.status != ProjectStatus.active
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="The project for this API key is not active.",
+            )
     return row
 
 
@@ -160,9 +180,13 @@ async def touch_last_used(session: AsyncSession, key: ApiKey) -> None:
     await session.commit()
 
 
-# ── rate limiting (in-process fixed window) ──────────────────────────────
-# key_id -> (window_minute_epoch, count)
-_RATE_BUCKETS: dict[str, tuple[int, int]] = {}
+# ── rate limiting (shared fixed window, one counter per key per minute) ──
+# Counters live in the shared cache (Redis when REDIS_URL is set), so every
+# worker process enforces the same ceiling for a key.
+def _rate_cache():
+    from app.services.cache import get_shared_cache
+
+    return get_shared_cache("api-key-rate")
 
 
 async def enforce_rate_limit(session: AsyncSession, key: ApiKey) -> dict:
@@ -186,12 +210,14 @@ async def enforce_rate_limit(session: AsyncSession, key: ApiKey) -> dict:
         return {"limit": -1, "remaining": -1}
 
     window = int(time.time() // 60)
-    bucket_key = str(key.id)
-    cur_window, count = _RATE_BUCKETS.get(bucket_key, (window, 0))
-    if cur_window != window:
-        cur_window, count = window, 0
-    count += 1
-    _RATE_BUCKETS[bucket_key] = (cur_window, count)
+    try:
+        count = _rate_cache().increment(f"{key.id}:{window}", ttl_seconds=65)
+    except Exception:  # noqa: BLE001 - fail closed rather than skip the limit
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Rate limiting is temporarily unavailable. Retry shortly.",
+            headers={"Retry-After": "5"},
+        )
 
     if count > rpm:
         raise HTTPException(

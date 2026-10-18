@@ -197,16 +197,16 @@ def _effective_knowledge_base_ids(
 ) -> Optional[list[uuid.UUID]]:
     """Resolve public-widget retrieval scope from agent and widget bindings.
 
-    A missing agent binding preserves the legacy widget behavior: the widget's
-    optional KB is used, or ``None`` allows the existing org-wide fallback.
-    Once an agent has an explicit binding, the widget can only narrow it. A
-    mismatch or explicit empty binding fails closed with no KB retrieval.
+    A public visitor never reaches every knowledge base by default. With no
+    binding at all, the widget's own KB is used, or retrieval is empty until the
+    owner binds one. Once an agent has an explicit binding, the widget can only
+    narrow it. A mismatch or explicit empty binding fails closed as well.
     """
     widget_id = widget.knowledge_base_id
     cfg = agent.config if agent is not None else None
     config = cfg.config if cfg is not None else None
     if not isinstance(config, dict) or "knowledge_base_ids" not in config:
-        return [widget_id] if widget_id else None
+        return [widget_id] if widget_id else []
 
     raw = config.get("knowledge_base_ids")
     if not isinstance(raw, list):
@@ -516,7 +516,8 @@ async def _persist_and_answer(
             session,
             organization_id=widget.organization_id,
             project_id=project_id,
-            visitor_key=ws.visitor_id,
+            # Namespaced by widget: the same visitor id on two widgets is two visitors.
+            visitor_key=f"{widget.id}:{ws.visitor_id}",
             channel="chat",
             name=ctx.get("name"),
             email=ctx.get("email"),
@@ -893,6 +894,24 @@ async def widget_escalate(
             "name": payload.name,
             "email": payload.email,
         },
+    )
+    # The manual request joins the same queue as automatic handoffs, so the team
+    # works one list whichever way the visitor reached a person.
+    from app.services.project_scope import resolve_project_id
+
+    project_id = await resolve_project_id(
+        session, widget.organization_id, widget.project_id
+    )
+    await escalation_service.create_escalation(
+        session,
+        organization_id=widget.organization_id,
+        project_id=project_id,
+        channel="chat",
+        question=(payload.reason or "").strip()
+        or "Visitor asked to speak to a person.",
+        conversation_id=ws.conversation_id,
+        name=payload.name,
+        email=payload.email,
     )
     await session.commit()
     return WidgetOk(detail="Escalation requested.")

@@ -24,6 +24,7 @@ from app.services import (
     visitor_service,
     workflow_triggers,
 )
+from app.services import business_scope_guard
 from app.services.business_scope_guard import Scope
 
 TEST_PROJECT_ID = uuid.uuid4()
@@ -595,3 +596,18 @@ def _default_project_for_tests(monkeypatch):
         return project
 
     monkeypatch.setattr(project_scope, "default_project_id", _default)
+
+
+@pytest.mark.parametrize(
+    "question",
+    [
+        "What is the bitcoin price today?",
+        "Should I buy ethereum now?",
+        "Where is the nifty going?",
+    ],
+)
+def test_market_and_crypto_questions_are_out_of_scope(question):
+    assert (
+        business_scope_guard.classify(question)
+        is business_scope_guard.Scope.OUT_OF_SCOPE
+    )

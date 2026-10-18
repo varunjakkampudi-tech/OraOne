@@ -73,3 +73,10 @@ Dated results. Each entry says what was run and what it does not prove.
 - **Migration rollback is not proven.** The migration chain has one head (0061). No
   down-migration has been exercised against a restored database, so a release that
   includes a migration can only be rolled back by restoring a backup.
+- **2026-10-18, migration rollback rehearsal (scratch database, not production).** A clean
+  export of the committed backend was run against an empty pgvector/pg16 container. Results:
+  upgrade to head passed; downgrade from head to 0061 and upgrade again passed; a downgrade from
+  0063 to 0043 passed. A full downgrade to base is refused by design: migration
+  `0043_drop_voice_platform` is one-way. Rolling back past 0043 needs a pre-migration backup.
+  Migrations 0044 to 0063 are reversible in this rehearsal. Each downgrade for the newer
+  migrations still needs to be reviewed for data loss before a live rollback.

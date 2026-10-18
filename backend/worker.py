@@ -65,6 +65,27 @@ async def _prune_error_events_daily(stop_event: asyncio.Event) -> None:
             continue
 
 
+async def _stop_if_a_loop_dies(
+    stop_event: asyncio.Event, loop_tasks: list[asyncio.Task]
+) -> None:
+    """Return when a shutdown is requested or any background loop has died.
+
+    A dead loop leaves the worker half-working. Returning here stops the process,
+    so the container restart policy brings it back with every loop running.
+    """
+    log = logging.getLogger("app.worker")
+    while not stop_event.is_set():
+        dead = [t for t in loop_tasks if t.done()]
+        if dead:
+            log.error("worker loop exited unexpectedly; stopping for restart")
+            stop_event.set()
+            return
+        try:
+            await asyncio.wait_for(stop_event.wait(), timeout=10)
+        except asyncio.TimeoutError:
+            continue
+
+
 async def main() -> None:
     logging.basicConfig(level=logging.INFO)
     init_engine()
@@ -81,7 +102,7 @@ async def main() -> None:
             # Windows event loops do not implement add_signal_handler.
             signal.signal(sig, lambda *_: loop.call_soon_threadsafe(stop_event.set))
     try:
-        await stop_event.wait()
+        await _stop_if_a_loop_dies(stop_event, [prune_task, escalation_task])
     finally:
         stop_event.set()
         await prune_task

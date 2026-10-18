@@ -58,6 +58,7 @@ _STRONG_OUT = re.compile(
     r"|(solve|calculate|derive)\b.{0,30}\b(equation|integral|homework|math problem)"
     r"|horoscope|astrology|zodiac"
     r"|diagnos\w*|dosage|should i (break ?up|divorce|quit)"
+    r"|bitcoin|ethereum|dogecoin|crypto(currency)?|nft|forex|stock market|share price|stock price|sensex|nifty"
     r")",
     re.IGNORECASE,
 )
