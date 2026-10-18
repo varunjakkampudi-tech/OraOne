@@ -492,3 +492,16 @@ ALREADY DECIDED OR DONE (no action needed)
 - CI on main: backend, frontend, browser (390 and 1280 px) and production images - all passing.
 - Owner decision recorded: projects are separate data boundaries.
 - Documentation and this blocker list reconciled with the code.
+
+
+=====================================================================
+ITEM 19 - DAILY AI TOKEN CAP (set the value)
+=====================================================================
+Why: each organization now has a daily limit on AI tokens. The code default is 500,000 tokens a day,
+     a placeholder. The monthly allowance still applies on top of it.
+Decision you make: reply with the daily token amount you want per plan, or "use default".
+     Use -1 for "no daily cap" on a plan.
+Plan values are set in backend/app/services/billing_service.py (key: ai_tokens_per_day) and
+     change only with your approval.
+Also decide: the monthly ai_tokens_per_month value on each plan (currently 250,000 on the free plan).
+Tell me: "daily cap: <number per plan>" or "daily cap: use default".
