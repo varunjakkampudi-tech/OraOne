@@ -302,3 +302,63 @@ async def enforce_quota(
                 f"({check['used']}/{check['limit']}). Upgrade your plan to continue."
             ),
         )
+
+
+async def reserve_metered(
+    session: AsyncSession,
+    organization_id: uuid.UUID,
+    metric: str,
+    amount: int,
+) -> bool:
+    """Atomically reserve ``amount`` of a metered quota before the work is done.
+
+    Returns False, without changing the counter, when the reservation would take
+    the organization past its plan limit. The check and the increment happen in
+    one conditional statement, so two concurrent requests cannot both pass a
+    limit that only one of them fits under. Unlimited plans always succeed.
+    """
+    spec = METERED_METRICS.get(metric)
+    if spec is None or amount <= 0:
+        return True
+    plan = await _plan_for(session, organization_id)
+    limit = _limit_for(plan.limits or {}, spec["limit_key"])
+    if limit == UNLIMITED:
+        await record_usage(session, organization_id, metric, amount)
+        return True
+    if amount > limit:
+        return False
+
+    period = period_key(spec["granularity"])
+    stmt = (
+        pg_insert(UsageCounter)
+        .values(
+            id=uuid.uuid4(),
+            organization_id=organization_id,
+            metric=metric,
+            period=period,
+            value=amount,
+        )
+        .on_conflict_do_update(
+            constraint="uq_usage_counters_org_metric_period",
+            set_={"value": UsageCounter.value + amount, "updated_at": _now()},
+            where=UsageCounter.value + amount <= limit,
+        )
+        .returning(UsageCounter.value)
+    )
+    result = await session.execute(stmt)
+    row = result.first()
+    await session.commit()
+    return row is not None
+
+
+async def settle_metered(
+    session: AsyncSession,
+    organization_id: uuid.UUID,
+    metric: str,
+    reserved: int,
+    actual: int,
+) -> None:
+    """Replace a reservation with the real usage. Overestimates are refunded."""
+    difference = int(actual) - int(reserved)
+    if difference != 0:
+        await record_usage(session, organization_id, metric, difference)

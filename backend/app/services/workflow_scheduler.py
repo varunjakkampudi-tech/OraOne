@@ -114,7 +114,7 @@ async def _loop() -> None:
         # Each job has its own guard so one failing job does not stop the others.
         for name, job in (
             ("schedule", _tick),
-            ("event runs", _dispatch_event_runs),
+            ("queued runs", _dispatch_queued_runs),
             ("waits", resume_due_waits),
         ):
             try:
@@ -128,27 +128,34 @@ _inflight: set[asyncio.Task] = set()
 _SHUTDOWN_GRACE_SECONDS = 25
 
 
-async def _dispatch_event_runs() -> None:
-    """Start queued event-triggered runs (lead.created, message.received).
+# A queued run that is older than this has not been started by its request
+# (the process probably died after the commit). Younger runs are left to the
+# request's own background start.
+QUEUED_RECOVERY_AFTER = timedelta(seconds=60)
 
-    Each run claims itself atomically in execute_run, so a run started here
-    cannot also be started by a later tick.
+
+def queued_runs_query(now: datetime, limit: int = 100):
+    """Queued runs of any trigger that the request path never started.
+
+    Public API, manual and event runs all commit as ``queued`` and then start in
+    a background task. If that process dies first, this query finds the run.
+    Each run claims itself atomically in execute_run, so starting a run here
+    while its request also starts it is safe: only one execution proceeds.
     """
+    return (
+        select(WorkflowRun.id)
+        .where(WorkflowRun.status == RunStatus.queued)
+        .where(WorkflowRun.created_at < now - QUEUED_RECOVERY_AFTER)
+        .order_by(WorkflowRun.created_at)
+        .limit(limit)
+    )
+
+
+async def _dispatch_queued_runs() -> None:
+    """Start queued runs that were committed but never started."""
     Maker = _maker()
     async with Maker() as session:  # type: ignore[misc]
-        run_ids = list(
-            (
-                await session.scalars(
-                    select(WorkflowRun.id)
-                    .where(
-                        WorkflowRun.status == RunStatus.queued,
-                        WorkflowRun.trigger == WorkflowTrigger.event,
-                    )
-                    .order_by(WorkflowRun.created_at)
-                    .limit(100)
-                )
-            ).all()
-        )
+        run_ids = list((await session.scalars(queued_runs_query(_utcnow()))).all())
     for run_id in run_ids:
         task = asyncio.create_task(execute_run(run_id))
         _inflight.add(task)

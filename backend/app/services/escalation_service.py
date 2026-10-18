@@ -25,6 +25,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from sqlalchemy import func, or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.log_redaction import redact_email, scrub_text
@@ -87,21 +88,11 @@ async def create_escalation(
     second one, so the team sees one queue entry per conversation.
     """
     if conversation_id is not None:
-        existing = await session.scalar(
-            select(Escalation)
-            .where(Escalation.conversation_id == conversation_id)
-            .where(Escalation.status != EscalationStatus.resolved)
-            .order_by(Escalation.created_at.desc())
-            .limit(1)
-        )
+        existing = await _open_for_conversation(session, conversation_id)
         if existing is not None:
-            existing.question = scrub_text(question or "", limit=QUESTION_CHARS)
-            existing.contact_name = (name or "").strip()[:160] or existing.contact_name
-            existing.contact_email = normalize_email(email) or existing.contact_email
-            existing.contact_phone = normalize_phone(phone) or existing.contact_phone
-            existing.has_contact = existing.has_contact or has_contact(email, phone)
-            await session.flush()
-            return existing
+            return _refresh(
+                existing, question=question, name=name, email=email, phone=phone
+            )
     row = Escalation(
         organization_id=organization_id,
         project_id=project_id,
@@ -118,10 +109,54 @@ async def create_escalation(
         next_attempt_at=_now(),
         due_at=_now() + RESPONSE_TARGET,
     )
-    session.add(row)
-    await session.flush()
+    if conversation_id is None:
+        session.add(row)
+        await session.flush()
+        log.info("escalation_created id=%s channel=%s", row.id, row.channel)
+        return row
+    try:
+        # The savepoint keeps a lost race from aborting the caller's transaction.
+        async with session.begin_nested():
+            session.add(row)
+            await session.flush()
+    except IntegrityError:
+        # A concurrent request created the open item first. The database rule
+        # guarantees exactly one, so reuse it.
+        winner = await _open_for_conversation(session, conversation_id)
+        if winner is None:
+            raise
+        return _refresh(winner, question=question, name=name, email=email, phone=phone)
     log.info("escalation_created id=%s channel=%s", row.id, row.channel)
     return row
+
+
+async def _open_for_conversation(
+    session: AsyncSession, conversation_id: uuid.UUID
+) -> Optional[Escalation]:
+    return await session.scalar(
+        select(Escalation)
+        .where(Escalation.conversation_id == conversation_id)
+        .where(Escalation.status != EscalationStatus.resolved)
+        .order_by(Escalation.created_at.desc())
+        .limit(1)
+    )
+
+
+def _refresh(
+    existing: Escalation,
+    *,
+    question: Optional[str],
+    name: Optional[str],
+    email: Optional[str],
+    phone: Optional[str],
+) -> Escalation:
+    """Update the open item with the latest question and any newly given contact."""
+    existing.question = scrub_text(question or "", limit=QUESTION_CHARS)
+    existing.contact_name = (name or "").strip()[:160] or existing.contact_name
+    existing.contact_email = normalize_email(email) or existing.contact_email
+    existing.contact_phone = normalize_phone(phone) or existing.contact_phone
+    existing.has_contact = existing.has_contact or has_contact(email, phone)
+    return existing
 
 
 async def _recipients(session: AsyncSession, organization_id: uuid.UUID) -> list[str]:

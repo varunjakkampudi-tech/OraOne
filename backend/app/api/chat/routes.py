@@ -52,7 +52,7 @@ from app.schemas.chat import (
     SuggestedQuestions,
 )
 from app.services.agent_runtime import AgentRuntime, sender_to_role
-from app.services import rag_service
+from app.services import grounding, rag_service
 from app.services import usage_service
 from app.services.audit import audit
 
@@ -781,6 +781,22 @@ async def send_message(
 # ───────────────────────── streaming (SSE) ─────────────────────
 
 
+def _text_chunks(text: str, size: int) -> list[str]:
+    """Split text into fixed-size pieces for the stream, without splitting words."""
+    out: list[str] = []
+    buf = ""
+    for word in text.split(" "):
+        candidate = f"{buf} {word}" if buf else word
+        if len(candidate) > size and buf:
+            out.append(buf + " ")
+            buf = word
+        else:
+            buf = candidate
+    if buf:
+        out.append(buf)
+    return out
+
+
 def _sse(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {json.dumps(data, default=str)}\n\n"
 
@@ -837,9 +853,17 @@ async def stream_message(
 
         acc: list[str] = []
         try:
+            # Collect the whole reply first. Nothing reaches the visitor until the
+            # grounding rule has run on the complete text, so an unsupported claim
+            # cannot be streamed out and then corrected.
             async for piece in runtime.stream_reply(agent, messages):
                 acc.append(piece)
-                yield _sse("token", {"delta": piece})
+            final, _changed = grounding.enforce_grounded(
+                "".join(acc), [c.content for c in retrieved]
+            )
+            acc = [final] if final else []
+            for chunk in _text_chunks(final, 60):
+                yield _sse("token", {"delta": chunk})
         except AIProviderError as e:
             log.warning("stream provider error code=%s: %s", e.code, e)
             yield _sse("error", {"error": e.code, "message": str(e)})

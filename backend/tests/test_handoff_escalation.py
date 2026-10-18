@@ -449,3 +449,59 @@ async def test_internal_notes_are_stored_and_reopen_restores_a_due_time(db_sessi
     assert row.status == "open"
     assert row.resolved_at is None
     assert row.due_at is not None and row.due_at > datetime.now(timezone.utc)
+
+
+@db_only
+@pytest.mark.asyncio
+async def test_database_rejects_a_second_open_escalation_for_one_conversation(
+    db_session,
+):
+    from sqlalchemy.exc import IntegrityError
+
+    from app.database.models.agent import Agent, AgentStatus, AgentType
+    from app.database.models.conversation import (
+        Conversation,
+        ConversationChannel,
+        ConversationStatus,
+    )
+    from app.database.models.escalation import Escalation
+
+    org, project = await _seed(db_session)
+    agent = Agent(
+        organization_id=org.id,
+        project_id=project.id,
+        name="Support",
+        type=AgentType.chat,
+        status=AgentStatus.active,
+        model="test/model",
+    )
+    db_session.add(agent)
+    await db_session.flush()
+    conversation = Conversation(
+        organization_id=org.id,
+        project_id=project.id,
+        agent_id=agent.id,
+        channel=ConversationChannel.chat,
+        status=ConversationStatus.active,
+        started_at=datetime.now(timezone.utc),
+    )
+    db_session.add(conversation)
+    await db_session.flush()
+    await _open_escalation(db_session, org, project, conversation_id=conversation.id)
+
+    duplicate = Escalation(
+        organization_id=org.id,
+        project_id=project.id,
+        conversation_id=conversation.id,
+        channel="chat",
+        question="A second open item.",
+        status="open",
+        notify_status="pending",
+        notify_attempts=0,
+        next_attempt_at=datetime.now(timezone.utc),
+        due_at=datetime.now(timezone.utc),
+    )
+    with pytest.raises(IntegrityError):
+        async with db_session.begin_nested():
+            db_session.add(duplicate)
+            await db_session.flush()

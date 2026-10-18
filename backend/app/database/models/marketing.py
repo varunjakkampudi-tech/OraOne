@@ -51,11 +51,13 @@ class MarketingCampaignStatus:
 
 class MarketingRecipientStatus:
     queued = "queued"
+    # Claimed by a worker and handed to the provider. Not yet recorded.
+    sending = "sending"
     sent = "sent"
     skipped = "skipped"
     failed = "failed"
 
-    ALL = ("queued", "sent", "skipped", "failed")
+    ALL = ("queued", "sending", "sent", "skipped", "failed")
 
 
 class MarketingCampaign(Base):
@@ -153,6 +155,10 @@ class MarketingRecipient(Base):
     )
     skip_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     failure_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # When a worker claimed this recipient for sending (used to detect interrupted sends).
+    claimed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     sent_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )

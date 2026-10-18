@@ -193,16 +193,20 @@ Still needs you or a live environment:
 28. Semantic grounding (LLM entailment): not built. The current checks are lexical, numeric and
     negation only, so they cannot judge paraphrase-level contradictions. Decide whether to add a
     second model call per reply (extra cost, latency) or a human review queue for sampled replies.
-29. Streaming replies (the streaming chat route) are not grounding-checked, because text reaches the
-    visitor before the check can run. Decide: buffer streams and check, or accept the risk.
+29. DONE (round 6): the signed-in streaming route collects the full reply, checks it, and only then
+    sends it in chunks. Trade-off: the visitor sees the reply after generation, not word by word.
+    The public widget already built its stream from a checked answer. Owner: confirm the trade-off.
 30. Browser tests against a real backend: the browser job still uses mocked API responses. Owner
     decision: approve adding PostgreSQL and Redis services to that CI job, and the 768 px project.
-31. Dashboard screen for the escalation queue (assign, resolve). The API exists at /api/escalations.
+31. DONE (round 5): the escalation inbox is at /studio/escalations (owner, notes, overdue, resolve, reopen).
 32. Response-time target for human handoffs (item 21).
-33. Marketing campaigns still send directly during the campaign run, not from a durable queue with
-    delivery receipts. Needed before large campaigns.
-34. Cost caps: per-organization daily spending limits reserved before model calls are not built.
-    Needed before paid plans.
+33. PARTLY DONE (round 6): campaign sends claim recipients, release the database locks, send, then record.
+    An interrupted claim is failed for review and never resent automatically. Still missing: provider
+    message IDs and delivery receipts (bounces, reads), and a durable outbound queue. Needed before large campaigns.
+34. PARTLY DONE (round 6): the monthly AI token allowance is reserved atomically before each model call,
+    settled to actual usage, and refunded on failure. The answer path falls back to passage text when the
+    allowance is used up; the signed-in chat returns 402. Still missing: a per-organization DAILY ceiling, and
+    provider-cost reconciliation (token counts are estimates until reconciled against invoices).
 35. Off-the-shelf market claims: competitor prices and features in the audit must be checked against
     each vendor's public pricing page before any external use. Do not publish comparisons until then.
 
@@ -230,3 +234,19 @@ ROUND 5 (audit of d8a3040)
 45. Performance under concurrent customer traffic: not measured. Needs a staging environment and
     approval to run a load test against it. Suggested target: 200 concurrent widget sessions with p95
     reply latency and error rate recorded.
+
+ROUND 6 (audit of 85ff6df)
+46. Mobile apps: the audit scores native apps at 5%. Decide whether "mobile" in the launch promise means
+    the responsive website (then say so) or native Android and iOS apps (a separate project).
+47. Studio versus /app navigation: two experiences exist. Decide which one is canonical; the other should
+    redirect or be removed so features are not built twice.
+48. Full cross-project authorization audit for every module (GET, LIST, CREATE, UPDATE, DELETE, EXECUTE).
+    Channel management and marketplace installs are now project-scoped. Super Admin impersonation and customer
+    inspection still need an adversarial test pass before launch.
+49. Live provider journeys (Meta, Twilio, ElevenLabs, SMTP, OpenRouter): need your credentials and a
+    recorded run per journey, with provider receipts. Code paths are tested with fakes only.
+50. Billing: production runs in free-access mode. Decide the launch commercial policy (free, paid, or
+    free-with-clear-"checkout unavailable" labels). Paid checkout must not be shown as working until it is proven.
+51. Durable delivery for public workflow runs and marketing: committed runs are now recovered by the
+    scheduler (round 6). Full crash-matrix testing against a real database is still needed.
+52. Load and failure tests: not run. Needs a staging environment (blocker item 45).

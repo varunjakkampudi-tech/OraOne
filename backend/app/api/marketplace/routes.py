@@ -21,6 +21,7 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -164,10 +165,13 @@ def _requirement_reads(evaluation: catalog.Evaluation) -> list[RequirementRead]:
     return [RequirementRead(**r.as_dict()) for r in evaluation.requirements]
 
 
-async def _installed_slugs(db: AsyncSession, organization_id: uuid.UUID) -> set[str]:
+async def _installed_slugs(
+    db: AsyncSession, organization_id: uuid.UUID, project_id: uuid.UUID
+) -> set[str]:
     rows = await db.scalars(
         select(MarketplaceInstallation.listing_slug)
         .where(MarketplaceInstallation.organization_id == organization_id)
+        .where(MarketplaceInstallation.project_id == project_id)
         .where(MarketplaceInstallation.status == InstallStatus.installed)
     )
     return set(rows.all())
@@ -230,9 +234,10 @@ async def list_listings(
     category: Optional[str] = Query(default=None),
     q: Optional[str] = Query(default=None),
     ctx: OrgContext = Depends(get_current_organization),
+    pctx: ProjectContext = Depends(get_current_project),
     db: AsyncSession = Depends(get_db),
 ) -> list[ListingRead]:
-    installed = await _installed_slugs(db, ctx.organization_id)
+    installed = await _installed_slugs(db, ctx.organization_id, pctx.project_id)
     items = catalog.list_listings(category=category, q=q)
     ratings = await _ratings_for(db, [i["slug"] for i in items])
     states = await _integration_states(db, ctx.organization_id)
@@ -246,12 +251,13 @@ async def list_listings(
 async def get_listing(
     slug: str,
     ctx: OrgContext = Depends(get_current_organization),
+    pctx: ProjectContext = Depends(get_current_project),
     db: AsyncSession = Depends(get_db),
 ) -> ListingDetail:
     item = catalog.get_listing(slug)
     if item is None:
         raise HTTPException(status_code=404, detail="Listing not found.")
-    installed = await _installed_slugs(db, ctx.organization_id)
+    installed = await _installed_slugs(db, ctx.organization_id, pctx.project_id)
     ratings = await _ratings_for(db, [slug])
     states = await _integration_states(db, ctx.organization_id)
     base = _to_listing_read(
@@ -262,12 +268,13 @@ async def get_listing(
 
 @router.get("/installations", response_model=list[InstallationRead])
 async def list_installations(
-    ctx: OrgContext = Depends(get_current_organization),
+    pctx: ProjectContext = Depends(get_current_project),
     db: AsyncSession = Depends(get_db),
 ) -> list[MarketplaceInstallation]:
     rows = await db.scalars(
         select(MarketplaceInstallation)
-        .where(MarketplaceInstallation.organization_id == ctx.organization_id)
+        .where(MarketplaceInstallation.organization_id == pctx.organization_id)
+        .where(MarketplaceInstallation.project_id == pctx.project_id)
         .where(MarketplaceInstallation.status == InstallStatus.installed)
         .order_by(desc(MarketplaceInstallation.created_at))
     )
@@ -290,13 +297,19 @@ async def install_listing(
         raise HTTPException(status_code=404, detail="Listing not found.")
     ctx = pctx.org
 
-    # Idempotent: if already installed, return the existing record.
-    existing = await db.scalar(
-        select(MarketplaceInstallation)
-        .where(MarketplaceInstallation.organization_id == ctx.organization_id)
-        .where(MarketplaceInstallation.listing_slug == slug)
-        .where(MarketplaceInstallation.status == InstallStatus.installed)
-    )
+    async def _existing_install() -> MarketplaceInstallation | None:
+        # Installations belong to a project: the same blueprint may be installed
+        # once per project.
+        return await db.scalar(
+            select(MarketplaceInstallation)
+            .where(MarketplaceInstallation.organization_id == ctx.organization_id)
+            .where(MarketplaceInstallation.project_id == pctx.project_id)
+            .where(MarketplaceInstallation.listing_slug == slug)
+            .where(MarketplaceInstallation.status == InstallStatus.installed)
+        )
+
+    # Idempotent: if already installed in this project, return the existing record.
+    existing = await _existing_install()
     if existing is not None:
         return InstallResponse(
             installation=InstallationRead.model_validate(existing),
@@ -415,7 +428,19 @@ async def install_listing(
         },
     )
     db.add(row)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        # A concurrent install won the race. Rolling back also removes the agent,
+        # knowledge base and workflow created above, so nothing is left half-installed.
+        await db.rollback()
+        winner = await _existing_install()
+        if winner is None:
+            raise HTTPException(status_code=409, detail="Installation conflict. Retry.")
+        return InstallResponse(
+            installation=InstallationRead.model_validate(winner),
+            agent_id=winner.agent_id,
+        )
     await db.refresh(row)
 
     audit(
@@ -445,13 +470,16 @@ async def install_listing(
 )
 async def uninstall_listing(
     installation_id: uuid.UUID,
-    ctx: OrgContext = Depends(require_permission(Permission.AGENTS_WRITE)),
+    _: OrgContext = Depends(require_permission(Permission.AGENTS_WRITE)),
+    pctx: ProjectContext = Depends(get_current_project),
     db: AsyncSession = Depends(get_db),
 ) -> Response:
+    ctx = pctx.org
     row = await db.scalar(
         select(MarketplaceInstallation)
         .where(MarketplaceInstallation.id == installation_id)
         .where(MarketplaceInstallation.organization_id == ctx.organization_id)
+        .where(MarketplaceInstallation.project_id == pctx.project_id)
     )
     if row is None:
         raise HTTPException(status_code=404, detail="Installation not found.")

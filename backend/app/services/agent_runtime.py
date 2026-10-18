@@ -31,7 +31,9 @@ from app.database.models.agent import Agent
 from app.database.models.message import Message, MessageSender
 from app.middleware.org_context import OrgContext
 from app.providers import AIResponse, ChatMessage, DEFAULT_MODEL, get_provider
-from app.services import grounding, model_router_service, rag_service
+from fastapi import HTTPException, status
+
+from app.services import grounding, model_router_service, rag_service, usage_service
 from app.services.rag_service import RetrievedChunk
 
 log = logging.getLogger("app.agent_runtime")
@@ -298,6 +300,38 @@ class AgentRuntime:
         """
         model, temperature, max_tokens = self._model_params(agent)
         chain = await self._route_chain(model)
+        # Reserve the estimated AI token spend before any paid call. A plan that
+        # cannot cover it is refused here, so no model call is made and no overspend occurs.
+        estimate = sum(len(m.content or "") // 4 + 4 for m in messages) + max_tokens
+        if not await usage_service.reserve_metered(
+            self.session, self.ctx.organization_id, "ai_tokens", estimate
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail="Your plan's AI token allowance for this month is used up.",
+            )
+        actual = 0
+        try:
+            resp = await self._call_chain(
+                chain, messages, temperature, max_tokens, passages
+            )
+            seen = getattr(resp, "usage", None)
+            actual = int(getattr(seen, "total_tokens", 0) or 0) or estimate
+            return resp
+        finally:
+            # Settle to real usage. A failed call is refunded in full.
+            await usage_service.settle_metered(
+                self.session, self.ctx.organization_id, "ai_tokens", estimate, actual
+            )
+
+    async def _call_chain(
+        self,
+        chain: list[str],
+        messages: list[ChatMessage],
+        temperature: float,
+        max_tokens: int,
+        passages: Optional[list[str]],
+    ) -> AIResponse:
         last_error: Optional[Exception] = None
         for idx, candidate in enumerate(chain):
             try:

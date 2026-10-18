@@ -26,6 +26,7 @@ from sqlalchemy.sql import operators
 from sqlalchemy.sql.elements import BinaryExpression, BindParameter, BooleanClauseList
 
 from app.api.channels import routes as channel_routes
+from app.middleware.project_context import ProjectContext, get_current_project
 from app.api.omnichannel import routes as omni_routes
 from app.api.voice import routes as voice_routes
 from app.core import crypto
@@ -48,6 +49,10 @@ INBOUND = "support@acme.example.test"
 
 
 # ───────────────────────── in-memory session ─────────────────────────
+
+
+# The project every fake agent belongs to; the client's active project.
+PROJECT_ID = uuid.uuid4()
 
 
 def _value(expr: Any, row: Any) -> Any:
@@ -100,7 +105,13 @@ class FakeSession:
         self.commits = 0
 
     def add_agent(self, agent_id: uuid.UUID, org_id: uuid.UUID, name: str) -> Agent:
-        agent = Agent(id=agent_id, organization_id=org_id, name=name, deleted_at=None)
+        agent = Agent(
+            id=agent_id,
+            organization_id=org_id,
+            project_id=PROJECT_ID,
+            name=name,
+            deleted_at=None,
+        )
         self.agents.append(agent)
         return agent
 
@@ -194,6 +205,14 @@ def _client(world, *, org: uuid.UUID, role: str = "owner") -> TestClient:
     app.include_router(channel_routes.router)
     app.dependency_overrides[get_db] = lambda: world.db
     app.dependency_overrides[get_current_organization] = lambda: ctx
+    app.dependency_overrides[get_current_project] = lambda: ProjectContext(
+        user_id=ctx.user_id,
+        organization_id=org,
+        membership_role=role,
+        project_id=PROJECT_ID,
+        project_slug="main",
+        is_default_project=True,
+    )
     return TestClient(app)
 
 

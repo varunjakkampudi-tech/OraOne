@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import uuid
+from types import SimpleNamespace
+
 import pytest
 
 from app.providers.base import AIProviderError, ChatMessage
@@ -22,7 +25,7 @@ async def test_generate_reply_surfaces_provider_error_when_chain_exhausted(monke
     runtime = object.__new__(runtime_module.AgentRuntime)
     runtime.provider = _AlwaysFailsProvider()
     runtime.session = None
-    runtime.ctx = None
+    runtime.ctx = SimpleNamespace(organization_id=uuid.uuid4())
 
     def _fake_model_params(agent):
         return "google/gemini-2.5-flash", 0.7, 100

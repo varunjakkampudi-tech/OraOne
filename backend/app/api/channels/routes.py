@@ -41,6 +41,7 @@ from app.schemas.channels import (
     SecretRotation,
     Verification,
 )
+from app.middleware.project_context import ProjectContext, get_current_project
 from app.services import channels_service
 from app.services.audit import audit
 from app.services.channels import binding_secrets
@@ -50,12 +51,19 @@ router = APIRouter(prefix="/api/agents", tags=["channels"])
 
 
 async def _load_agent(
-    session: AsyncSession, *, agent_id: uuid.UUID, organization_id: uuid.UUID
+    session: AsyncSession,
+    *,
+    agent_id: uuid.UUID,
+    organization_id: uuid.UUID,
+    project_id: uuid.UUID,
 ) -> Agent:
+    """Load an agent only when it belongs to the caller's organization AND the
+    active project. An agent in another project of the same organization is 404."""
     agent = await session.scalar(
         select(Agent)
         .where(Agent.id == agent_id)
         .where(Agent.organization_id == organization_id)
+        .where(Agent.project_id == project_id)
         .where(Agent.deleted_at.is_(None))
         .options(selectinload(Agent.config))
     )
@@ -91,10 +99,14 @@ def _channel_read(
 async def list_channels(
     agent_id: uuid.UUID,
     org: OrgContext = Depends(get_current_organization),
+    pctx: ProjectContext = Depends(get_current_project),
     session: AsyncSession = Depends(get_db),
 ):
     agent = await _load_agent(
-        session, agent_id=agent_id, organization_id=org.organization_id
+        session,
+        agent_id=agent_id,
+        organization_id=org.organization_id,
+        project_id=pctx.project_id,
     )
     rows = await channels_service.ensure_channels(session, agent)
     await session.commit()
@@ -114,12 +126,16 @@ async def update_channel(
     payload: ChannelUpdate,
     response: Response,
     org: OrgContext = Depends(get_current_organization),
+    pctx: ProjectContext = Depends(get_current_project),
     session: AsyncSession = Depends(get_db),
 ):
     if not channels_service.is_valid_channel(channel):
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Unknown channel")
     agent = await _load_agent(
-        session, agent_id=agent_id, organization_id=org.organization_id
+        session,
+        agent_id=agent_id,
+        organization_id=org.organization_id,
+        project_id=pctx.project_id,
     )
     settings = (
         payload.settings.model_dump(exclude_unset=True) if payload.settings else None
@@ -170,13 +186,17 @@ async def rotate_channel_secret(
     channel: str,
     response: Response,
     org: OrgContext = Depends(get_current_organization),
+    pctx: ProjectContext = Depends(get_current_project),
     session: AsyncSession = Depends(get_db),
 ):
     """Issue a new secret for a secret-bearing channel. The value is returned once."""
     if not channels_service.is_valid_channel(channel):
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Unknown channel")
     agent = await _load_agent(
-        session, agent_id=agent_id, organization_id=org.organization_id
+        session,
+        agent_id=agent_id,
+        organization_id=org.organization_id,
+        project_id=pctx.project_id,
     )
     issued, row = await channels_service.rotate_secret(session, agent, channel)
     audit(
@@ -204,10 +224,14 @@ async def rotate_channel_secret(
 async def get_deploy(
     agent_id: uuid.UUID,
     org: OrgContext = Depends(get_current_organization),
+    pctx: ProjectContext = Depends(get_current_project),
     session: AsyncSession = Depends(get_db),
 ):
     agent = await _load_agent(
-        session, agent_id=agent_id, organization_id=org.organization_id
+        session,
+        agent_id=agent_id,
+        organization_id=org.organization_id,
+        project_id=pctx.project_id,
     )
     info = await channels_service.build_deploy_info(session, agent)
     await session.commit()
@@ -223,10 +247,14 @@ async def update_domains(
     agent_id: uuid.UUID,
     payload: DomainsUpdate,
     org: OrgContext = Depends(get_current_organization),
+    pctx: ProjectContext = Depends(get_current_project),
     session: AsyncSession = Depends(get_db),
 ):
     agent = await _load_agent(
-        session, agent_id=agent_id, organization_id=org.organization_id
+        session,
+        agent_id=agent_id,
+        organization_id=org.organization_id,
+        project_id=pctx.project_id,
     )
     widget = await channels_service.ensure_widget(session, agent)
     domains = await channels_service.set_domains(session, widget, payload.domains)
@@ -251,10 +279,14 @@ async def publish_deploy(
     agent_id: uuid.UUID,
     payload: PublishRequest,
     org: OrgContext = Depends(get_current_organization),
+    pctx: ProjectContext = Depends(get_current_project),
     session: AsyncSession = Depends(get_db),
 ):
     agent = await _load_agent(
-        session, agent_id=agent_id, organization_id=org.organization_id
+        session,
+        agent_id=agent_id,
+        organization_id=org.organization_id,
+        project_id=pctx.project_id,
     )
     widget = await channels_service.ensure_widget(session, agent)
     if payload.publish:
@@ -286,10 +318,14 @@ async def publish_deploy(
 async def verify_deploy(
     agent_id: uuid.UUID,
     org: OrgContext = Depends(get_current_organization),
+    pctx: ProjectContext = Depends(get_current_project),
     session: AsyncSession = Depends(get_db),
 ):
     agent = await _load_agent(
-        session, agent_id=agent_id, organization_id=org.organization_id
+        session,
+        agent_id=agent_id,
+        organization_id=org.organization_id,
+        project_id=pctx.project_id,
     )
     widget = await channels_service.ensure_widget(session, agent)
     result = await channels_service.verify_installation(session, widget)

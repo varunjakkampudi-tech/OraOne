@@ -164,11 +164,7 @@ def test_installing_twice_returns_the_existing_installation_without_creating_ano
 def test_uninstall_is_scoped_to_the_callers_organization():
     session = FakeSession(scalar=[None])  # another organization's row is invisible
     with pytest.raises(HTTPException) as exc:
-        asyncio.run(
-            routes.uninstall_listing(
-                uuid.uuid4(), ctx=OrgContext(USER, "s", ORG, "admin"), db=session
-            )
-        )
+        asyncio.run(routes.uninstall_listing(uuid.uuid4(), pctx=_pctx(), db=session))
     assert exc.value.status_code == 404
     assert str(ORG) in _sql(session.statements[0])
     assert session.committed == 0
@@ -180,11 +176,7 @@ def test_uninstall_marks_the_callers_installation_removed():
     )
     session = FakeSession(scalar=[row])
 
-    response = asyncio.run(
-        routes.uninstall_listing(
-            row.id, ctx=OrgContext(USER, "s", ORG, "admin"), db=session
-        )
-    )
+    response = asyncio.run(routes.uninstall_listing(row.id, pctx=_pctx(), db=session))
 
     assert response.status_code == 204
     assert row.status == InstallStatus.removed
@@ -270,8 +262,17 @@ def test_deleting_own_review_deletes_it():
 
 def test_installed_listings_shown_to_a_caller_are_only_their_organizations_active_installs():
     session = FakeSession()
-    asyncio.run(routes._installed_slugs(session, ORG))
+    asyncio.run(routes._installed_slugs(session, ORG, _pctx().project_id))
     sql = _sql(session.statements[0])
     assert str(ORG) in sql
     assert str(OTHER_ORG) not in sql
     assert "installed" in sql
+
+
+def test_installed_listings_are_scoped_to_the_active_project():
+    other_project = uuid.uuid4()
+    session = FakeSession()
+    asyncio.run(routes._installed_slugs(session, ORG, other_project))
+    sql = _sql(session.statements[0])
+    assert str(other_project) in sql
+    assert str(PROJECT) not in sql

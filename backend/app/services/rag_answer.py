@@ -37,6 +37,7 @@ from app.services import (
     business_scope_guard,
     grounding,
     rag_service,
+    usage_service,
 )
 from app.services import model_router_service
 from app.services.business_scope_guard import Scope, SmallTalk
@@ -63,6 +64,15 @@ _NO_INFO_RE = re.compile(
     r"am unable to|couldn'?t|could not)\b[^.?!]{0,80}\b(information|details|answer|know)\b",
     re.IGNORECASE,
 )
+
+
+class _BudgetExhausted(Exception):
+    """The plan has no AI token budget left for this call."""
+
+
+def _estimate_prompt_tokens(messages) -> int:
+    # Rough estimate: about four characters per token, plus a small overhead per message.
+    return sum(len(m.content or "") // 4 + 4 for m in messages)
 
 
 def _effective_model(model=None):
@@ -240,10 +250,29 @@ async def answer_query(
                 content=f"CONTEXT:\n{context}\n\nQUESTION: {query}\n\nAnswer with inline citations.",
             ),
         )
+        # Reserve the estimated spend before the paid call. If the plan cannot cover
+        # it, answer from the passages instead of calling the model.
+        estimate = _estimate_prompt_tokens(messages) + max_tokens
+        if not await usage_service.reserve_metered(
+            session, organization_id, "ai_tokens", estimate
+        ):
+            raise _BudgetExhausted()
         _t0 = time.perf_counter()
-        resp = await provider.chat(
-            messages, model=used_model, temperature=temperature, max_tokens=max_tokens
-        )
+        actual = 0
+        try:
+            resp = await provider.chat(
+                messages,
+                model=used_model,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            seen = getattr(resp, "usage", None)
+            actual = int(getattr(seen, "total_tokens", 0) or 0) or estimate
+        finally:
+            # Settle to real usage. A failed call is refunded in full.
+            await usage_service.settle_metered(
+                session, organization_id, "ai_tokens", estimate, actual
+            )
         latency_ms = int((time.perf_counter() - _t0) * 1000)
         answer = (resp.content or "").strip()
         used_model = resp.model or used_model
@@ -264,6 +293,10 @@ async def answer_query(
             generated = True
         else:
             answer = _extractive_answer(chunks)
+    except _BudgetExhausted:
+        log.warning("ai_budget_exhausted; answering from passages")
+        answer = _extractive_answer(chunks)
+        used_model = None
     except AIProviderError as e:
         log.warning("rag generation failed (%s); using extractive fallback.", e)
         answer = _extractive_answer(chunks)

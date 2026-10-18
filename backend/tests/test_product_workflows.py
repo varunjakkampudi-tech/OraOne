@@ -542,7 +542,7 @@ async def test_event_runs_are_dispatched_once_each(monkeypatch):
 
     monkeypatch.setattr(scheduler, "execute_run", fake_execute_run)
 
-    await scheduler._dispatch_event_runs()
+    await scheduler._dispatch_queued_runs()
     await asyncio.sleep(0)
 
     assert sorted(scheduled, key=str) == sorted(run_ids, key=str)

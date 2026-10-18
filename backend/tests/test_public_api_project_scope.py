@@ -247,3 +247,73 @@ async def test_key_stops_working_when_its_project_is_deleted(db_session):
     with pytest.raises(HTTPException) as exc:
         await api_key_service.authenticate(db_session, full_key)
     assert exc.value.status_code == 401
+
+
+@db_only
+@pytest.mark.asyncio
+async def test_channel_management_cannot_load_an_agent_from_another_project(db_session):
+    from app.core.security import hash_password
+    from app.database.models.agent import Agent, AgentStatus, AgentType
+    from app.database.models.organization import Organization, OrgPlan
+    from app.database.models.project import Project, ProjectStatus
+    from app.database.models.user import User
+    from app.api.channels.routes import _load_agent
+
+    suffix = uuid.uuid4().hex[:8]
+    owner = User(
+        auth_subject=f"sub-{uuid.uuid4()}",
+        email=f"channels-{suffix}@example.test",
+        full_name="Channels Owner",
+        password_hash=hash_password("not-used-in-this-test-7"),
+        is_email_verified=True,
+    )
+    db_session.add(owner)
+    await db_session.flush()
+    org = Organization(
+        name=f"Channels {suffix}",
+        slug=f"channels-{suffix}",
+        plan=OrgPlan.free,
+        owner_user_id=owner.id,
+    )
+    db_session.add(org)
+    await db_session.flush()
+    alpha = Project(
+        organization_id=org.id,
+        name="alpha",
+        slug=f"alpha-{suffix}",
+        is_default=True,
+        status=ProjectStatus.active,
+    )
+    beta = Project(
+        organization_id=org.id,
+        name="beta",
+        slug=f"beta-{suffix}",
+        is_default=False,
+        status=ProjectStatus.active,
+    )
+    db_session.add_all([alpha, beta])
+    await db_session.flush()
+    agent = Agent(
+        organization_id=org.id,
+        project_id=beta.id,
+        name="Beta support",
+        type=AgentType.chat,
+        status=AgentStatus.active,
+        model="test/model",
+    )
+    db_session.add(agent)
+    await db_session.flush()
+
+    with pytest.raises(HTTPException) as exc:
+        await _load_agent(
+            db_session,
+            agent_id=agent.id,
+            organization_id=org.id,
+            project_id=alpha.id,
+        )
+    assert exc.value.status_code == 404
+
+    found = await _load_agent(
+        db_session, agent_id=agent.id, organization_id=org.id, project_id=beta.id
+    )
+    assert found.id == agent.id

@@ -6,6 +6,7 @@ chain is pinned to one model.
 
 from __future__ import annotations
 
+import uuid
 from types import SimpleNamespace
 
 import pytest
@@ -27,7 +28,9 @@ class _FakeProvider:
 
 def _runtime(monkeypatch, content: str) -> AgentRuntime:
     monkeypatch.setattr(agent_runtime, "get_provider", lambda: _FakeProvider(content))
-    runtime = AgentRuntime(session=None, ctx=SimpleNamespace())
+    runtime = AgentRuntime(
+        session=None, ctx=SimpleNamespace(organization_id=uuid.uuid4())
+    )
     monkeypatch.setattr(
         runtime, "_model_params", lambda agent: ("fake/model", 0.2, 100)
     )
@@ -74,3 +77,22 @@ async def test_runtime_reply_is_untouched_without_passages(monkeypatch):
     runtime = _runtime(monkeypatch, "The Starter plan costs 599 rupees.")
     resp = await runtime.generate_reply(SimpleNamespace(), [])
     assert resp.content == "The Starter plan costs 599 rupees."
+
+
+def test_stream_chunks_rebuild_the_exact_text():
+    from app.api.chat.routes import _text_chunks
+
+    text = "Refunds take five business days and go to the original payment method."
+    pieces = _text_chunks(text, 20)
+    assert len(pieces) > 1
+    assert "".join(pieces) == text
+    assert all(len(p) <= 21 for p in pieces)
+
+
+def test_streamed_invented_reply_is_replaced_before_chunking():
+    from app.api.chat.routes import _text_chunks
+
+    invented = "The Starter plan costs 599 rupees and includes a free domain."
+    final, changed = grounding.enforce_grounded(invented, [PASSAGE])
+    assert changed is True
+    assert "599" not in "".join(_text_chunks(final, 60))

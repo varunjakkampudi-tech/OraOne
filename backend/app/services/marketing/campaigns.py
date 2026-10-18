@@ -44,6 +44,8 @@ log = logging.getLogger("app.marketing.campaigns")
 
 MAX_RECIPIENTS = 500
 SEND_BATCH_SIZE = 25
+# A recipient still "sending" this long after its claim was taken was interrupted.
+SENDING_CLAIM_TIMEOUT = timedelta(minutes=15)
 MAX_NAME_LENGTH = 120
 MAX_SUBJECT_LENGTH = 200
 MAX_BODY_LENGTH = 10_000
@@ -413,6 +415,15 @@ def _message_text(
     return campaign.body.strip()
 
 
+async def _load_recipient_pair(
+    session: AsyncSession, recipient_id: uuid.UUID, lead_id: uuid.UUID
+):
+    """Fresh copies of a recipient and its lead, read after a commit."""
+    recipient = await session.get(MarketingRecipient, recipient_id)
+    lead = await session.get(Lead, lead_id)
+    return recipient, lead
+
+
 async def send_next_batch(
     session: AsyncSession,
     *,
@@ -424,7 +435,19 @@ async def send_next_batch(
     batch_size: int = SEND_BATCH_SIZE,
     now: Optional[datetime] = None,
 ) -> int:
-    """Process up to ``batch_size`` queued recipients. Returns how many were handled (0 means done)."""
+    """Process up to ``batch_size`` queued recipients. Returns how many were handled (0 means done).
+
+    Three phases, so that no database lock is held during a provider call:
+
+    1. Claim: apply the consent and policy checks, mark eligible recipients
+       ``sending``, and commit (this releases the row locks).
+    2. Send: call the provider for each claimed recipient, without a transaction open.
+    3. Record: write each outcome and the campaign counters, then commit.
+
+    A claim that is still ``sending`` long after it was taken means the worker stopped
+    during phase 2. The provider may already have accepted that message, so the claim is
+    marked failed for review and is never resent automatically.
+    """
     current = now or _utcnow()
     campaign = await get_campaign(
         session,
@@ -432,6 +455,28 @@ async def send_next_batch(
         project_id=project_id,
         campaign_id=campaign_id,
     )
+
+    # Stale claims from an interrupted worker: outcome unknown, so never auto-resend.
+    stale = list(
+        (
+            await session.scalars(
+                select(MarketingRecipient)
+                .where(MarketingRecipient.organization_id == organization_id)
+                .where(MarketingRecipient.campaign_id == campaign.id)
+                .where(MarketingRecipient.status == MarketingRecipientStatus.sending)
+                .where(MarketingRecipient.claimed_at < current - SENDING_CLAIM_TIMEOUT)
+            )
+        ).all()
+    )
+    for recipient in stale:
+        recipient.status = MarketingRecipientStatus.failed
+        recipient.failure_reason = (
+            "The send outcome is unknown after a worker interruption. "
+            "It was not resent automatically; check the provider before sending again."
+        )
+        campaign.failed_count += 1
+
+    # Phase 1: claim.
     rows = (
         await session.execute(
             select(MarketingRecipient, Lead)
@@ -445,6 +490,7 @@ async def send_next_batch(
         )
     ).all()
     if not rows:
+        await session.commit()
         return 0
 
     leads = [lead for _, lead in rows]
@@ -458,6 +504,7 @@ async def send_next_batch(
         now=current,
     )
 
+    to_send: list[tuple[uuid.UUID, uuid.UUID, str]] = []
     for recipient, lead in rows:
         reasons = policy_reasons(
             lead=lead,
@@ -479,16 +526,31 @@ async def send_next_batch(
             recipient.skip_reason = " ".join(reasons)
             campaign.skipped_count += 1
             continue
+        recipient.status = MarketingRecipientStatus.sending
+        recipient.claimed_at = current
+        to_send.append((recipient.id, lead.id, address or ""))
 
-        failure = await _deliver(
+    # Release the row locks before any network call.
+    await session.commit()
+    await session.refresh(campaign)
+
+    # Phase 2: send.
+    outcomes: dict[uuid.UUID, Optional[str]] = {}
+    for recipient_id, lead_id, address in to_send:
+        recipient, lead = await _load_recipient_pair(session, recipient_id, lead_id)
+        outcomes[recipient_id] = await _deliver(
             campaign,
             recipient=recipient,
             lead=lead,
-            address=address or "",
+            address=address,
             sender=sender,
             unsubscribe_base_url=unsubscribe_base_url,
             now=current,
         )
+
+    # Phase 3: record.
+    for recipient_id, failure in outcomes.items():
+        recipient = await session.get(MarketingRecipient, recipient_id)
         if failure is None:
             recipient.status = MarketingRecipientStatus.sent
             recipient.sent_at = current
@@ -498,7 +560,7 @@ async def send_next_batch(
             recipient.status = MarketingRecipientStatus.failed
             recipient.failure_reason = failure
             campaign.failed_count += 1
-    await session.flush()
+    await session.commit()
     return len(rows)
 
 

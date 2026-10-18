@@ -485,6 +485,18 @@ class _RecordingSession:
     async def scalar(self, _stmt):
         return self._agent_row
 
+    def begin_nested(self):
+        """A savepoint: this fake has no transaction to roll back."""
+
+        class _Savepoint:
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *_exc):
+                return False
+
+        return _Savepoint()
+
 
 def _inbound(channel: str = "whatsapp") -> omnichannel_service.InboundMessage:
     return omnichannel_service.InboundMessage(

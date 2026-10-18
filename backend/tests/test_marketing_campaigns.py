@@ -94,6 +94,15 @@ class ScriptedSession:
         self.added: list = []
         self.commits = 0
         self.rollbacks = 0
+        # Objects handed out by queries, so that session.get returns the same instances.
+        self.objects: list = []
+
+    def _remember(self, items):
+        for item in items:
+            if isinstance(item, tuple):
+                self.objects.extend(item)
+            else:
+                self.objects.append(item)
 
     async def scalar(self, stmt):
         self.statements.append(stmt)
@@ -101,13 +110,22 @@ class ScriptedSession:
 
     async def scalars(self, stmt):
         self.statements.append(stmt)
-        return _Rows(self._scalars.pop(0) if self._scalars else [])
+        rows = self._scalars.pop(0) if self._scalars else []
+        self._remember(rows)
+        return _Rows(rows)
 
     async def execute(self, stmt):
         self.statements.append(stmt)
-        return _Rows(self._execute.pop(0) if self._execute else [])
+        rows = self._execute.pop(0) if self._execute else []
+        self._remember(rows)
+        return _Rows(rows)
 
     async def get(self, model, pk):
+        return next(
+            (obj for obj in self.objects if getattr(obj, "id", None) == pk), None
+        )
+
+    async def refresh(self, obj):
         return None
 
     def add(self, obj):
@@ -918,3 +936,32 @@ async def test_an_unusable_email_in_an_unsubscribe_link_is_a_clean_refusal(monke
     )
     with pytest.raises(InvalidUnsubscribeToken, match="valid email"):
         await unsub.apply_unsubscribe(session, token, now=DAYTIME)
+
+
+@pytest.mark.asyncio
+async def test_an_interrupted_claim_is_failed_for_review_and_never_resent(monkeypatch):
+    lead = _lead()
+    campaign = _campaign("email")
+    recipient = _recipient(campaign, lead)
+    recipient.status = MarketingRecipientStatus.sending
+    recipient.claimed_at = DAYTIME - svc.SENDING_CLAIM_TIMEOUT - timedelta(minutes=1)
+    spy = SpySender()
+    session = ScriptedSession(scalar=[campaign], scalars=[[recipient]], execute=[[]])
+    monkeypatch.setattr(contact_policy_service, "suppressed_lead_ids", _none_suppressed)
+    monkeypatch.setattr(svc, "attempts_last_24h", _none_attempts)
+
+    handled = await svc.send_next_batch(
+        session,
+        organization_id=ORG,
+        project_id=PROJECT,
+        campaign_id=campaign.id,
+        sender=spy,
+        unsubscribe_base_url=PUBLIC_BASE,
+        now=DAYTIME,
+    )
+
+    assert handled == 0
+    assert spy.calls == []
+    assert recipient.status == MarketingRecipientStatus.failed
+    assert "outcome is unknown" in recipient.failure_reason
+    assert campaign.failed_count == 1
