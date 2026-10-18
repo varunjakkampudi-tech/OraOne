@@ -11,6 +11,7 @@ import asyncio
 import os
 import uuid
 from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
 from typing import AsyncIterator
 
 import pytest
@@ -410,3 +411,41 @@ async def test_retry_emails_only_the_admin_who_did_not_receive_the_alert(
         "the owner already had the alert and must not get it again"
     )
     assert first_owner not in sent_to
+
+
+def test_overdue_only_when_open_and_past_the_due_time():
+    past = datetime.now(timezone.utc) - timedelta(hours=1)
+    future = datetime.now(timezone.utc) + timedelta(hours=1)
+    open_late = SimpleNamespace(status="open", due_at=past)
+    open_on_time = SimpleNamespace(status="open", due_at=future)
+    resolved_late = SimpleNamespace(status="resolved", due_at=past)
+    no_target = SimpleNamespace(status="open", due_at=None)
+
+    assert escalation_service.is_overdue(open_late) is True
+    assert escalation_service.is_overdue(open_on_time) is False
+    assert escalation_service.is_overdue(resolved_late) is False
+    assert escalation_service.is_overdue(no_target) is False
+
+
+@db_only
+@pytest.mark.asyncio
+async def test_internal_notes_are_stored_and_reopen_restores_a_due_time(db_session):
+    org, project = await _seed(db_session)
+    row = await _open_escalation(db_session, org, project)
+    author = uuid.uuid4()
+
+    await escalation_service.add_note(
+        db_session, row, user_id=author, text="Called, left voicemail."
+    )
+    assert row.internal_notes[0]["user_id"] == str(author)
+    assert row.internal_notes[0]["text"] == "Called, left voicemail."
+
+    with pytest.raises(ValueError):
+        await escalation_service.add_note(db_session, row, user_id=author, text="   ")
+
+    await escalation_service.resolve(db_session, row)
+    assert row.status == "resolved"
+    await escalation_service.reopen(db_session, row)
+    assert row.status == "open"
+    assert row.resolved_at is None
+    assert row.due_at is not None and row.due_at > datetime.now(timezone.utc)

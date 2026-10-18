@@ -61,6 +61,7 @@ type NavItem =
 
 type StudioNavPath =
   | "/studio/inbox"
+  | "/studio/escalations"
   | "/studio/calls"
   | "/studio/marketing"
   | "/studio/leads"
@@ -82,6 +83,7 @@ const STUDIO_NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: "Conversations",
     items: [
       { label: "Inbox", to: "/studio/inbox" },
+      { label: "Escalations", to: "/studio/escalations" },
       { label: "Calls", to: "/studio/calls" },
     ],
   },

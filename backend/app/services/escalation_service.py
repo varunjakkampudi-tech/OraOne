@@ -43,6 +43,9 @@ log = logging.getLogger("app.escalations")
 MAX_NOTIFY_ATTEMPTS = 5
 NOTIFY_BACKOFF_SECONDS = 60
 QUESTION_CHARS = 1000
+# Placeholder response target. The owner decides the real value (blocker item 32).
+RESPONSE_TARGET = timedelta(hours=24)
+NOTE_CHARS = 1000
 
 HANDOFF_NO_CONTACT_TEXT = (
     "I don't have that information yet, so I won't guess. I've noted your question "
@@ -113,6 +116,7 @@ async def create_escalation(
         notify_status=NotifyStatus.pending,
         notify_attempts=0,
         next_attempt_at=_now(),
+        due_at=_now() + RESPONSE_TARGET,
     )
     session.add(row)
     await session.flush()
@@ -268,5 +272,34 @@ async def assign(
 async def resolve(session: AsyncSession, row: Escalation) -> Escalation:
     row.status = EscalationStatus.resolved
     row.resolved_at = _now()
+    await session.flush()
+    return row
+
+
+async def reopen(session: AsyncSession, row: Escalation) -> Escalation:
+    """Bring a resolved item back into the queue with a fresh response target."""
+    row.status = EscalationStatus.open
+    row.resolved_at = None
+    row.due_at = _now() + RESPONSE_TARGET
+    await session.flush()
+    return row
+
+
+def is_overdue(row: Escalation, now: Optional[datetime] = None) -> bool:
+    if row.status == EscalationStatus.resolved or row.due_at is None:
+        return False
+    return row.due_at < (now or _now())
+
+
+async def add_note(
+    session: AsyncSession, row: Escalation, *, user_id: uuid.UUID, text: str
+) -> Escalation:
+    """Append an internal note. Notes are for the team and never reach the visitor."""
+    clean = (text or "").strip()[:NOTE_CHARS]
+    if not clean:
+        raise ValueError("note text is required")
+    notes = list(row.internal_notes or [])
+    notes.append({"at": _now().isoformat(), "user_id": str(user_id), "text": clean})
+    row.internal_notes = notes
     await session.flush()
     return row

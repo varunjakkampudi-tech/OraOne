@@ -216,3 +216,17 @@ ROUND 4 BRAINSTORM (report: docs/product/MARKET-AND-ROADMAP.md)
     behaviour change affects paying customers, so it needs your approval.
 39. Widget visitors now get no knowledge base until the owner binds one. Existing widgets without a
     binding will hand off every question until a binding is set. Confirm this default.
+
+ROUND 5 (audit of d8a3040)
+40. Escalation inbox is built: /studio/escalations, with owner, notes, overdue, resolve and reopen.
+    The response target is a 24-hour placeholder until you confirm item 32.
+41. Grounding evaluation set has 38 cases. The labels were written by the engineering team, not by an
+    independent reviewer. Decide who labels a larger set (at least several hundred real replies), and
+    report unsupported-claim rate, retrieval recall and answer usefulness separately.
+42. Branch protection on main and repository visibility: still need your explicit approval (item 19).
+43. Live SMTP and a live AI provider call: still need the mailbox and the OpenRouter key on the server
+    (items 1, 26 and 27). The code paths are tested with fakes only.
+44. Encrypted off-host backup and a restore drill on the server: still open (items 15 and 24).
+45. Performance under concurrent customer traffic: not measured. Needs a staging environment and
+    approval to run a load test against it. Suggested target: 200 concurrent widget sessions with p95
+    reply latency and error rate recorded.

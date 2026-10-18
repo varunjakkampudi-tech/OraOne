@@ -57,6 +57,15 @@ _QUALIFIERS = frozenset(
     """.split()
 )
 
+# Units change what a number means: 5 days is not 5 hours, 499 rupees is not 499 dollars.
+_UNITS = frozenset(
+    """
+    rupee rupees rs inr dollar dollars usd euro euros percent day days hour hours
+    minute minutes week weeks month months year years kg kilogram kilograms km
+    litre litres liter liters
+    """.split()
+)
+
 _WORD = re.compile("[\\ẁ-ͯ؀-ۿऀ-ॿ฀-๿぀-ヿ一-鿿]+")
 _NUMBER = re.compile(r"\d+(?:[.,]\d+)*")
 _CITATION = re.compile(r"\[\d+\]")
@@ -88,7 +97,7 @@ def _negated(text: str) -> bool:
 
 
 def _qualifiers(text: str) -> set[str]:
-    return {token for token in _tokens(text) if token in _QUALIFIERS}
+    return {token for token in _tokens(text) if token in _QUALIFIERS or token in _UNITS}
 
 
 def _sentences(text: str) -> list[str]:

@@ -80,6 +80,13 @@ class Escalation(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("users.id", ondelete="SET NULL"),
     )
     resolved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    # Team response target. Overdue means open past this time and not resolved.
+    due_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    # Internal notes for the team: [{"at": iso, "user_id": str, "text": str}].
+    # Never sent to the visitor.
+    internal_notes: Mapped[list] = mapped_column(
+        JSONB, nullable=False, default=list, server_default="[]"
+    )
 
     notify_status: Mapped[str] = mapped_column(
         String(20), nullable=False, default=NotifyStatus.pending

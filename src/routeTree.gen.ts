@@ -175,6 +175,7 @@ import { Route as AuthenticatedStudioAssistantsIdRouteImport } from './routes/_a
 import { Route as AuthenticatedStudioBillingIndexRouteImport } from './routes/_authenticated/studio.billing.index'
 import { Route as AuthenticatedStudioCallsIndexRouteImport } from './routes/_authenticated/studio.calls.index'
 import { Route as AuthenticatedStudioChannelsChannelRouteImport } from './routes/_authenticated/studio.channels.$channel'
+import { Route as AuthenticatedStudioEscalationsIndexRouteImport } from './routes/_authenticated/studio.escalations.index'
 import { Route as AuthenticatedStudioGettingStartedIndexRouteImport } from './routes/_authenticated/studio.getting-started.index'
 import { Route as AuthenticatedStudioInboxIndexRouteImport } from './routes/_authenticated/studio.inbox.index'
 import { Route as AuthenticatedStudioInboxConversationIdRouteImport } from './routes/_authenticated/studio.inbox.$conversationId'
@@ -1061,6 +1062,12 @@ const AuthenticatedStudioChannelsChannelRoute =
     path: '/studio/channels/$channel',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedStudioEscalationsIndexRoute =
+  AuthenticatedStudioEscalationsIndexRouteImport.update({
+    id: '/studio/escalations/',
+    path: '/studio/escalations/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedStudioGettingStartedIndexRoute =
   AuthenticatedStudioGettingStartedIndexRouteImport.update({
     id: '/studio/getting-started/',
@@ -1485,6 +1492,7 @@ export interface FileRoutesByFullPath {
   '/studio/assistants/': typeof AuthenticatedStudioAssistantsIndexRoute
   '/studio/billing/': typeof AuthenticatedStudioBillingIndexRoute
   '/studio/calls/': typeof AuthenticatedStudioCallsIndexRoute
+  '/studio/escalations/': typeof AuthenticatedStudioEscalationsIndexRoute
   '/studio/getting-started/': typeof AuthenticatedStudioGettingStartedIndexRoute
   '/studio/inbox/': typeof AuthenticatedStudioInboxIndexRoute
   '/studio/integrations/': typeof AuthenticatedStudioIntegrationsIndexRoute
@@ -1670,6 +1678,7 @@ export interface FileRoutesByTo {
   '/studio/assistants': typeof AuthenticatedStudioAssistantsIndexRoute
   '/studio/billing': typeof AuthenticatedStudioBillingIndexRoute
   '/studio/calls': typeof AuthenticatedStudioCallsIndexRoute
+  '/studio/escalations': typeof AuthenticatedStudioEscalationsIndexRoute
   '/studio/getting-started': typeof AuthenticatedStudioGettingStartedIndexRoute
   '/studio/inbox': typeof AuthenticatedStudioInboxIndexRoute
   '/studio/integrations': typeof AuthenticatedStudioIntegrationsIndexRoute
@@ -1880,6 +1889,7 @@ export interface FileRoutesById {
   '/_authenticated/studio/assistants/': typeof AuthenticatedStudioAssistantsIndexRoute
   '/_authenticated/studio/billing/': typeof AuthenticatedStudioBillingIndexRoute
   '/_authenticated/studio/calls/': typeof AuthenticatedStudioCallsIndexRoute
+  '/_authenticated/studio/escalations/': typeof AuthenticatedStudioEscalationsIndexRoute
   '/_authenticated/studio/getting-started/': typeof AuthenticatedStudioGettingStartedIndexRoute
   '/_authenticated/studio/inbox/': typeof AuthenticatedStudioInboxIndexRoute
   '/_authenticated/studio/integrations/': typeof AuthenticatedStudioIntegrationsIndexRoute
@@ -2091,6 +2101,7 @@ export interface FileRouteTypes {
     | '/studio/assistants/'
     | '/studio/billing/'
     | '/studio/calls/'
+    | '/studio/escalations/'
     | '/studio/getting-started/'
     | '/studio/inbox/'
     | '/studio/integrations/'
@@ -2276,6 +2287,7 @@ export interface FileRouteTypes {
     | '/studio/assistants'
     | '/studio/billing'
     | '/studio/calls'
+    | '/studio/escalations'
     | '/studio/getting-started'
     | '/studio/inbox'
     | '/studio/integrations'
@@ -2485,6 +2497,7 @@ export interface FileRouteTypes {
     | '/_authenticated/studio/assistants/'
     | '/_authenticated/studio/billing/'
     | '/_authenticated/studio/calls/'
+    | '/_authenticated/studio/escalations/'
     | '/_authenticated/studio/getting-started/'
     | '/_authenticated/studio/inbox/'
     | '/_authenticated/studio/integrations/'
@@ -3715,6 +3728,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStudioChannelsChannelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/studio/escalations/': {
+      id: '/_authenticated/studio/escalations/'
+      path: '/studio/escalations'
+      fullPath: '/studio/escalations/'
+      preLoaderRoute: typeof AuthenticatedStudioEscalationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/studio/getting-started/': {
       id: '/_authenticated/studio/getting-started/'
       path: '/studio/getting-started'
@@ -4023,6 +4043,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedStudioAssistantsIndexRoute: typeof AuthenticatedStudioAssistantsIndexRoute
   AuthenticatedStudioBillingIndexRoute: typeof AuthenticatedStudioBillingIndexRoute
   AuthenticatedStudioCallsIndexRoute: typeof AuthenticatedStudioCallsIndexRoute
+  AuthenticatedStudioEscalationsIndexRoute: typeof AuthenticatedStudioEscalationsIndexRoute
   AuthenticatedStudioGettingStartedIndexRoute: typeof AuthenticatedStudioGettingStartedIndexRoute
   AuthenticatedStudioInboxIndexRoute: typeof AuthenticatedStudioInboxIndexRoute
   AuthenticatedStudioIntegrationsIndexRoute: typeof AuthenticatedStudioIntegrationsIndexRoute
@@ -4051,6 +4072,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedStudioAssistantsIndexRoute,
   AuthenticatedStudioBillingIndexRoute: AuthenticatedStudioBillingIndexRoute,
   AuthenticatedStudioCallsIndexRoute: AuthenticatedStudioCallsIndexRoute,
+  AuthenticatedStudioEscalationsIndexRoute:
+    AuthenticatedStudioEscalationsIndexRoute,
   AuthenticatedStudioGettingStartedIndexRoute:
     AuthenticatedStudioGettingStartedIndexRoute,
   AuthenticatedStudioInboxIndexRoute: AuthenticatedStudioInboxIndexRoute,
