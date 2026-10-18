@@ -26,6 +26,8 @@ from app.services import (
 )
 from app.services.business_scope_guard import Scope
 
+TEST_PROJECT_ID = uuid.uuid4()
+
 # ───────────────────────────── fakes ─────────────────────────────
 
 
@@ -154,6 +156,7 @@ async def test_out_of_scope_questions_are_refused_without_a_model_call(
         uuid.uuid4(),
         persona="Be friendly.",
         business_contact="https://example.test",
+        project_id=TEST_PROJECT_ID,
     )
 
     assert provider.calls == []
@@ -171,7 +174,9 @@ async def test_small_talk_is_answered_without_retrieval_or_model(monkeypatch):
     _install_provider(monkeypatch, provider)
     retrieval = _install_retrieval(monkeypatch, {})
 
-    result = await rag_answer.answer_query(object(), "hi", uuid.uuid4())
+    result = await rag_answer.answer_query(
+        object(), "hi", uuid.uuid4(), project_id=TEST_PROJECT_ID
+    )
 
     assert provider.calls == []
     assert retrieval == []
@@ -190,7 +195,11 @@ async def test_in_scope_question_with_passage_is_answered_from_context(monkeypat
     )
 
     result = await rag_answer.answer_query(
-        object(), "What is your refund policy?", org, persona=None
+        object(),
+        "What is your refund policy?",
+        org,
+        persona=None,
+        project_id=TEST_PROJECT_ID,
     )
 
     assert result["scope"] == "in_scope"
@@ -211,7 +220,9 @@ async def test_ambiguous_question_with_passage_is_classified_by_fixed_label(
     _install_provider(monkeypatch, provider)
     _install_retrieval(monkeypatch, {org: [_chunk("The bronze package is for two.")]})
 
-    result = await rag_answer.answer_query(object(), "the bronze package for two", org)
+    result = await rag_answer.answer_query(
+        object(), "the bronze package for two", org, project_id=TEST_PROJECT_ID
+    )
 
     assert len(provider.calls) == 1, "only the classifier may run"
     assert provider.calls[0]["max_tokens"] <= 5
@@ -228,7 +239,22 @@ async def test_ambiguous_question_with_unclear_label_proceeds_to_grounded_answer
     _install_provider(monkeypatch, provider)
     _install_retrieval(monkeypatch, {org: [_chunk("The bronze package is for two.")]})
 
-    result = await rag_answer.answer_query(object(), "the bronze package", org)
+    # The fixed-label classifier call returns "Maybe". The answer call returns a
+    # reply the passage supports, so the grounding check keeps it.
+    chat = provider.chat
+
+    async def _labelled(messages, **kwargs):
+        if kwargs.get("max_tokens", 999) <= 5:
+            return await chat(messages, **kwargs)
+        provider.calls.append({"messages": list(messages), **kwargs})
+        return SimpleNamespace(
+            content="The bronze package is for two.", model=provider.model, usage=None
+        )
+
+    provider.chat = _labelled
+    result = await rag_answer.answer_query(
+        object(), "the bronze package", org, project_id=TEST_PROJECT_ID
+    )
 
     assert result["scope"] == "in_scope"
     assert result["grounded"] is True
@@ -249,6 +275,7 @@ async def test_no_passage_hands_off_and_never_calls_the_model(monkeypatch):
         "What is the price of the blue widget?",
         uuid.uuid4(),
         persona="You are a friendly shop assistant.",
+        project_id=TEST_PROJECT_ID,
     )
 
     assert provider.calls == []
@@ -268,7 +295,9 @@ async def test_model_saying_it_lacks_information_becomes_a_handoff(monkeypatch):
     _install_provider(monkeypatch, provider)
     _install_retrieval(monkeypatch, {org: [_chunk("We open at nine.")]})
 
-    result = await rag_answer.answer_query(object(), "What is the price?", org)
+    result = await rag_answer.answer_query(
+        object(), "What is the price?", org, project_id=TEST_PROJECT_ID
+    )
 
     assert result["handoff"] is True
     assert result["answer"] == rag_answer.HANDOFF_TEXT
@@ -284,7 +313,9 @@ async def test_extractive_fallback_is_grounded_but_not_generated(monkeypatch):
         monkeypatch, {org: [_chunk("Refunds are processed within five business days.")]}
     )
 
-    result = await rag_answer.answer_query(object(), "How long do refunds take?", org)
+    result = await rag_answer.answer_query(
+        object(), "How long do refunds take?", org, project_id=TEST_PROJECT_ID
+    )
 
     assert result["generated"] is False
     assert result["grounded"] is True
@@ -355,6 +386,7 @@ async def test_profile_and_scope_rule_reach_the_model_prompt(monkeypatch):
         org,
         persona="Use a cheerful tone.",
         assistant_profile="call_centre",
+        project_id=TEST_PROJECT_ID,
     )
 
     system = _system_text(provider.calls[0])
@@ -405,6 +437,7 @@ async def test_prompts_never_contain_another_tenants_knowledge(monkeypatch):
         extra_context="visitor remembers Acme",
         assistant_profile="website_owner",
         business_contact="https://acme.test",
+        project_id=TEST_PROJECT_ID,
     )
 
     assert {c["organization_id"] for c in calls} == {org_a}
@@ -424,7 +457,9 @@ async def test_other_tenants_passages_do_not_answer_a_question(monkeypatch):
     _install_provider(monkeypatch, provider)
     _install_retrieval(monkeypatch, store)
 
-    result = await rag_answer.answer_query(object(), "Are you open on Sundays?", org_a)
+    result = await rag_answer.answer_query(
+        object(), "Are you open on Sundays?", org_a, project_id=TEST_PROJECT_ID
+    )
 
     assert result["handoff"] is True
     assert provider.calls == []
@@ -546,3 +581,17 @@ async def test_omnichannel_passes_owner_persona_and_contact(monkeypatch):
     assert kwargs["assistant_profile"] == "small_business"
     assert kwargs["business_contact"] == "https://shop.test"
     assert recorded.get("leads") is None
+
+
+@pytest.fixture(autouse=True)
+def _default_project_for_tests(monkeypatch):
+    """Customer paths resolve a project. These tests have no project rows, so
+    the organization default is pinned to one fixed project."""
+    from app.services import project_scope
+
+    project = uuid.uuid4()
+
+    async def _default(_session, _organization_id):
+        return project
+
+    monkeypatch.setattr(project_scope, "default_project_id", _default)

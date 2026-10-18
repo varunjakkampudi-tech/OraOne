@@ -50,6 +50,11 @@ def _smtp_config() -> dict | None:
     }
 
 
+def delivery_configured() -> bool:
+    """True when SMTP settings are present, so mail can actually leave the server."""
+    return _smtp_config() is not None
+
+
 def _send_via_smtp(*, to: str, subject: str, html_body: str, cfg: dict) -> bool:
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject

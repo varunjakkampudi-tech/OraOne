@@ -32,7 +32,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.log_redaction import scrub_secrets
 from app.providers import AIProviderError, ChatMessage, DEFAULT_MODEL, get_provider
-from app.services import assistant_profiles, business_scope_guard, rag_service
+from app.services import (
+    assistant_profiles,
+    business_scope_guard,
+    grounding,
+    rag_service,
+)
 from app.services import model_router_service
 from app.services.business_scope_guard import Scope, SmallTalk
 
@@ -130,6 +135,7 @@ async def answer_query(
     query: str,
     organization_id: uuid.UUID,
     *,
+    project_id: uuid.UUID,
     knowledge_base_ids: Optional[list[uuid.UUID]] = None,
     top_k: int = rag_service.DEFAULT_TOP_K,
     source_types: Optional[list[str]] = None,
@@ -165,6 +171,7 @@ async def answer_query(
             session,
             query,
             organization_id,
+            project_id=project_id,
             knowledge_base_ids=knowledge_base_ids,
             top_k=top_k,
             source_types=source_types,
@@ -246,6 +253,13 @@ async def answer_query(
             return _handoff_result(
                 query, scope, chunks, sources, confidence, usage=usage, model=used_model
             )
+        if answer and grounding.unsupported_sentences(
+            answer, [c.content for c in chunks]
+        ):
+            # The reply states something the passages do not say. Use the passage
+            # text instead, so no unsupported claim reaches the visitor.
+            log.warning("rag_reply_unsupported; using passage text")
+            answer = ""
         if answer:
             generated = True
         else:

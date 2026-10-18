@@ -389,7 +389,11 @@ class _EmailMustNotBeCalled:
 
 @pytest.mark.asyncio
 async def test_no_email_provider_fails_honestly_through_the_real_registry(monkeypatch):
+    from app.services import email_service
+
     monkeypatch.setattr(adapters.EmailAdapter, "send", _EmailMustNotBeCalled())
+    # SMTP is not configured in tests: the email service reports "not delivered".
+    monkeypatch.setattr(email_service, "send_email", lambda **_kwargs: False)
     lead = _lead()
     campaign = _campaign("email")
     recipient = _recipient(campaign, lead)
@@ -403,7 +407,7 @@ async def test_no_email_provider_fails_honestly_through_the_real_registry(monkey
 
     assert sent is False
     assert recipient.status == MarketingRecipientStatus.failed
-    assert recipient.failure_reason == "No email delivery provider is connected yet"
+    assert recipient.failure_reason == svc.PROVIDER_REFUSED_REASON
     assert recipient.sent_at is None
     assert campaign.sent_count == 0
     assert campaign.failed_count == 1

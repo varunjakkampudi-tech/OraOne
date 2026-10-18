@@ -27,6 +27,8 @@ from app.database.session import get_db
 from app.services import omnichannel_service, visitor_service, workflow_triggers
 from app.services.channels import adapters
 
+TEST_PROJECT_ID = uuid.uuid4()
+
 SDK_SECRET = "sdk-binding-secret"
 EMAIL_SECRET = "email-provider-secret"
 TG_SECRET = "telegram-webhook-secret"
@@ -556,3 +558,17 @@ async def test_telegram_transport_error_log_does_not_leak_the_bot_token(
     assert ok is False
     assert "bot-token-value" not in caplog.text
     assert "ConnectError" in caplog.text
+
+
+@pytest.fixture(autouse=True)
+def _default_project_for_tests(monkeypatch):
+    """Customer paths resolve a project. These tests have no project rows, so
+    the organization default is pinned to one fixed project."""
+    from app.services import project_scope
+
+    project = uuid.uuid4()
+
+    async def _default(_session, _organization_id):
+        return project
+
+    monkeypatch.setattr(project_scope, "default_project_id", _default)

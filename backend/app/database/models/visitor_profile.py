@@ -31,9 +31,13 @@ class VisitorProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "visitor_profiles"
     __table_args__ = (
         UniqueConstraint(
-            "organization_id", "visitor_key", name="uq_visitor_profiles_org_key"
+            "organization_id",
+            "project_id",
+            "visitor_key",
+            name="uq_visitor_profiles_org_project_key",
         ),
         Index("ix_visitor_profiles_organization_id", "organization_id"),
+        Index("ix_visitor_profiles_project_id", "project_id"),
         Index("ix_visitor_profiles_email", "email"),
         Index("ix_visitor_profiles_phone", "phone"),
         Index("ix_visitor_profiles_last_seen_at", "last_seen_at"),
@@ -42,6 +46,14 @@ class VisitorProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     organization_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
         ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    # Visitor memory is scoped to one project. The same person in two projects
+    # of one organization is two profiles, so knowledge and memory never mix.
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("projects.id", ondelete="CASCADE"),
         nullable=False,
     )
 

@@ -172,10 +172,16 @@ class AgentRuntime:
         kb_ids = self._linked_kb_ids(agent)
         if kb_ids == []:
             return []
+        from app.services.project_scope import resolve_project_id
+
+        project_id = await resolve_project_id(
+            self.session, self.ctx.organization_id, agent.project_id
+        )
         return await rag_service.search_chunks(
             self.session,
             query,
             self.ctx.organization_id,
+            project_id=project_id,
             knowledge_base_ids=kb_ids,
             top_k=top_k,
         )

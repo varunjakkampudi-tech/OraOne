@@ -283,23 +283,32 @@ async def test_instagram_uses_the_meta_instagram_adapter(adapter_calls):
     assert adapter_calls[0]["parsed"].to_address == "17841"
 
 
-async def test_email_fails_honestly_because_no_email_delivery_is_connected(
-    adapter_calls,
+async def test_email_is_sent_through_the_email_service_not_the_inbound_adapter(
+    monkeypatch, adapter_calls
 ):
+    from app.services import email_service
+
+    sent: list[dict] = []
+
+    def fake_send_email(**kwargs):
+        sent.append(kwargs)
+        return True
+
+    monkeypatch.setattr(email_service, "send_email", fake_send_email)
     org = uuid.uuid4()
     sender, _ = _sender([_binding(org, "email", "email")])
 
-    with pytest.raises(
-        senders.OutboundNotConfigured, match="Email delivery is not connected"
-    ):
-        await sender.send(
-            channel="email",
-            recipient="ada@example.com",
-            text="Hi",
-            organization_id=org,
-            lead_id=uuid.uuid4(),
-        )
+    details = await sender.send(
+        channel="email",
+        recipient="ada@example.com",
+        text="Hi",
+        organization_id=org,
+        lead_id=uuid.uuid4(),
+    )
+
     assert adapter_calls == []
+    assert [m["to"] for m in sent] == ["ada@example.com"]
+    assert details == {"provider": "email", "binding_id": None}
 
 
 async def test_adapter_refusal_is_a_failure_with_no_provider_detail(

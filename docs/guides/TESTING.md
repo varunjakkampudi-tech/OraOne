@@ -1,7 +1,9 @@
 # Testing
 
-OraOne has four layers of automated tests. Each runs in CI on every push and pull
-request.
+OraOne has four layers of automated tests. CI (`.github/workflows/ci.yml`) runs the web lint,
+typecheck and unit tests, the backend lint and tests, and the Playwright browser tests at 390 and
+1280 px. It runs on pull requests and on pushes to `main`. The 768 px browser project is not run
+in CI.
 
 | Layer                        | Tool                   | Command                                                | Covers                                          |
 | ---------------------------- | ---------------------- | ------------------------------------------------------ | ----------------------------------------------- |
@@ -13,6 +15,11 @@ request.
 ## End-to-end suites
 
 Playwright suites are tagged in their titles. Each tag can be run on its own.
+
+Only the spec files named in `testMatch` in `playwright.config.ts` run by default:
+`public-site`, `studio`, `channel-setup`, `admin`, `install`, `auth` and `route-health`. The tags
+below apply to tests in those files. The other spec files in `e2e/` are not in that list, so the
+tag commands do not run them unless the config changes.
 
 | Suite         | Tag           | Purpose                                                                                                                                                                     |
 | ------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -45,10 +52,10 @@ The suites run against the full local stack:
 3. Start the API with `ALLOW_DEV_PASSWORD_LOGIN=true` in `backend/.env`.
 4. Start the web app with `bun run dev`, or point `E2E_BASE_URL` at a running build.
 
-The first run installs the browsers:
+The first run installs the browser:
 
 ```bash
-bunx playwright install --with-deps chromium firefox webkit
+bunx playwright install --with-deps chromium
 ```
 
 ### Sitemap, widget and install
@@ -57,9 +64,8 @@ bunx playwright install --with-deps chromium firefox webkit
 
 ### Browsers and devices
 
-Projects: desktop Chromium, Firefox and WebKit, plus Pixel 7 (Android Chrome) and
-iPhone 14 (Safari). Tests that depend on the viewport skip themselves on the other
-kind of device.
+Projects in `playwright.config.ts`: Chromium at 390, 768 and 1280 px. CI runs the 390 and 1280
+projects. Firefox, WebKit and mobile device emulation are not configured.
 
 ### Visual baselines
 
@@ -72,8 +78,9 @@ bun run test:e2e:visual -- --update-snapshots
 
 ### Reports
 
-Failing runs keep a trace, a screenshot and an HTML report in `playwright-report/`.
-CI uploads these as artifacts.
+Failing runs keep a trace and a screenshot in `test-results/`. The config uses the list reporter,
+so no HTML report is written by default. When the browser job fails, CI uploads `test-results/`
+and `playwright-report/` as an artifact.
 
 ## Backend tests
 

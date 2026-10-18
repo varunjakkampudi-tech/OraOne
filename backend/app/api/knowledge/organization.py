@@ -18,6 +18,7 @@ from app.database.models.knowledge_base import KnowledgeBase
 from app.database.models.knowledge_folder import KnowledgeFolder
 from app.database.session import get_db
 from app.middleware.org_context import OrgContext, get_current_organization
+from app.middleware.project_context import get_current_project_id
 from app.core.permissions import Permission
 from app.middleware.org_context import require_permission
 from app.schemas.knowledge import (
@@ -436,6 +437,7 @@ async def list_document_versions(
 async def knowledge_search(
     payload: KnowledgeSearchRequest,
     ctx: OrgContext = Depends(get_current_organization),
+    project_id: uuid.UUID = Depends(get_current_project_id),
     session: AsyncSession = Depends(get_db),
 ) -> KnowledgeSearchResponse:
     """Semantic + keyword search across processed documents (org-scoped)."""
@@ -444,6 +446,7 @@ async def knowledge_search(
         session,
         payload.query,
         ctx.organization_id,
+        project_id=project_id,
         knowledge_base_ids=kb_ids,
         top_k=payload.top_k,
     )

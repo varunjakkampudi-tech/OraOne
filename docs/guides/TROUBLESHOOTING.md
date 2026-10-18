@@ -5,8 +5,9 @@ For production problems (webhooks, calls, messages, quotas, widgets, integration
 
 ## Sign-in code never arrives
 
-Sign-in codes are sent only when `SMTP_HOST` is configured. Without it, the API logs
-the code as not sent. Check `backend/.env`, then restart the API. In local development,
+Sign-in codes are sent only when `SMTP_HOST` is configured. Without it, no code is sent, and
+the sign-in request returns HTTP 503 instead of a success message. The same 503 is returned when a
+send fails. Check `backend/.env`, then restart the API. In local development,
 use the developer sign-in panel (or `POST /api/auth/dev-login`) with the seeded accounts.
 
 ## Assistant replies fail with a provider error

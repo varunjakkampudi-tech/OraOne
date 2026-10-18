@@ -96,14 +96,15 @@ See [docs/guides/TESTING.md](docs/guides/TESTING.md) for prerequisites and suite
 
 ## Continuous integration
 
-| Workflow              | Purpose                                                                                                 |
-| --------------------- | ------------------------------------------------------------------------------------------------------- |
-| `format-and-lint.yml` | Checks formatting, ESLint, TypeScript and Ruff on every push and pull request.                          |
-| `test-suites.yml`     | Web unit tests, backend tests, and the Playwright suites (smoke, sanity, critical, regression, visual). |
-| `fix-formatting.yml`  | Manual. Formats the code and opens a pull request.                                                      |
+| Workflow             | Purpose                                                                                                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`             | On pull requests and pushes to `main`. Web lint, typecheck, unit tests and build; backend Ruff checks, migrations and tests; Playwright browser tests at 390 and 1280 px. |
+| `deploy.yml`         | Manual only (`workflow_dispatch`), and only from `main`. Uses the `production` environment and the secrets `DEPLOY_HOST`, `DEPLOY_USER` and `DEPLOY_SSH_KEY`.             |
+| `fix-formatting.yml` | Manual. Formats the code and opens a pull request.                                                                                                                        |
 
-No workflow deploys the application. Production deployment is manual, as described in
-[HOSTINGER-DEPLOYMENT](docs/HOSTINGER-DEPLOYMENT.md).
+Nothing deploys on a push or a pull request. The deploy workflow runs only when someone starts it
+from the Actions tab. See [HOSTINGER-DEPLOYMENT](docs/HOSTINGER-DEPLOYMENT.md) for the server and the
+secrets that must be set first.
 
 ## Documentation
 

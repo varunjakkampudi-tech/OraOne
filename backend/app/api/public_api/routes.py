@@ -220,10 +220,14 @@ async def chat_v1(
     key: ApiKey = Depends(require_api_scope("chat:write")),
     session: AsyncSession = Depends(get_db),
 ) -> dict:
+    from app.services.project_scope import resolve_project_id
+
+    project_id = await resolve_project_id(session, key.organization_id, key.project_id)
     result = await answer_query(
         session,
         payload.message,
         key.organization_id,
+        project_id=project_id,
         knowledge_base_ids=payload.knowledge_base_ids,
         top_k=payload.top_k,
         model=payload.model,
@@ -544,11 +548,14 @@ async def search_v1(
     session: AsyncSession = Depends(get_db),
 ) -> dict:
     from app.services import rag_service
+    from app.services.project_scope import resolve_project_id
 
+    project_id = await resolve_project_id(session, key.organization_id, key.project_id)
     chunks = await rag_service.hybrid_search(
         session,
         payload.query,
         key.organization_id,
+        project_id=project_id,
         knowledge_base_ids=payload.knowledge_base_ids,
         top_k=payload.top_k,
         source_types=payload.source_types,

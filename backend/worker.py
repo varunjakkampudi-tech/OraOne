@@ -18,12 +18,34 @@ load_dotenv(Path(__file__).resolve().parent / ".env", override=False)
 
 from app.database import session as db_session
 from app.database.session import dispose_engine, init_engine
+from app.services import escalation_service
 from app.services.ops_service import prune_error_events
 from app.services.webhook_outbox import start_outbox_worker, stop_outbox_worker
 from app.services.workflow_scheduler import start_scheduler, stop_scheduler
 
 
 PRUNE_INTERVAL_SECONDS = 24 * 60 * 60
+ESCALATION_INTERVAL_SECONDS = 60
+
+
+async def _deliver_escalations(stop_event: asyncio.Event) -> None:
+    """Email the team about unanswered questions, retrying failed sends."""
+    log = logging.getLogger("app.worker")
+    while not stop_event.is_set():
+        try:
+            async with db_session.AsyncSessionLocal() as session:
+                counts = await escalation_service.deliver_due(session)
+                await session.commit()
+            if any(counts.values()):
+                log.info("escalations_delivered %s", counts)
+        except Exception:  # noqa: BLE001 - a failed pass must not stop the worker
+            log.exception("escalation_delivery_failed")
+        try:
+            await asyncio.wait_for(
+                stop_event.wait(), timeout=ESCALATION_INTERVAL_SECONDS
+            )
+        except asyncio.TimeoutError:
+            continue
 
 
 async def _prune_error_events_daily(stop_event: asyncio.Event) -> None:
@@ -50,6 +72,7 @@ async def main() -> None:
     start_outbox_worker()
     stop_event = asyncio.Event()
     prune_task = asyncio.create_task(_prune_error_events_daily(stop_event))
+    escalation_task = asyncio.create_task(_deliver_escalations(stop_event))
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGINT, signal.SIGTERM):
         try:
@@ -62,6 +85,7 @@ async def main() -> None:
     finally:
         stop_event.set()
         await prune_task
+        await escalation_task
         await stop_scheduler()
         await stop_outbox_worker()
         await dispose_engine()

@@ -329,8 +329,10 @@ from app.api.operations import router as operations_router  # noqa: E402
 app.include_router(operations_router)
 # Leads (CRM) — first-class lead capture + pipeline (project-scoped)
 from app.api.leads import router as leads_router  # noqa: E402
+from app.api.escalations import router as escalations_router  # noqa: E402
 
 app.include_router(leads_router)
+app.include_router(escalations_router)
 from app.api.marketing import router as marketing_router  # noqa: E402
 
 app.include_router(marketing_router)

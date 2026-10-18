@@ -87,7 +87,7 @@ sequenceDiagram
   U->>W: Enter email
   W->>A: POST /api/auth/email-code/request
   A->>M: Send six-digit code (10 min, single use)
-  A-->>W: 200 (same answer for known and unknown emails)
+  A-->>W: 200 (same for known and unknown emails), or 503 if sending fails
   U->>W: Enter code
   W->>A: POST /api/auth/email-code/verify
   A-->>W: Set httpOnly access and refresh cookies

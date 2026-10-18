@@ -65,6 +65,7 @@ from app.schemas.widget import (
 )
 from app.services import assistant_profiles
 from app.services import widget_service
+from app.services import escalation_service
 from app.services import lead_service
 from app.services import visitor_service
 from app.services.rag_answer import answer_query
@@ -502,6 +503,11 @@ async def _persist_and_answer(
 
     # Unified cross-channel identity: recognise this visitor, fold in any
     # new identity/context, and prime the answer with what we already know.
+    from app.services.project_scope import resolve_project_id
+
+    project_id = await resolve_project_id(
+        session, widget.organization_id, widget.project_id
+    )
     digest: Optional[str] = None
     profile = None
     if conversation is not None:
@@ -509,6 +515,7 @@ async def _persist_and_answer(
         profile = await visitor_service.upsert_profile(
             session,
             organization_id=widget.organization_id,
+            project_id=project_id,
             visitor_key=ws.visitor_id,
             channel="chat",
             name=ctx.get("name"),
@@ -553,6 +560,7 @@ async def _persist_and_answer(
         session,
         text,
         widget.organization_id,
+        project_id=project_id,
         knowledge_base_ids=kb_ids,
         top_k=5,
         extra_context=digest,
@@ -562,6 +570,15 @@ async def _persist_and_answer(
         business_contact=agent_contact,
     )
     handoff = bool(result.get("handoff"))
+    if handoff:
+        # Promise follow-up only when the visitor left a way to be reached.
+        ctx_contact = ws.user_context or {}
+        result["answer"] = escalation_service.handoff_reply(
+            result.get("answer", ""),
+            contact_known=escalation_service.has_contact(
+                ctx_contact.get("email"), ctx_contact.get("phone")
+            ),
+        )
 
     # False when the reply is a fallback (no model produced it). Carried to the response and metadata.
     generated = bool(result.get("generated", False))
@@ -597,6 +614,17 @@ async def _persist_and_answer(
                 intent=(text or "")[:255] or None,
                 message=text,
                 source="chat",
+            )
+            await escalation_service.create_escalation(
+                session,
+                organization_id=widget.organization_id,
+                project_id=project_id,
+                channel="chat",
+                question=text or "",
+                conversation_id=conversation.id,
+                name=ctx.get("name"),
+                email=ctx.get("email"),
+                phone=ctx.get("phone"),
             )
 
     if profile is not None:

@@ -709,3 +709,17 @@ async def test_voice_turn_is_recorded_on_the_voice_channel(db_session, monkeypat
         assert channels and all(c == ConversationChannel.voice for c in channels)
     finally:
         await _cleanup(db_session, org_ids=[org_id], user_ids=[user.id])
+
+
+@pytest.fixture(autouse=True)
+def _default_project_for_tests(monkeypatch):
+    """Customer paths resolve a project. These tests have no project rows, so
+    the organization default is pinned to one fixed project."""
+    from app.services import project_scope
+
+    project = uuid.uuid4()
+
+    async def _default(_session, _organization_id):
+        return project
+
+    monkeypatch.setattr(project_scope, "default_project_id", _default)

@@ -1,11 +1,14 @@
 """Every RAG inference must respect the configured model boundary."""
 
+import uuid
 from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
 
 from app.services import rag_answer
+
+TEST_PROJECT_ID = uuid.uuid4()
 
 
 @pytest.mark.asyncio
@@ -44,6 +47,7 @@ async def test_explicit_empty_scope_skips_hybrid_search(monkeypatch):
         uuid4(),
         knowledge_base_ids=[],
         persona=None,
+        project_id=TEST_PROJECT_ID,
     )
 
     assert result["sources"] == []

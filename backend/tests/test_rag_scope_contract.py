@@ -1,11 +1,14 @@
 """Focused tests for None-versus-empty knowledge scope handling."""
 
+import uuid
 from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
 
 from app.services import rag_service, workflow_engine
+
+TEST_PROJECT_ID = uuid.uuid4()
 
 
 @pytest.mark.asyncio
@@ -19,7 +22,11 @@ async def test_hybrid_search_explicit_empty_allowlist_returns_without_querying(
 
     assert (
         await rag_service.hybrid_search(
-            object(), "question", uuid4(), knowledge_base_ids=[]
+            object(),
+            "question",
+            uuid4(),
+            knowledge_base_ids=[],
+            project_id=TEST_PROJECT_ID,
         )
         == []
     )
@@ -42,8 +49,13 @@ async def test_hybrid_search_none_preserves_legacy_all_kb_scope(monkeypatch):
     monkeypatch.setattr(rag_service, "_fts_candidates", no_candidates)
     monkeypatch.setattr(rag_service, "_keyword_search", no_candidates)
 
-    assert await rag_service.hybrid_search(object(), "question", organization_id) == []
-    assert calls == [(organization_id, None, None)]
+    assert (
+        await rag_service.hybrid_search(
+            object(), "question", organization_id, project_id=TEST_PROJECT_ID
+        )
+        == []
+    )
+    assert calls == [(organization_id, None, TEST_PROJECT_ID)]
 
 
 @pytest.mark.asyncio
@@ -57,7 +69,7 @@ async def test_workflow_kb_query_preserves_omitted_and_explicit_empty_scope(
         return []
 
     monkeypatch.setattr(workflow_engine.rag_service, "search_chunks", record_search)
-    workflow = SimpleNamespace(organization_id=uuid4())
+    workflow = SimpleNamespace(organization_id=uuid4(), project_id=TEST_PROJECT_ID)
 
     await workflow_engine._step_kb_query(
         object(), workflow, {"query": "legacy fallback"}, {}

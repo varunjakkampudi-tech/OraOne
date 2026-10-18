@@ -42,6 +42,8 @@ from app.services import (
     visitor_service,
     workflow_triggers,
 )
+from app.services import escalation_service
+from app.services.project_scope import resolve_project_id
 from app.services.rag_answer import answer_query
 
 log = logging.getLogger("app.omnichannel")
@@ -219,10 +221,13 @@ async def handle_inbound(session: AsyncSession, msg: InboundMessage) -> Outbound
 
     channel_enum = _channel_enum(msg.channel)
 
+    project_id = await resolve_project_id(session, msg.organization_id, msg.project_id)
+
     # 1) Cross-channel identity + shared memory (Phase C).
     profile = await visitor_service.upsert_profile(
         session,
         organization_id=msg.organization_id,
+        project_id=project_id,
         visitor_key=_visitor_key(msg),
         channel=msg.channel,
         name=msg.name,
@@ -278,6 +283,7 @@ async def handle_inbound(session: AsyncSession, msg: InboundMessage) -> Outbound
         session,
         text,
         msg.organization_id,
+        project_id=project_id,
         top_k=5,
         extra_context=digest,
         persona=agent_cfg.system_prompt if agent_cfg is not None else None,
@@ -286,6 +292,12 @@ async def handle_inbound(session: AsyncSession, msg: InboundMessage) -> Outbound
     )
     answer = result.get("answer", "")
     handoff = bool(result.get("handoff"))
+    if handoff:
+        # Promise follow-up only when the visitor left a way to be reached.
+        answer = escalation_service.handoff_reply(
+            answer,
+            contact_known=escalation_service.has_contact(msg.email, msg.phone),
+        )
 
     # 5) Persist the agent's reply + roll memory forward.
     session.add(
@@ -317,6 +329,17 @@ async def handle_inbound(session: AsyncSession, msg: InboundMessage) -> Outbound
             intent=text[:255],
             message=text,
             source=msg.channel,
+        )
+        await escalation_service.create_escalation(
+            session,
+            organization_id=msg.organization_id,
+            project_id=project_id,
+            channel=msg.channel,
+            question=text,
+            conversation_id=conversation.id,
+            name=msg.name,
+            email=msg.email,
+            phone=msg.phone,
         )
     conversation.last_message_at = visitor_service.now_utc()
     visitor_service.append_memory(profile, channel=msg.channel, role="user", text=text)

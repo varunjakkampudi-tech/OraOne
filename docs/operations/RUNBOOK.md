@@ -162,9 +162,9 @@ Work through the list in order. The first match is the usual cause.
 
 ## 7. Sign-in codes do not arrive
 
-**Symptom.** A user asks for a sign-in code and never receives it. The page shows no error.
+**Symptom.** A user asks for a sign-in code and gets an error ("Sign-in codes cannot be sent right now") or never receives a code.
 
-**Cause.** When `SMTP_HOST` is unset, the email is logged as `email (SMTP_HOST not configured) ... [not sent]`. When SMTP fails, the log says `SMTP send failed` with the error type. The sign-in request answers the same way in both cases, so the user sees nothing wrong.
+**Cause.** When `SMTP_HOST` is unset, the log says `email (SMTP_HOST not configured) ... [not sent]`. When SMTP fails, the log says `SMTP send failed` with the error type. In both cases the server removes the stored code and the sign-in request returns HTTP 503, so no code is issued. The log line `email_code_not_delivered` marks the failed request.
 
 **Fix.** Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` and `SMTP_USE_SSL` (`true` for port 465, `false` for STARTTLS). Restart the backend. Send yourself a code to test. Codes last 10 minutes.
 

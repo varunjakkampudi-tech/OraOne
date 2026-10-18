@@ -127,7 +127,8 @@ The deploy is manual. Only the `deploy.yml` workflow can ship, and only from `ma
 | 10. Cleanup       | The runner deletes its key file, even on failure.                                                                                                                                                                                                                                                              | Repo (`deploy.yml`)                                     |
 
 CI (`.github/workflows/ci.yml`) runs on pull requests and pushes to `main`. It lints, type-checks,
-tests and builds the web app, and tests the backend. It never deploys.
+tests and builds the web app, runs the Playwright browser tests at 390 and 1280 px, and tests the
+backend. It never deploys.
 
 ```mermaid
 sequenceDiagram
@@ -176,15 +177,14 @@ flowchart LR
 
 ## 6. Items that differ from other docs
 
-- `docs/HOSTINGER-DEPLOYMENT.md` section 1 says the deploy workflow is "not present in the
-  repository" and that the release is built on the server from a checked-out commit. Both are out
-  of date. `deploy.yml` and `scripts/deploy-remote.sh` are committed (commit `e69494d`), and the
-  current release is built from a git archive of `HEAD`. That document has not been changed here.
+- `docs/HOSTINGER-DEPLOYMENT.md` section 1 now says that `deploy.yml` exists and is manual, and that
+  the workflow builds from a git archive of `HEAD`. The manual path in section 6 still uses a
+  checked-out commit.
 - `docker-compose.prod.yml` says to run with `--env-file .env.production`. `deploy-remote.sh` passes
   `--env-file .env`. Use the second form for the live copy, and make sure the file exists.
 - The owner notes that SMTP is not configured on the server (`blocker.txt` item 1), and that backups
   are not configured (`docs/HOSTINGER-DEPLOYMENT.md` section 1). Sign-in codes depend on SMTP.
-  Without it, the codes are not delivered.
+  Without it, no code is sent, and the sign-in request returns HTTP 503.
 
 ## 7. Not verified in this review
 

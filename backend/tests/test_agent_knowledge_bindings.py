@@ -1,5 +1,6 @@
 """Contract tests for assistant-specific knowledge-base bindings."""
 
+import uuid
 from datetime import datetime, timezone
 from types import SimpleNamespace
 from uuid import uuid4
@@ -11,6 +12,8 @@ from app.api.agents.routes import _to_read_model, _validate_knowledge_base_ids
 from app.database.models.agent import AgentStatus, AgentType
 from app.services.agent_runtime import AgentRuntime
 from app.schemas.agents import AgentCreate, AgentUpdate
+
+TEST_PROJECT_ID = uuid.uuid4()
 
 
 def test_knowledge_binding_omitted_is_distinct_from_explicit_empty():
@@ -115,9 +118,9 @@ async def test_binding_validation_requires_all_ids_in_active_org_project():
 
 def test_runtime_distinguishes_omitted_and_explicit_empty_binding():
     runtime = object.__new__(AgentRuntime)
-    omitted = SimpleNamespace(config=SimpleNamespace(config={}))
+    omitted = SimpleNamespace(project_id=None, config=SimpleNamespace(config={}))
     explicit_empty = SimpleNamespace(
-        config=SimpleNamespace(config={"knowledge_base_ids": []})
+        project_id=None, config=SimpleNamespace(config={"knowledge_base_ids": []})
     )
 
     assert runtime._linked_kb_ids(SimpleNamespace(config=None)) is None
@@ -130,7 +133,9 @@ async def test_runtime_explicit_empty_binding_skips_rag(monkeypatch):
     runtime = object.__new__(AgentRuntime)
     runtime.session = object()
     runtime.ctx = SimpleNamespace(organization_id=uuid4())
-    agent = SimpleNamespace(config=SimpleNamespace(config={"knowledge_base_ids": []}))
+    agent = SimpleNamespace(
+        project_id=None, config=SimpleNamespace(config={"knowledge_base_ids": []})
+    )
 
     async def fail_if_called(*_args, **_kwargs):
         raise AssertionError("RAG search must be skipped for an explicit empty binding")
@@ -146,7 +151,7 @@ async def test_runtime_omitted_binding_keeps_rag_fallback(monkeypatch):
     runtime = object.__new__(AgentRuntime)
     runtime.session = object()
     runtime.ctx = SimpleNamespace(organization_id=uuid4())
-    agent = SimpleNamespace(config=SimpleNamespace(config={}))
+    agent = SimpleNamespace(project_id=None, config=SimpleNamespace(config={}))
     calls = []
 
     async def record_search(*_args, **kwargs):
@@ -158,3 +163,17 @@ async def test_runtime_omitted_binding_keeps_rag_fallback(monkeypatch):
     )
     assert await runtime.retrieve_context(agent, "uses fallback") == []
     assert calls == [None]
+
+
+@pytest.fixture(autouse=True)
+def _default_project_for_tests(monkeypatch):
+    """Customer paths resolve a project. These tests have no project rows, so
+    the organization default is pinned to one fixed project."""
+    from app.services import project_scope
+
+    project = uuid.uuid4()
+
+    async def _default(_session, _organization_id):
+        return project
+
+    monkeypatch.setattr(project_scope, "default_project_id", _default)

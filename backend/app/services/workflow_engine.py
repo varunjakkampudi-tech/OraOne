@@ -666,10 +666,16 @@ async def _step_kb_query(
     )
     top_k = int(cfg.get("top_k", 5))
 
+    from app.services.project_scope import resolve_project_id
+
+    project_id = await resolve_project_id(
+        session, workflow.organization_id, workflow.project_id
+    )
     chunks = await rag_service.search_chunks(
         session,
         query,
         workflow.organization_id,
+        project_id=project_id,
         knowledge_base_ids=kb_ids,
         top_k=top_k,
     )

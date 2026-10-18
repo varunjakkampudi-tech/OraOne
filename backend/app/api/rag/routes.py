@@ -11,6 +11,8 @@ All endpoints are tenant-scoped via :class:`OrgContext`.
 
 from __future__ import annotations
 
+import uuid
+
 from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +23,7 @@ from app.database.models.knowledge_base import KnowledgeBase
 from app.database.models.website import Website
 from app.database.session import get_db
 from app.middleware.org_context import OrgContext, get_current_organization
+from app.middleware.project_context import get_current_project_id
 from app.core.permissions import Permission
 from app.middleware.org_context import require_permission
 from app.schemas.rag import (
@@ -47,12 +50,14 @@ router = APIRouter(tags=["rag"])
 async def rag_query(
     payload: RagQueryRequest,
     ctx: OrgContext = Depends(get_current_organization),
+    project_id: uuid.UUID = Depends(get_current_project_id),
     session: AsyncSession = Depends(get_db),
 ) -> RagQueryResponse:
     result = await answer_query(
         session,
         payload.query,
         ctx.organization_id,
+        project_id=project_id,
         knowledge_base_ids=payload.knowledge_base_ids,
         top_k=payload.top_k,
         source_types=payload.source_types,
@@ -80,12 +85,14 @@ async def rag_query(
 async def rag_search(
     payload: RagSearchRequest,
     ctx: OrgContext = Depends(get_current_organization),
+    project_id: uuid.UUID = Depends(get_current_project_id),
     session: AsyncSession = Depends(get_db),
 ) -> RagSearchResponse:
     chunks = await rag_service.hybrid_search(
         session,
         payload.query,
         ctx.organization_id,
+        project_id=project_id,
         knowledge_base_ids=payload.knowledge_base_ids,
         top_k=payload.top_k,
         source_types=payload.source_types,

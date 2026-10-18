@@ -56,13 +56,17 @@ def _clean_context(ctx: Optional[dict]) -> dict[str, Any]:
 
 
 async def _lookup_by_key(
-    session: AsyncSession, organization_id: uuid.UUID, key: str
+    session: AsyncSession,
+    organization_id: uuid.UUID,
+    project_id: uuid.UUID,
+    key: str,
 ) -> Optional[VisitorProfile]:
     """Resolve a profile whose ``visitor_key`` is ``key`` OR which has folded
-    ``key`` in as an alias."""
+    ``key`` in as an alias. Profiles never cross projects."""
     return await session.scalar(
         select(VisitorProfile)
         .where(VisitorProfile.organization_id == organization_id)
+        .where(VisitorProfile.project_id == project_id)
         .where(
             or_(
                 VisitorProfile.visitor_key == key,
@@ -77,6 +81,7 @@ async def _lookup_by_key(
 async def find_by_identity(
     session: AsyncSession,
     organization_id: uuid.UUID,
+    project_id: uuid.UUID,
     *,
     email: Optional[str] = None,
     phone: Optional[str] = None,
@@ -96,6 +101,7 @@ async def find_by_identity(
     return await session.scalar(
         select(VisitorProfile)
         .where(VisitorProfile.organization_id == organization_id)
+        .where(VisitorProfile.project_id == project_id)
         .where(or_(*conds))
         .order_by(VisitorProfile.first_seen_at.asc())
         .limit(1)
@@ -172,6 +178,7 @@ async def upsert_profile(
     session: AsyncSession,
     *,
     organization_id: uuid.UUID,
+    project_id: uuid.UUID,
     visitor_key: str,
     channel: Optional[str] = None,
     name: Optional[str] = None,
@@ -197,9 +204,9 @@ async def upsert_profile(
     name = (name or "").strip()[:160] or None
     new_ctx = _clean_context(context)
 
-    by_key = await _lookup_by_key(session, organization_id, visitor_key)
+    by_key = await _lookup_by_key(session, organization_id, project_id, visitor_key)
     by_identity = await find_by_identity(
-        session, organization_id, email=email, phone=phone
+        session, organization_id, project_id, email=email, phone=phone
     )
 
     profile: Optional[VisitorProfile]
@@ -216,6 +223,7 @@ async def upsert_profile(
     if profile is None:
         profile = VisitorProfile(
             organization_id=organization_id,
+            project_id=project_id,
             visitor_key=visitor_key,
             name=name,
             email=email,

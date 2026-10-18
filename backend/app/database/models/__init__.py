@@ -91,6 +91,7 @@ from app.database.models.widget import (
 )
 from app.database.models.widget_domain import WidgetDomain
 from app.database.models.widget_session import WidgetSession
+from app.database.models.escalation import Escalation
 from app.database.models.widget_event import WidgetEvent, WidgetEventType
 from app.database.models.webhook import (
     WebhookEndpoint,
@@ -251,6 +252,7 @@ __all__ = [
     "WidgetSession",
     "WidgetEvent",
     "WidgetEventType",
+    "Escalation",
     "WebhookEndpoint",
     "WebhookDelivery",
     "WebhookEventType",

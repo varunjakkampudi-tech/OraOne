@@ -133,14 +133,15 @@ def _keywords(text: str) -> list[str]:
 def _base_query(
     organization_id: uuid.UUID,
     kb_ids: Optional[list[uuid.UUID]],
-    project_id: Optional[uuid.UUID] = None,
+    project_id: uuid.UUID,
 ):
     """Source-agnostic, org-scoped candidate query.
 
-    Filters on the denormalised ``document_chunks.organization_id`` so
-    website chunks (no Document) are included. LEFT JOINs resolve the
-    citation source and exclude soft-deleted / unprocessed sources.
-    When ``project_id`` is given, also scopes to that project's namespace.
+        Filters on the denormalised ``document_chunks.organization_id`` so
+        website chunks (no Document) are included. LEFT JOINs resolve the
+        citation source and exclude soft-deleted / unprocessed sources.
+        ``project_id`` is mandatory: every retrieval is confined to one project, so two
+    projects in the same organization never share knowledge.
     """
     q = (
         select(
@@ -174,8 +175,7 @@ def _base_query(
     )
     if kb_ids:
         q = q.where(DocumentChunk.knowledge_base_id.in_(kb_ids))
-    if project_id is not None:
-        q = q.where(DocumentChunk.project_id == project_id)  # project namespace
+    q = q.where(DocumentChunk.project_id == project_id)  # project namespace
     return q
 
 
@@ -211,7 +211,7 @@ async def hybrid_search(
     top_k: int = DEFAULT_TOP_K,
     source_types: Optional[list[str]] = None,
     candidate_k: int = CANDIDATE_K,
-    project_id: Optional[uuid.UUID] = None,
+    project_id: uuid.UUID,
     rerank: Optional[bool] = None,
     reranker: Optional[str] = None,
     rerank_top_n: int = RERANK_TOP_N,
@@ -437,7 +437,7 @@ async def search_chunks(
     knowledge_base_ids: Optional[list[uuid.UUID]] = None,
     top_k: int = DEFAULT_TOP_K,
     source_types: Optional[list[str]] = None,
-    project_id: Optional[uuid.UUID] = None,
+    project_id: uuid.UUID,
 ) -> list[RetrievedChunk]:
     """Return the ``top_k`` most relevant chunks for ``query``.
 

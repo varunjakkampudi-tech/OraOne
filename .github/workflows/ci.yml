@@ -130,3 +130,90 @@ jobs:
         run: alembic upgrade head
       - name: Tests
         run: python -m pytest -q -p no:cacheprovider
+
+  production-images:
+    # Builds the same images Compose ships (frontend.Dockerfile and backend/Dockerfile),
+    # boots them and checks their health endpoints. Independent of the other jobs.
+    name: Production images build and boot
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: oraone_admin
+          POSTGRES_PASSWORD: ci_password
+          POSTGRES_DB: oraone
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U oraone_admin -d oraone"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build frontend image
+        run: docker build -f frontend.Dockerfile -t oraone-frontend:ci .
+      - name: Build backend image
+        run: docker build -t oraone-backend:ci ./backend
+      - name: Start frontend container
+        # Published on 127.0.0.1 only; the runner is the only client.
+        run: |
+          docker run -d --name oraone-frontend-ci -p 127.0.0.1:8080:8080 oraone-frontend:ci
+      - name: Start backend container
+        # Host networking lets the container reach the postgres and redis service
+        # containers on 127.0.0.1. Values below are throwaway CI-only test values.
+        env:
+          JWT_SECRET_KEY: ci-only-jwt-secret-key-change-me-32-bytes-long
+        run: |
+          docker run -d --name oraone-backend-ci --network host \
+            -e ENVIRONMENT=development \
+            -e JWT_SECRET_KEY \
+            -e DATABASE_URL=postgresql+asyncpg://oraone_admin:ci_password@127.0.0.1:5432/oraone \
+            -e ALEMBIC_DATABASE_URL=postgresql+psycopg2://oraone_admin:ci_password@127.0.0.1:5432/oraone \
+            -e REDIS_URL=redis://127.0.0.1:6379/0 \
+            -e RUN_BACKGROUND_WORKERS=false \
+            oraone-backend:ci
+      - name: Wait for frontend GET / to return 200
+        run: |
+          for i in $(seq 1 45); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/ || true)
+            echo "frontend attempt $i: HTTP $code"
+            if [ "$code" = "200" ]; then exit 0; fi
+            if [ "$(docker inspect -f '{{.State.Running}}' oraone-frontend-ci)" != "true" ]; then
+              echo "frontend container stopped before it became ready"
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "frontend did not return HTTP 200 within 90 seconds"
+          exit 1
+      - name: Wait for backend GET /api/health/ready to return 200
+        run: |
+          for i in $(seq 1 45); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/api/health/ready || true)
+            echo "backend attempt $i: HTTP $code"
+            if [ "$code" = "200" ]; then exit 0; fi
+            if [ "$(docker inspect -f '{{.State.Running}}' oraone-backend-ci)" != "true" ]; then
+              echo "backend container stopped before it became ready"
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "backend did not return HTTP 200 within 90 seconds"
+          exit 1
+      - name: Print container logs on failure
+        if: failure()
+        run: |
+          echo "--- frontend container logs ---"
+          docker logs oraone-frontend-ci 2>&1 || true
+          echo "--- backend container logs ---"
+          docker logs oraone-backend-ci 2>&1 || true
+      - name: Remove containers
+        if: always()
+        run: docker rm -f oraone-frontend-ci oraone-backend-ci || true

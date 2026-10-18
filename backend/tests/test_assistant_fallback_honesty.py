@@ -16,6 +16,8 @@ from httpx import ASGITransport, AsyncClient
 from app.middleware.org_context import OrgContext, get_current_organization
 from app.services import assistants, rag_answer, rag_service
 
+TEST_PROJECT_ID = uuid.uuid4()
+
 
 def _ctx() -> OrgContext:
     return OrgContext(
@@ -129,7 +131,11 @@ async def test_rag_answer_fallback_is_flagged_not_generated(monkeypatch):
     monkeypatch.setattr(rag_answer, "get_provider", lambda: _FailingProvider())
 
     result = await rag_answer.answer_query(
-        object(), "How long do refunds take?", uuid.uuid4(), persona=None
+        object(),
+        "How long do refunds take?",
+        uuid.uuid4(),
+        persona=None,
+        project_id=TEST_PROJECT_ID,
     )
     assert result["generated"] is False
     assert "Refunds are processed" in result["answer"]
@@ -159,7 +165,11 @@ async def test_rag_answer_model_reply_is_flagged_generated(monkeypatch):
     monkeypatch.setattr(rag_answer, "get_provider", lambda: _Provider())
 
     result = await rag_answer.answer_query(
-        object(), "How long do refunds take?", uuid.uuid4(), persona=None
+        object(),
+        "How long do refunds take?",
+        uuid.uuid4(),
+        persona=None,
+        project_id=TEST_PROJECT_ID,
     )
     assert result["generated"] is True
     assert result["answer"] == "Refunds take five business days [1]."

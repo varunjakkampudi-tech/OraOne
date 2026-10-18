@@ -97,7 +97,7 @@ NOT IN THIS RELEASE (planned)
 
 19. GitHub repository settings (needs your explicit approval; I will not change them without it)
    - Branch protection on main: currently NOT protected (verified via the GitHub API on 2026-10-18).
-     Proposed: require the CI and Browser tests checks to pass, block force pushes and deletion,
+     Proposed: require the web, browser and backend jobs of ci.yml to pass, block force pushes and deletion,
      and require one review. Reply "approve branch protection" and I will apply it.
    - Repository visibility: currently PUBLIC. Proposed: make it private, because the docs and
      history describe the deployment layout. Reply "make repository private" to approve.
@@ -137,11 +137,15 @@ ADDED 2026-10-18 (documentation pass). Each item below needs your decision or a 
    home page, while docs/PRODUCT-PORTFOLIO.md records them as built with setup gaps. Choose the wording.
    Changing the site copy is a code edit, which needs your approval first.
 
-18. No deploy workflow exists. .github/workflows holds only the test, lint and formatting workflows, so
-   nothing deploys automatically, and the docs say so. Before a deploy workflow is written:
-   - approve it, and choose the deploy account (item 5 proposes root; a dedicated deploy user in the docker
-     group is the safer choice);
-   - note that item 5 above contains the server's IP address in plain text. The new docs do not repeat it.
+18. The deploy workflow exists but has not been run. .github/workflows/deploy.yml is manual only
+   (workflow_dispatch) and runs only from main. Nothing deploys on a push or a pull request. Before the
+   first run:
+   - add the secrets DEPLOY_HOST, DEPLOY_USER and DEPLOY_SSH_KEY to the production environment (item 5);
+   - add required reviewers to the production environment in GitHub settings. The repository does not
+     show whether this rule is set;
+   - choose the deploy account (item 5 proposes root; a dedicated deploy user in the docker group is the
+     safer choice).
+   - The server address is not written in this file. Copy it from the Hostinger panel (item 5).
 
 DECISIONS FROM THE LATEST ROUND (owner input needed)
 - Business-only AI: confirm the list of weak topics that trigger a refusal (for example
@@ -150,3 +154,21 @@ DECISIONS FROM THE LATEST ROUND (owner input needed)
 - Database row-level security: not configured; tenant separation is enforced in application
   code. Decide whether to add PostgreSQL RLS policies before large customer onboarding.
 - Admin navigation: Logs, Analytics and Beta flags are now in the menu; confirm the labels.
+
+UPDATE 2026-10-18 (audit round 3). What changed and what still needs you.
+20. Project isolation: DONE in code. Retrieval, visitor memory and handoffs are confined to one
+    project; a missing project resolves to the organization default. Migration 0062 backfills
+    existing data. Owner decision recorded: projects are separate data boundaries.
+21. Human handoff: DONE in code. Each handoff is stored as an escalation, emailed to organization
+    owners and admins, retried with backoff, and moved to dead letter after 5 attempts. A visitor
+    with no contact details is asked for one, and is never promised follow-up.
+    OWNER DECISION NEEDED: the response-time target (for example "within one business day").
+    Email delivery needs the SMTP mailbox (item 1). Without it, escalations stay pending and visible.
+    The dashboard screen for the escalation queue is not built yet; the API is at /api/escalations.
+22. Grounding: DONE in code. Each sentence of a model reply must be supported by the retrieved
+    passages; otherwise the passage text is used. The check is lexical, so it is strict and can
+    refuse valid paraphrases. Evaluation set: backend/tests/fixtures/grounding_eval.json.
+    OWNER DECISION NEEDED: approve the set, and send real rejected replies to extend it.
+23. Production image in CI: ADDED (job "Production images build and boot"). Verified locally: the
+    frontend image builds and serves HTTP 200. Not verified: the backend container booting on a
+    GitHub runner. Check the first run.

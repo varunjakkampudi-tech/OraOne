@@ -24,6 +24,8 @@ from app.database.session import get_db
 from app.services import lead_service, omnichannel_service
 from app.services import visitor_service, widget_service, workflow_triggers
 
+TEST_PROJECT_ID = uuid.uuid4()
+
 FALLBACK_TEXT = (
     "I couldn't find anything relevant in your knowledge base for that question. "
     "Try rephrasing, or add documents / websites that cover this topic."
@@ -248,3 +250,17 @@ def test_widget_model_reply_carries_generated_true(monkeypatch):
     assert body["answer"] == answer
     [agent_msg] = session.agent_messages()
     assert agent_msg.metadata_["generated"] is True
+
+
+@pytest.fixture(autouse=True)
+def _default_project_for_tests(monkeypatch):
+    """Customer paths resolve a project. These tests have no project rows, so
+    the organization default is pinned to one fixed project."""
+    from app.services import project_scope
+
+    project = uuid.uuid4()
+
+    async def _default(_session, _organization_id):
+        return project
+
+    monkeypatch.setattr(project_scope, "default_project_id", _default)

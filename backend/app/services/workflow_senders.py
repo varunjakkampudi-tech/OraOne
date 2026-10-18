@@ -14,6 +14,7 @@ sender is called, so this module does not repeat the policy.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 import uuid
@@ -22,7 +23,9 @@ from typing import Any, Callable, Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.log_redaction import redact_email
 from app.database.models.agent_channel import AgentChannel, ChannelStatus
+from app.services import email_service
 from app.services.channels.adapters import ParsedInbound, get_adapter
 from app.services.channels.config import ChannelsConfig, get_channels_config
 
@@ -32,16 +35,29 @@ log = logging.getLogger("app.workflow.senders")
 SUPPORTED_CHANNELS: tuple[str, ...] = ("whatsapp", "sms", "instagram", "email")
 
 # Provider adapters (by ``AgentChannel.provider``) that may carry each channel.
+# Email is not listed: it is sent through ``email_service`` (see ``_send_email``).
 _PROVIDERS_BY_CHANNEL: dict[str, tuple[str, ...]] = {
     "whatsapp": ("twilio", "meta"),
     "sms": ("twilio",),
     "instagram": ("meta_instagram",),
-    "email": ("email",),
 }
+
+# Workflow email messages use one plain-text template with the message body.
+EMAIL_TEMPLATE = "workflow_message.html"
+DEFAULT_EMAIL_SUBJECT = "A message from your team"
+_EMAIL_SHAPE_RE = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
 
 
 class OutboundNotConfigured(Exception):
     """The channel cannot send right now. The message is safe to show to users."""
+
+
+def normalise_email_address(value: Optional[str]) -> Optional[str]:
+    """Trim and lowercase an address, as the auth code does; None when malformed."""
+    address = (value or "").strip().lower()
+    if not address or len(address) > 254 or not _EMAIL_SHAPE_RE.fullmatch(address):
+        return None
+    return address
 
 
 class ChannelOutboundSender:
@@ -67,11 +83,14 @@ class ChannelOutboundSender:
         text: str,
         organization_id: uuid.UUID,
         lead_id: uuid.UUID,
+        subject: Optional[str] = None,
     ) -> dict[str, Any]:
         if channel not in SUPPORTED_CHANNELS:
             raise OutboundNotConfigured(
                 f"Messages cannot be sent on the {channel} channel."
             )
+        if channel == "email":
+            return await _send_email(recipient=recipient, text=text, subject=subject)
         cfg = self._config()
         async with self._session_factory() as session:  # type: AsyncSession
             bindings = await find_bindings(session, organization_id, channel)
@@ -139,8 +158,6 @@ def _not_ready_reason(
             return "The Instagram access token is not configured on the server."
         if not str(extra.get("instagram_account_id") or "").strip():
             return "The Instagram binding has no instagram_account_id."
-    elif provider == "email":
-        return "Email delivery is not connected on this server yet."
     return None
 
 
@@ -221,6 +238,37 @@ async def _deliver(
         # The adapter returns False for any non-2xx answer or transport error.
         raise RuntimeError(f"The {channel} provider did not accept the message.")
     return {"provider": provider, "binding_id": str(binding.id)}
+
+
+async def _send_email(
+    *, recipient: str, text: str, subject: Optional[str]
+) -> dict[str, Any]:
+    """Send one workflow email through the transactional email service.
+
+    The address is validated before anything is sent. ``send_email`` is blocking
+    SMTP I/O, so it runs in a worker thread. It returns False when SMTP is not
+    configured or the server refuses the message, and that is reported as a
+    failure. It is not an OutboundNotConfigured, because the engine must not treat
+    it as safe to retry (the provider may have accepted the message).
+    """
+    address = normalise_email_address(recipient)
+    if address is None:
+        raise OutboundNotConfigured(
+            "The lead's email address is not valid, so the message was not sent."
+        )
+    subject_line = (subject or "").strip()[:200] or DEFAULT_EMAIL_SUBJECT
+    delivered = await asyncio.to_thread(
+        email_service.send_email,
+        to=address,
+        subject=subject_line,
+        template=EMAIL_TEMPLATE,
+        context={"message": text},
+        preheader=subject_line,
+    )
+    if not delivered:
+        log.warning("email workflow send not delivered → to=%s", redact_email(address))
+        raise RuntimeError("The email provider did not accept the message.")
+    return {"provider": "email", "binding_id": None}
 
 
 def _default_session_factory():

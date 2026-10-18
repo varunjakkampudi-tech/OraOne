@@ -1,6 +1,6 @@
 # End-to-end tests for the product surfaces
 
-These tests open the web app in a real browser and check that each page a visitor or a signed-in user can reach shows its main content, does not scroll sideways, and throws no uncaught JavaScript errors. Every check runs at three widths: 390 px (phone), 768 px (tablet) and 1280 px (desktop).
+These tests open the web app in a real browser and check that each page a visitor or a signed-in user can reach shows its main content, does not scroll sideways, and throws no uncaught JavaScript errors. The configured widths are 390 px (phone), 768 px (tablet) and 1280 px (desktop). The CI browser job runs 390 px and 1280 px only. Run 768 px locally with `--project=768`.
 
 ## How to run
 
