@@ -505,3 +505,6 @@ Plan values are set in backend/app/services/billing_service.py (key: ai_tokens_p
      change only with your approval.
 Also decide: the monthly ai_tokens_per_month value on each plan (currently 250,000 on the free plan).
 Tell me: "daily cap: <number per plan>" or "daily cap: use default".
+Note (round 8): the code default for the daily cap now never exceeds the plan's monthly AI token
+allowance. On the free plan (250,000 tokens a month) the daily default is therefore 250,000, not 500,000.
+Choose the real daily values from model cost and abuse exposure, not from this default.

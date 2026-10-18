@@ -305,10 +305,20 @@ async def enforce_quota(
 
 
 def _metered_limit(limits: dict, spec: dict) -> int:
-    """A plan's explicit limit, else the metric's default, else unlimited."""
+    """A plan's explicit limit, else the metric's default, else unlimited.
+
+    A default is never allowed to exceed the plan's monthly AI token allowance:
+    a daily cap larger than the monthly allowance could never be the limit that
+    applies first, so it would do nothing.
+    """
     if spec["limit_key"] in limits:
         return _limit_for(limits, spec["limit_key"])
-    return int(spec.get("default_limit", UNLIMITED))
+    default = int(spec.get("default_limit", UNLIMITED))
+    if spec.get("cap_default_at_monthly") and default != UNLIMITED:
+        monthly = _limit_for(limits, METERED_METRICS["ai_tokens"]["limit_key"])
+        if monthly != UNLIMITED:
+            return min(default, monthly)
+    return default
 
 
 async def reserve_metered(
@@ -381,6 +391,7 @@ METERED_METRICS["ai_tokens_daily"] = {
     "limit_key": "ai_tokens_per_day",
     "granularity": "day",
     "default_limit": DEFAULT_DAILY_AI_TOKENS,
+    "cap_default_at_monthly": True,
 }
 
 

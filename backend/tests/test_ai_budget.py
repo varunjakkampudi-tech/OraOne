@@ -372,3 +372,19 @@ async def test_daily_cap_refuses_the_call_that_would_exceed_it(monkeypatch):
             )
             await session.commit()
         await dispose_engine()
+
+
+def test_daily_default_never_exceeds_the_monthly_allowance():
+    """Free plan: 250,000 tokens a month must also cap a day, so the daily cap can apply first."""
+    spec = usage_service.METERED_METRICS["ai_tokens_daily"]
+    assert usage_service._metered_limit({"ai_tokens_per_month": 250000}, spec) == 250000
+    assert (
+        usage_service._metered_limit({"ai_tokens_per_month": -1}, spec)
+        == usage_service.DEFAULT_DAILY_AI_TOKENS
+    )
+    assert (
+        usage_service._metered_limit(
+            {"ai_tokens_per_day": 1000, "ai_tokens_per_month": 250000}, spec
+        )
+        == 1000
+    )
