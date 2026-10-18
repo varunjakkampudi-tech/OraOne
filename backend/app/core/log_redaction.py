@@ -98,6 +98,20 @@ def scrub_text(value: object, *, limit: int | None = None) -> str:
     return text
 
 
+def scrub_secrets(value: object) -> str:
+    """Remove credential-shaped strings only, for text sent back to customers.
+
+    Unlike ``scrub_text`` this keeps emails, URLs and ordinary words, because a
+    business's own support address or help link is legitimate reply content.
+    It removes bearer tokens, JWTs and well-known provider key prefixes that
+    could appear in a knowledge-base passage and be echoed in a reply.
+    """
+    text = "" if value is None else str(value)
+    text = _BEARER_RE.sub(f"Bearer {REDACTED}", text)
+    text = _JWT_RE.sub(REDACTED, text)
+    return _KNOWN_SECRET_RE.sub(REDACTED, text)
+
+
 def replace_raw_path(text: str, raw_path: str | None, route_template_value: str) -> str:
     """Swap a concrete request path (which may hold a token) for its route template."""
     if raw_path and len(raw_path) >= 4 and raw_path != route_template_value:

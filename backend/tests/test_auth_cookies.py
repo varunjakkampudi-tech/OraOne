@@ -27,6 +27,18 @@ def isolated_rate_limit_cache(monkeypatch):
     monkeypatch.setattr(rate_limit, "_cache", lambda: cache)
 
 
+@pytest.fixture(autouse=True)
+def stub_code_delivery(monkeypatch):
+    """No SMTP in tests: report the code as delivered so sign-in can proceed."""
+    from app.services import email_service
+
+    monkeypatch.setattr(
+        email_service,
+        "send_login_otp",
+        lambda to, *, code, expires_in="10 minutes": True,
+    )
+
+
 def _postgres_reachable() -> bool:
     import os
 

@@ -113,12 +113,18 @@ def _to_tokens_response(pair: token_service.TokenPair) -> TokensResponse:
     )
 
 
+class EmailDeliveryError(RuntimeError):
+    """The sign-in code could not be delivered, so no code was issued."""
+
+
 async def request_email_code(session: AsyncSession, data: EmailCodeRequest) -> None:
     """Start a passwordless sign-in by emailing a one-time code.
 
     Unknown addresses get a new account with an unusable random password, so
-    the emailed code is the only way in. Callers always receive the same
-    response, so account existence is never disclosed.
+    the emailed code is the only way in. Callers receive the same response
+    whether or not the address has an account. The one exception is delivery
+    failure: that is an outage of the mail service, not of the account, and
+    raises EmailDeliveryError with the stored code removed.
     """
     from app.services.email_service import send_login_otp
 
@@ -154,7 +160,12 @@ async def request_email_code(session: AsyncSession, data: EmailCodeRequest) -> N
     code = generate_numeric_code()
     with _guard_store():
         _cache().set(_code_key(email), code, ttl_seconds=_LOGIN_CODE_TTL_SECONDS)
-    send_login_otp(email, code=code)
+    if not send_login_otp(email, code=code):
+        # Never report a code as issued when no email left the server.
+        with _guard_store():
+            _cache().delete(_code_key(email))
+        log.error("email_code_not_delivered user=%s", subject)
+        raise EmailDeliveryError("sign-in code could not be delivered")
     log.info("email_code_sent user=%s", subject)
 
 

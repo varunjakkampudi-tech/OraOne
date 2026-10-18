@@ -57,3 +57,19 @@ flowchart TD
   Rollback --> Verify[Verify recovery]
   Verify --> Observe
 ```
+
+## Drill evidence
+
+Dated results. Each entry says what was run and what it does not prove.
+
+- **2026-10-18, scratch database (not production).** A throwaway pgvector/pg16 container
+  was seeded with two tables and a foreign key (500 and 5,000 rows). It was dumped with
+  `pg_dump -Fc` and restored into a second database with `pg_restore`. Row counts,
+  an MD5 checksum over the message bodies and the foreign key all matched.
+  This proves the dump and restore tooling works on this pg major version.
+  It does **not** prove the production backup, its schedule, its passphrase handling,
+  or a restore of the real schema. Those remain open until the scheduled drill runs
+  against the production backup (see the owner blocker list).
+- **Migration rollback is not proven.** The migration chain has one head (0061). No
+  down-migration has been exercised against a restored database, so a release that
+  includes a migration can only be rolled back by restoring a backup.

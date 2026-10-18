@@ -39,6 +39,36 @@ jobs:
       - name: Build
         run: bun run build
 
+  browser:
+    name: Browser tests (phone and desktop widths)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.2"
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+      - name: Browser tests
+        # Project names come from playwright.config.ts (390, 768, 1280). The
+        # config's webServer starts the Vite dev server for the run.
+        run: bunx playwright test --project=390 --project=1280
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+
   backend:
     name: Backend lint and tests
     runs-on: ubuntu-latest

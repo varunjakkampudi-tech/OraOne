@@ -61,6 +61,7 @@ export default defineConfig({
     command: "npm run dev",
     url: baseURL,
     reuseExistingServer: true,
-    timeout: 120_000,
+    // A cold Vite start on a CI runner can exceed two minutes.
+    timeout: 240_000,
   },
 });

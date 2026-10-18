@@ -30,6 +30,7 @@ from typing import Any, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.log_redaction import scrub_secrets
 from app.providers import AIProviderError, ChatMessage, DEFAULT_MODEL, get_provider
 from app.services import assistant_profiles, business_scope_guard, rag_service
 from app.services import model_router_service
@@ -106,7 +107,8 @@ def _result(
         else 0
     )
     return {
-        "answer": answer,
+        # Customer-facing text: never echo a credential found in a source passage.
+        "answer": scrub_secrets(answer),
         "sources": sources or [],
         "confidence": confidence,
         "related_questions": related or [],

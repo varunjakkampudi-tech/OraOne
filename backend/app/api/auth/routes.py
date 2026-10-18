@@ -53,7 +53,13 @@ async def email_code_request(
     payload: EmailCodeRequest, session: AsyncSession = Depends(get_db)
 ):
     """Email a one-time sign-in code. Creates the account when the address is new."""
-    await auth_service.request_email_code(session, payload)
+    try:
+        await auth_service.request_email_code(session, payload)
+    except auth_service.EmailDeliveryError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Sign-in codes cannot be sent right now. Please try again shortly.",
+        ) from exc
     return MessageResponse(
         message="If this address can receive sign-in codes, a code is on its way."
     )

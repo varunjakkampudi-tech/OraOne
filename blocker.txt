@@ -37,7 +37,7 @@ ACCOUNTS AND SECRETS (I cannot create accounts, enter passwords, or accept terms
    - Create a GitHub repository (private) for OraOne.
    - Tell me the repo name (owner/name). I will push code only after you approve the push.
    - Add repository secrets (Settings -> Secrets and variables -> Actions):
-     DEPLOY_HOST = 200.141.14.57
+     DEPLOY_HOST = the VPS IP address (copy it from your Hostinger panel; not written in this file)
      DEPLOY_USER = root
      DEPLOY_SSH_KEY = contents of the private key file ~/.ssh/oraone_vps
        (I will tell you the exact file path to copy; do NOT paste it into chat)
@@ -94,6 +94,15 @@ ITEMS I WILL DO WITHOUT YOU (for your awareness)
 NOT IN THIS RELEASE (planned)
 - YouTube and Instagram marketing for end users: needs YouTube Data API and Meta
   Marketing API approvals. Will be built after those approvals.
+
+19. GitHub repository settings (needs your explicit approval; I will not change them without it)
+   - Branch protection on main: currently NOT protected (verified via the GitHub API on 2026-10-18).
+     Proposed: require the CI and Browser tests checks to pass, block force pushes and deletion,
+     and require one review. Reply "approve branch protection" and I will apply it.
+   - Repository visibility: currently PUBLIC. Proposed: make it private, because the docs and
+     history describe the deployment layout. Reply "make repository private" to approve.
+   - Note: making the repository private may affect the Lovable connection (see AGENTS.md).
+     Check that before approving.
 
 ADDED 2026-10-18 (documentation pass). Each item below needs your decision or a fact only you can confirm.
 

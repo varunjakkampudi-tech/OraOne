@@ -492,3 +492,39 @@ def test_dev_login_stays_off_when_environment_is_unset(monkeypatch):
     assert auth_service._dev_password_login_allowed() is False
     monkeypatch.setattr(auth_service.settings, "environment", "development")
     assert auth_service._dev_password_login_allowed() is True
+
+
+@pytest.mark.asyncio
+async def test_undelivered_code_is_not_issued_and_reports_failure(
+    otp_stores, monkeypatch
+):
+    """A send that fails must not leave a usable code behind or report success."""
+    from app.schemas.auth import EmailCodeRequest
+    from app.services import auth_service, email_service
+
+    codes, _guard = otp_stores
+    monkeypatch.setattr(
+        email_service,
+        "send_login_otp",
+        lambda to, *, code, expires_in="10 minutes": False,
+    )
+    user = SimpleNamespace(
+        auth_subject="sub-undelivered",
+        status=SimpleNamespace(value="active"),
+    )
+
+    class _Users:
+        def __init__(self, _session):
+            pass
+
+        async def get_by_email(self, _email):
+            return user
+
+    monkeypatch.setattr(auth_service, "UserRepository", _Users)
+    session = SimpleNamespace(add=lambda obj: None, commit=None)
+
+    with pytest.raises(auth_service.EmailDeliveryError):
+        await auth_service.request_email_code(
+            session, EmailCodeRequest(email="undelivered@example.com")
+        )
+    assert auth_service._code_key("undelivered@example.com") not in codes._store
