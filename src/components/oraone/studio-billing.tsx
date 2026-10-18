@@ -38,7 +38,6 @@ function useSection<T>(load: () => Promise<T>, failure: string): Section<T> {
       cancelled = true;
     };
     // The loaders are module-level functions, so the effect runs once per mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return state;
 }

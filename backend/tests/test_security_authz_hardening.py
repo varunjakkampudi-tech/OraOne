@@ -328,7 +328,11 @@ def test_access_log_never_contains_a_token_in_a_path(monkeypatch):
         def error(self, event, **fields):
             recorded.append((event, fields))
 
-    monkeypatch.setattr(server, "_access_logger", _Recorder())
+    from app.core import logging as core_logging
+
+    # The access line is written through app.core.logging.access_logger (see
+    # app/middleware/request_context.py), so that is the logger to replace.
+    monkeypatch.setattr(core_logging, "access_logger", _Recorder())
     monkeypatch.setitem(server.app.dependency_overrides, get_db, lambda: _NullSession())
     client = TestClient(server.app, raise_server_exceptions=False)
 

@@ -8,6 +8,7 @@ audit calls are captured.
 from __future__ import annotations
 
 import json
+import uuid
 from types import SimpleNamespace
 
 import pytest
@@ -16,7 +17,9 @@ from httpx import ASGITransport, AsyncClient
 
 from app.core import config_overrides, crypto
 from app.core.config_registry import BY_NAME, mask_secret
+from app.database.models.admin_config_draft import AdminConfigDraft
 from app.database.models.admin_config_override import AdminConfigOverride
+from app.database.models.admin_config_publish_event import AdminConfigPublishEvent
 from app.middleware.platform_context import (
     PlatformContext,
     get_current_platform_context,
@@ -32,10 +35,12 @@ REASON = "Rotating the key after a planned review"
 
 
 class _Store:
-    """In-memory replacement for the admin_config_overrides table."""
+    """In-memory replacement for the active, draft and publish-event tables."""
 
     def __init__(self) -> None:
         self.rows: dict[tuple[str, str], AdminConfigOverride] = {}
+        self.drafts: dict[tuple[str, str], AdminConfigDraft] = {}
+        self.events: list[AdminConfigPublishEvent] = []
 
     async def fetch(self, session, environment):
         return [row for (env, _), row in self.rows.items() if env == environment]
@@ -57,6 +62,54 @@ class _Store:
     async def delete(self, session, *, environment, name):
         self.rows.pop((environment, name), None)
 
+    async def fetch_drafts(self, session, environment):
+        return [d for (env, _), d in self.drafts.items() if env == environment]
+
+    async def upsert_draft(
+        self,
+        session,
+        *,
+        existing,
+        environment,
+        name,
+        action,
+        value_encrypted,
+        actor_id,
+        now,
+    ):
+        if existing is None:
+            self.drafts[(environment, name)] = AdminConfigDraft(
+                environment=environment,
+                name=name,
+                action=action,
+                value_encrypted=value_encrypted,
+                updated_at=now,
+            )
+        else:
+            existing.action = action
+            existing.value_encrypted = value_encrypted
+            existing.updated_at = now
+
+    async def delete_draft(self, session, *, environment, name):
+        self.drafts.pop((environment, name), None)
+
+    async def delete_drafts(self, session, *, environment):
+        for key in [k for k in self.drafts if k[0] == environment]:
+            del self.drafts[key]
+
+    async def fetch_events(self, session, environment, limit):
+        matching = sorted(
+            (e for e in self.events if e.environment == environment),
+            key=lambda e: e.published_at,
+            reverse=True,
+        )
+        return matching[:limit]
+
+    def add_event(self, session, event):
+        if event.id is None:
+            event.id = uuid.uuid4()
+        self.events.append(event)
+
 
 class _FakeSession:
     def __init__(self) -> None:
@@ -75,6 +128,12 @@ def store(monkeypatch):
     monkeypatch.setattr(config_console, "_fetch_rows", fake.fetch)
     monkeypatch.setattr(config_console, "_upsert_row", fake.upsert)
     monkeypatch.setattr(config_console, "_delete_row", fake.delete)
+    monkeypatch.setattr(config_console, "_fetch_drafts", fake.fetch_drafts)
+    monkeypatch.setattr(config_console, "_upsert_draft", fake.upsert_draft)
+    monkeypatch.setattr(config_console, "_delete_draft", fake.delete_draft)
+    monkeypatch.setattr(config_console, "_delete_drafts", fake.delete_drafts)
+    monkeypatch.setattr(config_console, "_fetch_publish_events", fake.fetch_events)
+    monkeypatch.setattr(config_console, "_add_publish_event", fake.add_event)
     return fake
 
 
@@ -271,44 +330,51 @@ async def test_successful_write_is_audited_without_secret_value(
         )
     assert r.status_code == 200, r.text
     body = r.json()
-    assert body["status"] == "saved"
-    assert body["restart_required"] is True
+    assert body["status"] == "draft_saved"
+    assert body["active"] is False
+    assert body["restart_required"] is False
     assert AUDIT_SECRET_VALUE not in r.text
 
-    updates = [kw for action, kw in audit_calls if action == "update"]
-    assert len(updates) == 1
-    audit_kwargs = updates[0]
+    drafts = [kw for action, kw in audit_calls if action == "draft_save"]
+    assert len(drafts) == 1
+    audit_kwargs = drafts[0]
     assert audit_kwargs["user_id"] == "00000000-0000-4000-8000-000000000001"
     assert audit_kwargs["meta"]["admin_email"] == "admin@example.com"
     assert audit_kwargs["meta"]["key"] == "OPENROUTER_API_KEY"
     assert audit_kwargs["meta"]["reason"] == REASON
-    assert audit_kwargs["after"] == {"set": True}
+    assert audit_kwargs["meta"]["change"] == "set"
     assert AUDIT_SECRET_VALUE not in json.dumps(audit_calls, default=str)
-    # The stored value is encrypted, never plaintext.
-    stored = store.rows[("local", "OPENROUTER_API_KEY")]
+    # The draft is stored encrypted, never as plaintext, and the active store is untouched.
+    stored = store.drafts[("local", "OPENROUTER_API_KEY")]
     assert AUDIT_SECRET_VALUE not in stored.value_encrypted
+    assert store.rows == {}
 
 
 @pytest.mark.asyncio
-async def test_plain_write_audit_records_old_and_new_values(
+async def test_clear_draft_takes_effect_only_after_publish(
     client_factory, store, audit_calls
 ):
+    store.rows[("local", "LOG_LEVEL")] = AdminConfigOverride(
+        environment="local",
+        name="LOG_LEVEL",
+        value_encrypted=crypto.encrypt("INFO"),
+    )
     async with client_factory(UserRole.super_admin) as c:
-        await c.put("/api/admin/config/LOG_LEVEL", json=_write_body(value="INFO"))
-        await c.put("/api/admin/config/LOG_LEVEL", json=_write_body(value="DEBUG"))
-    updates = [kw for action, kw in audit_calls if action == "update"]
-    assert updates[1]["before"] == {"set": True, "value": "INFO"}
-    assert updates[1]["after"] == {"set": True, "value": "DEBUG"}
-
-
-@pytest.mark.asyncio
-async def test_clear_override_removes_row(client_factory, store, audit_calls):
-    async with client_factory(UserRole.super_admin) as c:
-        await c.put("/api/admin/config/LOG_LEVEL", json=_write_body(value="INFO"))
         r = await c.put("/api/admin/config/LOG_LEVEL", json=_write_body(value=None))
+        published = await c.post(
+            "/api/admin/config/publish",
+            json={
+                "environment": "local",
+                "confirm": "local",
+                "reason": REASON,
+                "reviewed": ["LOG_LEVEL"],
+            },
+        )
     assert r.status_code == 200
-    assert r.json()["status"] == "cleared"
+    assert r.json()["status"] == "draft_removal_saved"
+    assert published.status_code == 200, published.text
     assert ("local", "LOG_LEVEL") not in store.rows
+    assert store.drafts == {}
 
 
 @pytest.mark.asyncio
@@ -343,6 +409,16 @@ async def test_environments_are_isolated(client_factory, store, audit_calls):
                 confirm="OPENROUTER_API_KEY",
             ),
         )
+        published = await c.post(
+            "/api/admin/config/publish",
+            json={
+                "environment": "production",
+                "confirm": "production",
+                "reason": REASON,
+                "reviewed": ["OPENROUTER_API_KEY"],
+            },
+        )
+        assert published.status_code == 200, published.text
         local_view = await c.get("/api/admin/config?environment=local")
         prod_view = await c.get("/api/admin/config?environment=production")
 

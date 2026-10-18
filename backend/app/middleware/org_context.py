@@ -34,6 +34,7 @@ from app.database.models.organization_member import (
 )
 from app.database.models.user import User
 from app.database.session import get_db
+from app.core.log_redaction import fingerprint
 from app.middleware.access_log import request_route_label
 from app.middleware.jwt_auth import get_current_user_claims
 
@@ -173,12 +174,13 @@ async def get_current_organization(
 
     # Attach to the request for easy logging downstream (e.g. access logs).
     request.state.org_context = ctx
+    request.state.org_hash = fingerprint(ctx.organization_id)
     await apply_rls_on_session(session, ctx)
 
     log.info(
-        "org_context user=%s org=%s role=%s path=%s",
-        ctx.user_id,
-        ctx.organization_id,
+        "org_context actor=%s org=%s role=%s route=%s",
+        fingerprint(ctx.user_id),
+        request.state.org_hash,
         ctx.membership_role,
         request_route_label(request),
     )

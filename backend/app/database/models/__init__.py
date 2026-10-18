@@ -58,10 +58,13 @@ from app.database.models.organization_invitation import (
     InvitationStatus,
 )
 from app.database.models.usage import UsageCounter
+from app.database.models.admin_config_draft import AdminConfigDraft
+from app.database.models.admin_config_publish_event import AdminConfigPublishEvent
 from app.database.models.api_key import ApiKey
 from app.database.models.ai_model_policy import AIModelPolicy
 from app.database.models.org_branding import OrgBranding
 from app.database.models.audit_log import AuditLog
+from app.database.models.error_event import ErrorEvent
 from app.database.models.conversation_folder import ConversationFolder
 from app.database.models.knowledge_folder import KnowledgeFolder
 from app.database.models.document_version import DocumentVersion
@@ -157,6 +160,7 @@ from app.database.models.product import (
 from app.database.models.organization_entitlement import OrganizationEntitlement
 
 __all__ = [
+    "ErrorEvent",
     "User",
     "UserRole",
     "UserStatus",
@@ -217,6 +221,8 @@ __all__ = [
     "OrganizationInvitation",
     "InvitationStatus",
     "UsageCounter",
+    "AdminConfigDraft",
+    "AdminConfigPublishEvent",
     "ApiKey",
     "AIModelPolicy",
     "OrgBranding",

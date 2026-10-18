@@ -16,9 +16,31 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parent / ".env", override=False)
 
+from app.database import session as db_session
 from app.database.session import dispose_engine, init_engine
+from app.services.ops_service import prune_error_events
 from app.services.webhook_outbox import start_outbox_worker, stop_outbox_worker
 from app.services.workflow_scheduler import start_scheduler, stop_scheduler
+
+
+PRUNE_INTERVAL_SECONDS = 24 * 60 * 60
+
+
+async def _prune_error_events_daily(stop_event: asyncio.Event) -> None:
+    """Delete error records past their retention period, once a day."""
+    log = logging.getLogger("app.worker")
+    while not stop_event.is_set():
+        try:
+            async with db_session.AsyncSessionLocal() as session:
+                removed = await prune_error_events(session)
+                await session.commit()
+            log.info("error_events_pruned removed=%s", removed)
+        except Exception:  # noqa: BLE001 - a failed prune must not stop the worker
+            log.exception("error_events_prune_failed")
+        try:
+            await asyncio.wait_for(stop_event.wait(), timeout=PRUNE_INTERVAL_SECONDS)
+        except asyncio.TimeoutError:
+            continue
 
 
 async def main() -> None:
@@ -27,6 +49,7 @@ async def main() -> None:
     start_scheduler()
     start_outbox_worker()
     stop_event = asyncio.Event()
+    prune_task = asyncio.create_task(_prune_error_events_daily(stop_event))
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGINT, signal.SIGTERM):
         try:
@@ -37,6 +60,8 @@ async def main() -> None:
     try:
         await stop_event.wait()
     finally:
+        stop_event.set()
+        await prune_task
         await stop_scheduler()
         await stop_outbox_worker()
         await dispose_engine()

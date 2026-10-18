@@ -1,6 +1,6 @@
 # OraOne roadmap
 
-Product numbers identify the portfolio and do not prescribe a release sequence. Product 1 is active development; Products 2–9 are planned; Product 10 is the long-term vision. See [Product portfolio](PRODUCT-PORTFOLIO.md) for exact scopes.
+Product numbers identify the portfolio and do not prescribe a release sequence. Product 1 is in active development. Products 2 to 7 and 9 have code in this repository at the statuses in the portfolio; Product 8 is not in this repository; Product 10 is the long-term vision. See [Product portfolio](PRODUCT-PORTFOLIO.md) for exact scopes.
 
 ## Current focus — Product 1
 
@@ -12,18 +12,21 @@ Product numbers identify the portfolio and do not prescribe a release sequence. 
 
 ## Portfolio status
 
-| Product                       | Status (see the portfolio for blockers)  |
-| ----------------------------- | ---------------------------------------- |
-| OraOne AI Chat Platform       | In active development                    |
-| OraOne AI Voice Platform      | Blocked by a setup gap (voice binding)   |
-| OraOne WhatsApp Platform      | Blocked by a setup gap (channel binding) |
-| Omnichannel Communication Hub | Partly available                         |
-| Workflow Automation Platform  | Partly available                         |
-| AI Studio & Agent Builder     | Partly available                         |
-| Marketplace                   | Partly available                         |
-| Mobile Applications           | Not built in this repository             |
-| Enterprise Edition            | Partly available                         |
-| OraOne OS                     | Long-term vision                         |
+| Product                       | Status (see the portfolio for blockers) |
+| ----------------------------- | --------------------------------------- |
+| OraOne AI Chat Platform       | Live-needs-account                      |
+| OraOne AI Voice Platform      | Live-needs-account                      |
+| OraOne WhatsApp Platform      | Live-needs-account                      |
+| Omnichannel Communication Hub | Built (partial)                         |
+| Workflow Automation Platform  | Built (partial)                         |
+| AI Studio & Agent Builder     | Built (partial)                         |
+| Marketplace                   | Built                                   |
+| Mobile Applications           | Planned (not in this repository)        |
+| Enterprise Edition            | Built (partial)                         |
+| OraOne OS                     | Planned (long-term vision)              |
+
+Status labels are defined in the [portfolio](PRODUCT-PORTFOLIO.md). "Partial" means some of the
+product's listed features are missing.
 
 ## Shared foundations
 

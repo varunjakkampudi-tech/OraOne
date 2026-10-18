@@ -6,24 +6,28 @@ leads. **Product 1, the OraOne AI Chat Platform, is this repository.**
 
 ## What it includes
 
-| Area                                                  | Status                                                            |
-| ----------------------------------------------------- | ----------------------------------------------------------------- |
-| Passwordless sign-in with email codes                 | Available                                                         |
-| Workspaces (projects) and organizations               | Available                                                         |
-| Assistants: configuration and playground              | Available, AI replies use OpenRouter                              |
-| Website chat: script tag, browser SDK, React and REST | Available, see the [website guide](docs/guides/WEBSITE-WIDGET.md) |
-| Conversations inbox                                   | Available                                                         |
-| Leads                                                 | Available                                                         |
-| Knowledge documents and search                        | Available                                                         |
-| Team, billing and usage, analytics, API keys, account | Available                                                         |
-| Public marketing site, documentation and legal pages  | Available                                                         |
-| Staff console                                         | Available to platform administrators                              |
+Status uses the portfolio labels: **Built** (code and tests exist), and **Live-needs-account** (the
+code is built, but a service needs accounts, mail or a setup step before customers can use it).
+
+| Area                                                  | Status                                                                                   |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Passwordless sign-in with email codes                 | Built. Live-needs-account: production needs a mail server for sign-in codes              |
+| Workspaces (projects) and organizations               | Built                                                                                    |
+| Assistants: configuration and playground              | Built. Live-needs-account: AI replies need an OpenRouter key                             |
+| Website chat: script tag, browser SDK, React and REST | Built, see the [website guide](docs/guides/WEBSITE-WIDGET.md)                            |
+| Conversations inbox                                   | Built                                                                                    |
+| Leads and import                                      | Built                                                                                    |
+| Knowledge documents and search                        | Built                                                                                    |
+| Team, billing and usage, analytics, API keys, account | Built. Billing is off (free access)                                                      |
+| Public marketing site, documentation and legal pages  | Built                                                                                    |
+| Configuration console (staff)                         | Built. Other platform administration pages are empty states until their services connect |
 
 The repository also contains code for AI voice, WhatsApp, Instagram, the omnichannel
 inbox, workflows, marketing campaigns, the marketplace, integrations and calls. Several of
-these need a setup step that is not yet available in Studio. Mobile applications are not in
-this repository, and OraOne OS is a long-term vision. The status and blockers of each are in
-[PRODUCTS](docs/guides/PRODUCTS.md) and [PRODUCT-PORTFOLIO](docs/PRODUCT-PORTFOLIO.md).
+these are Live-needs-account: they need a provider account and a setup step that Studio does not
+yet offer. Mobile applications are not in this repository, and OraOne OS is a long-term vision.
+The status and blockers of each are in [PRODUCTS](docs/guides/PRODUCTS.md) and
+[PRODUCT-PORTFOLIO](docs/PRODUCT-PORTFOLIO.md).
 
 ## Architecture
 
@@ -70,7 +74,8 @@ bun run dev                      # http://localhost:5180
 | `admin@oraone.in` | `oraone.in`       | platform owner |
 
 Use the **Developer sign-in** panel on the sign-in page. It appears only in
-development builds, and these accounts exist only in development.
+development builds, and these accounts exist only in development. The seed script
+refuses to run outside `ENVIRONMENT=development`. Never seed these accounts on a server.
 
 ## Commands
 
@@ -97,17 +102,28 @@ See [docs/guides/TESTING.md](docs/guides/TESTING.md) for prerequisites and suite
 | `test-suites.yml`     | Web unit tests, backend tests, and the Playwright suites (smoke, sanity, critical, regression, visual). |
 | `fix-formatting.yml`  | Manual. Formats the code and opens a pull request.                                                      |
 
+No workflow deploys the application. Production deployment is manual, as described in
+[HOSTINGER-DEPLOYMENT](docs/HOSTINGER-DEPLOYMENT.md).
+
 ## Documentation
 
+- [Vision and mission (draft for owner review)](docs/VISION-AND-MISSION.md)
+- [Product portfolio: status and blockers](docs/PRODUCT-PORTFOLIO.md)
+- [Products guide: what each part does and how to set it up](docs/guides/PRODUCTS.md)
 - [Architecture and flow diagrams](docs/architecture/DIAGRAMS.md)
 - [Quickstart](docs/guides/QUICKSTART.md)
 - [Add OraOne to your website](docs/guides/WEBSITE-WIDGET.md)
-- [Environment variables](docs/guides/ENVIRONMENT.md)
+- [Configuration reference (every environment variable)](docs/operations/CONFIGURATION.md)
 - [Authentication and authorization](docs/architecture/AUTHENTICATION-RBAC.md)
 - [Testing](docs/guides/TESTING.md)
-- [Deployment](docs/operations/DEPLOYMENT.md)
-- [Troubleshooting](docs/guides/TROUBLESHOOTING.md)
+- [Deployment (generic Compose steps)](docs/operations/DEPLOYMENT.md)
+- [Hostinger production deployment](docs/HOSTINGER-DEPLOYMENT.md)
+- [Backup and restore](docs/operations/BACKUP-RESTORE.md)
+- [Troubleshooting and runbook](docs/operations/RUNBOOK.md)
+- [Security controls and accepted risks](docs/operations/SECURITY.md)
 - [Security model](docs/security/SECURITY-MODEL.md)
+- [Admin and configuration guide](docs/guides/ADMIN-CONFIG.md)
+- [Security reporting](SECURITY.md)
 
 ## Licence
 

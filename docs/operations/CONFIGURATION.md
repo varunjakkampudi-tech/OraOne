@@ -13,9 +13,12 @@ names the code reads that the registry does not list. Values are never shown her
 Use placeholders such as `<random-48-chars>`, and keep real values in the server's
 secret store or environment file.
 
-This page describes the working tree at the time of writing. Some of the code it
-describes (the registry, the configuration console, and the calls, voice and marketing
-modules) was not yet committed.
+This is the single source of truth for environment variables. [docs/CONFIGURATION.md](../CONFIGURATION.md)
+and [guides/ENVIRONMENT.md](../guides/ENVIRONMENT.md) only point here.
+
+Checked against commit `e6f8237` on branch `feat/product1-launch` (clean working tree when written).
+All 93 keys in `backend/app/core/config_registry.py` appear in this page, and no name here is
+missing from the code. Section 13 lists names the code reads without a registry entry.
 
 ## How to read the tables
 
@@ -188,7 +191,10 @@ on the server. See [PRODUCTS](../guides/PRODUCTS.md).
 ## 13. Names the registry does not list
 
 These are read by the code but are not in `config_registry.py`. The console cannot
-set them, so set them in the server's environment or `backend/.env`.
+set them, so set them in the server's environment or `backend/.env`. The OAuth names are read
+by `backend/app/services/oauth_service.py`, which builds them from a prefix per provider:
+`GOOGLE_CALENDAR`, `GOOGLE_SHEETS`, `SLACK`, `NOTION` and `HUBSPOT` (the registry covers only the
+Google Drive pair `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`). Adding them to the registry is a code change.
 
 | Variable                                                                                     | Required                        | Default             | Missing behaviour and notes                                                                                                                                                                                      |
 | -------------------------------------------------------------------------------------------- | ------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -244,6 +250,9 @@ That file must exist on the server.
 `VITE_*` values are compiled into the build. Changing them needs a new build.
 
 ## 16. Operator scripts and migrations
+
+Script paths are relative to `backend/`. The one exception is `scripts/capture-media.ts` in section 17,
+which is at the repository root.
 
 | Variable                                                            | Used by                                                                                                                                                     | Notes                                                                                                                                                                                                                                          |
 | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

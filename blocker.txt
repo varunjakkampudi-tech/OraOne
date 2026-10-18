@@ -74,6 +74,16 @@ DECISIONS I NEED FROM YOU
 12. Privacy: confirm you want the data policy to say that OraOne does not use customer
     data to train models, and that data is stored in India (Mumbai server).
 
+12a. Legal pages (/privacy, /terms and the other legal pages): the text is still a draft.
+    The pages now say "Pending legal review" next to the "Draft for review" banner. Decide
+    who reviews the text (you or counsel) and approve it. I will not remove the banner
+    until you confirm the final text.
+
+12b. Public images: view the four generated images used on the solution cards
+    (solution-support, solution-leads, solution-sales, solution-small) and the product
+    screenshots in public/media/studio-*.jpg. I have not viewed them. See
+    docs/operations/MEDIA-REVIEW.md. Tell me which ones to replace.
+
 ITEMS I WILL DO WITHOUT YOU (for your awareness)
 - Code quality (lint, prettier, structure), security audit and fixes, dependency audit
   and updates, logging and log download for admins, admin config drafts that only admins
@@ -84,3 +94,42 @@ ITEMS I WILL DO WITHOUT YOU (for your awareness)
 NOT IN THIS RELEASE (planned)
 - YouTube and Instagram marketing for end users: needs YouTube Data API and Meta
   Marketing API approvals. Will be built after those approvals.
+
+ADDED 2026-10-18 (documentation pass). Each item below needs your decision or a fact only you can confirm.
+
+13. Vision and mission: confirm or replace the DRAFT in docs/VISION-AND-MISSION.md.
+   - It is marked "Draft for owner review" and is built only from existing product statements.
+     It contains no customer claims or statistics.
+   - Confirm the target customers ("businesses" is deliberate), and the open decisions listed at
+     the end of that file. Item 11 above has the earlier one-paragraph wording.
+
+14. Hostinger facts that are NOT in the repository: confirm them, or send corrections (no IP address).
+   - Docs: docs/HOSTINGER-DEPLOYMENT.md, sections 2, 3 and 10. The commands to check them are in section 9.
+   - DNS: A record for @ to the VPS; CAA contents; DNSSEC enabled with the DS record published; registrar lock on.
+   - CAA: decide the certificate authority before you publish a CAA record. Caddy may fall back to a
+     second authority, and a record that lists only one would block that fallback.
+   - Host: Mumbai region and Ubuntu 26.04; firewall allows only 22, 80 and 443; fail2ban sshd jail on;
+     SSH key-only login; security updates on or off.
+
+15. Backups are not configured. Decide and set up:
+   - the backup destination (outside the application folder) and retention period;
+   - a root-only passphrase file outside the repository checkout, for backend/scripts/weekly_backup.py;
+   - a schedule for that script, and one restore drill (backend/scripts/backup_restore_drill.py) with the result recorded.
+   - Until a restore drill passes, a release with a database migration cannot be reversed in practice
+     (docs/HOSTINGER-DEPLOYMENT.md, section 7).
+
+16. Accepted security risks: confirm you accept them, or ask for changes (docs/operations/SECURITY.md, section 2).
+   - The Content Security Policy allows inline scripts (Caddyfile).
+   - Caddy access logging is off, so there is no edge request log.
+   - The webhook and general API rate-limit tiers fail open if the shared store fails.
+   - The README lists the development accounts and their passwords. They are seeded only in development.
+
+17. Conflicting public copy: src/content/site/marketing.ts says "Phone and WhatsApp are planned" on the
+   home page, while docs/PRODUCT-PORTFOLIO.md records them as built with setup gaps. Choose the wording.
+   Changing the site copy is a code edit, which needs your approval first.
+
+18. No deploy workflow exists. .github/workflows holds only the test, lint and formatting workflows, so
+   nothing deploys automatically, and the docs say so. Before a deploy workflow is written:
+   - approve it, and choose the deploy account (item 5 proposes root; a dedicated deploy user in the docker
+     group is the safer choice);
+   - note that item 5 above contains the server's IP address in plain text. The new docs do not repeat it.

@@ -1,0 +1,117 @@
+# Production deployment. Manual only: it runs from the Actions tab (workflow_dispatch) and
+# nowhere else. The job also refuses any ref other than main, and it waits for approval
+# through the "production" environment protection rule configured in GitHub settings.
+#
+# Required secrets (set on the "production" environment, never in the repository):
+#   DEPLOY_HOST       host name or IP of the production server
+#   DEPLOY_USER      ssh user on that server (must be able to run docker compose)
+#   DEPLOY_SSH_KEY   private key for DEPLOY_USER (its public half is in authorized_keys)
+#
+# Secret values are never echoed. ssh runs with StrictHostKeyChecking=yes against the host key
+# that ssh-keyscan returned on this run; see the note in the "Trust the host key" step.
+name: Deploy production
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to production
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+    steps:
+      - name: Refuse to deploy anything but main
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "Deploys run only from main; this run is $GITHUB_REF." >&2
+            exit 1
+          fi
+
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check deploy secrets are present
+        run: |
+          missing=""
+          if [ -z "$DEPLOY_HOST" ]; then missing="$missing DEPLOY_HOST"; fi
+          if [ -z "$DEPLOY_USER" ]; then missing="$missing DEPLOY_USER"; fi
+          if [ -z "$DEPLOY_SSH_KEY" ]; then missing="$missing DEPLOY_SSH_KEY"; fi
+          if [ -n "$missing" ]; then
+            echo "Missing deploy secrets:$missing" >&2
+            exit 1
+          fi
+
+      - name: Prepare ssh
+        run: |
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/deploy_key"
+          chmod 600 "$HOME/.ssh/deploy_key"
+
+      - name: Trust the host key
+        # Note: ssh-keyscan trusts whatever key the host presents on this run. Pinning the
+        # host key in a secret (for example DEPLOY_KNOWN_HOSTS) would remove that trust step.
+        run: |
+          ssh-keyscan -H "$DEPLOY_HOST" > "$HOME/.ssh/known_hosts" 2>/dev/null
+          if [ ! -s "$HOME/.ssh/known_hosts" ]; then
+            echo "Could not read the host key for the deploy host." >&2
+            exit 1
+          fi
+
+      - name: Archive the repository
+        run: git archive --format=tar.gz --output "$RUNNER_TEMP/oraone-release.tar.gz" HEAD
+
+      - name: Upload the archive
+        run: |
+          scp -i "$HOME/.ssh/deploy_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "$RUNNER_TEMP/oraone-release.tar.gz" \
+            "$DEPLOY_USER@$DEPLOY_HOST:/tmp/oraone-release.tar.gz"
+
+      - name: Stage, swap and start the new release
+        run: |
+          ssh -i "$HOME/.ssh/deploy_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "$DEPLOY_USER@$DEPLOY_HOST" "bash -s -- deploy" < scripts/deploy-remote.sh
+
+      - name: Wait for readiness, roll back on failure
+        run: |
+          # Poll for up to 120 seconds: each probe is capped at 5 seconds, with 5 seconds between probes.
+          ready=0
+          deadline=$((SECONDS + 120))
+          attempt=0
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            attempt=$((attempt + 1))
+            if curl -fsS --max-time 5 -o /dev/null https://oraone.in/api/health/ready; then
+              ready=1
+              echo "Readiness check passed on attempt $attempt."
+              break
+            fi
+            sleep 5
+          done
+          if [ "$ready" != "1" ]; then
+            echo "Readiness did not pass within 2 minutes. Rolling back." >&2
+            ssh -i "$HOME/.ssh/deploy_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+              "$DEPLOY_USER@$DEPLOY_HOST" "bash -s -- rollback" < scripts/deploy-remote.sh \
+              || echo "Rollback did not complete. Inspect the host before retrying." >&2
+            exit 1
+          fi
+
+      - name: Remove local key material
+        if: always()
+        run: rm -f "$HOME/.ssh/deploy_key"

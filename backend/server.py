@@ -11,7 +11,6 @@ from app.core.logging import configure_logging  # noqa: E402
 configure_logging()
 
 import os
-import uuid
 import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -375,6 +374,23 @@ from app.api.admin_config import router as admin_config_router  # noqa: E402
 
 app.include_router(admin_config_router)
 
+# Platform admin analytics (aggregate counts only; super-admin and admin)
+from app.api.admin_analytics import router as admin_analytics_router  # noqa: E402
+
+app.include_router(admin_analytics_router)
+
+# Beta feature flags: caller flags (any signed-in user) and super-admin overrides
+from app.api.feature_flags import admin_router as admin_feature_flags_router  # noqa: E402
+from app.api.feature_flags import router as feature_flags_router  # noqa: E402
+
+app.include_router(feature_flags_router)
+app.include_router(admin_feature_flags_router)
+
+# Admin log viewer: error events, related log lines, audited JSON/CSV downloads
+from app.api.admin_logs import router as admin_logs_router  # noqa: E402
+
+app.include_router(admin_logs_router)
+
 from app.core.cors import dashboard_origins  # noqa: E402
 
 allow_origins = dashboard_origins()
@@ -511,54 +527,10 @@ async def security_headers_mw(request, call_next):
 
 
 # ---------- Request correlation + structured access log ----------
-from app.core.logging import access_logger as _access_logger  # noqa: E402
+# Request IDs, the access log and 5xx error capture live in the outermost ASGI
+# middleware, installed at the end of this file (app/middleware/request_context.py).
 from app.middleware.access_log import request_route_label  # noqa: E402
 from app.middleware.upload_size_limit import UploadSizeLimitMiddleware  # noqa: E402
-from app.core.tracing import current_trace_id as _current_trace_id  # noqa: E402
-
-
-@app.middleware("http")
-async def request_context_mw(request, call_next):
-    """Stamp every request with a correlation id and emit one structured
-    (JSON, via structlog) access-log line per request. Never logs
-    headers/bodies/secrets — only routing + timing metadata, matching the
-    redaction rules used by the audit log elsewhere in this file.
-
-    ``user_id`` is best-effort: nothing upstream currently stamps
-    ``request.state.user_id``, so it's usually None — left as a hook for
-    whichever auth dependency runs first to populate, rather than decoding
-    the bearer token a second time here."""
-    request_id = request.headers.get("x-request-id") or str(uuid.uuid4())
-    request.state.request_id = request_id
-    start = datetime.now(timezone.utc)
-    try:
-        response = await call_next(request)
-    except Exception as exc:  # noqa: BLE001 — log then re-raise unchanged
-        duration_ms = int((datetime.now(timezone.utc) - start).total_seconds() * 1000)
-        _access_logger.error(
-            "request.failed",
-            request_id=request_id,
-            trace_id=_current_trace_id(),
-            method=request.method,
-            # Route template only: concrete paths can carry bot/share tokens.
-            route=request_route_label(request),
-            duration_ms=duration_ms,
-            error=type(exc).__name__,
-        )
-        raise
-    duration_ms = int((datetime.now(timezone.utc) - start).total_seconds() * 1000)
-    response.headers["X-Request-Id"] = request_id
-    _access_logger.info(
-        "request.completed",
-        request_id=request_id,
-        trace_id=_current_trace_id(),
-        method=request.method,
-        route=request_route_label(request),
-        status_code=response.status_code,
-        duration_ms=duration_ms,
-        user_id=getattr(request.state, "user_id", None),
-    )
-    return response
 
 
 # ---------- Rate limiting (tiered) + idempotency ----------
@@ -681,3 +653,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(WidgetPublicCORSMiddleware)
+
+# Outermost: request IDs on every response, one access line per request, and
+# scrubbed error_events rows for 5xx responses and unhandled exceptions.
+from app.middleware.request_context import install_request_context  # noqa: E402
+
+install_request_context(app)

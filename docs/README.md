@@ -1,25 +1,28 @@
 # Documentation map
 
-| Need                           | Document                                                                           |
-| ------------------------------ | ---------------------------------------------------------------------------------- |
-| Install locally                | [Quickstart](guides/QUICKSTART.md)                                                 |
-| Configure environments         | [Environment](guides/ENVIRONMENT.md)                                               |
-| Understand the system          | [System overview](architecture/SYSTEM-OVERVIEW.md)                                 |
-| UI design                      | [Design index](design/README.md)                                                   |
-| Architecture and flow diagrams | [Diagrams](architecture/DIAGRAMS.md)                                               |
-| Add OraOne to a website        | [Website widget](guides/WEBSITE-WIDGET.md)                                         |
-| Change identity or roles       | [Authentication and RBAC](architecture/AUTHENTICATION-RBAC.md) and [RBAC](RBAC.md) |
-| Test changes                   | [Testing](guides/TESTING.md)                                                       |
-| Deploy Compose                 | [Deployment](operations/DEPLOYMENT.md)                                             |
-| Recover data                   | [Backup and restore](operations/BACKUP-RESTORE.md)                                 |
-| Release gate                   | [Release checklist](operations/RELEASE-CHECKLIST.md)                               |
-| Security report                | [SECURITY.md](../SECURITY.md)                                                      |
-| Planned work                   | [Roadmap](ROADMAP.md)                                                              |
-| Every product, plainly         | [Products guide](guides/PRODUCTS.md)                                               |
-| Every setting, with defaults   | [Configuration reference](operations/CONFIGURATION.md)                             |
-| Common problems and fixes      | [Runbook](operations/RUNBOOK.md)                                                   |
-| Admin console and secrets      | [Admin and configuration guide](guides/ADMIN-CONFIG.md)                            |
-| Product status and blockers    | [Product portfolio](PRODUCT-PORTFOLIO.md)                                          |
+| Need                           | Document                                                                                                      |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| Vision and mission (draft)     | [Vision and mission](VISION-AND-MISSION.md), awaiting owner review                                            |
+| Product status and blockers    | [Product portfolio](PRODUCT-PORTFOLIO.md)                                                                     |
+| Every product, plainly         | [Products guide](guides/PRODUCTS.md)                                                                          |
+| Install locally                | [Quickstart](guides/QUICKSTART.md)                                                                            |
+| Every setting, with defaults   | [Configuration reference](operations/CONFIGURATION.md). [docs/CONFIGURATION.md](CONFIGURATION.md) points here |
+| Understand the system          | [System overview](architecture/SYSTEM-OVERVIEW.md)                                                            |
+| UI design                      | [Design index](design/README.md)                                                                              |
+| Architecture and flow diagrams | [Diagrams](architecture/DIAGRAMS.md)                                                                          |
+| Add OraOne to a website        | [Website widget](guides/WEBSITE-WIDGET.md)                                                                    |
+| Change identity or roles       | [Authentication and RBAC](architecture/AUTHENTICATION-RBAC.md) and [RBAC](RBAC.md)                            |
+| Test changes                   | [Testing](guides/TESTING.md)                                                                                  |
+| Deploy with Compose (generic)  | [Deployment](operations/DEPLOYMENT.md)                                                                        |
+| Deploy to the Hostinger server | [Hostinger deployment](HOSTINGER-DEPLOYMENT.md)                                                               |
+| Recover data                   | [Backup and restore](operations/BACKUP-RESTORE.md)                                                            |
+| Release gate                   | [Release checklist](operations/RELEASE-CHECKLIST.md)                                                          |
+| Security controls and risks    | [Security controls and accepted risks](operations/SECURITY.md)                                                |
+| Security model                 | [Security model](security/SECURITY-MODEL.md)                                                                  |
+| Report a vulnerability         | [SECURITY.md](../SECURITY.md)                                                                                 |
+| Planned work                   | [Roadmap](ROADMAP.md)                                                                                         |
+| Common problems and fixes      | [Runbook](operations/RUNBOOK.md)                                                                              |
+| Admin console and secrets      | [Admin and configuration guide](guides/ADMIN-CONFIG.md)                                                       |
 
 RBAC and security records remain authoritative for their named scope.
 

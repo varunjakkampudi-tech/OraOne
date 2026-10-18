@@ -1372,7 +1372,7 @@ function AnalyticsPage() {
           ["Conversations", "12,486", "Total sample volume"],
           ["AI resolution", "78.4%", "Sample autonomous resolutions"],
           ["Average response", "1.4s", "Illustrative response time"],
-          ["Customer satisfaction", "4.8/5", "Sample rating"],
+          ["Customer satisfaction", "Not connected yet", "Requires a feedback source"],
         ].map((m) => (
           <div key={m[0]}>
             <span>{m[0]}</span>
@@ -1770,8 +1770,8 @@ function SettingsPage({ pagePath }: { pagePath: string }) {
               {pagePath.includes("/account") ? "Email address" : "Workspace website"}
               <input
                 type={pagePath.includes("/account") ? "email" : "url"}
-                defaultValue={
-                  pagePath.includes("/account") ? "alex@example.com" : "https://example.com"
+                placeholder={
+                  pagePath.includes("/account") ? "Your email address" : "Your website address"
                 }
               />
             </label>

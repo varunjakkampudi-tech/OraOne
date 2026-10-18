@@ -6,8 +6,8 @@ handled. It is for the person who runs the server and the platform administrator
 The full list of settings, with defaults, is in
 [CONFIGURATION](../operations/CONFIGURATION.md).
 
-This describes the working tree at the time of writing. The configuration console
-and its registry were not yet committed.
+This describes the code at commit `e6f8237` on branch `feat/product1-launch`. The configuration
+console and its registry are in that commit. Being committed does not mean they run in production.
 
 ## Three places where settings live
 
@@ -45,7 +45,23 @@ Its API is `/api/admin/config`.
 2. Enter the new value. Do not send line breaks or control characters. The limit is 2048 characters.
 3. Type the exact key name in **confirm**.
 4. Enter a **reason** of 10 to 500 characters. Do not put secrets in the reason.
-5. Save. To remove a saved value, send an empty value (the page uses a remove action).
+5. **Save draft.** To remove a saved value, use the remove action. Either way the change is
+   only a draft. It does not change the running application.
+
+### Publishing drafts
+
+Only a super-admin can publish. Open the **Drafts** section for the environment, check the
+diff (secrets show only a masked tail; production plain values are hidden), then:
+
+1. Type the environment name (`local` or `production`) in **confirm**.
+2. Enter a **reason** of 10 to 500 characters.
+3. Publish. The server publishes only the drafts you reviewed. If a draft changed since you
+   reviewed it, the publish is refused and you must review the diff again.
+
+Publishing makes the drafts active and records who published, when, why, and the key names
+with their change type. It never records a value. The **History** section shows the last 50
+publishes for the environment. Each publish needs a restart of the API before it applies.
+A draft can be discarded at any time without changing the active value.
 
 The server refuses a request when:
 

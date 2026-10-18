@@ -436,3 +436,30 @@ async def list_security_events(
             for e in rows
         ],
     }
+
+
+# ─────────────────────────── retention ───────────────────────────
+ERROR_EVENT_RETENTION_DAYS = 30
+
+
+async def prune_error_events(
+    session: AsyncSession,
+    *,
+    older_than_days: int = ERROR_EVENT_RETENTION_DAYS,
+    now: Optional[datetime] = None,
+) -> int:
+    """Delete ``error_events`` older than the retention window; returns rows removed.
+
+    Idempotent and safe to repeat. The scheduler should call it periodically;
+    this module does not start a schedule of its own.
+    """
+    from sqlalchemy import delete
+
+    from app.database.models.error_event import ErrorEvent
+
+    cutoff = (now or _utcnow()) - timedelta(days=older_than_days)
+    result = await session.execute(
+        delete(ErrorEvent).where(ErrorEvent.occurred_at < cutoff)
+    )
+    await session.commit()
+    return int(result.rowcount or 0)

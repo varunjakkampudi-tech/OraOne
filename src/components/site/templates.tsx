@@ -236,11 +236,11 @@ function ChatDemo() {
           </p>
         </div>
         <p className="ml-auto max-w-[80%] rounded-2xl rounded-br-sm bg-sky-500 px-4 py-2.5 text-white">
-          I am Sam. Call me on 555 0100 on Saturday morning.
+          This is Visitor A. Call me on 555 0100 on Saturday morning.
         </p>
         <div className="max-w-[88%]">
           <p className="rounded-2xl rounded-bl-sm bg-white/10 px-4 py-2.5 text-slate-100">
-            Thanks, Sam. The team will confirm your Saturday appointment.
+            Thanks, Visitor A. The team will confirm your Saturday appointment.
           </p>
         </div>
         <div className="mt-1 flex items-center justify-between gap-3 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm">
@@ -414,10 +414,10 @@ function FeaturePreview({ title }: { title: string }) {
   }
   if (title === "Team inbox and leads") {
     const rows = [
-      ["Sam", "Lead: Saturday morning", "New", "10:24"],
-      ["Priya", "Do you accept new patients?", "Answered", "Yesterday"],
-      ["Alex", "Opening hours on Saturdays", "Answered", "Yesterday"],
-      ["Jordan", "Is there parking at the clinic?", "Answered", "Mon"],
+      ["Visitor A", "Lead: Saturday morning", "New", "10:24"],
+      ["Visitor B", "Do you accept new patients?", "Answered", "Yesterday"],
+      ["Visitor C", "Opening hours on Saturdays", "Answered", "Yesterday"],
+      ["Visitor D", "Is there parking at the clinic?", "Answered", "Mon"],
     ];
     return (
       <div className="flex h-full flex-col gap-3 p-5" aria-hidden="true">
@@ -698,10 +698,10 @@ function InboxPreview() {
             I can take your name, phone number and a preferred time.
           </p>
           <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-sm bg-muted px-4 py-2.5 text-base md:text-[15px] text-foreground">
-            I am Sam. Call me on 555 0100 on Saturday morning.
+            This is Visitor A. Call me on 555 0100 on Saturday morning.
           </p>
           <p className="max-w-[85%] rounded-2xl rounded-bl-sm bg-primary px-4 py-2.5 text-base md:text-[15px] text-primary-foreground">
-            Thanks, Sam. The team will confirm your Saturday appointment.
+            Thanks, Visitor A. The team will confirm your Saturday appointment.
           </p>
         </div>
         <aside className="border-t border-border p-6 md:border-l md:border-t-0 lg:col-span-3">
@@ -709,7 +709,7 @@ function InboxPreview() {
           <dl className="mt-4 grid gap-3 text-sm">
             <div>
               <dt className="text-foreground/70">Name</dt>
-              <dd className="font-medium text-foreground">Sam</dd>
+              <dd className="font-medium text-foreground">Visitor A</dd>
             </div>
             <div>
               <dt className="text-foreground/70">Phone</dt>
@@ -1062,7 +1062,8 @@ function ArticleTemplate({ page }: { page: ArticlePage }) {
               role="note"
               className="mb-10 rounded-xl border border-amber-300 bg-amber-50 p-4 text-[16px] text-amber-950"
             >
-              Draft for review. This text is not final until it has been reviewed and approved.
+              Draft for review. Pending legal review. This text is not final until it has been
+              reviewed and approved.
             </p>
           )}
           {page.pullquote && (

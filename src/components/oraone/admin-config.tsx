@@ -17,8 +17,8 @@ import { ApiError, messageOf } from "@/lib/api/client";
 import {
   listAdminConfig,
   reloadAdminConfig,
-  saveAdminConfig,
-  type SaveResult,
+  saveAdminConfigDraft,
+  type DraftSaveResult,
 } from "@/lib/api/admin-config";
 import {
   REASON_MAX_LENGTH,
@@ -33,9 +33,10 @@ import {
   type ConfigItem,
   type ConfigList,
 } from "@/lib/admin-config";
+import { DraftsPanel, PublishHistoryPanel } from "@/components/oraone/admin-config-publish";
 
 const ENVIRONMENT_COPY: Record<ConfigEnvironment, string> = {
-  local: "Local values come from this server and from console changes saved for local.",
+  local: "Local values come from this server and from console changes published for local.",
   production:
     "Production values are never shown here. Each key shows only whether it is set, because the deployment's secret store holds them.",
 };
@@ -53,6 +54,7 @@ export function AdminConfigPanel() {
   const [editing, setEditing] = useState<ConfigItem | null>(null);
   const [reloadOpen, setReloadOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const load = useCallback(async (env: ConfigEnvironment) => {
     setState({ kind: "loading" });
@@ -81,6 +83,16 @@ export function AdminConfigPanel() {
     void load(environment);
   }, [environment, load]);
 
+  /** After a draft, publish or discard: say what happened and refresh every panel. */
+  const changed = useCallback(
+    (message: string) => {
+      setNotice(message);
+      setRefreshKey((key) => key + 1);
+      void load(environment);
+    },
+    [environment, load],
+  );
+
   const groups = useMemo(
     () => (state.kind === "ready" ? groupItems(state.data, query) : []),
     [state, query],
@@ -90,7 +102,8 @@ export function AdminConfigPanel() {
     <section aria-labelledby="admin-config-heading" className="admin-section">
       <h2 id="admin-config-heading">Application configuration</h2>
       <p className="admin-table-summary">
-        Settings the API reads from its environment. Secrets are never shown in full. Saved changes
+        Settings the API reads from its environment. Secrets are never shown in full. Saving a
+        change creates a draft. A draft changes nothing until it is published, and published values
         take effect after the API restarts.
       </p>
 
@@ -117,7 +130,7 @@ export function AdminConfigPanel() {
           role="status"
           className="mb-4 rounded-md border border-amber-500 bg-amber-50 p-4 text-sm text-amber-950 dark:bg-amber-950/40 dark:text-amber-100"
         >
-          <strong>Restart required.</strong> Saved changes apply when the API restarts. Restart
+          <strong>Restart required.</strong> Published changes apply when the API restarts. Restart
           every API worker, then reload this page.
         </div>
       )}
@@ -162,6 +175,9 @@ export function AdminConfigPanel() {
 
       {state.kind === "ready" && (
         <>
+          <DraftsPanel environment={environment} refreshKey={refreshKey} onChanged={changed} />
+          <PublishHistoryPanel environment={environment} refreshKey={refreshKey} />
+
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="w-full sm:max-w-sm">
               <Label htmlFor="admin-config-search">Search settings</Label>
@@ -222,14 +238,15 @@ export function AdminConfigPanel() {
           item={editing}
           environment={environment}
           onClose={() => setEditing(null)}
-          onSaved={(result: SaveResult) => {
+          onSaved={(result: DraftSaveResult) => {
             setEditing(null);
-            setNotice(
-              result.status === "cleared"
-                ? `Saved value removed for ${result.name}. Restart the API to apply.`
-                : `Saved ${result.name}. Restart the API to apply.`,
+            changed(
+              result.status === "unchanged"
+                ? `Nothing is published for ${result.name}, so there is nothing to remove.`
+                : result.status === "draft_removal_saved"
+                  ? `Draft saved to remove ${result.name}. Publish it to apply.`
+                  : `Draft saved for ${result.name}. Publish it to apply.`,
             );
-            void load(environment);
           }}
         />
       )}
@@ -237,12 +254,12 @@ export function AdminConfigPanel() {
       {reloadOpen && (
         <ReloadDialog
           onClose={() => setReloadOpen(false)}
-          onReloaded={(changed) => {
+          onReloaded={(reloaded) => {
             setReloadOpen(false);
             setNotice(
-              changed.length
-                ? `Reloaded this server: ${changed.length} setting(s) changed. Restart all workers to apply everything.`
-                : "Reloaded this server. Nothing changed. Restart all workers to apply saved changes.",
+              reloaded.length
+                ? `Reloaded this server: ${reloaded.length} setting(s) changed. Restart all workers to apply everything.`
+                : "Reloaded this server. Nothing changed. Restart all workers to apply published changes.",
             );
             void load(environment);
           }}
@@ -280,6 +297,11 @@ function ConfigRow({
             <span className="rounded bg-muted px-1.5 py-0.5 text-xs">Required</span>
           )}
           <span className={`text-xs font-medium ${toneClass}`}>{status.label}</span>
+          {item.draft_pending && (
+            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-950 dark:bg-amber-950/60 dark:text-amber-100">
+              Draft pending
+            </span>
+          )}
         </div>
         <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>
         <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
@@ -327,7 +349,7 @@ function EditDialog({
   item: ConfigItem;
   environment: ConfigEnvironment;
   onClose: () => void;
-  onSaved: (result: SaveResult) => void;
+  onSaved: (result: DraftSaveResult) => void;
 }) {
   const [value, setValue] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -348,7 +370,7 @@ function EditDialog({
     setBusy(true);
     setError(null);
     try {
-      const result = await saveAdminConfig(item.name, {
+      const result = await saveAdminConfigDraft(item.name, {
         environment,
         value: nextValue,
         confirm,
@@ -376,8 +398,9 @@ function EditDialog({
         </DialogHeader>
 
         <p className="text-sm text-muted-foreground">
-          Current: {maskedDisplay(item)}. Saved changes apply after the API restarts. Do not paste
-          other secrets into the reason field.
+          Current: {maskedDisplay(item)}. Saving creates a draft. Nothing changes until someone
+          publishes it, and published values apply after the API restarts. Do not paste other
+          secrets into the reason field.
         </p>
 
         <form
@@ -452,7 +475,7 @@ function EditDialog({
                 disabled={busy || removal.length > 0}
                 onClick={() => void submit(null)}
               >
-                Remove saved value
+                Draft removal of saved value
               </Button>
             ) : (
               <span />
@@ -462,7 +485,7 @@ function EditDialog({
                 Cancel
               </Button>
               <Button type="submit" disabled={busy || problems.length > 0}>
-                {busy ? "Saving..." : "Save change"}
+                {busy ? "Saving draft..." : "Save draft"}
               </Button>
             </div>
           </DialogFooter>

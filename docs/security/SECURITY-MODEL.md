@@ -19,8 +19,12 @@ rule that matters.
 - **Rate limits:** sign-in and refresh endpoints are throttled per IP and per user.
 - **Uploads:** stored on a volume owned by the application user. Paths are checked
   against traversal.
-- **Secrets:** supplied through the environment, never committed. The secret
-  scanner in the assistant output filter redacts common key formats.
+- **Secrets:** supplied through the environment, never committed. The secrets
+  inventory returns only set or not-set flags and a masked tail. Redaction of common key
+  formats exists in `security_service.redact_output`, but this review found it reached from
+  the operations endpoints only, not from the chat reply path.
+- **Controls and accepted risks:** the controls with their source files, and the open items,
+  are listed in [SECURITY](../operations/SECURITY.md).
 
 ## Reporting
 

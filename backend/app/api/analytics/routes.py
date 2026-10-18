@@ -18,10 +18,10 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db
-from app.middleware.org_context import OrgContext, require_permission
+from app.middleware.org_context import OrgContext, require_permission, require_role
 from app.middleware.project_context import ProjectContext, get_current_project
 from app.schemas.analytics import OrgAnalyticsResponse
-from app.services import analytics_service
+from app.services import admin_analytics_service, analytics_service
 
 router = APIRouter(tags=["analytics"])
 
@@ -37,6 +37,15 @@ async def analytics_overview(
         session, ctx.organization_id, days, project_id=pctx.project_id
     )
     return OrgAnalyticsResponse(**data)
+
+
+@router.get("/api/analytics/summary")
+async def analytics_summary(
+    ctx: OrgContext = Depends(require_role("owner")),
+    session: AsyncSession = Depends(get_db),
+) -> dict:
+    """30-day summary for the organisation owner. Counts only; scoped to the caller's org."""
+    return await admin_analytics_service.org_summary(session, ctx.organization_id)
 
 
 @router.get("/api/analytics/modules")

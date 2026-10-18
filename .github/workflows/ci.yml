@@ -1,0 +1,88 @@
+# Continuous integration for pull requests and pushes to main.
+# Lint, typecheck, unit tests and build for the web app; lint and tests for the backend.
+# This workflow never deploys. Production is deployed only by deploy.yml, on manual dispatch.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Web lint, typecheck, unit tests and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.2"
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Lint
+        run: bun run lint
+      - name: Typecheck
+        run: bun run typecheck
+      - name: Unit tests
+        run: bun run test
+      - name: Build
+        run: bun run build
+
+  backend:
+    name: Backend lint and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: oraone_admin
+          POSTGRES_PASSWORD: ci_password
+          POSTGRES_DB: oraone
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U oraone_admin -d oraone"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ENVIRONMENT: development
+      JWT_SECRET_KEY: ci-only-jwt-secret-key-change-me-32-bytes-long
+      DATABASE_URL: postgresql+asyncpg://oraone_admin:ci_password@127.0.0.1:5432/oraone
+      ALEMBIC_DATABASE_URL: postgresql+psycopg2://oraone_admin:ci_password@127.0.0.1:5432/oraone
+      REDIS_URL: redis://127.0.0.1:6379/0
+      RUN_BACKGROUND_WORKERS: "false"
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Ruff check
+        run: ruff check .
+      - name: Ruff format check
+        run: ruff format --check .
+      - name: Migrations
+        run: alembic upgrade head
+      - name: Tests
+        run: python -m pytest -q -p no:cacheprovider

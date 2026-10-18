@@ -61,7 +61,7 @@ stripe>=10.0,<15.0              # signed Checkout, Portal and webhook processing
 # ---- Redis (distributed cache / rate limiting) ----
 # Required by production-like environments for shared auth, idempotency and
 # rate-limit state. Local development may use the in-process fallback.
-redis>=5.0,<6.0
+redis>=6.0,<7.0
 
 # Transitive security floors verified by pip-audit on 2026-10-12.
 anyio>=4.14.2,<5.0

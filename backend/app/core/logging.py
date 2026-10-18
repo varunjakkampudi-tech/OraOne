@@ -2,9 +2,12 @@
 
 One JSON log line per request, with a stable schema every log aggregator
 (Loki, CloudWatch, Datadog, whatever) can parse without custom parsing
-rules: timestamp, level, event, request_id, method, path, status_code,
-duration_ms, user_id, organization_id. Replaces the hand-rolled
-``json.dumps(...)`` access logger that used to live inline in server.py.
+rules: timestamp, level, event, request_id, route, method, status_code,
+duration_ms, actor_hash, org_hash. Request fields are stamped by
+``app.middleware.request_context.add_request_context``.
+
+When ``APP_LOG_FILE`` is set, the same JSON lines are also appended to that
+file (rotated) so the admin log viewer can show a request's related lines.
 
 ``configure_logging()`` is idempotent — safe to call multiple times (e.g.
 once from server.py, once from a test fixture) without duplicating handlers.
@@ -13,12 +16,20 @@ once from server.py, once from a test fixture) without duplicating handlers.
 from __future__ import annotations
 
 import logging
+import logging.handlers
 import os
 import sys
 
 import structlog
 
 _configured = False
+
+
+def _request_context_processor(logger, method_name, event_dict):
+    # Imported lazily: the middleware module imports this one for access_logger.
+    from app.middleware.request_context import add_request_context
+
+    return add_request_context(logger, method_name, event_dict)
 
 
 def configure_logging() -> None:
@@ -49,6 +60,7 @@ def configure_logging() -> None:
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso"),
+        _request_context_processor,
         structlog.processors.StackInfoRenderer(),
     ]
 
@@ -74,13 +86,32 @@ def configure_logging() -> None:
             structlog.stdlib.ProcessorFormatter.remove_processors_meta,
             renderer,
         ],
+        # Plain stdlib records (not from structlog) get the same correlation fields.
+        foreign_pre_chain=shared_processors,
     )
 
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
+    handlers: list[logging.Handler] = [handler]
+
+    log_file = os.environ.get("APP_LOG_FILE", "").strip()
+    if log_file:
+        file_handler = logging.handlers.RotatingFileHandler(
+            log_file, maxBytes=20 * 1024 * 1024, backupCount=5, encoding="utf-8"
+        )
+        file_handler.setFormatter(
+            structlog.stdlib.ProcessorFormatter(
+                processors=[
+                    structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                    structlog.processors.JSONRenderer(),
+                ],
+                foreign_pre_chain=shared_processors,
+            )
+        )
+        handlers.append(file_handler)
 
     root = logging.getLogger()
-    root.handlers = [handler]
+    root.handlers = handlers
     root.setLevel(level)
 
 
@@ -88,5 +119,5 @@ def get_logger(name: str = "app"):
     return structlog.get_logger(name)
 
 
-#: Dedicated logger for the one-line-per-request access log (server.py).
+#: Dedicated logger for the one-line-per-request access log (middleware).
 access_logger = structlog.get_logger("app.access")

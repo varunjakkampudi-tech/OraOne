@@ -1,12 +1,39 @@
 import { describe, expect, it } from "vitest";
 import {
+  changedDraftCount,
+  draftDiffRows,
   groupItems,
   maskedDisplay,
+  publishChangeLabel,
+  publishProblems,
   removeProblems,
   sourceLabel,
   writeProblems,
   type ConfigItem,
+  type DiffRow,
+  type DraftEntry,
 } from "@/lib/admin-config";
+
+function firstRow(entries: DraftEntry[]): DiffRow {
+  const [row] = draftDiffRows(entries);
+  if (row === undefined) throw new Error("expected one diff row");
+  return row;
+}
+
+function draft(overrides: Partial<DraftEntry>): DraftEntry {
+  return {
+    name: "EXAMPLE_KEY",
+    group: "Core",
+    kind: "plain",
+    action: "set",
+    readable: true,
+    changed: true,
+    before: { is_set: false, masked_tail: null, value: null },
+    after: { is_set: true, masked_tail: null, value: "DEBUG" },
+    updated_at: null,
+    ...overrides,
+  };
+}
 
 function item(overrides: Partial<ConfigItem>): ConfigItem {
   return {
@@ -129,5 +156,117 @@ describe("write validation", () => {
     expect(
       removeProblems({ name: "LOG_LEVEL", confirm: "", reason: "Clearing an old override" }),
     ).toHaveLength(1);
+  });
+});
+
+describe("draftDiffRows", () => {
+  it("masks a secret on both sides to a tail and never shows the full value", () => {
+    const row = firstRow([
+      draft({
+        name: "OPENROUTER_API_KEY",
+        kind: "secret",
+        before: { is_set: true, masked_tail: "9876", value: null },
+        after: { is_set: true, masked_tail: "5555", value: null },
+      }),
+    ]);
+    expect(row.before).toBe("Set, ends in 9876");
+    expect(row.after).toBe("Set, ends in 5555");
+    expect(JSON.stringify(row)).not.toMatch(/sk-or/);
+  });
+
+  it("shows a short secret as plain Set, without any tail", () => {
+    const row = firstRow([
+      draft({
+        kind: "secret",
+        before: { is_set: false, masked_tail: null, value: null },
+        after: { is_set: true, masked_tail: null, value: null },
+      }),
+    ]);
+    expect(row.before).toBe("Not set");
+    expect(row.after).toBe("Set");
+  });
+
+  it("shows plain values for local and a hidden note where the server withheld them", () => {
+    const local = firstRow([
+      draft({
+        before: { is_set: true, masked_tail: null, value: "INFO" },
+        after: { is_set: true, masked_tail: null, value: "DEBUG" },
+      }),
+    ]);
+    expect(local.before).toBe("INFO");
+    expect(local.after).toBe("DEBUG");
+
+    const production = firstRow([
+      draft({
+        after: { is_set: true, masked_tail: null, value: null },
+      }),
+    ]);
+    expect(production.after).toBe("Hidden for this environment");
+  });
+
+  it("describes a removal and a draft that cannot be read", () => {
+    const removal = firstRow([
+      draft({
+        action: "clear",
+        before: { is_set: true, masked_tail: null, value: "INFO" },
+        after: { is_set: false, masked_tail: null, value: null },
+      }),
+    ]);
+    expect(removal.actionLabel).toBe("Remove saved value");
+    expect(removal.after).toBe("Removed (deployment value applies)");
+
+    const unreadable = firstRow([draft({ readable: false })]);
+    expect(unreadable.after).toBe("Cannot be read. Discard and save again.");
+  });
+});
+
+describe("changedDraftCount", () => {
+  it("counts only drafts whose value would actually change", () => {
+    expect(
+      changedDraftCount([draft({ changed: true }), draft({ name: "B", changed: false })]),
+    ).toBe(1);
+    expect(changedDraftCount([])).toBe(0);
+  });
+});
+
+describe("publishProblems", () => {
+  it("requires the typed environment name, a reason of ten characters and at least one draft", () => {
+    const problems = publishProblems({
+      environment: "production",
+      confirm: "local",
+      reason: "short",
+      draftCount: 0,
+    });
+    expect(problems).toContain("There are no draft changes to publish.");
+    expect(problems).toContain("Type production exactly to confirm.");
+    expect(problems).toContain("Give a reason of at least 10 characters.");
+  });
+
+  it("accepts a complete publish, with surrounding spaces ignored in the reason", () => {
+    expect(
+      publishProblems({
+        environment: "local",
+        confirm: "local",
+        reason: "  Rotating the key after review  ",
+        draftCount: 2,
+      }),
+    ).toEqual([]);
+  });
+
+  it("refuses a reason that is too long", () => {
+    const problems = publishProblems({
+      environment: "local",
+      confirm: "local",
+      reason: "x".repeat(501),
+      draftCount: 1,
+    });
+    expect(problems).toEqual(["The reason must be 500 characters or fewer."]);
+  });
+});
+
+describe("publishChangeLabel", () => {
+  it("names key changes without any value", () => {
+    expect(publishChangeLabel({ name: "LOG_LEVEL", change: "set" })).toBe("LOG_LEVEL");
+    expect(publishChangeLabel({ name: "LOG_LEVEL", change: "clear" })).toBe("LOG_LEVEL (removed)");
   });
 });

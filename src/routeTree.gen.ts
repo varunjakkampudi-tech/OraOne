@@ -38,13 +38,16 @@ import { Route as StatusRouteImport } from './routes/status'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAiModelsRouteImport } from './routes/admin.ai-models'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
+import { Route as AdminBetaRouteImport } from './routes/admin.beta'
 import { Route as AdminBillingRouteImport } from './routes/admin.billing'
 import { Route as AdminConfigRouteImport } from './routes/admin.config'
 import { Route as AdminEntitlementsRouteImport } from './routes/admin.entitlements'
 import { Route as AdminErrorsRouteImport } from './routes/admin.errors'
 import { Route as AdminFeatureFlagsRouteImport } from './routes/admin.feature-flags'
 import { Route as AdminInfrastructureRouteImport } from './routes/admin.infrastructure'
+import { Route as AdminLogsRouteImport } from './routes/admin.logs'
 import { Route as AdminMonitoringRouteImport } from './routes/admin.monitoring'
 import { Route as AdminOrganizationsRouteImport } from './routes/admin.organizations'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
@@ -357,9 +360,19 @@ const AdminAiModelsRoute = AdminAiModelsRouteImport.update({
   path: '/ai-models',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAuditRoute = AdminAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBetaRoute = AdminBetaRouteImport.update({
+  id: '/beta',
+  path: '/beta',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminBillingRoute = AdminBillingRouteImport.update({
@@ -390,6 +403,11 @@ const AdminFeatureFlagsRoute = AdminFeatureFlagsRouteImport.update({
 const AdminInfrastructureRoute = AdminInfrastructureRouteImport.update({
   id: '/infrastructure',
   path: '/infrastructure',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLogsRoute = AdminLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMonitoringRoute = AdminMonitoringRouteImport.update({
@@ -1308,13 +1326,16 @@ export interface FileRoutesByFullPath {
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/admin/ai-models': typeof AdminAiModelsRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/beta': typeof AdminBetaRoute
   '/admin/billing': typeof AdminBillingRoute
   '/admin/config': typeof AdminConfigRoute
   '/admin/entitlements': typeof AdminEntitlementsRoute
   '/admin/errors': typeof AdminErrorsRoute
   '/admin/feature-flags': typeof AdminFeatureFlagsRoute
   '/admin/infrastructure': typeof AdminInfrastructureRoute
+  '/admin/logs': typeof AdminLogsRoute
   '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/organizations': typeof AdminOrganizationsRouteWithChildren
   '/admin/products': typeof AdminProductsRoute
@@ -1505,13 +1526,16 @@ export interface FileRoutesByTo {
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/admin/ai-models': typeof AdminAiModelsRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/beta': typeof AdminBetaRoute
   '/admin/billing': typeof AdminBillingRoute
   '/admin/config': typeof AdminConfigRoute
   '/admin/entitlements': typeof AdminEntitlementsRoute
   '/admin/errors': typeof AdminErrorsRoute
   '/admin/feature-flags': typeof AdminFeatureFlagsRoute
   '/admin/infrastructure': typeof AdminInfrastructureRoute
+  '/admin/logs': typeof AdminLogsRoute
   '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/security': typeof AdminSecurityRoute
@@ -1694,13 +1718,16 @@ export interface FileRoutesById {
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/admin/ai-models': typeof AdminAiModelsRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/beta': typeof AdminBetaRoute
   '/admin/billing': typeof AdminBillingRoute
   '/admin/config': typeof AdminConfigRoute
   '/admin/entitlements': typeof AdminEntitlementsRoute
   '/admin/errors': typeof AdminErrorsRoute
   '/admin/feature-flags': typeof AdminFeatureFlagsRoute
   '/admin/infrastructure': typeof AdminInfrastructureRoute
+  '/admin/logs': typeof AdminLogsRoute
   '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/organizations': typeof AdminOrganizationsRouteWithChildren
   '/admin/products': typeof AdminProductsRoute
@@ -1900,13 +1927,16 @@ export interface FileRouteTypes {
     | '/status'
     | '/terms'
     | '/admin/ai-models'
+    | '/admin/analytics'
     | '/admin/audit'
+    | '/admin/beta'
     | '/admin/billing'
     | '/admin/config'
     | '/admin/entitlements'
     | '/admin/errors'
     | '/admin/feature-flags'
     | '/admin/infrastructure'
+    | '/admin/logs'
     | '/admin/monitoring'
     | '/admin/organizations'
     | '/admin/products'
@@ -2097,13 +2127,16 @@ export interface FileRouteTypes {
     | '/status'
     | '/terms'
     | '/admin/ai-models'
+    | '/admin/analytics'
     | '/admin/audit'
+    | '/admin/beta'
     | '/admin/billing'
     | '/admin/config'
     | '/admin/entitlements'
     | '/admin/errors'
     | '/admin/feature-flags'
     | '/admin/infrastructure'
+    | '/admin/logs'
     | '/admin/monitoring'
     | '/admin/products'
     | '/admin/security'
@@ -2285,13 +2318,16 @@ export interface FileRouteTypes {
     | '/status'
     | '/terms'
     | '/admin/ai-models'
+    | '/admin/analytics'
     | '/admin/audit'
+    | '/admin/beta'
     | '/admin/billing'
     | '/admin/config'
     | '/admin/entitlements'
     | '/admin/errors'
     | '/admin/feature-flags'
     | '/admin/infrastructure'
+    | '/admin/logs'
     | '/admin/monitoring'
     | '/admin/organizations'
     | '/admin/products'
@@ -2697,11 +2733,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAiModelsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/audit': {
       id: '/admin/audit'
       path: '/audit'
       fullPath: '/admin/audit'
       preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/beta': {
+      id: '/admin/beta'
+      path: '/beta'
+      fullPath: '/admin/beta'
+      preLoaderRoute: typeof AdminBetaRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/billing': {
@@ -2744,6 +2794,13 @@ declare module '@tanstack/react-router' {
       path: '/infrastructure'
       fullPath: '/admin/infrastructure'
       preLoaderRoute: typeof AdminInfrastructureRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/logs': {
+      id: '/admin/logs'
+      path: '/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AdminLogsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/monitoring': {
@@ -4006,13 +4063,16 @@ const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(
 
 interface AdminRouteChildren {
   AdminAiModelsRoute: typeof AdminAiModelsRoute
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAuditRoute: typeof AdminAuditRoute
+  AdminBetaRoute: typeof AdminBetaRoute
   AdminBillingRoute: typeof AdminBillingRoute
   AdminConfigRoute: typeof AdminConfigRoute
   AdminEntitlementsRoute: typeof AdminEntitlementsRoute
   AdminErrorsRoute: typeof AdminErrorsRoute
   AdminFeatureFlagsRoute: typeof AdminFeatureFlagsRoute
   AdminInfrastructureRoute: typeof AdminInfrastructureRoute
+  AdminLogsRoute: typeof AdminLogsRoute
   AdminMonitoringRoute: typeof AdminMonitoringRoute
   AdminOrganizationsRoute: typeof AdminOrganizationsRouteWithChildren
   AdminProductsRoute: typeof AdminProductsRoute
@@ -4027,13 +4087,16 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAiModelsRoute: AdminAiModelsRoute,
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAuditRoute: AdminAuditRoute,
+  AdminBetaRoute: AdminBetaRoute,
   AdminBillingRoute: AdminBillingRoute,
   AdminConfigRoute: AdminConfigRoute,
   AdminEntitlementsRoute: AdminEntitlementsRoute,
   AdminErrorsRoute: AdminErrorsRoute,
   AdminFeatureFlagsRoute: AdminFeatureFlagsRoute,
   AdminInfrastructureRoute: AdminInfrastructureRoute,
+  AdminLogsRoute: AdminLogsRoute,
   AdminMonitoringRoute: AdminMonitoringRoute,
   AdminOrganizationsRoute: AdminOrganizationsRouteWithChildren,
   AdminProductsRoute: AdminProductsRoute,

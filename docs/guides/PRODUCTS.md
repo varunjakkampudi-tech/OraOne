@@ -19,10 +19,13 @@ Every section starts with a **Status in this code** line. The statuses are:
   through Studio or the API. Ask the engineering team before you promise it to a customer.
 - **Not built**: no code in this repository.
 
-These statuses describe the code in the repository's working tree at the time of writing.
-Some of that code is not yet committed. Nothing here is a launch date or a claim that the
-product is live for customers. Production readiness is tracked in
-[PRODUCT-PORTFOLIO](../PRODUCT-PORTFOLIO.md).
+These statuses describe the code at commit `e6f8237` on branch `feat/product1-launch`, with a
+clean working tree when this guide was written. Committed code is not the same as a live
+service. Nothing here is a launch date or a claim that the product is live for customers.
+Production readiness is tracked in [PRODUCT-PORTFOLIO](../PRODUCT-PORTFOLIO.md), which uses the
+three portfolio labels: **Built**, **Live-needs-account** and **Planned**. The mapping is:
+Available = Built; Partly available = Built (partial); Blocked by a setup gap = Live-needs-account
+(the account is needed, and the setup step is not yet in Studio); Not built = Planned.
 
 Two words are used throughout:
 
@@ -31,7 +34,7 @@ Two words are used throughout:
 
 ---
 
-## 1. Website chat
+## 1. Website chat widget
 
 **Status in this code: Available.**
 
@@ -89,7 +92,7 @@ status rules, which include the website chat page.
 
 ---
 
-## 2. AI Voice
+## 2. AI Voice agent
 
 **Status in this code: Blocked by a setup gap.** The call handling is written, but no
 screen and no API can create the voice binding that connects a phone number to an
@@ -325,7 +328,7 @@ They always return a result. When the model is unavailable, the result says that
 2. Attach knowledge in the knowledge tab.
 3. Try questions in the playground.
 4. Publish a version, then activate the assistant.
-5. Install it on a website (see [Website chat](#1-website-chat)).
+5. Install it on a website (see [Website chat widget](#1-website-chat-widget)).
 
 ### What it does not do yet
 
@@ -513,7 +516,7 @@ Frontend: `src/test/integrations-api.test.ts`, `src/lib/integration-status.test.
 
 ---
 
-## 10. Workflows
+## 10. Workflow automation
 
 **Status in this code: Available** for the triggers and steps listed below, with the
 send-message limits described.
@@ -606,7 +609,7 @@ Every outbound call is subject to the same consent rules as marketing (see
 - Twilio settings: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`, and
   `PUBLIC_API_BASE_URL` set to an `https://` address. Without them, starting a campaign returns
   an error that names the missing settings.
-- An AI Voice binding for the calling number (see [AI Voice](#2-ai-voice)).
+- An AI Voice binding for the calling number (see [AI Voice agent](#2-ai-voice-agent)).
 - Leads with an E.164 phone number, and consent recorded on each lead. Imported consent is
   recorded as the value in the file, and is marked "confirm the source".
 - A role with calls permission (`calls.write`).
@@ -683,6 +686,145 @@ The columns are recognised by name. For example, `name`, `phone`, `mobile`, `ema
 through the API), `test_product_outreach_timing.py` (import consent in the outreach rules),
 `test_product_tenant_security.py` (lead and calls permissions). Frontend:
 `src/test/lead-consent.test.ts`.
+
+---
+
+## 13. OraOne OS hub
+
+**Status in this code: Built** for the hub and its status rules. OraOne OS is the name of the
+signed-in home page (`/studio`). It is not a separate product. The long-term vision is in
+[PRODUCT-PORTFOLIO](../PRODUCT-PORTFOLIO.md), row 10.
+
+### What it does
+
+The hub lists ten areas. Each shows its status and one primary action:
+
+| Area              | Status shown                                                  | Action                               |
+| ----------------- | ------------------------------------------------------------- | ------------------------------------ |
+| Website chat      | From the channel rows: Connected, Paused or Not connected yet | Set up or Open (channel setup page)  |
+| AI Voice          | As above                                                      | Set up or Open                       |
+| WhatsApp          | As above                                                      | Set up or Open                       |
+| Instagram         | As above                                                      | Set up or Open                       |
+| Omnichannel inbox | Planned (roadmap label)                                       | Open (inbox)                         |
+| AI Studio         | Available (roadmap label)                                     | Open (assistants)                    |
+| Marketing         | Not connected yet                                             | Set up, with no screen behind it yet |
+| Marketplace       | Planned (roadmap label)                                       | Open (marketplace)                   |
+| Integrations      | Not connected yet                                             | Open (integrations)                  |
+| Calls             | Planned (roadmap label)                                       | Open (calls)                         |
+
+Channel areas read the channel rows for the workspace's first assistant. If that request is still
+loading, the card says "Checking…". If it fails, the card says "Not connected yet". Nothing is shown
+as live without data behind it.
+
+The channel setup pages (`/studio/channels/...`) list the accounts and settings each channel needs,
+by name, and a checklist of what is done. The checklist reads data the app has loaded. It does not
+call a provider.
+
+### What you need first
+
+- A signed-in account with a workspace (see [Quickstart](QUICKSTART.md)).
+- For a channel page, the setup listed on that page, for example an assistant with saved
+  instructions for website chat.
+
+### How to set it up
+
+1. Sign in and open **OraOne OS** (`/studio`).
+2. Choose an area. For a channel, choose **Set up** and follow the checklist on its page.
+3. Choose **Open** on an area that is already connected.
+
+### What it does not do yet
+
+- A channel shows as connected only when its row is enabled and active. The rows for WhatsApp,
+  Instagram and AI Voice cannot yet be created from Studio (see those sections). So those cards
+  cannot reach Connected through the normal flow.
+- The Marketing card has no screen behind it.
+- The roadmap labels for the Omnichannel inbox, Marketplace and Calls read "Planned". Those screens
+  work for the data they hold, so the label is out of date.
+
+### How it is tested
+
+Frontend: `src/lib/studio-os.test.ts` (area status and actions, channel status rules). End-to-end:
+`e2e/studio.spec.ts`, `e2e/channel-setup.spec.ts`.
+
+---
+
+## 14. Admin console
+
+**Status in this code: Partly available.** The configuration console is live for platform
+super-admins. The other administration pages show empty states until the services they need are
+connected. Nothing on those pages is simulated.
+
+### What it does
+
+The admin area sits under `/admin` and is for platform staff only.
+
+- **Configuration** (`/admin/config`) is live. It lists every key in the configuration registry by
+  group, for the `local` or `production` view. It shows secrets only as "Set, ends in XXXX" or
+  "Not set". A change is first saved as a **draft**, with the key name typed to confirm and a
+  reason of 10 to 500 characters. A super-admin then **publishes** the reviewed drafts. Publishing
+  takes effect only after the API restarts. Keys the console cannot manage are shown read-only.
+  The API is under `/api/admin/config`.
+- **Secret inventory** (`GET /api/super-admin/secrets`) returns, for twelve names, whether each is
+  set and a masked tail. It is an API only. No screen calls it, and it is read-only.
+- **Other pages** (users, organizations, subscriptions, billing, usage, error logs, audit logs,
+  support, monitoring, infrastructure, AI models, security, products, entitlements, feature flags
+  and settings) show a table definition and an empty state. For example, "Error events are
+  unavailable until authorized observability services are connected." The backend has matching
+  super-admin endpoints (for example `/api/super-admin/audit-logs` and `/api/super-admin/feature-flags`),
+  but the admin screens do not call them.
+
+### Logs, analytics and beta
+
+- **Logs.** There is no log view or log download in the admin area. Error logs and audit logs are
+  empty states. Engineering work on admin logs is listed in [blocker.txt](../../blocker.txt).
+- **Analytics.** The global usage and monitoring pages are empty states. The screens do not show
+  metered or measured figures.
+- **Beta.** A product can have the `beta` status in the product model, and the entitlement key
+  `beta_features` marks the opt-in beta surface. The feature-flag screen is a placeholder. The
+  backend's `PATCH /api/super-admin/feature-flags/{key}` is not called by any screen. Beta testers
+  are not yet added through the console (see `blocker.txt` item 10).
+
+### What you need first
+
+- A platform account with the `super_admin` role. The first one is granted by an engineer on the
+  server (see `blocker.txt` item 8). The `admin` platform role does not get access to these routes.
+- For saved values: `INTEGRATIONS_ENCRYPTION_KEY` set on the server. Saved values are encrypted with
+  it. Changing it makes stored values unreadable.
+
+### How to set it up
+
+1. Sign in with the super-admin account.
+2. Open **Configuration** and choose the environment tab (`Local` or `Production`).
+3. To change a console-managed key, open its row, enter the new value (no line breaks, at most 2048
+   characters), type the key name in **confirm**, enter a reason and choose **Save draft**. Do not put
+   secrets in the reason.
+4. Open **Drafts**, check the diff, type the environment name in **confirm**, enter a reason and
+   publish. If a draft changed after you reviewed it, the publish is refused.
+5. Restart the API so that every worker loads the published values, for example
+   `docker compose --env-file .env.production -f docker-compose.prod.yml restart backend workers`.
+   **Reload** re-reads the saved values into one process only (it needs the confirm text `RELOAD`),
+   so it is not a substitute for a restart. The page shows **Restart required** when a saved change
+   is newer than the running process.
+6. Check the masked values. Secrets must show only "Set, ends in XXXX" or "Not set".
+
+The full rules, including the audit records, history and key rotation, are in
+[ADMIN-CONFIG](ADMIN-CONFIG.md).
+
+### What it does not do yet
+
+- No log viewer, no log download, no audit-log screen, no analytics screen.
+- No feature-flag or beta-tester screen. No screen for the entitlements overview.
+- This section describes commit `e6f8237`. Uncommitted work in the working tree at the time of
+  writing adds admin log, analytics, feature-flag and beta screens and new migrations. It is not
+  counted here. Update this section when that work is committed and tested.
+- No single sign-on for administrators. Sign-in is by email code, like every other account.
+- Other admin pages cannot show data until their services are connected.
+
+### How it is tested
+
+Backend: `backend/tests/test_admin_config_console.py`, `backend/tests/test_platform_rbac.py`,
+`backend/tests/test_authorization.py`, `backend/tests/test_security_authz_hardening.py`.
+Frontend: `src/lib/admin-config.test.ts`. End-to-end: `e2e/admin.spec.ts`.
 
 ---
 

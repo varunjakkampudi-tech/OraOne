@@ -9,8 +9,8 @@ configured SDK) — no collector, no Jaeger, nothing required to run the
 app locally. Set the endpoint (e.g. an OTel Collector, Jaeger, Honeycomb,
 Grafana Tempo) to start exporting real traces.
 
-``request_id`` (already stamped on every request by server.py's
-``request_context_mw``) is attached to the active span as an attribute so
+``request_id`` (already stamped on every request by
+``RequestContextMiddleware``) is attached to the active span as an attribute so
 a trace and a structured log line for the same request can be correlated
 by that id even without a full OTLP pipeline.
 """

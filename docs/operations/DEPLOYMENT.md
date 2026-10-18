@@ -7,15 +7,19 @@ never written in this document.
 
 ## What runs
 
-| Container              | Image source                                         | Role                                                                                                                                                             |
-| ---------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `oraone-prod-proxy`    | `caddy:2-alpine` with [`Caddyfile`](../../Caddyfile) | The only public entry point. Ports 80 and 443. Obtains the TLS certificate for `CADDY_DOMAIN`. Sends `/api/*` to the backend and everything else to the web app. |
-| `oraone-prod-frontend` | [`frontend.Dockerfile`](../../frontend.Dockerfile)   | Web application (Node server on port 8080). Not published.                                                                                                       |
-| `oraone-prod-backend`  | [`backend/Dockerfile`](../../backend/Dockerfile)     | API under Gunicorn (port 8000). Not published. Runs `alembic upgrade head`, then starts.                                                                         |
-| `oraone-prod-workers`  | same image as backend                                | Runs `worker.py`: the workflow scheduler and the webhook outbox. No HTTP port.                                                                                   |
-| `oraone-prod-migrate`  | same image as backend                                | One-shot. Runs `alembic upgrade head`. The API and workers start only after it exits with code 0.                                                                |
-| `oraone-prod-postgres` | `pgvector/pgvector:pg16`                             | Database. Not published.                                                                                                                                         |
-| `oraone-prod-redis`    | `redis:7-alpine`                                     | Shared cache, rate limits, sign-in codes. Not published.                                                                                                         |
+| Container              | Image source                                              | Role                                                                                                                                                             |
+| ---------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `oraone-prod-proxy`    | `caddy:2.11.7-alpine` with [`Caddyfile`](../../Caddyfile) | The only public entry point. Ports 80 and 443. Obtains the TLS certificate for `CADDY_DOMAIN`. Sends `/api/*` to the backend and everything else to the web app. |
+| `oraone-prod-frontend` | [`frontend.Dockerfile`](../../frontend.Dockerfile)        | Web application (Node server on port 8080). Not published.                                                                                                       |
+| `oraone-prod-backend`  | [`backend/Dockerfile`](../../backend/Dockerfile)          | API under Gunicorn (port 8000). Not published. Runs `alembic upgrade head`, then starts.                                                                         |
+| `oraone-prod-workers`  | same image as backend                                     | Runs `worker.py`: the workflow scheduler and the webhook outbox. No HTTP port.                                                                                   |
+| `oraone-prod-migrate`  | same image as backend                                     | One-shot. Runs `alembic upgrade head`. The API and workers start only after it exits with code 0.                                                                |
+| `oraone-prod-postgres` | `pgvector/pgvector:pg16`                                  | Database. Not published.                                                                                                                                         |
+| `oraone-prod-redis`    | `redis:7.4.11-alpine`                                     | Shared cache, rate limits, sign-in codes. Not published.                                                                                                         |
+
+The production host (Hostinger VPS, DNS, firewall, the `/opt/oraone` layout and rollback status)
+is described in [HOSTINGER-DEPLOYMENT](../HOSTINGER-DEPLOYMENT.md). The image tags above are
+those in `docker-compose.prod.yml`.
 
 Only Caddy publishes ports. The `scripts/` folder is excluded from the backend image
 (see `backend/.dockerignore`), so run operator scripts from a checkout of the repository,
