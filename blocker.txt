@@ -1,252 +1,494 @@
-OraOne - BLOCKERS (things only you can do)
-==========================================
-Last updated: 2026-10-18. I will keep this file current. Each item says what I need and why.
+OraOne - BLOCKERS: what only you can do (step by step)
+=====================================================
+Last updated: 18 October 2026, after commit bb61c54 on main.
+This file replaces the earlier numbered list. Old numbers are noted in brackets where they apply.
 
-ACCOUNTS AND SECRETS (I cannot create accounts, enter passwords, or accept terms/payments)
+HOW TO USE THIS FILE
+--------------------
+1. Work through the items in order. Each item has the steps, the exact values to fill in,
+   and a check that tells you it worked.
+2. SECRETS: never paste a password, API key, token, private key, or passphrase into chat.
+   Put secrets only in the server file /opt/oraone/backend/.env or in the GitHub secrets page.
+   In chat you may tell me non-secret values only (for example a host name, a sender address,
+   a model name, or "done").
+3. When an item is done, reply with its number and "done" (plus any non-secret values asked for).
+   I will then update this file and run the checks.
+4. Server file changes: after editing /opt/oraone/backend/.env, restart the services:
+       cd /opt/oraone
+       docker compose -f docker-compose.prod.yml up -d backend workers
+   Then check: curl -s https://oraone.in/api/health/ready   (should return HTTP 200)
 
-1. Email delivery (sign-in codes depend on this)
-   - Create mailbox noreply@oraone.in in Hostinger email.
-   - On the server, add to /opt/oraone/backend/.env:
-     SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM, SMTP_USE_SSL
-   - Then restart backend:  cd /opt/oraone && docker compose -f docker-compose.prod.yml up -d backend workers
 
-2. Meta (WhatsApp + Instagram)
-   - Finish "Step 2. Production setup" in the Meta app dashboard:
-     a) Register the WhatsApp phone number (needs the SMS/voice code, only you can receive it)
-     b) Add payment method for business-initiated messages (your payment, your choice)
-     c) Configure Webhooks: Callback URL = https://oraone.in/api/channels/meta/inbound
-        Verify token = META_WHATSAPP_VERIFY_TOKEN value from your local backend/.env
-        Subscribe to the "messages" field.
-   - Instagram: create/enable the Instagram messaging permission and an Instagram-scoped
-     page token; give me the token name only (set META_INSTAGRAM_ACCESS_TOKEN on the server).
-   - Business verification (Meta may require it for production messaging).
+QUICK CHECKLIST
+---------------
+[ ] 1  Email delivery (SMTP) for sign-in codes               - needs: mailbox + server .env
+[ ] 2  WhatsApp (Meta Cloud API)                              - needs: Meta app + server .env
+[ ] 3  Instagram messaging (Meta)                             - needs: Meta permission + server .env
+[ ] 4  Calls and SMS (Twilio)                                 - needs: Twilio account + server .env
+[ ] 5  Human voice for calls (ElevenLabs)                     - needs: ElevenLabs key + server .env
+[ ] 6  AI model (OpenRouter)                                  - needs: OpenRouter key + spend limit
+[ ] 7  Redis for production rate limits                       - needs: server .env check
+[ ] 8  GitHub: branch protection on main                      - needs: your approval
+[ ] 9  GitHub: make the repository private                    - needs: your approval
+[ ] 10 GitHub: deployment secrets and production approval     - needs: GitHub settings
+[ ] 11 Encrypted off-host backups and a restore drill         - needs: destination + server
+[ ] 12 Billing: free or paid launch decision                  - needs: your decision
+[ ] 13 Live proof for every provider journey                  - needs: items 1 to 7 done
+[ ] 14 Staging environment for load and security tests        - needs: approval
+[ ] 15 Decisions on product behaviour (section 15a to 15j)    - needs: your answers
+[ ] 16 Legal text and public images review                    - needs: your review
+[ ] 17 Rotate the development account passwords               - needs: your action
+[ ] 18 Website copy: which wording is correct                 - needs: your choice
 
-3. Twilio (calls, SMS, AI voice)
-   - Add to server /opt/oraone/backend/.env:  PUBLIC_API_BASE_URL=https://oraone.in  (already set)
-   - In Twilio console, on your phone number set webhooks:
-     Voice:            https://oraone.in/api/voice/inbound
-     Messaging (SMS/WhatsApp): https://oraone.in/api/channels/twilio/inbound
-     Status callback:  https://oraone.in/api/voice/status
+Items 1-7 are needed for a working customer product. Items 8-10 are needed before the repository
+is opened to others. Item 11 is needed before paid customers.
 
-4. ElevenLabs (human-like voice for AI calls)
-   - Create an ElevenLabs account, copy your API key and choose a voice ID.
-   - Add to server .env:  ELEVENLABS_API_KEY=...  and  ELEVENLABS_VOICE_ID=...
-   - Also set REDIS_URL=redis://redis:6379/0 in server .env (for voice audio across workers).
 
-5. GitHub (automated tests and deployment)
-   - Create a GitHub repository (private) for OraOne.
-   - Tell me the repo name (owner/name). I will push code only after you approve the push.
-   - Add repository secrets (Settings -> Secrets and variables -> Actions):
-     DEPLOY_HOST = the VPS IP address (copy it from your Hostinger panel; not written in this file)
-     DEPLOY_USER = root
-     DEPLOY_SSH_KEY = contents of the private key file ~/.ssh/oraone_vps
-       (I will tell you the exact file path to copy; do NOT paste it into chat)
-   - Optional: DEPLOY_PATH = /opt/oraone
+=====================================================================
+ITEM 1 - EMAIL DELIVERY (SMTP) FOR SIGN-IN CODES      [old item 1, 26]
+=====================================================================
+Why: sign-in works only if the 6-digit code is emailed. Without SMTP, users cannot sign in.
+Status: the code now fails closed (users see an error instead of a fake success), but no email
+leaves the server until this is set up.
 
-6. Google / Slack / HubSpot / Notion / Google Sheets / Calendar integrations (optional)
-   - Create OAuth apps in each provider's developer console, then add client ID and
-     secret to the server .env (names listed in docs/operations/CONFIGURATION.md).
-   - Until then, those integrations correctly show "not configured yet".
+Step 1. In the Hostinger control panel, open Emails and create a mailbox:
+        Address: noreply@oraone.in
+        Choose a strong password and save it in your password manager.
+Step 2. In the Hostinger email settings, find the outgoing (SMTP) server name, port and SSL setting.
+        Copy them from the Hostinger page. Do not guess them.
+Step 3. On the server, edit /opt/oraone/backend/.env and add these lines (replace each <FILL> value):
 
-7. Marketing (email campaigns)
-   - Choose an email delivery provider for campaign mail (for example Hostinger SMTP or a
-     transactional provider) and give me the provider name. I will wire it after you add
-     the credentials to the server .env.
-   - WhatsApp marketing outside the 24-hour window needs approved message templates in Meta.
+        SMTP_HOST=<FILL: outgoing server name from Hostinger>
+        SMTP_PORT=<FILL: port from Hostinger>
+        SMTP_USER=noreply@oraone.in
+        SMTP_PASSWORD=<FILL: mailbox password - secret, server file only>
+        SMTP_FROM=noreply@oraone.in
+        SMTP_USE_SSL=<FILL: true or false, as Hostinger specifies for that port>
 
-8. First admin user
-   - Sign in once at https://oraone.in with your own email (code arrives by email).
-   - Tell me the email. I will grant the platform super-admin role on the server.
+Step 4. Restart the services (see "How to use" above).
+Step 5. Test: open https://oraone.in/auth/sign-in, enter your own email, and ask for a code.
+        The code should arrive within a minute. If it does not, check the spam folder, then run:
+            docker logs oraone-prod-backend --tail 200 | grep -i smtp
+        Look for "email sent via SMTP". Do not paste log lines that contain a password.
 
-DECISIONS I NEED FROM YOU
+Tell me: "SMTP done" and the sender address you used (non-secret).
 
-9. Free access: production currently runs ORAONE_FREE_ACCESS_ONLY=true (billing off).
-   Confirm this stays on until pricing is ready.
 
-10. Beta testers: give me the list of beta tester email addresses (or say "none yet").
-    I will add the beta feature flags when you confirm the list.
+=====================================================================
+ITEM 2 - WHATSAPP (META CLOUD API)                    [old item 2]
+=====================================================================
+Why: WhatsApp messages reach the assistant only after Meta is connected.
 
-11. Vision and mission text for the docs: confirm the wording below, or send your own.
-    Draft: "OraOne is one AI operating system for every conversation: every channel,
-    every customer, and every follow-up in one place, with an AI that answers from your
-    own information and hands over to your team when needed."
+Step 1. Go to https://developers.facebook.com, open your app, then WhatsApp > API Setup.
+Step 2. Add your business phone number. Meta sends a verification code by SMS or voice.
+        You must receive that code yourself. Complete the steps Meta shows.
+Step 3. Add a payment method for business-initiated messages (your choice, your account).
+Step 4. Create a permanent access token for a system user (Business Settings > System users).
+        Give it the WhatsApp permissions for your app.
+Step 5. Note the App Secret: App settings > Basic > App secret (click Show).
+Step 6. Choose a verify token: any random text of at least 20 characters. Keep it secret.
+Step 7. On the server, edit /opt/oraone/backend/.env:
 
-12. Privacy: confirm you want the data policy to say that OraOne does not use customer
-    data to train models, and that data is stored in India (Mumbai server).
+        META_WHATSAPP_ACCESS_TOKEN=<FILL: permanent system user token - secret>
+        META_WHATSAPP_APP_SECRET=<FILL: App secret - secret>
+        META_WHATSAPP_VERIFY_TOKEN=<FILL: the verify token you chose - secret>
 
-12a. Legal pages (/privacy, /terms and the other legal pages): the text is still a draft.
-    The pages now say "Pending legal review" next to the "Draft for review" banner. Decide
-    who reviews the text (you or counsel) and approve it. I will not remove the banner
-    until you confirm the final text.
+Step 8. Restart the services.
+Step 9. In Meta > WhatsApp > Configuration > Webhooks:
+        Callback URL:  https://oraone.in/api/channels/meta/inbound
+        Verify token:  the same value as META_WHATSAPP_VERIFY_TOKEN
+        Click Verify and save. Then subscribe to the "messages" field.
+Step 10. In OraOne Studio > Channels > WhatsApp, enter the Phone number ID and WhatsApp Business
+         Account ID shown in Meta. These are not secrets; they go in Studio, not in .env.
+Step 11. Test: send a WhatsApp message to your business number from another phone.
+         The conversation should appear in Studio > Inbox within a minute.
 
-12b. Public images: view the four generated images used on the solution cards
-    (solution-support, solution-leads, solution-sales, solution-small) and the product
-    screenshots in public/media/studio-*.jpg. I have not viewed them. See
-    docs/operations/MEDIA-REVIEW.md. Tell me which ones to replace.
+Tell me: "WhatsApp done" and the phone number (non-secret, for example +91...).
 
-ITEMS I WILL DO WITHOUT YOU (for your awareness)
-- Code quality (lint, prettier, structure), security audit and fixes, dependency audit
-  and updates, logging and log download for admins, admin config drafts that only admins
-  can publish, beta feature flags, high-level analytics, removing dummy data from the
-  public site, product test suites (unit, API, end-to-end, smoke, regression, critical),
-  GitHub Actions workflows (manual deploy from main), documentation updates.
 
-NOT IN THIS RELEASE (planned)
-- YouTube and Instagram marketing for end users: needs YouTube Data API and Meta
-  Marketing API approvals. Will be built after those approvals.
+=====================================================================
+ITEM 3 - INSTAGRAM MESSAGING (META)                   [old item 2]
+=====================================================================
+Why: Instagram direct messages are answered only after Meta permission is approved.
 
-19. GitHub repository settings (needs your explicit approval; I will not change them without it)
-   - Branch protection on main: currently NOT protected (verified via the GitHub API on 2026-10-18).
-     Proposed: require the web, browser and backend jobs of ci.yml to pass, block force pushes and deletion,
-     and require one review. Reply "approve branch protection" and I will apply it.
-   - Repository visibility: currently PUBLIC. Proposed: make it private, because the docs and
-     history describe the deployment layout. Reply "make repository private" to approve.
+Step 1. In your Meta app, add the Instagram product and connect your Instagram professional account.
+Step 2. Request the Instagram messaging permission. Meta may require app review and business
+        verification. This can take days or weeks.
+Step 3. Create a page access token for the Instagram account (with the permission above).
+Step 4. On the server, edit /opt/oraone/backend/.env:
 
-ADDED 2026-10-18 (documentation pass). Each item below needs your decision or a fact only you can confirm.
+        META_INSTAGRAM_ACCESS_TOKEN=<FILL: Instagram-scoped token - secret>
 
-13. Vision and mission: confirm or replace the DRAFT in docs/VISION-AND-MISSION.md.
-   - It is marked "Draft for owner review" and is built only from existing product statements.
-     It contains no customer claims or statistics.
-   - Confirm the target customers ("businesses" is deliberate), and the open decisions listed at
-     the end of that file. Item 11 above has the earlier one-paragraph wording.
+Step 5. Restart the services.
+Step 6. In Studio > Channels > Instagram, enter the Instagram account ID from Meta.
+Step 7. Test with a direct message from a second Instagram account.
 
-14. Hostinger facts that are NOT in the repository: confirm them, or send corrections (no IP address).
-   - Docs: docs/HOSTINGER-DEPLOYMENT.md, sections 2, 3 and 10. The commands to check them are in section 9.
-   - DNS: A record for @ to the VPS; CAA contents; DNSSEC enabled with the DS record published; registrar lock on.
-   - CAA: decide the certificate authority before you publish a CAA record. Caddy may fall back to a
-     second authority, and a record that lists only one would block that fallback.
-   - Host: Mumbai region and Ubuntu 26.04; firewall allows only 22, 80 and 443; fail2ban sshd jail on;
-     SSH key-only login; security updates on or off.
+Tell me: "Instagram done" once a test message appears in Studio, or "Instagram waiting for Meta approval".
 
-15. Backups are not configured. Decide and set up:
-   - the backup destination (outside the application folder) and retention period;
-   - a root-only passphrase file outside the repository checkout, for backend/scripts/weekly_backup.py;
-   - a schedule for that script, and one restore drill (backend/scripts/backup_restore_drill.py) with the result recorded.
-   - Until a restore drill passes, a release with a database migration cannot be reversed in practice
-     (docs/HOSTINGER-DEPLOYMENT.md, section 7).
 
-16. Accepted security risks: confirm you accept them, or ask for changes (docs/operations/SECURITY.md, section 2).
-   - The Content Security Policy allows inline scripts (Caddyfile).
-   - Caddy access logging is off, so there is no edge request log.
-   - The webhook and general API rate-limit tiers fail open if the shared store fails.
-   - The README lists the development accounts and their passwords. They are seeded only in development.
+=====================================================================
+ITEM 4 - CALLS AND SMS (TWILIO)                       [old item 3]
+=====================================================================
+Why: inbound calls, SMS and voice answers need a Twilio number.
 
-17. Conflicting public copy: src/content/site/marketing.ts says "Phone and WhatsApp are planned" on the
-   home page, while docs/PRODUCT-PORTFOLIO.md records them as built with setup gaps. Choose the wording.
-   Changing the site copy is a code edit, which needs your approval first.
+Step 1. Create or log in to a Twilio account at https://www.twilio.com/console.
+Step 2. Buy a phone number that supports the calls and SMS you need (cost: your choice).
+Step 3. Note these values from the Twilio console (Account info):
+        Account SID   (starts with AC)
+        Auth Token    (secret)
+        Your number   (E.164 format, for example +14155550123)
+Step 4. On the server, edit /opt/oraone/backend/.env:
 
-18. The deploy workflow exists but has not been run. .github/workflows/deploy.yml is manual only
-   (workflow_dispatch) and runs only from main. Nothing deploys on a push or a pull request. Before the
-   first run:
-   - add the secrets DEPLOY_HOST, DEPLOY_USER and DEPLOY_SSH_KEY to the production environment (item 5);
-   - add required reviewers to the production environment in GitHub settings. The repository does not
-     show whether this rule is set;
-   - choose the deploy account (item 5 proposes root; a dedicated deploy user in the docker group is the
-     safer choice).
-   - The server address is not written in this file. Copy it from the Hostinger panel (item 5).
+        TWILIO_ACCOUNT_SID=<FILL: Account SID - starts with AC>
+        TWILIO_AUTH_TOKEN=<FILL: Auth Token - secret>
+        TWILIO_PHONE_NUMBER=<FILL: your number in E.164 format>
+        PUBLIC_API_BASE_URL=https://oraone.in
 
-DECISIONS FROM THE LATEST ROUND (owner input needed)
-- Business-only AI: confirm the list of weak topics that trigger a refusal (for example
-  "weather"), and which contact details the refusal message shows (website only today).
-- Handoff notes: decide who gets notified when the AI cannot answer, and the response time.
-- Database row-level security: not configured; tenant separation is enforced in application
-  code. Decide whether to add PostgreSQL RLS policies before large customer onboarding.
-- Admin navigation: Logs, Analytics and Beta flags are now in the menu; confirm the labels.
+Step 5. Restart the services.
+Step 6. In Twilio Console > Phone Numbers > your number, set these webhooks:
+        Voice ("A call comes in"), method POST:
+            https://oraone.in/api/voice/inbound
+        Messaging ("A message comes in"), method POST:
+            https://oraone.in/api/channels/twilio/inbound
+        Status callback URL (voice):
+            https://oraone.in/api/voice/status
+Step 7. Test: call the number from your phone. You should hear the greeting and be able to ask a question.
+        Test SMS: send a text to the number and check Studio > Inbox.
 
-UPDATE 2026-10-18 (audit round 3). What changed and what still needs you.
-20. Project isolation: DONE in code. Retrieval, visitor memory and handoffs are confined to one
-    project; a missing project resolves to the organization default. Migration 0062 backfills
-    existing data. Owner decision recorded: projects are separate data boundaries.
-21. Human handoff: DONE in code. Each handoff is stored as an escalation, emailed to organization
-    owners and admins, retried with backoff, and moved to dead letter after 5 attempts. A visitor
-    with no contact details is asked for one, and is never promised follow-up.
-    OWNER DECISION NEEDED: the response-time target (for example "within one business day").
-    Email delivery needs the SMTP mailbox (item 1). Without it, escalations stay pending and visible.
-    The dashboard screen for the escalation queue is not built yet; the API is at /api/escalations.
-22. Grounding: DONE in code. Each sentence of a model reply must be supported by the retrieved
-    passages; otherwise the passage text is used. The check is lexical, so it is strict and can
-    refuse valid paraphrases. Evaluation set: backend/tests/fixtures/grounding_eval.json.
-    OWNER DECISION NEEDED: approve the set, and send real rejected replies to extend it.
-23. Production image in CI: ADDED (job "Production images build and boot"). Verified locally: the
-    frontend image builds and serves HTTP 200. Not verified: the backend container booting on a
-    GitHub runner. Check the first run.
+Tell me: "Twilio done" and the number (non-secret).
 
-ROUND 4 (2026-10-18): what is fixed in code, and what only you can complete.
-Fixed in code (see the pull request for the test evidence):
-- Public API keys bound to a project are confined to that project on every list, read and write.
-  Usage and analytics refuse project-scoped keys, because they aggregate across the organization.
-- Explicit widget escalation creates a queue item. One unresolved item per conversation.
-- Grounding: numeric and negation checks added. Replies that go beyond the retrieved passages
-  are replaced by passage text in the widget, omnichannel and signed-in chat paths.
-- API key rate limits use the shared store and fail closed (503) when it is unavailable.
-- Escalation delivery claims due rows with FOR UPDATE SKIP LOCKED and leases them before sending.
-- Migration rollback rehearsed on a scratch database (see docs/operations/BACKUP-RESTORE.md).
 
-Still needs you or a live environment:
-24. Off-host encrypted backup and restore into an isolated environment. Needs a backup destination
-    outside the server, a passphrase file, and approval of a cron change on the VPS (items 15 and 16).
-25. Production rate limits: set REDIS_URL on the server. Without it, production refuses to start the
-    shared cache for API keys, and every API request gets 503. Confirm the Redis service is up.
-26. Live SMTP: configure the mailbox (item 1). Then send one real escalation alert and one sign-in code.
-27. OpenRouter live check: run one real chat and one embedding call from the server, and record the
-    model names and monthly cost limit you accept.
-28. Semantic grounding (LLM entailment): not built. The current checks are lexical, numeric and
-    negation only, so they cannot judge paraphrase-level contradictions. Decide whether to add a
-    second model call per reply (extra cost, latency) or a human review queue for sampled replies.
-29. DONE (round 6): the signed-in streaming route collects the full reply, checks it, and only then
-    sends it in chunks. Trade-off: the visitor sees the reply after generation, not word by word.
-    The public widget already built its stream from a checked answer. Owner: confirm the trade-off.
-30. Browser tests against a real backend: the browser job still uses mocked API responses. Owner
-    decision: approve adding PostgreSQL and Redis services to that CI job, and the 768 px project.
-31. DONE (round 5): the escalation inbox is at /studio/escalations (owner, notes, overdue, resolve, reopen).
-32. Response-time target for human handoffs (item 21).
-33. PARTLY DONE (round 6): campaign sends claim recipients, release the database locks, send, then record.
-    An interrupted claim is failed for review and never resent automatically. Still missing: provider
-    message IDs and delivery receipts (bounces, reads), and a durable outbound queue. Needed before large campaigns.
-34. PARTLY DONE (round 6): the monthly AI token allowance is reserved atomically before each model call,
-    settled to actual usage, and refunded on failure. The answer path falls back to passage text when the
-    allowance is used up; the signed-in chat returns 402. Still missing: a per-organization DAILY ceiling, and
-    provider-cost reconciliation (token counts are estimates until reconciled against invoices).
-35. Off-the-shelf market claims: competitor prices and features in the audit must be checked against
-    each vendor's public pricing page before any external use. Do not publish comparisons until then.
+=====================================================================
+ITEM 5 - HUMAN VOICE FOR CALLS (ELEVENLABS)           [old item 4]
+=====================================================================
+Why: calls can use a natural voice. Without it, the system uses the built-in fallback voice.
 
-ROUND 4 BRAINSTORM (report: docs/product/MARKET-AND-ROADMAP.md)
-36. Pricing decision: INR pricing, a free starter, and what the base plan includes (see the report).
-    Competitor prices were read from public pages on 18 Oct 2026; re-check before external use.
-37. Setup-friction features (business-hours and handoff step, test-before-embed, embed helper)
-    are not built. They are frontend work and need your approval of the wording.
-38. Public API subscription enforcement: decide whether v1 routes must also run the plan check
-    (authorization.authorize) and reject canceled organizations. The code change is small; the
-    behaviour change affects paying customers, so it needs your approval.
-39. Widget visitors now get no knowledge base until the owner binds one. Existing widgets without a
-    binding will hand off every question until a binding is set. Confirm this default.
+Step 1. Create an account at https://elevenlabs.io and copy your API key from the profile page.
+Step 2. Choose a voice in the voice library and copy its Voice ID.
+Step 3. Choose the model you want, or leave it empty to use the default.
+Step 4. On the server, edit /opt/oraone/backend/.env:
 
-ROUND 5 (audit of d8a3040)
-40. Escalation inbox is built: /studio/escalations, with owner, notes, overdue, resolve and reopen.
-    The response target is a 24-hour placeholder until you confirm item 32.
-41. Grounding evaluation set has 38 cases. The labels were written by the engineering team, not by an
-    independent reviewer. Decide who labels a larger set (at least several hundred real replies), and
-    report unsupported-claim rate, retrieval recall and answer usefulness separately.
-42. Branch protection on main and repository visibility: still need your explicit approval (item 19).
-43. Live SMTP and a live AI provider call: still need the mailbox and the OpenRouter key on the server
-    (items 1, 26 and 27). The code paths are tested with fakes only.
-44. Encrypted off-host backup and a restore drill on the server: still open (items 15 and 24).
-45. Performance under concurrent customer traffic: not measured. Needs a staging environment and
-    approval to run a load test against it. Suggested target: 200 concurrent widget sessions with p95
-    reply latency and error rate recorded.
+        ELEVENLABS_API_KEY=<FILL: API key - secret>
+        ELEVENLABS_VOICE_ID=<FILL: Voice ID - non-secret>
+        ELEVENLABS_MODEL_ID=<FILL: model name - non-secret, optional>
 
-ROUND 6 (audit of 85ff6df)
-46. Mobile apps: the audit scores native apps at 5%. Decide whether "mobile" in the launch promise means
-    the responsive website (then say so) or native Android and iOS apps (a separate project).
-47. Studio versus /app navigation: two experiences exist. Decide which one is canonical; the other should
-    redirect or be removed so features are not built twice.
-48. Full cross-project authorization audit for every module (GET, LIST, CREATE, UPDATE, DELETE, EXECUTE).
-    Channel management and marketplace installs are now project-scoped. Super Admin impersonation and customer
-    inspection still need an adversarial test pass before launch.
-49. Live provider journeys (Meta, Twilio, ElevenLabs, SMTP, OpenRouter): need your credentials and a
-    recorded run per journey, with provider receipts. Code paths are tested with fakes only.
-50. Billing: production runs in free-access mode. Decide the launch commercial policy (free, paid, or
-    free-with-clear-"checkout unavailable" labels). Paid checkout must not be shown as working until it is proven.
-51. Durable delivery for public workflow runs and marketing: committed runs are now recovered by the
-    scheduler (round 6). Full crash-matrix testing against a real database is still needed.
-52. Load and failure tests: not run. Needs a staging environment (blocker item 45).
+Step 5. Restart the services.
+Step 6. Test: place a call (Item 4) and listen to the answer.
+
+Tell me: "ElevenLabs done" once a test call uses the new voice.
+
+
+=====================================================================
+ITEM 6 - AI MODEL (OPENROUTER)                        [old item 27]
+=====================================================================
+Why: every AI answer comes from OpenRouter. Without a key, assistants cannot answer.
+
+Step 1. Create an account at https://openrouter.ai and add a payment method (your choice).
+Step 2. Create an API key (Keys page). Copy it once.
+Step 3. Set a monthly spend limit on the account (Settings / Limits). This protects you from
+        unexpected cost. Choose the amount yourself.
+Step 4. Choose the model you want and copy its exact model ID from OpenRouter.
+Step 5. On the server, edit /opt/oraone/backend/.env:
+
+        OPENROUTER_API_KEY=<FILL: API key - secret>
+        OPENROUTER_MODEL=<FILL: exact model ID from OpenRouter>
+        OPENROUTER_SITE_URL=https://oraone.in
+        OPENROUTER_APP_NAME=OraOne
+
+Step 6. Restart the services.
+Step 7. Test: open the public widget on a test page, ask a question that is in your knowledge base,
+        and check that a grounded answer appears.
+
+Tell me: "OpenRouter done", the model ID (non-secret), and the monthly limit you set (amount in USD).
+
+
+=====================================================================
+ITEM 7 - REDIS FOR PRODUCTION RATE LIMITS             [old item 25]
+=====================================================================
+Why: in production, API key rate limits are shared through Redis. Without Redis, every API request
+     returns 503. This is deliberate: a limit is never skipped.
+
+Step 1. On the server, check that the Redis container is running:
+            docker ps --filter name=oraone-prod-redis
+Step 2. In /opt/oraone/backend/.env, make sure this line exists:
+
+        REDIS_URL=redis://redis:6379/0
+
+Step 3. Restart the services.
+Step 4. Test: create an API key in Studio > API keys and call GET /api/v1/ping with it.
+        It should return HTTP 200.
+
+Tell me: "Redis done".
+
+
+=====================================================================
+ITEM 8 - GITHUB: BRANCH PROTECTION ON main            [old item 19, 42]
+=====================================================================
+Why: without protection, code can reach main without review or passing tests.
+Status: NOT protected today. I will not change this setting without your explicit approval.
+
+Decision you make: approve or refuse.
+If approved, apply these settings:
+  - GitHub > repository > Settings > Branches > Add branch protection rule.
+    Branch name pattern: main
+  - Require a pull request before merging: on. Required approvals: 1.
+  - Require status checks to pass before merging: on. Select these four checks:
+        Web lint, typecheck, unit tests and build
+        Backend lint and tests
+        Browser tests (phone and desktop widths)
+        Production images build and boot
+  - Require branches to be up to date before merging: on.
+  - Do not allow force pushes: on.
+  - Do not allow deletions: on.
+
+Reply to me exactly: "approve branch protection"  or  "refuse branch protection".
+If you approve, I will open pull requests for changes instead of pushing straight to main.
+
+
+=====================================================================
+ITEM 9 - GITHUB: MAKE THE REPOSITORY PRIVATE          [old item 5, 19]
+=====================================================================
+Why: the repository is public. The deployment layout and the code are visible to anyone.
+Status: PUBLIC today.
+
+Decision you make: approve or refuse.
+If approved: GitHub > repository > Settings > General > Danger Zone > Change visibility > Make private.
+Before you do it: any other service that reads this repository needs access granted again.
+
+Reply to me exactly: "make repository private"  or  "keep repository public".
+
+
+=====================================================================
+ITEM 10 - GITHUB: DEPLOYMENT SECRETS AND PRODUCTION APPROVAL   [old item 5, 18]
+=====================================================================
+Why: the deploy workflow (.github/workflows/deploy.yml) connects to the server. It is manual only,
+     runs only from main, and has NOT been run yet. Nothing deploys on a push.
+
+Step 1. GitHub > repository > Settings > Secrets and variables > Actions > New repository secret.
+        Create these secrets. Paste the values directly into GitHub; do not send them to me:
+
+        DEPLOY_HOST      = <FILL: the VPS IP address from your Hostinger panel>
+        DEPLOY_USER      = <FILL: a deploy user on the server. Recommended: a dedicated user in the
+                           docker group, not root>
+        DEPLOY_SSH_KEY   = <FILL: the full private key text, including the BEGIN and END lines - secret>
+
+Step 2. Create the environment "production": Settings > Environments > New environment, name: production.
+        Add yourself as a required reviewer, so every deploy waits for your approval.
+        Check the setting on the page after you save it; the repository cannot show this to me.
+Step 3. Run the deploy only when you are ready: Actions > Deploy > Run workflow > branch: main.
+        It waits for your approval before it runs.
+
+Tell me: "deploy secrets done" (do not include values).
+
+
+=====================================================================
+ITEM 11 - ENCRYPTED OFF-HOST BACKUPS AND A RESTORE DRILL   [old item 15, 24, 44]
+=====================================================================
+Why: if the server is lost, the data must be restorable from somewhere else.
+What the repository has today:
+  - backend/scripts/weekly_backup.py writes an encrypted file on the server. It does NOT copy the
+    file off the server, and it does not delete old files.
+  - backend/scripts/backup_restore_drill.py exists. It has not been run against a real backup.
+  - docs/operations/BACKUP-RESTORE.md has the rehearsal of migration rollback on a scratch database.
+    That is not a production backup.
+
+Step 1. Choose an off-host destination you control: another cloud storage account, or another
+        server. Note the cost and the retention period (for example 30 days).
+Step 2. On the server, create a passphrase file that only root can read:
+            install -m 600 /dev/null /root/oraone-backup-passphrase
+            nano /root/oraone-backup-passphrase
+        Type a long passphrase and save. Store the same passphrase in your password manager.
+        Without it, the backups cannot be restored.
+Step 3. Create the backup folder:
+            mkdir -p /var/backups/oraone
+Step 4. Give the backup job these settings (in /opt/oraone/backend/.env, or in the environment the job
+        runs with):
+
+        ORAONE_BACKUP_DIR=/var/backups/oraone
+        ORAONE_BACKUP_PASSPHRASE_FILE=/root/oraone-backup-passphrase
+        DB_HOST=<FILL: database host - usually postgres>
+        DB_PORT=5432
+        DB_NAME=oraone
+        DB_USER=<FILL: database user>
+        DB_PASSWORD=<FILL: database password - secret>
+
+Step 5. Run the backup once by hand and check that a file appears in /var/backups/oraone.
+Step 6. Schedule it weekly with cron, as root. This changes the server, so approve it first.
+        Reply with the day and time you want.
+Step 7. Set up the off-host copy after each backup, using a tool you choose (for example rclone).
+        This needs your destination account, so I cannot do it for you.
+Step 8. Restore drill. Do this on a separate machine or a disposable database, NEVER on production:
+            cd backend
+            python scripts/backup_restore_drill.py --help
+        Follow the script's instructions. Record the date, the backup file used, and whether row counts
+        and schema matched, in docs/operations/BACKUP-RESTORE.md under "Drill evidence".
+
+Tell me: "backup once done", "off-host copy done", and "restore drill passed on <date>".
+
+
+=====================================================================
+ITEM 12 - BILLING: FREE OR PAID LAUNCH DECISION       [old item 9, 50]
+=====================================================================
+Why: production runs in free-access mode (ORAONE_FREE_ACCESS_ONLY=true). Paid checkout has not been
+     proven end to end.
+
+Decision you make, choose one:
+  A) FREE: keep ORAONE_FREE_ACCESS_ONLY=true. Reply: "launch free".
+     I will then label paid plans as "not available yet" on the pricing and billing pages.
+  B) PAID: reply "launch paid". Then you complete these steps:
+     Step 1. Create a Stripe account at https://dashboard.stripe.com and complete business verification.
+     Step 2. Create the products and prices for your plans in Stripe (you choose the amounts, in INR).
+     Step 3. Stripe > Developers > API keys: copy the SECRET key (live mode). Secret.
+     Step 4. Stripe > Developers > Webhooks > Add endpoint:
+             URL: https://oraone.in/api/billing/webhook
+             Events: checkout.session.completed, customer.subscription.updated,
+                     customer.subscription.deleted, invoice.paid, invoice.payment_failed
+             Copy the signing secret (starts with whsec_). Secret.
+     Step 5. On the server, edit /opt/oraone/backend/.env:
+             STRIPE_SECRET_KEY=<FILL: live secret key - secret>
+             STRIPE_WEBHOOK_SECRET=<FILL: signing secret starting whsec_ - secret>
+             ORAONE_FREE_ACCESS_ONLY=false
+     Step 6. Tax: confirm your GST registration and invoice wording with your accountant.
+             Give me your GSTIN and invoice name as text (not secret).
+     Step 7. Optional: test in Stripe test mode before switching to live keys.
+
+Tell me: "launch free" or "launch paid". For paid, also give your GSTIN and the plan prices (INR).
+
+
+=====================================================================
+ITEM 13 - LIVE PROOF FOR EVERY PROVIDER JOURNEY       [old item 49]
+=====================================================================
+Why: tests use fake providers. Launch needs recorded proof with real provider responses.
+Do this after items 1 to 7 are done. Fill in one line per journey, then send me the table.
+
+LIVE TEST LOG
+  Journey                                      Date        Result     Provider receipt (ID or cropped screenshot)
+  Sign-in code arrives by email                <FILL>      <FILL>     <FILL>
+  WhatsApp message in, answer out              <FILL>      <FILL>     <FILL>
+  Instagram message in, answer out             <FILL>      <FILL>     <FILL>
+  Inbound call answered by the assistant       <FILL>      <FILL>     <FILL>
+  SMS in, answer out                           <FILL>      <FILL>     <FILL>
+  Call answered with the chosen voice          <FILL>      <FILL>     <FILL>
+  Grounded answer from the widget (OpenRouter) <FILL>      <FILL>     <FILL>
+  Escalation email reaches an admin            <FILL>      <FILL>     <FILL>
+  Payment (only if paid launch)                <FILL>      <FILL>     <FILL>
+
+Receipts: a provider message ID, a Twilio call SID, or a screenshot of the provider dashboard.
+Crop screenshots so that no keys or tokens are visible.
+
+
+=====================================================================
+ITEM 14 - STAGING ENVIRONMENT FOR LOAD AND SECURITY TESTS   [old item 45, 48, 52]
+=====================================================================
+Why: load tests and authorization tests must not run against customer data.
+
+Decision you make: approve or refuse a staging server.
+If approved:
+  Step 1. Create a second small VPS (the same provider; Mumbai region is fine).
+  Step 2. Install Docker and copy docker-compose.prod.yml to it.
+  Step 3. Use test data only. Never copy production data to staging.
+  Step 4. Tell me the staging address (for example staging.oraone.in). Non-secret.
+
+Reply to me exactly: "approve staging" or "refuse staging".
+
+
+=====================================================================
+ITEM 15 - DECISIONS ON PRODUCT BEHAVIOUR                    [old items 11-13, 28, 29, 32, 38, 39, 46, 47]
+=====================================================================
+Reply with the letter for each. If you are unsure, reply "use your recommendation" for that item.
+
+15a. Stronger answer checks (semantic grounding)                          [old 28]
+     A) Add a second AI model call per answer that checks it against the sources. More cost and time.
+     B) Keep the current rule-based checks only.
+     Recommendation: B now; decide A after the live tests produce data.
+
+15b. Streaming replies in the signed-in chat                              [old 29]
+     A) Keep the current behaviour: the full answer is checked before anything is shown.
+     B) Show words as they arrive, accepting that an unsupported claim may be visible briefly.
+     Recommendation: A.
+
+15c. Mobile apps                                                          [old 46]
+     A) "Mobile" means the responsive website. I will say so in the launch text.
+     B) Native Android and iOS apps are part of launch. This is a separate project.
+     Recommendation: A for launch.
+
+15d. Navigation: /studio or /app                                          [old 47]
+     A) /studio is canonical; /app pages redirect to it.
+     B) /app is canonical; /studio pages redirect to it.
+     Recommendation: A.
+
+15e. Human handoff response target                                        [old 32, 21]
+     Reply with the target, for example "4 hours" or "one business day".
+     It is a 24-hour placeholder in the code until you answer.
+
+15f. Public API for canceled organizations                                [old 38]
+     A) A canceled organization loses public API access immediately.
+     B) Keep the current behaviour.
+     Recommendation: A. Affects paying customers, so I will not change it without this answer.
+
+15g. Widgets with no knowledge base bound                                 [old 39]
+     Today: such a widget answers nothing until the owner binds a knowledge base.
+     A) Keep this.   B) Allow answers from all project knowledge (less safe).
+     Recommendation: A.
+
+15h. Who is told when the assistant cannot answer                         [old 21]
+     Today: owners and admins by email. Tell me if a named person should also be told.
+
+15i. Vision and mission text (docs/VISION-AND-MISSION.md)                  [old 11, 13]
+     Approve the draft, or send your wording.
+
+15j. Privacy statement                                                    [old 12]
+     Confirm that customer data is not used to train models and is stored in India (Mumbai server).
+     Reply "confirm privacy" or send the wording you want.
+
+
+=====================================================================
+ITEM 16 - LEGAL TEXT AND PUBLIC IMAGES                       [old 12a, 12b]
+=====================================================================
+16a. Legal pages (/privacy, /terms, cookie policy, acceptable use) are still drafts marked
+     "Pending legal review".
+     Step 1. Decide who reviews them: you, or a lawyer.
+     Step 2. Send the reviewed final text, or approve the current text.
+     Step 3. I then remove the draft banner.
+
+16b. Public images (solution cards and product screenshots in public/media/) have not been viewed
+     by the owner. Open docs/operations/MEDIA-REVIEW.md, view each image, and reply with the file
+     names to replace, or "all images approved".
+
+
+=====================================================================
+ITEM 17 - ROTATE DEVELOPMENT ACCOUNT PASSWORDS               [old 16]
+=====================================================================
+Why: the README lists development account passwords. They are used only in development, but they are
+     in a public repository.
+Step 1. Reply "rotate dev passwords". I will change them in the code and development seed, and
+        remove them from the README.
+Step 2. Put any new password only in your local .env. Never commit it.
+
+
+=====================================================================
+ITEM 18 - WEBSITE COPY: WHICH WORDING IS CORRECT              [old 17]
+=====================================================================
+Why: the home page says "Phone and WhatsApp are planned", but the product records say they are built
+     with setup still to do. The two must agree.
+Reply with A or B:
+  A) "Phone and WhatsApp are available; setup needs your accounts." (matches the product records)
+  B) "Phone and WhatsApp are coming soon." (matches the current home page)
+Recommendation: A, after items 2 and 4 are done.
+Changing site text is a code change, so I will make it only after your reply.
+
+
+=====================================================================
+ALREADY DECIDED OR DONE (no action needed)
+=====================================================================
+- Project isolation across channels, marketplace, workflows, public API, widget and visitor memory.
+- Human handoff: escalation queue with notes, overdue, resolve and reopen (/studio/escalations).
+- Grounding checks: numbers, negation, qualifiers and units; 38-case evaluation set.
+- Streaming replies are checked before they are shown (signed-in chat).
+- AI token budget: reserved before each model call, settled, refunded on failure.
+- Campaign sends: no database lock held during provider calls; interrupted sends are never resent.
+- Workflow runs: committed but unstarted runs are recovered by the scheduler.
+- Migrations 0044 to 0069 are reversible in the rehearsal; 0043 is one-way and needs a backup.
+- CI on main: backend, frontend, browser (390 and 1280 px) and production images - all passing.
+- Owner decision recorded: projects are separate data boundaries.
+- Documentation and this blocker list reconciled with the code.
