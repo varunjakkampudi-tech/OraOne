@@ -508,3 +508,29 @@ Tell me: "daily cap: <number per plan>" or "daily cap: use default".
 Note (round 8): the code default for the daily cap now never exceeds the plan's monthly AI token
 allowance. On the free plan (250,000 tokens a month) the daily default is therefore 250,000, not 500,000.
 Choose the real daily values from model cost and abuse exposure, not from this default.
+
+
+=====================================================================
+ROUND 9 - WHAT IS BUILT, AND WHAT STILL NEEDS YOU
+=====================================================================
+BUILT (code and tests):
+- Billing webhooks: each Stripe event is applied once (replays do nothing and bill nothing), and an
+  older event cannot overwrite a newer subscription state.
+- Marketing: the provider's message id is stored per recipient; delivery receipts (delivered, read,
+  bounced, failed) move a message forward only, so out-of-order receipts are ignored.
+- Staff replies: POST /api/inbox/conversations/{id}/replies stores the reply, delivers it on the
+  conversation's channel, and reports the honest result (delivered, sent, not_configured, failed).
+  The first human reply is recorded on the open escalation; resolving stays a separate action.
+- Workflow runs left "running" by a stopped worker are recovered (round 8).
+- Cross-organization authorization tests (round 7).
+
+STILL NEEDS YOU OR A LIVE ACCOUNT:
+35a. Provider delivery receipts: the webhook that reports "delivered" or "bounced" from Meta and Twilio
+     must be registered in each provider console, using the signed URLs in items 2 and 4. The receipt
+     logic exists and is tested; the provider endpoints are not built until you confirm the accounts.
+35b. Money-based AI ledger: needs the current price per 1,000 tokens for each model you use, from
+     OpenRouter's price list, in your currency. Send the list (non-secret) and I will build the ledger.
+35c. Stripe: the webhook endpoint https://oraone.in/api/billing/webhook must be added in the Stripe
+     dashboard (item 12, step 4). Replays and ordering are tested without Stripe.
+35d. Staff reply screen: the reply API exists; the inbox page still needs a reply box. I will build it
+     when you confirm the layout you want (or say "build it as the other inbox screens").

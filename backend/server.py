@@ -333,6 +333,9 @@ from app.api.escalations import router as escalations_router  # noqa: E402
 
 app.include_router(leads_router)
 app.include_router(escalations_router)
+from app.api.inbox import router as inbox_router  # noqa: E402
+
+app.include_router(inbox_router)
 from app.api.marketing import router as marketing_router  # noqa: E402
 
 app.include_router(marketing_router)

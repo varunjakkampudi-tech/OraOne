@@ -80,6 +80,8 @@ class Escalation(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("users.id", ondelete="SET NULL"),
     )
     resolved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    # When a person on the team first replied to the customer for this escalation.
+    first_reply_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     # Team response target. Overdue means open past this time and not resolved.
     due_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     # Internal notes for the team: [{"at": iso, "user_id": str, "text": str}].

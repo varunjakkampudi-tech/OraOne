@@ -58,6 +58,7 @@ class EscalationRead(BaseModel):
     internal_notes: list[NoteRead] = Field(default_factory=list)
     created_at: datetime
     resolved_at: Optional[datetime] = None
+    first_reply_at: Optional[datetime] = None
 
 
 class EscalationSummary(BaseModel):
@@ -98,6 +99,7 @@ def _to_read(row: Escalation, now: Optional[datetime] = None) -> EscalationRead:
         internal_notes=[NoteRead(**note) for note in notes if isinstance(note, dict)],
         created_at=row.created_at,
         resolved_at=row.resolved_at,
+        first_reply_at=row.first_reply_at,
     )
 
 

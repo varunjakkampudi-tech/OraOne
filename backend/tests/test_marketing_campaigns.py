@@ -965,3 +965,137 @@ async def test_an_interrupted_claim_is_failed_for_review_and_never_resent(monkey
     assert recipient.status == MarketingRecipientStatus.failed
     assert "outcome is unknown" in recipient.failure_reason
     assert campaign.failed_count == 1
+
+
+class _IdSender:
+    """A sender that returns the provider's message id, as a real provider adapter does."""
+
+    def __init__(self, message_id):
+        self.message_id = message_id
+        self.calls = []
+
+    async def send(self, **kwargs):
+        self.calls.append(kwargs)
+        return self.message_id
+
+
+@pytest.mark.asyncio
+async def test_a_send_keeps_the_providers_message_id_and_marks_it_sent(monkeypatch):
+    lead = _lead()
+    campaign = _campaign("email")
+    recipient = _recipient(campaign, lead)
+    sender = _IdSender({"id": "msg-42"})
+
+    assert await _send_one(campaign, recipient, lead, sender, monkeypatch) is True
+    assert recipient.provider_message_id == "msg-42"
+    assert recipient.delivery_status == svc.MarketingDeliveryStatus.sent
+
+
+def test_provider_ids_are_read_from_string_or_dict_only():
+    assert svc._as_message_id("  abc  ") == "abc"
+    assert svc._as_message_id({"message_id": "m-1"}) == "m-1"
+    assert svc._as_message_id(None) is None
+    assert svc._as_message_id("   ") is None
+    assert svc._as_message_id(12345) is None
+
+
+@pytest.mark.parametrize(
+    "current, incoming, expected",
+    [
+        (None, "delivered", True),
+        ("sent", "delivered", True),
+        ("delivered", "read", True),
+        ("delivered", "delivered", False),
+        ("read", "delivered", False),
+        ("delivered", "bounced", True),
+        ("bounced", "delivered", False),
+        ("sent", "mystery", False),
+    ],
+)
+def test_receipts_only_move_a_message_forward(current, incoming, expected):
+    assert svc.receipt_advances(current, incoming) is expected
+
+
+@pytest.mark.asyncio
+async def test_receipts_are_applied_once_and_ignored_when_out_of_order(monkeypatch):
+    lead = _lead()
+    campaign = _campaign("email")
+    recipient = _recipient(campaign, lead)
+    recipient.provider_message_id = "msg-7"
+    recipient.delivery_status = "sent"
+    recipient.delivery_updated_at = DAYTIME
+    later = DAYTIME + timedelta(minutes=5)
+
+    async def _run(status, when):
+        session = ScriptedSession(scalar=[recipient])
+        return await svc.apply_delivery_receipt(
+            session,
+            organization_id=ORG,
+            provider_message_id="msg-7",
+            status=status,
+            occurred_at=when,
+        )
+
+    assert await _run("delivered", later) == "applied"
+    assert recipient.delivery_status == "delivered"
+    assert (
+        await _run("delivered", later + timedelta(minutes=1)) == "stale"
+    )  # a repeat changes nothing
+    assert await _run("read", later + timedelta(minutes=2)) == "applied"
+    assert (
+        await _run("delivered", later + timedelta(minutes=3)) == "stale"
+    )  # arrives after "read"
+    assert recipient.delivery_status == "read"
+
+
+@pytest.mark.asyncio
+async def test_a_receipt_older_than_the_last_one_applied_is_stale(monkeypatch):
+    lead = _lead()
+    campaign = _campaign("sms")
+    recipient = _recipient(campaign, lead)
+    recipient.provider_message_id = "msg-8"
+    recipient.delivery_status = "delivered"
+    recipient.delivery_updated_at = DAYTIME + timedelta(hours=1)
+    session = ScriptedSession(scalar=[recipient])
+
+    result = await svc.apply_delivery_receipt(
+        session,
+        organization_id=ORG,
+        provider_message_id="msg-8",
+        status="read",
+        occurred_at=DAYTIME,
+    )
+    assert result == "stale"
+    assert recipient.delivery_status == "delivered"
+
+
+@pytest.mark.asyncio
+async def test_receipts_for_unknown_ids_or_states_change_nothing():
+    unknown = ScriptedSession(scalar=[None])
+    assert (
+        await svc.apply_delivery_receipt(
+            unknown,
+            organization_id=ORG,
+            provider_message_id="nope",
+            status="delivered",
+            occurred_at=DAYTIME,
+        )
+        == "unknown"
+    )
+
+    lead = _lead()
+    recipient = _recipient(_campaign("email"), lead)
+    recipient.provider_message_id = "msg-9"
+    recipient.delivery_status = "sent"
+    odd = ScriptedSession(scalar=[recipient])
+    assert (
+        await svc.apply_delivery_receipt(
+            odd,
+            organization_id=ORG,
+            provider_message_id="msg-9",
+            status="teleported",
+            occurred_at=DAYTIME,
+        )
+        == "ignored"
+    )
+    assert recipient.delivery_status == "sent"

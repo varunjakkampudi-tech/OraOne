@@ -338,3 +338,20 @@ async def add_note(
     row.internal_notes = notes
     await session.flush()
     return row
+
+
+async def record_human_reply(
+    session: AsyncSession, conversation_id: uuid.UUID, *, at: Optional[datetime] = None
+) -> Optional[Escalation]:
+    """Note the first human reply on the conversation's unresolved escalation.
+
+    Resolution stays a separate, explicit staff action; a reply alone does not close the item.
+    Returns the escalation that was updated, or None when there is none.
+    """
+    row = await _open_for_conversation(session, conversation_id)
+    if row is None:
+        return None
+    if row.first_reply_at is None:
+        row.first_reply_at = at or _now()
+        await session.flush()
+    return row

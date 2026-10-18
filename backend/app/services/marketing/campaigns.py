@@ -564,6 +564,77 @@ async def send_next_batch(
     return len(rows)
 
 
+class MarketingDeliveryStatus:
+    """Delivery states reported by a provider, in the order they can progress."""
+
+    sent = "sent"
+    delivered = "delivered"
+    read = "read"
+    bounced = "bounced"
+    failed = "failed"
+
+    RANK = {sent: 0, delivered: 1, read: 2, bounced: 3, failed: 3}
+
+
+def _as_message_id(response) -> str | None:
+    """The provider's message id, when the sender returns one (a string or a dict with an 'id')."""
+    if isinstance(response, str) and response.strip():
+        return response.strip()[:200]
+    if isinstance(response, dict):
+        value = response.get("id") or response.get("message_id")
+        if isinstance(value, str) and value.strip():
+            return value.strip()[:200]
+    return None
+
+
+def receipt_advances(current: str | None, incoming: str) -> bool:
+    """True when a receipt moves a message forward. Receipts can arrive out of order,
+    so a state that is not further along than the current one is ignored."""
+    if incoming not in MarketingDeliveryStatus.RANK:
+        return False
+    if current is None:
+        return True
+    return (
+        MarketingDeliveryStatus.RANK[incoming] > MarketingDeliveryStatus.RANK[current]
+    )
+
+
+async def apply_delivery_receipt(
+    session: AsyncSession,
+    *,
+    organization_id: uuid.UUID,
+    provider_message_id: str,
+    status: str,
+    occurred_at: datetime,
+) -> str:
+    """Apply a provider's delivery receipt to the matching recipient.
+
+    Returns "applied", "stale" (an older or non-advancing receipt), "ignored" (unknown state)
+    or "unknown" (no recipient of this organization has that provider id).
+    """
+    recipient = await session.scalar(
+        select(MarketingRecipient)
+        .where(MarketingRecipient.organization_id == organization_id)
+        .where(MarketingRecipient.provider_message_id == provider_message_id)
+        .limit(1)
+    )
+    if recipient is None:
+        return "unknown"
+    if status not in MarketingDeliveryStatus.RANK:
+        return "ignored"
+    if (
+        recipient.delivery_updated_at is not None
+        and occurred_at < recipient.delivery_updated_at
+    ):
+        return "stale"
+    if not receipt_advances(recipient.delivery_status, status):
+        return "stale"
+    recipient.delivery_status = status
+    recipient.delivery_updated_at = occurred_at
+    await session.flush()
+    return "applied"
+
+
 async def _deliver(
     campaign: MarketingCampaign,
     *,
@@ -579,13 +650,19 @@ async def _deliver(
         return UNSUBSCRIBE_UNAVAILABLE_REASON
     text = _message_text(campaign, recipient.id, unsubscribe_base_url.rstrip("/"), now)
     try:
-        await sender.send(
+        provider_response = await sender.send(
             channel=campaign.channel,
             recipient=address,
             text=text,
             organization_id=campaign.organization_id,
             lead_id=lead.id,
         )
+        # Keep the provider's id so that later delivery receipts can be matched to this recipient.
+        recipient.provider_message_id = _as_message_id(provider_response)
+        recipient.delivery_status = (
+            MarketingDeliveryStatus.sent if recipient.provider_message_id else None
+        )
+        recipient.delivery_updated_at = now if recipient.provider_message_id else None
     except OutboundNotConfigured as exc:
         if campaign.channel == MarketingChannel.email:
             return EMAIL_NO_PROVIDER_REASON

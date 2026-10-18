@@ -155,6 +155,15 @@ class MarketingRecipient(Base):
     )
     skip_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     failure_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # The provider's id for the message, from the send response. Receipts match on it.
+    provider_message_id: Mapped[Optional[str]] = mapped_column(
+        String(200), nullable=True
+    )
+    # Latest delivery state reported by the provider: sent, delivered, read, bounced or failed.
+    delivery_status: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    delivery_updated_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     # When a worker claimed this recipient for sending (used to detect interrupted sends).
     claimed_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
