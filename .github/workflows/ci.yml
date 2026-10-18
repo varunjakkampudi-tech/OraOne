@@ -55,6 +55,20 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Install Chromium
         run: bunx playwright install --with-deps chromium
+      - name: Start dev server and wait for it
+        # Starting the server here, not in Playwright, makes a failure visible:
+        # the status codes and the server log are printed below.
+        run: |
+          bun run dev -- --port 5173 --strictPort > dev-server.log 2>&1 &
+          for i in $(seq 1 90); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5173/ || true)
+            echo "attempt $i: HTTP $code"
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 2
+          done
+          echo "--- dev server log ---"
+          cat dev-server.log
+          exit 1
       - name: Browser tests
         # Project names come from playwright.config.ts (390, 768, 1280). The
         # config's webServer starts the Vite dev server for the run.
