@@ -253,8 +253,8 @@ async def answer_query(
         # Reserve the estimated spend before the paid call. If the plan cannot cover
         # it, answer from the passages instead of calling the model.
         estimate = _estimate_prompt_tokens(messages) + max_tokens
-        if not await usage_service.reserve_metered(
-            session, organization_id, "ai_tokens", estimate
+        if not await usage_service.reserve_ai_tokens(
+            session, organization_id, estimate
         ):
             raise _BudgetExhausted()
         _t0 = time.perf_counter()
@@ -270,8 +270,8 @@ async def answer_query(
             actual = int(getattr(seen, "total_tokens", 0) or 0) or estimate
         finally:
             # Settle to real usage. A failed call is refunded in full.
-            await usage_service.settle_metered(
-                session, organization_id, "ai_tokens", estimate, actual
+            await usage_service.settle_ai_tokens(
+                session, organization_id, estimate, actual
             )
         latency_ms = int((time.perf_counter() - _t0) * 1000)
         answer = (resp.content or "").strip()

@@ -115,8 +115,9 @@ async def test_failed_call_is_refunded_in_full(monkeypatch):
         persona=None,
         project_id=uuid.uuid4(),
     )
-    assert len(settled) == 1
-    assert settled[0][1] == 0
+    # Both counters (daily and monthly) are settled, and each is refunded in full.
+    assert len(settled) == 2
+    assert all(actual == 0 for _reserved, actual in settled)
 
 
 @pytest.mark.asyncio
@@ -202,8 +203,12 @@ def _postgres_reachable() -> bool:
         return False
 
 
+# Probe once at import time: inside a running test event loop the probe cannot start its own loop.
+_DB_REACHABLE = _postgres_reachable()
+
+
 @pytest.mark.skipif(
-    not _postgres_reachable(), reason="Postgres is not reachable from this host."
+    not _DB_REACHABLE, reason="Postgres is not reachable from this host."
 )
 @pytest.mark.asyncio
 async def test_concurrent_reservations_cannot_exceed_the_limit(monkeypatch):
@@ -256,6 +261,110 @@ async def test_concurrent_reservations_cannot_exceed_the_limit(monkeypatch):
     try:
         results = await asyncio.gather(*[_attempt() for _ in range(5)])
         assert results.count(True) == 1
+    finally:
+        async with maker() as session:
+            await session.execute(
+                delete(UsageCounter).where(UsageCounter.organization_id == org)
+            )
+            await session.commit()
+        await dispose_engine()
+
+
+@pytest.mark.asyncio
+async def test_monthly_refusal_returns_the_daily_reservation(monkeypatch):
+    """If the monthly allowance refuses, the daily reservation is refunded."""
+    calls: list[tuple[str, int]] = []
+
+    async def _reserve(_session, _org, metric, amount):
+        calls.append(("reserve", metric, amount))
+        return metric == "ai_tokens_daily"
+
+    async def _settle(_session, _org, metric, reserved, actual):
+        calls.append(("settle", metric, actual - reserved))
+
+    monkeypatch.setattr(usage_service, "reserve_metered", _reserve)
+    monkeypatch.setattr(usage_service, "settle_metered", _settle)
+
+    assert await usage_service.reserve_ai_tokens(None, uuid.uuid4(), 40) is False
+    assert calls == [
+        ("reserve", "ai_tokens_daily", 40),
+        ("reserve", "ai_tokens", 40),
+        ("settle", "ai_tokens_daily", -40),
+    ]
+
+
+@pytest.mark.asyncio
+async def test_daily_cap_uses_the_metric_default_unless_the_plan_sets_one(monkeypatch):
+    spec = usage_service.METERED_METRICS["ai_tokens_daily"]
+    assert (
+        usage_service._metered_limit({}, spec) == usage_service.DEFAULT_DAILY_AI_TOKENS
+    )
+    assert usage_service._metered_limit({"ai_tokens_per_day": 1000}, spec) == 1000
+    assert (
+        usage_service._metered_limit({"ai_tokens_per_day": -1}, spec)
+        == usage_service.UNLIMITED
+    )
+
+
+@pytest.mark.asyncio
+async def test_daily_cap_refuses_the_call_that_would_exceed_it(monkeypatch):
+    """Against the real counter: with a daily cap of 100, a second 60-token reservation is refused."""
+    if not _DB_REACHABLE:
+        pytest.skip("Postgres is not reachable from this host.")
+    from sqlalchemy import delete
+
+    from app.database import session as db_session_module
+    from app.database.models.usage import UsageCounter
+    from app.database.session import dispose_engine, init_engine
+
+    await dispose_engine()
+    init_engine()
+    maker = db_session_module.AsyncSessionLocal
+    # The counters have a foreign key to organizations, so a real organization row is needed.
+    from app.core.security import hash_password
+    from app.database.models.organization import Organization, OrgPlan
+    from app.database.models.user import User
+
+    suffix = uuid.uuid4().hex[:8]
+    async with maker() as session:
+        owner = User(
+            auth_subject=f"sub-{uuid.uuid4()}",
+            email=f"daily-cap-{suffix}@example.test",
+            full_name="Daily Cap Owner",
+            password_hash=hash_password("not-used-in-this-test-9"),
+            is_email_verified=True,
+        )
+        session.add(owner)
+        await session.flush()
+        organization = Organization(
+            name=f"Daily {suffix}",
+            slug=f"daily-{suffix}",
+            plan=OrgPlan.free,
+            owner_user_id=owner.id,
+        )
+        session.add(organization)
+        await session.commit()
+        org = organization.id
+    monkeypatch.setitem(
+        usage_service.METERED_METRICS["ai_tokens_daily"], "default_limit", 100
+    )
+
+    async def _plan_for(_session, _org):
+        return SimpleNamespace(limits={"ai_tokens_per_month": -1})
+
+    monkeypatch.setattr(usage_service, "_plan_for", _plan_for)
+    try:
+        async with maker() as session:
+            # The monthly counter is not a constraint here; only the daily cap is.
+            assert (
+                await conftest.REAL_RESERVE_METERED(session, org, "ai_tokens_daily", 60)
+                is True
+            )
+        async with maker() as session:
+            assert (
+                await conftest.REAL_RESERVE_METERED(session, org, "ai_tokens_daily", 60)
+                is False
+            )
     finally:
         async with maker() as session:
             await session.execute(

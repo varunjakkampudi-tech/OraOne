@@ -304,6 +304,13 @@ async def enforce_quota(
         )
 
 
+def _metered_limit(limits: dict, spec: dict) -> int:
+    """A plan's explicit limit, else the metric's default, else unlimited."""
+    if spec["limit_key"] in limits:
+        return _limit_for(limits, spec["limit_key"])
+    return int(spec.get("default_limit", UNLIMITED))
+
+
 async def reserve_metered(
     session: AsyncSession,
     organization_id: uuid.UUID,
@@ -321,7 +328,7 @@ async def reserve_metered(
     if spec is None or amount <= 0:
         return True
     plan = await _plan_for(session, organization_id)
-    limit = _limit_for(plan.limits or {}, spec["limit_key"])
+    limit = _metered_limit(plan.limits or {}, spec)
     if limit == UNLIMITED:
         await record_usage(session, organization_id, metric, amount)
         return True
@@ -362,3 +369,40 @@ async def settle_metered(
     difference = int(actual) - int(reserved)
     if difference != 0:
         await record_usage(session, organization_id, metric, difference)
+
+
+# ── daily AI token cap ─────────────────────────────────────────────────────
+# A per-organization daily ceiling on AI tokens. A plan can set its own value
+# with "ai_tokens_per_day"; -1 removes the cap. The default is a placeholder
+# until the owner sets the real value (blocker item 34).
+DEFAULT_DAILY_AI_TOKENS = 500_000
+METERED_METRICS["ai_tokens_daily"] = {
+    "label": "AI Tokens / day",
+    "limit_key": "ai_tokens_per_day",
+    "granularity": "day",
+    "default_limit": DEFAULT_DAILY_AI_TOKENS,
+}
+
+
+async def reserve_ai_tokens(
+    session: AsyncSession, organization_id: uuid.UUID, amount: int
+) -> bool:
+    """Reserve AI tokens against the daily cap, then the monthly allowance.
+
+    If the monthly reservation fails, the daily reservation is returned, so a
+    refused call leaves both counters unchanged.
+    """
+    if not await reserve_metered(session, organization_id, "ai_tokens_daily", amount):
+        return False
+    if await reserve_metered(session, organization_id, "ai_tokens", amount):
+        return True
+    await settle_metered(session, organization_id, "ai_tokens_daily", amount, 0)
+    return False
+
+
+async def settle_ai_tokens(
+    session: AsyncSession, organization_id: uuid.UUID, reserved: int, actual: int
+) -> None:
+    """Replace an AI token reservation with actual usage on both counters."""
+    await settle_metered(session, organization_id, "ai_tokens_daily", reserved, actual)
+    await settle_metered(session, organization_id, "ai_tokens", reserved, actual)

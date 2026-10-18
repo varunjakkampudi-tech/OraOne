@@ -303,8 +303,8 @@ class AgentRuntime:
         # Reserve the estimated AI token spend before any paid call. A plan that
         # cannot cover it is refused here, so no model call is made and no overspend occurs.
         estimate = sum(len(m.content or "") // 4 + 4 for m in messages) + max_tokens
-        if not await usage_service.reserve_metered(
-            self.session, self.ctx.organization_id, "ai_tokens", estimate
+        if not await usage_service.reserve_ai_tokens(
+            self.session, self.ctx.organization_id, estimate
         ):
             raise HTTPException(
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,
@@ -320,8 +320,8 @@ class AgentRuntime:
             return resp
         finally:
             # Settle to real usage. A failed call is refunded in full.
-            await usage_service.settle_metered(
-                self.session, self.ctx.organization_id, "ai_tokens", estimate, actual
+            await usage_service.settle_ai_tokens(
+                self.session, self.ctx.organization_id, estimate, actual
             )
 
     async def _call_chain(
