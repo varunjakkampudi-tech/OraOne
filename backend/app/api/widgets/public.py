@@ -63,6 +63,7 @@ from app.schemas.widget import (
     WidgetSessionRead,
     WidgetSessionStart,
 )
+from app.services import assistant_profiles
 from app.services import widget_service
 from app.services import lead_service
 from app.services import visitor_service
@@ -448,6 +449,8 @@ async def _persist_and_answer(
     # model.
     agent_persona: Optional[str] = None
     agent_model: Optional[str] = None
+    agent_profile: Optional[str] = None
+    agent_contact: Optional[str] = None
     agent_row: Optional[Agent] = None
     if agent_id is not None:
         agent_row = await session.scalar(
@@ -470,6 +473,9 @@ async def _persist_and_answer(
             cfg = agent_row.config
             agent_persona = cfg.system_prompt if cfg else None
             agent_model = agent_row.model
+            cfg_extras = cfg.config if cfg else None
+            agent_profile = assistant_profiles.resolve_profile(cfg_extras, "chat")
+            agent_contact = assistant_profiles.contact_hint(cfg_extras)
 
     conversation: Optional[Conversation] = None
     conversation_is_new = False
@@ -552,7 +558,10 @@ async def _persist_and_answer(
         extra_context=digest,
         persona=agent_persona,
         model=agent_model,
+        assistant_profile=agent_profile,
+        business_contact=agent_contact,
     )
+    handoff = bool(result.get("handoff"))
 
     # False when the reply is a fallback (no model produced it). Carried to the response and metadata.
     generated = bool(result.get("generated", False))
@@ -567,10 +576,28 @@ async def _persist_and_answer(
                 "confidence": result.get("confidence"),
                 "model": result.get("model"),
                 "generated": generated,
+                "handoff": handoff,
             },
         )
         session.add(answer_msg)
         conversation.last_message_at = widget_service.now_utc()
+        if handoff:
+            # No supporting passage: the question goes to the team as a lead note.
+            ctx = ws.user_context or {}
+            await lead_service.upsert_conversation_lead(
+                session,
+                organization_id=widget.organization_id,
+                project_id=widget.project_id,
+                conversation_id=conversation.id,
+                agent_id=agent_id,
+                widget_id=widget.id,
+                name=ctx.get("name"),
+                email=ctx.get("email"),
+                phone=ctx.get("phone"),
+                intent=(text or "")[:255] or None,
+                message=text,
+                source="chat",
+            )
 
     if profile is not None:
         visitor_service.append_memory(profile, channel="chat", role="user", text=text)

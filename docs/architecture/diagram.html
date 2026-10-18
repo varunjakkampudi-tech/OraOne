@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OraOne architecture overview</title>
+    <style>
+      :root {
+        --bg: #f6f6f3;
+        --fg: #1c1c1a;
+        --muted: #55554f;
+        --box: #ffffff;
+        --box-stroke: #3a3a36;
+        --edge: #2f2f2b;
+        --edge-dash: #6b6b64;
+        --edge-label: #3a3a36;
+        --group: #ecece6;
+        --prov: #e9f0fa;
+        --prov-stroke: #3b5f8f;
+        --accent: #2d6a4f;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #161715;
+          --fg: #ecece6;
+          --muted: #b4b4ac;
+          --box: #22231f;
+          --box-stroke: #a9a9a0;
+          --edge: #d6d6cd;
+          --edge-dash: #8e8e86;
+          --edge-label: #cfcfc6;
+          --group: #1d1e1b;
+          --prov: #1d2a3b;
+          --prov-stroke: #7ea6d9;
+          --accent: #7fc4a0;
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #161715;
+        --fg: #ecece6;
+        --muted: #b4b4ac;
+        --box: #22231f;
+        --box-stroke: #a9a9a0;
+        --edge: #d6d6cd;
+        --edge-dash: #8e8e86;
+        --edge-label: #cfcfc6;
+        --group: #1d1e1b;
+        --prov: #1d2a3b;
+        --prov-stroke: #7ea6d9;
+        --accent: #7fc4a0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          16px/1.5 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 16px;
+        overflow-x: hidden;
+      }
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 1.35rem;
+        margin: 0 0 4px;
+      }
+      h2 {
+        font-size: 1.05rem;
+        margin: 22px 0 6px;
+        color: var(--accent);
+      }
+      p,
+      li {
+        color: var(--fg);
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin-top: 8px;
+      }
+      .box {
+        fill: var(--box);
+        stroke: var(--box-stroke);
+        stroke-width: 1.2;
+      }
+      .box-dashed {
+        fill: var(--box);
+        stroke: var(--box-stroke);
+        stroke-width: 1.2;
+        stroke-dasharray: 4 3;
+      }
+      .prov {
+        fill: var(--prov);
+        stroke: var(--prov-stroke);
+        stroke-width: 1.2;
+      }
+      .zone {
+        fill: var(--group);
+        stroke: none;
+      }
+      .t-title {
+        font:
+          600 13px system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        fill: var(--fg);
+      }
+      .t-sub {
+        font:
+          400 11.5px system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        fill: var(--muted);
+      }
+      .t-zone {
+        font:
+          700 11px system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        fill: var(--muted);
+        letter-spacing: 0.04em;
+      }
+      .t-edge {
+        font:
+          500 10.5px system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        fill: var(--edge-label);
+      }
+      .arrow {
+        stroke: var(--edge);
+        stroke-width: 1.4;
+        fill: none;
+      }
+      .arrow-dash {
+        stroke: var(--edge-dash);
+        stroke-width: 1.3;
+        fill: none;
+        stroke-dasharray: 4 3;
+      }
+      .legend-text {
+        font:
+          400 11.5px system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        fill: var(--muted);
+      }
+      ul {
+        padding-left: 1.2em;
+        margin: 6px 0;
+      }
+      li {
+        margin: 4px 0;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>OraOne production architecture</h1>
+      <p class="muted">
+        Overview of the production stack at commit e69494d. Static drawing, not a live status view.
+      </p>
+
+      <svg
+        viewBox="0 0 400 1000"
+        role="img"
+        aria-labelledby="arch-title arch-desc"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <title id="arch-title">OraOne production architecture overview</title>
+        <desc id="arch-desc">
+          Clients and provider webhooks reach Caddy. Caddy routes to the frontend and to the FastAPI
+          backend. The backend uses PostgreSQL with pgvector and Redis. Workers run the scheduler
+          and webhook outbox, and share the uploads volume. The backend and workers call external
+          providers: Meta, Twilio, Telegram, ElevenLabs, OpenRouter, SMTP, Google, Slack, Notion and
+          HubSpot.
+        </desc>
+        <defs>
+          <marker
+            id="head"
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="7"
+            markerHeight="7"
+            orient="auto-start-reverse"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" style="fill: var(--edge)"></path>
+          </marker>
+          <marker
+            id="head-dash"
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="7"
+            markerHeight="7"
+            orient="auto-start-reverse"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" style="fill: var(--edge-dash)"></path>
+          </marker>
+        </defs>
+
+        <!-- Clients -->
+        <rect class="box" x="20" y="20" width="170" height="52" rx="6"></rect>
+        <text class="t-title" x="105" y="41" text-anchor="middle">Staff browser</text>
+        <text class="t-sub" x="105" y="58" text-anchor="middle">web app, signed in</text>
+
+        <rect class="box" x="210" y="20" width="170" height="52" rx="6"></rect>
+        <text class="t-title" x="295" y="41" text-anchor="middle">Website visitors</text>
+        <text class="t-sub" x="295" y="58" text-anchor="middle">widget.js and SDK</text>
+
+        <rect class="box" x="20" y="84" width="360" height="40" rx="6"></rect>
+        <text class="t-title" x="200" y="101" text-anchor="middle">
+          Provider webhooks (inbound)
+        </text>
+        <text class="t-sub" x="200" y="116" text-anchor="middle">
+          Meta, Twilio, Telegram, email: verified
+        </text>
+
+        <!-- Edge -->
+        <rect
+          class="box"
+          x="20"
+          y="150"
+          width="360"
+          height="52"
+          rx="6"
+          style="stroke-width: 2; stroke: var(--accent)"
+        ></rect>
+        <text class="t-title" x="200" y="172" text-anchor="middle">
+          Caddy proxy (ports 80 and 443 only)
+        </text>
+        <text class="t-sub" x="200" y="189" text-anchor="middle">
+          TLS, security headers, /api routing
+        </text>
+
+        <path class="arrow" d="M 105 72 L 105 150" marker-end="url(#head)"></path>
+        <path class="arrow" d="M 295 72 L 295 150" marker-end="url(#head)"></path>
+        <path class="arrow" d="M 200 124 L 200 150" marker-end="url(#head)"></path>
+
+        <!-- App tier -->
+        <rect class="box" x="20" y="238" width="170" height="56" rx="6"></rect>
+        <text class="t-title" x="105" y="260" text-anchor="middle">Frontend</text>
+        <text class="t-sub" x="105" y="277" text-anchor="middle">TanStack Start :8080</text>
+
+        <rect class="box" x="210" y="238" width="170" height="56" rx="6"></rect>
+        <text class="t-title" x="295" y="260" text-anchor="middle">Backend API</text>
+        <text class="t-sub" x="295" y="277" text-anchor="middle">FastAPI, Gunicorn :8000</text>
+
+        <path class="arrow" d="M 105 202 L 105 238" marker-end="url(#head)"></path>
+        <path class="arrow" d="M 295 202 L 295 238" marker-end="url(#head)"></path>
+        <text class="t-edge" x="300" y="226">/api/*</text>
+        <text class="t-edge" x="112" y="226">other paths</text>
+        <path class="arrow" d="M 190 266 L 210 266" marker-end="url(#head)"></path>
+
+        <!-- Workers and migrate -->
+        <rect class="box" x="210" y="336" width="170" height="56" rx="6"></rect>
+        <text class="t-title" x="295" y="358" text-anchor="middle">Workers</text>
+        <text class="t-sub" x="295" y="375" text-anchor="middle">scheduler, outbox, prune</text>
+        <path class="arrow" d="M 295 294 L 295 336"></path>
+        <text class="t-edge" x="301" y="318">same image</text>
+
+        <rect class="box-dashed" x="20" y="336" width="170" height="56" rx="6"></rect>
+        <text class="t-title" x="105" y="358" text-anchor="middle">Migrate (once)</text>
+        <text class="t-sub" x="105" y="375" text-anchor="middle">alembic upgrade head</text>
+        <path class="arrow-dash" d="M 105 392 L 105 436" marker-end="url(#head-dash)"></path>
+        <text class="t-edge" x="111" y="424">gates start</text>
+
+        <!-- Data tier -->
+        <rect class="box" x="20" y="436" width="170" height="60" rx="6"></rect>
+        <text class="t-title" x="105" y="460" text-anchor="middle">PostgreSQL 16</text>
+        <text class="t-sub" x="105" y="478" text-anchor="middle">with pgvector</text>
+        <text class="t-sub" x="105" y="490" text-anchor="middle">system of record</text>
+
+        <rect class="box" x="210" y="436" width="170" height="60" rx="6"></rect>
+        <text class="t-title" x="295" y="460" text-anchor="middle">Redis 7.4</text>
+        <text class="t-sub" x="295" y="478" text-anchor="middle">rate limits, idempotency</text>
+        <text class="t-sub" x="295" y="490" text-anchor="middle">shared cache</text>
+
+        <path
+          class="arrow"
+          d="M 210 292 L 200 292 L 200 466 L 190 466"
+          marker-end="url(#head)"
+        ></path>
+        <path class="arrow" d="M 295 392 L 295 436" marker-end="url(#head)"></path>
+
+        <rect class="box" x="20" y="512" width="360" height="40" rx="6"></rect>
+        <text class="t-title" x="200" y="530" text-anchor="middle">Uploads volume</text>
+        <text class="t-sub" x="200" y="545" text-anchor="middle">
+          shared by backend and workers
+        </text>
+
+        <!-- Outbound to providers -->
+        <path class="arrow-dash" d="M 200 552 L 200 586" marker-end="url(#head-dash)"></path>
+        <text class="t-edge" x="206" y="574">outbound HTTPS</text>
+
+        <rect class="zone" x="8" y="592" width="384" height="312" rx="8"></rect>
+        <text class="t-zone" x="20" y="610">
+          EXTERNAL PROVIDERS (called by backend and workers)
+        </text>
+
+        <rect class="prov" x="20" y="620" width="170" height="48" rx="6"></rect>
+        <text class="t-title" x="105" y="639" text-anchor="middle">Meta</text>
+        <text class="t-sub" x="105" y="656" text-anchor="middle">WhatsApp, Instagram</text>
+
+        <rect class="prov" x="210" y="620" width="170" height="48" rx="6"></rect>
+        <text class="t-title" x="295" y="639" text-anchor="middle">Twilio</text>
+        <text class="t-sub" x="295" y="656" text-anchor="middle">SMS, WhatsApp, voice</text>
+
+        <rect class="prov" x="20" y="678" width="170" height="48" rx="6"></rect>
+        <text class="t-title" x="105" y="697" text-anchor="middle">Telegram</text>
+        <text class="t-sub" x="105" y="714" text-anchor="middle">Bot API messages</text>
+
+        <rect class="prov" x="210" y="678" width="170" height="48" rx="6"></rect>
+        <text class="t-title" x="295" y="697" text-anchor="middle">ElevenLabs</text>
+        <text class="t-sub" x="295" y="714" text-anchor="middle">spoken voice replies</text>
+
+        <rect class="prov" x="20" y="736" width="170" height="48" rx="6"></rect>
+        <text class="t-title" x="105" y="755" text-anchor="middle">OpenRouter</text>
+        <text class="t-sub" x="105" y="772" text-anchor="middle">models, embeddings</text>
+
+        <rect class="prov" x="210" y="736" width="170" height="48" rx="6"></rect>
+        <text class="t-title" x="295" y="755" text-anchor="middle">SMTP</text>
+        <text class="t-sub" x="295" y="772" text-anchor="middle">sign-in codes, invites</text>
+
+        <rect class="prov" x="20" y="794" width="170" height="48" rx="6"></rect>
+        <text class="t-title" x="105" y="813" text-anchor="middle">Google</text>
+        <text class="t-sub" x="105" y="830" text-anchor="middle">Drive, Calendar, Sheets</text>
+
+        <rect class="prov" x="210" y="794" width="170" height="48" rx="6"></rect>
+        <text class="t-title" x="295" y="813" text-anchor="middle">Slack</text>
+        <text class="t-sub" x="295" y="830" text-anchor="middle">OAuth connect</text>
+
+        <rect class="prov" x="20" y="852" width="170" height="48" rx="6"></rect>
+        <text class="t-title" x="105" y="871" text-anchor="middle">Notion</text>
+        <text class="t-sub" x="105" y="888" text-anchor="middle">OAuth connect</text>
+
+        <rect class="prov" x="210" y="852" width="170" height="48" rx="6"></rect>
+        <text class="t-title" x="295" y="871" text-anchor="middle">HubSpot</text>
+        <text class="t-sub" x="295" y="888" text-anchor="middle">OAuth connect</text>
+
+        <!-- Legend -->
+        <text class="legend-text" x="20" y="934">
+          Solid: request or data. Dashed: one-off or outbound.
+        </text>
+        <text class="legend-text" x="20" y="950">
+          Only the proxy publishes ports. Data stores stay private.
+        </text>
+        <text class="legend-text" x="20" y="966">Webhooks are checked before parsing.</text>
+        <text class="legend-text" x="20" y="982">
+          Only Google Drive syncs data; the others only connect.
+        </text>
+      </svg>
+
+      <h2>What each box does</h2>
+      <ul>
+        <li>
+          <strong>Caddy</strong> terminates TLS, sets security headers, and routes
+          <code>/api/*</code> to the backend. Everything else goes to the frontend.
+        </li>
+        <li>
+          <strong>Frontend</strong> serves the web app and the widget script. It calls the API on
+          the same origin.
+        </li>
+        <li>
+          <strong>Backend API</strong> handles sign-in, tenants, channel webhooks, the widget API,
+          retrieval-augmented answers, and admin routes.
+        </li>
+        <li>
+          <strong>Workers</strong> run scheduled workflows, wait resumption, the webhook outbox, and
+          daily pruning of error records older than 30 days.
+        </li>
+        <li>
+          <strong>Migrate</strong> applies database migrations once before the API and workers
+          start.
+        </li>
+        <li>
+          <strong>PostgreSQL</strong> stores tenants, conversations, knowledge chunks (pgvector),
+          workflows, and audit records. <strong>Redis</strong> holds rate limits, idempotency keys,
+          and short-lived codes.
+        </li>
+      </ul>
+      <p class="muted">
+        Source of truth: <code>docker-compose.prod.yml</code>, <code>Caddyfile</code>,
+        <code>backend/server.py</code>, <code>backend/worker.py</code>. Detail is in SYSTEM.md,
+        DATA.md and DEPLOYMENT-DIAGRAM.md in this folder.
+      </p>
+    </main>
+  </body>
+</html>

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -53,6 +53,23 @@ class AgentUpdate(BaseModel):
     website_url: Optional[str] = Field(default=None, max_length=500)
 
     system_prompt: Optional[str] = None
+    assistant_profile: Optional[
+        Literal[
+            "general",
+            "small_business",
+            "website_owner",
+            "whatsapp_business",
+            "instagram_dm",
+            "marketing",
+            "call_centre",
+        ]
+    ] = Field(
+        default=None,
+        description=(
+            "Persona profile that keeps replies on the business. Stored in the agent "
+            "config; omitted leaves it unchanged."
+        ),
+    )
     temperature: Optional[float] = Field(default=None, ge=0.0, le=2.0)
     voice: Optional[str] = Field(default=None, max_length=80)
     language: Optional[str] = Field(default=None, max_length=16)

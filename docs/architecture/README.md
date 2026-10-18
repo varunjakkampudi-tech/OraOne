@@ -1,5 +1,17 @@
 # Architecture
 
+Start here for the production architecture. The documents below were checked against the code
+at commit `e69494d`. Uncommitted working-tree changes are named where they matter.
+
+| Document                                    | Read it for                                                                                                                              |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| [SYSTEM](SYSTEM.md)                         | Containers, request flow, channel flow, AI flow, outbound contact, workflows, admin, security boundaries. Mermaid diagram for each flow. |
+| [DATA](DATA.md)                             | The 84 tables, key relationships, the Alembic head, and retention rules.                                                                 |
+| [DEPLOYMENT-DIAGRAM](DEPLOYMENT-DIAGRAM.md) | Host layout, DNS records, Caddy TLS, firewall, and the GitHub deploy and rollback path.                                                  |
+| [diagram.html](diagram.html)                | One-page SVG overview. Open it in a browser. No external scripts.                                                                        |
+
+Older and supporting documents:
+
 - [System overview](SYSTEM-OVERVIEW.md)
 - [Authentication and RBAC](AUTHENTICATION-RBAC.md)
 - [AI and RAG](AI-RAG.md)

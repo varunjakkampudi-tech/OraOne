@@ -25,6 +25,7 @@ from typing import Any, Optional
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.database.models.agent import Agent, AgentStatus
 from app.database.models.channel_inbound_receipt import ChannelInboundReceipt
@@ -34,7 +35,13 @@ from app.database.models.conversation import (
     ConversationStatus,
 )
 from app.database.models.message import Message, MessageSender
-from app.services import contact_policy_service, visitor_service, workflow_triggers
+from app.services import (
+    assistant_profiles,
+    contact_policy_service,
+    lead_service,
+    visitor_service,
+    workflow_triggers,
+)
 from app.services.rag_answer import answer_query
 
 log = logging.getLogger("app.omnichannel")
@@ -198,12 +205,17 @@ async def handle_inbound(session: AsyncSession, msg: InboundMessage) -> Outbound
         log.info("duplicate inbound ignored channel=%s", msg.channel)
         return OutboundReply(text="", handled=False)
 
-    # Agent must be active — a paused agent never invokes the model.
-    agent_status = await session.scalar(
-        select(Agent.status).where(Agent.id == msg.agent_id)
+    # Agent must be active — a paused agent never invokes the model. The agent's
+    # config supplies the owner's persona, the persona profile and the contact hint.
+    agent_row = await session.scalar(
+        select(Agent)
+        .options(selectinload(Agent.config))
+        .where(Agent.id == msg.agent_id)
     )
-    if agent_status is not None and agent_status != AgentStatus.active:
+    if isinstance(agent_row, Agent) and agent_row.status != AgentStatus.active:
         return OutboundReply(text=_AGENT_UNAVAILABLE, handled=True)
+    agent_cfg = agent_row.config if isinstance(agent_row, Agent) else None
+    cfg_extras = agent_cfg.config if agent_cfg is not None else None
 
     channel_enum = _channel_enum(msg.channel)
 
@@ -268,8 +280,12 @@ async def handle_inbound(session: AsyncSession, msg: InboundMessage) -> Outbound
         msg.organization_id,
         top_k=5,
         extra_context=digest,
+        persona=agent_cfg.system_prompt if agent_cfg is not None else None,
+        assistant_profile=assistant_profiles.resolve_profile(cfg_extras, msg.channel),
+        business_contact=assistant_profiles.contact_hint(cfg_extras),
     )
     answer = result.get("answer", "")
+    handoff = bool(result.get("handoff"))
 
     # 5) Persist the agent's reply + roll memory forward.
     session.add(
@@ -283,9 +299,25 @@ async def handle_inbound(session: AsyncSession, msg: InboundMessage) -> Outbound
                 "model": result.get("model"),
                 "channel": msg.channel,
                 "generated": bool(result.get("generated", False)),
+                "handoff": handoff,
             },
         )
     )
+    if handoff:
+        # No supporting passage: the question goes to the team as a lead note.
+        await lead_service.upsert_conversation_lead(
+            session,
+            organization_id=msg.organization_id,
+            project_id=msg.project_id,
+            conversation_id=conversation.id,
+            agent_id=msg.agent_id,
+            name=msg.name,
+            email=msg.email,
+            phone=msg.phone,
+            intent=text[:255],
+            message=text,
+            source=msg.channel,
+        )
     conversation.last_message_at = visitor_service.now_utc()
     visitor_service.append_memory(profile, channel=msg.channel, role="user", text=text)
     visitor_service.append_memory(

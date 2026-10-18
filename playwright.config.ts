@@ -23,6 +23,7 @@ export default defineConfig({
     "admin.spec.ts",
     "install.spec.ts",
     "auth.spec.ts",
+    "route-health.spec.ts",
   ],
   fullyParallel: true,
   // The dev server compiles each route on first visit, so allow generous time.

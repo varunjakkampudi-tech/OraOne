@@ -133,3 +133,11 @@ ADDED 2026-10-18 (documentation pass). Each item below needs your decision or a 
    - approve it, and choose the deploy account (item 5 proposes root; a dedicated deploy user in the docker
      group is the safer choice);
    - note that item 5 above contains the server's IP address in plain text. The new docs do not repeat it.
+
+DECISIONS FROM THE LATEST ROUND (owner input needed)
+- Business-only AI: confirm the list of weak topics that trigger a refusal (for example
+  "weather"), and which contact details the refusal message shows (website only today).
+- Handoff notes: decide who gets notified when the AI cannot answer, and the response time.
+- Database row-level security: not configured; tenant separation is enforced in application
+  code. Decide whether to add PostgreSQL RLS policies before large customer onboarding.
+- Admin navigation: Logs, Analytics and Beta flags are now in the menu; confirm the labels.

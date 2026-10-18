@@ -69,6 +69,7 @@ type StudioNavPath =
   | "/studio/assistants"
   | "/studio/knowledge"
   | "/studio/marketplace"
+  | "/studio/getting-started"
   | "/studio/integrations"
   | "/studio/webhooks"
   | "/studio/api-keys"
@@ -108,6 +109,7 @@ const STUDIO_NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { label: "AI Studio", to: "/studio/assistants" },
       { label: "Knowledge", to: "/studio/knowledge" },
       { label: "Marketplace", to: "/studio/marketplace" },
+      { label: "Getting started", to: "/studio/getting-started" },
       { label: "Integrations", to: "/studio/integrations" },
       { label: "Webhooks", to: "/studio/webhooks" },
       { label: "API keys", to: "/studio/api-keys" },

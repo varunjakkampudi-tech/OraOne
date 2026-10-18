@@ -72,6 +72,7 @@ import { Route as AppSearchRouteImport } from './routes/app.search'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppTeamRouteImport } from './routes/app.team'
 import { Route as AppWorkspacesRouteImport } from './routes/app.workspaces'
+import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthErrorRouteImport } from './routes/auth.error'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
@@ -174,6 +175,7 @@ import { Route as AuthenticatedStudioAssistantsIdRouteImport } from './routes/_a
 import { Route as AuthenticatedStudioBillingIndexRouteImport } from './routes/_authenticated/studio.billing.index'
 import { Route as AuthenticatedStudioCallsIndexRouteImport } from './routes/_authenticated/studio.calls.index'
 import { Route as AuthenticatedStudioChannelsChannelRouteImport } from './routes/_authenticated/studio.channels.$channel'
+import { Route as AuthenticatedStudioGettingStartedIndexRouteImport } from './routes/_authenticated/studio.getting-started.index'
 import { Route as AuthenticatedStudioInboxIndexRouteImport } from './routes/_authenticated/studio.inbox.index'
 import { Route as AuthenticatedStudioInboxConversationIdRouteImport } from './routes/_authenticated/studio.inbox.$conversationId'
 import { Route as AuthenticatedStudioIntegrationsIndexRouteImport } from './routes/_authenticated/studio.integrations.index'
@@ -529,6 +531,11 @@ const AppWorkspacesRoute = AppWorkspacesRouteImport.update({
   id: '/workspaces',
   path: '/workspaces',
   getParentRoute: () => AppRoute,
+} as any)
+const AuthIndexRoute = AuthIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/callback',
@@ -1054,6 +1061,12 @@ const AuthenticatedStudioChannelsChannelRoute =
     path: '/studio/channels/$channel',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedStudioGettingStartedIndexRoute =
+  AuthenticatedStudioGettingStartedIndexRouteImport.update({
+    id: '/studio/getting-started/',
+    path: '/studio/getting-started/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedStudioInboxIndexRoute =
   AuthenticatedStudioInboxIndexRouteImport.update({
     id: '/studio/inbox/',
@@ -1390,6 +1403,7 @@ export interface FileRoutesByFullPath {
   '/solutions/small-business': typeof SolutionsSmallBusinessRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/auth/': typeof AuthIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/help/': typeof HelpIndexRoute
   '/onboarding/': typeof OnboardingIndexRoute
@@ -1471,6 +1485,7 @@ export interface FileRoutesByFullPath {
   '/studio/assistants/': typeof AuthenticatedStudioAssistantsIndexRoute
   '/studio/billing/': typeof AuthenticatedStudioBillingIndexRoute
   '/studio/calls/': typeof AuthenticatedStudioCallsIndexRoute
+  '/studio/getting-started/': typeof AuthenticatedStudioGettingStartedIndexRoute
   '/studio/inbox/': typeof AuthenticatedStudioInboxIndexRoute
   '/studio/integrations/': typeof AuthenticatedStudioIntegrationsIndexRoute
   '/studio/knowledge/': typeof AuthenticatedStudioKnowledgeIndexRoute
@@ -1509,7 +1524,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/acceptable-use': typeof AcceptableUseRoute
-  '/auth': typeof AuthRouteWithChildren
   '/changelog': typeof ChangelogRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
@@ -1577,6 +1591,7 @@ export interface FileRoutesByTo {
   '/solutions/small-business': typeof SolutionsSmallBusinessRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
+  '/auth': typeof AuthIndexRoute
   '/docs': typeof DocsIndexRoute
   '/help': typeof HelpIndexRoute
   '/onboarding': typeof OnboardingIndexRoute
@@ -1655,6 +1670,7 @@ export interface FileRoutesByTo {
   '/studio/assistants': typeof AuthenticatedStudioAssistantsIndexRoute
   '/studio/billing': typeof AuthenticatedStudioBillingIndexRoute
   '/studio/calls': typeof AuthenticatedStudioCallsIndexRoute
+  '/studio/getting-started': typeof AuthenticatedStudioGettingStartedIndexRoute
   '/studio/inbox': typeof AuthenticatedStudioInboxIndexRoute
   '/studio/integrations': typeof AuthenticatedStudioIntegrationsIndexRoute
   '/studio/knowledge': typeof AuthenticatedStudioKnowledgeIndexRoute
@@ -1782,6 +1798,7 @@ export interface FileRoutesById {
   '/solutions/small-business': typeof SolutionsSmallBusinessRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/auth/': typeof AuthIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/help/': typeof HelpIndexRoute
   '/onboarding/': typeof OnboardingIndexRoute
@@ -1863,6 +1880,7 @@ export interface FileRoutesById {
   '/_authenticated/studio/assistants/': typeof AuthenticatedStudioAssistantsIndexRoute
   '/_authenticated/studio/billing/': typeof AuthenticatedStudioBillingIndexRoute
   '/_authenticated/studio/calls/': typeof AuthenticatedStudioCallsIndexRoute
+  '/_authenticated/studio/getting-started/': typeof AuthenticatedStudioGettingStartedIndexRoute
   '/_authenticated/studio/inbox/': typeof AuthenticatedStudioInboxIndexRoute
   '/_authenticated/studio/integrations/': typeof AuthenticatedStudioIntegrationsIndexRoute
   '/_authenticated/studio/knowledge/': typeof AuthenticatedStudioKnowledgeIndexRoute
@@ -1991,6 +2009,7 @@ export interface FileRouteTypes {
     | '/solutions/small-business'
     | '/admin/'
     | '/app/'
+    | '/auth/'
     | '/docs/'
     | '/help/'
     | '/onboarding/'
@@ -2072,6 +2091,7 @@ export interface FileRouteTypes {
     | '/studio/assistants/'
     | '/studio/billing/'
     | '/studio/calls/'
+    | '/studio/getting-started/'
     | '/studio/inbox/'
     | '/studio/integrations/'
     | '/studio/knowledge/'
@@ -2110,7 +2130,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/acceptable-use'
-    | '/auth'
     | '/changelog'
     | '/contact'
     | '/cookies'
@@ -2178,6 +2197,7 @@ export interface FileRouteTypes {
     | '/solutions/small-business'
     | '/admin'
     | '/app'
+    | '/auth'
     | '/docs'
     | '/help'
     | '/onboarding'
@@ -2256,6 +2276,7 @@ export interface FileRouteTypes {
     | '/studio/assistants'
     | '/studio/billing'
     | '/studio/calls'
+    | '/studio/getting-started'
     | '/studio/inbox'
     | '/studio/integrations'
     | '/studio/knowledge'
@@ -2382,6 +2403,7 @@ export interface FileRouteTypes {
     | '/solutions/small-business'
     | '/admin/'
     | '/app/'
+    | '/auth/'
     | '/docs/'
     | '/help/'
     | '/onboarding/'
@@ -2463,6 +2485,7 @@ export interface FileRouteTypes {
     | '/_authenticated/studio/assistants/'
     | '/_authenticated/studio/billing/'
     | '/_authenticated/studio/calls/'
+    | '/_authenticated/studio/getting-started/'
     | '/_authenticated/studio/inbox/'
     | '/_authenticated/studio/integrations/'
     | '/_authenticated/studio/knowledge/'
@@ -2970,6 +2993,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/workspaces'
       preLoaderRoute: typeof AppWorkspacesRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/auth/': {
+      id: '/auth/'
+      path: '/'
+      fullPath: '/auth/'
+      preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/auth/callback': {
       id: '/auth/callback'
@@ -3685,6 +3715,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStudioChannelsChannelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/studio/getting-started/': {
+      id: '/_authenticated/studio/getting-started/'
+      path: '/studio/getting-started'
+      fullPath: '/studio/getting-started/'
+      preLoaderRoute: typeof AuthenticatedStudioGettingStartedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/studio/inbox/': {
       id: '/_authenticated/studio/inbox/'
       path: '/studio/inbox'
@@ -3986,6 +4023,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedStudioAssistantsIndexRoute: typeof AuthenticatedStudioAssistantsIndexRoute
   AuthenticatedStudioBillingIndexRoute: typeof AuthenticatedStudioBillingIndexRoute
   AuthenticatedStudioCallsIndexRoute: typeof AuthenticatedStudioCallsIndexRoute
+  AuthenticatedStudioGettingStartedIndexRoute: typeof AuthenticatedStudioGettingStartedIndexRoute
   AuthenticatedStudioInboxIndexRoute: typeof AuthenticatedStudioInboxIndexRoute
   AuthenticatedStudioIntegrationsIndexRoute: typeof AuthenticatedStudioIntegrationsIndexRoute
   AuthenticatedStudioKnowledgeIndexRoute: typeof AuthenticatedStudioKnowledgeIndexRoute
@@ -4013,6 +4051,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedStudioAssistantsIndexRoute,
   AuthenticatedStudioBillingIndexRoute: AuthenticatedStudioBillingIndexRoute,
   AuthenticatedStudioCallsIndexRoute: AuthenticatedStudioCallsIndexRoute,
+  AuthenticatedStudioGettingStartedIndexRoute:
+    AuthenticatedStudioGettingStartedIndexRoute,
   AuthenticatedStudioInboxIndexRoute: AuthenticatedStudioInboxIndexRoute,
   AuthenticatedStudioIntegrationsIndexRoute:
     AuthenticatedStudioIntegrationsIndexRoute,
@@ -4525,6 +4565,7 @@ interface AuthRouteChildren {
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
   AuthVerifyEmailRoute: typeof AuthVerifyEmailRoute
+  AuthIndexRoute: typeof AuthIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
@@ -4538,6 +4579,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthSignInRoute: AuthSignInRoute,
   AuthSignUpRoute: AuthSignUpRoute,
   AuthVerifyEmailRoute: AuthVerifyEmailRoute,
+  AuthIndexRoute: AuthIndexRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)

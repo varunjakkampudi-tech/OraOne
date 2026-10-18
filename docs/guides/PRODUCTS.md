@@ -19,8 +19,9 @@ Every section starts with a **Status in this code** line. The statuses are:
   through Studio or the API. Ask the engineering team before you promise it to a customer.
 - **Not built**: no code in this repository.
 
-These statuses describe the code at commit `e6f8237` on branch `feat/product1-launch`, with a
-clean working tree when this guide was written. Committed code is not the same as a live
+These statuses describe the code at commit `e69494d` on branch `feat/product1-launch`. Uncommitted
+working-tree changes present at the review (the business scope guard and assistant profiles) are not
+counted. Committed code is not the same as a live
 service. Nothing here is a launch date or a claim that the product is live for customers.
 Production readiness is tracked in [PRODUCT-PORTFOLIO](../PRODUCT-PORTFOLIO.md), which uses the
 three portfolio labels: **Built**, **Live-needs-account** and **Planned**. The mapping is:
@@ -94,9 +95,9 @@ status rules, which include the website chat page.
 
 ## 2. AI Voice agent
 
-**Status in this code: Blocked by a setup gap.** The call handling is written, but no
-screen and no API can create the voice binding that connects a phone number to an
-assistant.
+**Status in this code: Partly available.** The call handling is written. The voice binding that
+connects a phone number to an assistant can be set in Studio (channel settings) or through the
+channel API (`PATCH /api/agents/{agent_id}/channels/voice`). Live calls have not been tested.
 
 ### What it does
 
@@ -123,17 +124,16 @@ voice path is used by outbound calls (see [Calls](#11-calls)).
 
 1. Set the Twilio and public-address settings on the server. Recreate the containers.
 2. Create the assistant and add its knowledge.
-3. Create the **voice binding** that links the phone number to the assistant. The binding
-   is a database record, with channel `voice`, the number in E.164 form, `enabled` set to
-   true, and the assistant's identifier. **No screen or API in this repository creates it.**
-   The Studio channel page for AI Voice shows "Not connected yet" until it exists.
+3. Open the AI Voice channel in Studio and enter the phone number in E.164 form, then switch the
+   channel on. The same settings can be sent to `PATCH /api/agents/{agent_id}/channels/voice`
+   (`phone_number`, `enabled`). The channel cannot be enabled without a number. A number can be
+   claimed by one organisation only.
 4. In Twilio, point the voice webhook of the number at `/api/voice/inbound` (HTTP POST).
 5. Call the number and check the reply.
 
 ### What it does not do yet
 
-- There is no set-up screen or API for the voice binding (see step 3). Without it, callers
-  hear that the number is not available.
+- Without an enabled voice binding, callers hear that the number is not available.
 - Speech is handled turn by turn with Twilio's speech input. This is not a streaming voice model.
 - The voice code does not record call audio. Each spoken turn is saved as a message in the
   conversation, so the Inbox shows what was said.
@@ -150,9 +150,9 @@ conversation channel).
 
 ## 3. WhatsApp
 
-**Status in this code: Blocked by a setup gap.** Inbound and reply code is written for two
-routes, Twilio and the Meta WhatsApp Cloud API. The binding that links a number to an
-assistant can only be created in the database.
+**Status in this code: Partly available.** Inbound and reply code is written for two routes, Twilio
+and the Meta WhatsApp Cloud API. The binding that links a number to an assistant is set in Studio
+(channel settings) or through the channel API. Live messages have not been tested.
 
 ### What it does
 
@@ -182,13 +182,12 @@ repository. Check their current requirements.
    `META_WHATSAPP_VERIFY_TOKEN`. Subscribe to the messages field.
    For Twilio, set the incoming-message webhook of the sender to
    `<your public address>/api/channels/twilio/inbound`.
-3. Create the WhatsApp binding (a database record, channel `whatsapp`). Engineering must do
-   this step until a screen or API exists.
+3. Open the WhatsApp channel in Studio, enter the `phone_number_id`, then switch the channel on.
+   The same setting can be sent to `PATCH /api/agents/{agent_id}/channels/whatsapp`.
 4. Send a test message from a phone.
 
 ### What it does not do yet
 
-- No screen or API creates the WhatsApp binding.
 - This review found no support for approved message templates. Messages that a provider
   refuses are logged with the HTTP status, and no reply is sent.
 - Outbound messages from workflows and marketing use the same path, so the same limits apply.
@@ -203,8 +202,9 @@ repository. Check their current requirements.
 
 ## 4. Instagram
 
-**Status in this code: Blocked by a setup gap.** The code handles direct messages. The
-binding that links an Instagram account to an assistant can only be created in the database.
+**Status in this code: Partly available.** The code handles direct messages. The binding that
+links an Instagram account to an assistant can be set in Studio or through the channel API
+(`instagram_account_id`). Live messages have not been tested.
 
 ### What it does
 
@@ -227,13 +227,12 @@ Meta's app review for the messaging permissions is outside this repository.
 1. Set the server settings above. Recreate the containers.
 2. Set the callback URL to `<your public address>/api/channels/meta_instagram/inbound` and the
    verify token to `META_WHATSAPP_VERIFY_TOKEN`.
-3. Create the Instagram binding (database record, channel `instagram`), with the
-   `instagram_account_id` of the account. Engineering must do this step.
+3. In Studio, open the Instagram channel, enter the `instagram_account_id` of the account, then
+   switch the channel on.
 4. Send a direct message to the account and check the reply.
 
 ### What it does not do yet
 
-- No screen or API creates the binding.
 - Comments and stories are not handled.
 - Replies are sent only when the Instagram token is set. Otherwise the message is stored
   without a reply being sent.
@@ -351,8 +350,8 @@ They always return a result. When the model is unavailable, the result says that
 ## 7. Marketing
 
 **Status in this code: Partly available.** Public contact and newsletter forms work. The
-campaign engine is written, but no email sender is connected, and the SMS and WhatsApp
-sends need bindings that cannot yet be created.
+campaign engine is written, but no email sender is connected. The SMS and WhatsApp sends need an
+enabled binding, which Studio or the channel API can set.
 
 ### What it does
 
@@ -386,8 +385,8 @@ Campaigns are created and sent through the API. The Studio page for Marketing ex
 
 - **Email**: no email delivery is connected. Sends fail with the reason
   "Email delivery is not connected on this server yet." Do not promise email campaigns.
-- **SMS and WhatsApp**: the sender needs an enabled binding for the channel. The binding is a
-  database record (see the WhatsApp section). Without it, the send fails with a plain reason.
+- **SMS and WhatsApp**: the sender needs an enabled binding for the channel (see the WhatsApp
+  section). Without it, the send fails with a plain reason.
 - **Unsubscribe links** use `PUBLIC_API_BASE_URL`, and are signed with the JWT secret.
 
 ### What it does not do yet
@@ -465,7 +464,9 @@ Only Google Drive syncs data today. Outbound webhooks work.
   the connection is stored with its tokens encrypted.
 - **Google Drive** syncs the folders or files you choose into the knowledge base, read-only.
 - **Outbound webhooks** (Studio, **Webhooks**): send events from OraOne to a URL you control.
-  Each endpoint has a signing secret, which you can rotate. You can send a test event. Private
+  The code emits two events today, `conversation.created` and `message.created`, both from the
+  public API. The other events in the list are not emitted yet. Each endpoint has a signing secret,
+  which you can rotate. You can send a test event. Private
   and internal addresses are refused, to prevent server-side request forgery.
 
 | Provider                             | Connect (OAuth)                                        | Data sync       |
@@ -583,10 +584,10 @@ Workflows that use an unknown event name are refused when saved.
 
 ## 11. Calls
 
-**Status in this code: Blocked by a setup gap.** The campaign engine, its consent rules and
-its Twilio integration are written. A campaign also needs an AI Voice binding for the calling
-number, and that binding cannot yet be created through Studio or the API. Without it, the
-person answering hears that the number is not available. Studio labels Calls as "planned".
+**Status in this code: Partly available.** The campaign engine, its consent rules and its Twilio
+integration are written. A campaign needs an enabled AI Voice binding for the calling number, which
+can be set in Studio or through the channel API (see [AI Voice agent](#2-ai-voice-agent)). Live calls
+have not been tested. Studio labels Calls as "planned".
 
 ### What it does
 
@@ -617,14 +618,13 @@ Every outbound call is subject to the same consent rules as marketing (see
 ### How to set it up
 
 1. Set the Twilio and public-address settings. Recreate the containers.
-2. Create the AI Voice binding (engineering step, until a screen exists).
+2. Set up the AI Voice binding for the calling number (see section 2).
 3. Import leads with a consent column (see [Leads and import](#12-leads-and-import)).
 4. In Studio, open **Calls**, create a campaign, choose the leads and the timezone.
 5. Choose **Start**. Watch the attempts. Pause if needed.
 
 ### What it does not do yet
 
-- No set-up screen or API creates the AI Voice binding that outbound calls need.
 - The campaign advances only when Twilio reports a call's end, or when someone presses Start
   again. There is no timer. A call still marked as in progress after 30 minutes is checked with
   Twilio the next time the queue moves.
@@ -734,9 +734,8 @@ call a provider.
 
 ### What it does not do yet
 
-- A channel shows as connected only when its row is enabled and active. The rows for WhatsApp,
-  Instagram and AI Voice cannot yet be created from Studio (see those sections). So those cards
-  cannot reach Connected through the normal flow.
+- A channel shows as connected only when its row is enabled and active. The setting each channel
+  needs (for example the WhatsApp phone number ID or the AI Voice phone number) is in its section.
 - The Marketing card has no screen behind it.
 - The roadmap labels for the Omnichannel inbox, Marketplace and Calls read "Planned". Those screens
   work for the data they hold, so the label is out of date.
@@ -766,7 +765,7 @@ The admin area sits under `/admin` and is for platform staff only.
   The API is under `/api/admin/config`.
 - **Secret inventory** (`GET /api/super-admin/secrets`) returns, for twelve names, whether each is
   set and a masked tail. It is an API only. No screen calls it, and it is read-only.
-- **Other pages** (users, organizations, subscriptions, billing, usage, error logs, audit logs,
+- **Other pages** (users, organizations, subscriptions, billing, usage, audit logs,
   support, monitoring, infrastructure, AI models, security, products, entitlements, feature flags
   and settings) show a table definition and an empty state. For example, "Error events are
   unavailable until authorized observability services are connected." The backend has matching
@@ -775,10 +774,11 @@ The admin area sits under `/admin` and is for platform staff only.
 
 ### Logs, analytics and beta
 
-- **Logs.** There is no log view or log download in the admin area. Error logs and audit logs are
-  empty states. Engineering work on admin logs is listed in [blocker.txt](../../blocker.txt).
-- **Analytics.** The global usage and monitoring pages are empty states. The screens do not show
-  metered or measured figures.
+- **Logs.** The admin area has an error log viewer. It lists stored 5xx records, by default for the
+  last 24 hours and for up to 30 days. It can download them as JSON or CSV, capped at 10,000 rows.
+  Each download is audited. The audit-log page is still an empty state.
+- **Analytics.** The Analytics page loads platform figures from `/api/admin/analytics/overview`. It
+  is gated by the `admin_analytics_console` feature flag.
 - **Beta.** A product can have the `beta` status in the product model, and the entitlement key
   `beta_features` marks the opt-in beta surface. The feature-flag screen is a placeholder. The
   backend's `PATCH /api/super-admin/feature-flags/{key}` is not called by any screen. Beta testers
@@ -812,11 +812,10 @@ The full rules, including the audit records, history and key rotation, are in
 
 ### What it does not do yet
 
-- No log viewer, no log download, no audit-log screen, no analytics screen.
+- No audit-log screen. The Audit Logs page is an empty state.
 - No feature-flag or beta-tester screen. No screen for the entitlements overview.
-- This section describes commit `e6f8237`. Uncommitted work in the working tree at the time of
-  writing adds admin log, analytics, feature-flag and beta screens and new migrations. It is not
-  counted here. Update this section when that work is committed and tested.
+- This section describes commit `e69494d`. The error log viewer and the analytics page are in that
+  commit. Uncommitted work present at the review is not counted here.
 - No single sign-on for administrators. Sign-in is by email code, like every other account.
 - Other admin pages cannot show data until their services are connected.
 

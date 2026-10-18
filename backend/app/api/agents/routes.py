@@ -528,6 +528,7 @@ async def update_agent(
         or payload.greeting is not None
         or payload.max_tokens is not None
         or payload.website_url is not None
+        or payload.assistant_profile is not None
         or payload.knowledge_base_ids is not None
     )
     if cfg_changed and cfg is None:
@@ -552,6 +553,11 @@ async def update_agent(
             cfg.config = {
                 **(cfg.config or {}),
                 "website_url": payload.website_url.strip(),
+            }
+        if payload.assistant_profile is not None:
+            cfg.config = {
+                **(cfg.config or {}),
+                "assistant_profile": payload.assistant_profile,
             }
         if knowledge_base_ids is not None:
             cfg.config = {
