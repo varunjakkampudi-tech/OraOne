@@ -101,8 +101,6 @@ NOT IN THIS RELEASE (planned)
      and require one review. Reply "approve branch protection" and I will apply it.
    - Repository visibility: currently PUBLIC. Proposed: make it private, because the docs and
      history describe the deployment layout. Reply "make repository private" to approve.
-   - Note: making the repository private may affect the Lovable connection (see AGENTS.md).
-     Check that before approving.
 
 ADDED 2026-10-18 (documentation pass). Each item below needs your decision or a fact only you can confirm.
 
