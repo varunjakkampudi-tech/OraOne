@@ -1558,3 +1558,84 @@ def _safe_json(value: Any) -> dict[str, Any]:
         else:
             out[k] = str(v)
     return out
+
+
+# ───────────────────────── interrupted runs ─────────────────────────
+# A worker that dies mid-run leaves the run in "running". Nothing else recovers it,
+# so this sweep does. The rule for each stuck run depends on what had already started:
+#   - no step started         -> nothing external ran, so the run is queued again.
+#   - every step finished     -> the run is marked completed (the crash came after the end).
+#   - a step was in progress  -> the run is marked failed as interrupted, and is NOT
+#                                retried, because an external action may already have run.
+# Runs paused on a durable delay are left alone; resume_due_waits resumes them.
+
+INTERRUPTED_RUN_AFTER = timedelta(minutes=15)
+INTERRUPTED_REASON = (
+    "The run was interrupted by a worker restart. It was not retried automatically, "
+    "because an external action in it may already have happened."
+)
+
+
+async def reap_interrupted_runs(
+    now: Optional[datetime] = None, *, limit: int = 50
+) -> dict:
+    """Recover runs left in "running" by a stopped worker. Returns how many were handled."""
+    now = now or _utcnow()
+    cutoff = now - INTERRUPTED_RUN_AFTER
+    counts = {"requeued": 0, "completed": 0, "failed": 0, "waiting": 0}
+    Maker = _maker()
+    async with Maker() as session:  # type: ignore[misc]
+        runs = list(
+            (
+                await session.scalars(
+                    select(WorkflowRun)
+                    .where(WorkflowRun.status == RunStatus.running)
+                    .where(WorkflowRun.started_at < cutoff)
+                    .order_by(WorkflowRun.started_at)
+                    .limit(limit)
+                )
+            ).all()
+        )
+        for run in runs:
+            steps = list(
+                (
+                    await session.scalars(
+                        select(WorkflowRunStep)
+                        .where(WorkflowRunStep.run_id == run.id)
+                        .order_by(WorkflowRunStep.order_index)
+                    )
+                ).all()
+            )
+            if any(
+                s.status == RunStepStatus.running
+                and _type_value(s.type) == StepType.delay.value
+                for s in steps
+            ):
+                counts["waiting"] += 1
+                continue
+            in_progress = [s for s in steps if s.status == RunStepStatus.running]
+            started = [s for s in steps if s.status != RunStepStatus.pending]
+            if not started:
+                run.status = RunStatus.queued
+                run.started_at = None
+                counts["requeued"] += 1
+                continue
+            if not in_progress and all(
+                s.status in (RunStepStatus.completed, RunStepStatus.skipped)
+                for s in steps
+            ):
+                run.status = RunStatus.completed
+                run.finished_at = now
+                counts["completed"] += 1
+                continue
+            for step in in_progress:
+                step.status = RunStepStatus.failed
+                step.error_message = INTERRUPTED_REASON
+                step.finished_at = now
+            run.status = RunStatus.failed
+            run.error_message = INTERRUPTED_REASON
+            run.finished_at = now
+            counts["failed"] += 1
+            log.warning("workflow run %s marked interrupted", run.id)
+        await session.commit()
+    return counts

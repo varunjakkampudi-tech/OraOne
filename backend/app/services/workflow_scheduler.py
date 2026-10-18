@@ -35,7 +35,11 @@ from app.database.models.workflow import (
     WorkflowTrigger,
 )
 from app.database.session import AsyncSessionLocal, init_engine
-from app.services.workflow_engine import execute_run, resume_due_waits
+from app.services.workflow_engine import (
+    execute_run,
+    reap_interrupted_runs,
+    resume_due_waits,
+)
 
 log = logging.getLogger("app.workflow.scheduler")
 
@@ -116,6 +120,7 @@ async def _loop() -> None:
             ("schedule", _tick),
             ("queued runs", _dispatch_queued_runs),
             ("waits", resume_due_waits),
+            ("interrupted runs", reap_interrupted_runs),
         ):
             try:
                 await job()
