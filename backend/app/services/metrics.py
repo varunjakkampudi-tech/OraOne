@@ -13,19 +13,12 @@ Call sites only ever use the module-level facade — :func:`inc` / :func:`observ
 :class:`MetricsBackend`. That indirection is the seam for shipping metrics to a
 real system later:
 
-    :class:`InProcessBackend`     — default; single process, single lock.
-    :class:`PrometheusBackend`    — DESIGN STUB; maps to ``prometheus_client``.
-    :class:`OpenTelemetryBackend` — DESIGN STUB; maps to OTel meters.
-
-Select via ``METRICS_BACKEND`` (``inprocess`` | ``prometheus`` | ``otel``). The
-stub backends lazily import their (absent) dependency and the factory falls
-back to in-process if it isn't installed, so nothing breaks by default.
+    :class:`InProcessBackend` — the only backend; single process, single lock.
 """
 
 from __future__ import annotations
 
 import logging
-import os
 import threading
 from abc import ABC, abstractmethod
 from typing import Any
@@ -161,122 +154,10 @@ class InProcessBackend(MetricsBackend):
             self._histograms.clear()
 
 
-class PrometheusBackend(MetricsBackend):
-    """DESIGN STUB — record into ``prometheus_client`` collectors.
-
-    Not wired by default (the dependency isn't installed). It lazily creates
-    Counters/Histograms on first use; ``prometheus_text`` renders via
-    ``generate_latest``. Construction raises if the package is missing so the
-    factory can fall back to in-process.
-    """
-
-    name = "prometheus"
-
-    def __init__(self) -> None:
-        try:
-            import prometheus_client  # type: ignore
-        except Exception as e:  # pragma: no cover — optional dependency
-            raise RuntimeError(
-                "PrometheusBackend requires the 'prometheus_client' package."
-            ) from e
-        self._client = prometheus_client
-        self._lock = threading.Lock()
-        self._counters: dict[str, Any] = {}
-        self._histograms: dict[str, Any] = {}
-
-    def _counter(self, name: str, labelnames: tuple[str, ...]):  # pragma: no cover
-        with self._lock:
-            c = self._counters.get(name)
-            if c is None:
-                c = self._client.Counter(name, name, labelnames)
-                self._counters[name] = c
-            return c
-
-    def inc(
-        self, name: str, amount: float = 1.0, **labels: str
-    ) -> None:  # pragma: no cover
-        c = self._counter(name, tuple(sorted(labels)))
-        (c.labels(**labels) if labels else c).inc(amount)
-
-    def observe(
-        self, name: str, value: float, buckets: tuple[int, ...] = _DEFAULT_BUCKETS_MS
-    ) -> None:  # pragma: no cover
-        with self._lock:
-            h = self._histograms.get(name)
-            if h is None:
-                h = self._client.Histogram(name, name, buckets=buckets)
-                self._histograms[name] = h
-        h.observe(value)
-
-    def prometheus_text(self) -> str:  # pragma: no cover
-        return self._client.generate_latest().decode("utf-8")
-
-
-class OpenTelemetryBackend(MetricsBackend):
-    """DESIGN STUB — record into OpenTelemetry meters.
-
-    Not wired by default. Lazily obtains a meter and maps counters/histograms
-    to OTel instruments; export is handled by the configured OTel pipeline
-    (OTLP → Collector → Prometheus/CloudWatch). Construction raises if the SDK
-    is missing so the factory can fall back to in-process.
-    """
-
-    name = "otel"
-
-    def __init__(self) -> None:
-        try:
-            from opentelemetry import metrics as otel_metrics  # type: ignore
-        except Exception as e:  # pragma: no cover — optional dependency
-            raise RuntimeError(
-                "OpenTelemetryBackend requires the 'opentelemetry-api' package."
-            ) from e
-        self._meter = otel_metrics.get_meter("oraone.authorization")
-        self._lock = threading.Lock()
-        self._counters: dict[str, Any] = {}
-        self._histograms: dict[str, Any] = {}
-
-    def inc(
-        self, name: str, amount: float = 1.0, **labels: str
-    ) -> None:  # pragma: no cover
-        with self._lock:
-            c = self._counters.get(name)
-            if c is None:
-                c = self._meter.create_counter(name)
-                self._counters[name] = c
-        c.add(amount, attributes=labels or None)
-
-    def observe(
-        self, name: str, value: float, buckets: tuple[int, ...] = _DEFAULT_BUCKETS_MS
-    ) -> None:  # pragma: no cover
-        with self._lock:
-            h = self._histograms.get(name)
-            if h is None:
-                h = self._meter.create_histogram(name)
-                self._histograms[name] = h
-        h.record(value)
-
-
 # --------------------------------------------------------------------------- #
 # Active backend + module-level facade                                        #
 # --------------------------------------------------------------------------- #
 def _make_backend() -> MetricsBackend:
-    choice = os.getenv("METRICS_BACKEND", "inprocess").strip().lower()
-    if choice in {"prometheus", "prom"}:
-        try:
-            b = PrometheusBackend()
-            log.info("metrics backend: prometheus")
-            return b
-        except Exception as e:  # pragma: no cover
-            log.warning(
-                "prometheus metrics backend unavailable (%s); using in-process.", e
-            )
-    elif choice in {"otel", "opentelemetry"}:
-        try:
-            b = OpenTelemetryBackend()
-            log.info("metrics backend: opentelemetry")
-            return b
-        except Exception as e:  # pragma: no cover
-            log.warning("otel metrics backend unavailable (%s); using in-process.", e)
     return InProcessBackend()
 
 

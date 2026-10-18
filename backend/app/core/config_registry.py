@@ -151,11 +151,6 @@ REGISTRY: tuple[ConfigKey, ...] = (
         console_managed=False,
     ),
     _key(
-        "METRICS_BACKEND",
-        "Core",
-        "Where metrics are sent: inprocess, prometheus or otel.",
-    ),
-    _key(
         "ENTITLEMENTS_CACHE_BACKEND",
         "Core",
         "Cache used for plan entitlements: inprocess or redis.",

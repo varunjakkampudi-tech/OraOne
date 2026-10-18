@@ -394,7 +394,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
               >
                 <span className="avatar avatar-primary">AM</span>
                 <span className="profile-label">
-                  <strong>Alex Mercer</strong>
+                  <strong>Sample admin</strong>
                   <small>WORKSPACE DEMO</small>
                 </span>
                 <ChevronDown />

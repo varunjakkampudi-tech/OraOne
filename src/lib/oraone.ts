@@ -65,9 +65,9 @@ export function pageHead(title: string, routePath?: string) {
 export const demoCustomers = [
   {
     id: "olivia",
-    name: "Olivia Rhye",
+    name: "Sample customer A",
     initials: "OR",
-    email: "olivia@example.com",
+    email: "olivia@sample.invalid",
     company: "Layers",
     status: "Customer",
     channel: "Website",
@@ -75,9 +75,9 @@ export const demoCustomers = [
   },
   {
     id: "phoenix",
-    name: "Phoenix Baker",
+    name: "Sample customer B",
     initials: "PB",
-    email: "phoenix@example.com",
+    email: "phoenix@sample.invalid",
     company: "Sisyphus",
     status: "Qualified",
     channel: "Website",
@@ -85,9 +85,9 @@ export const demoCustomers = [
   },
   {
     id: "lana",
-    name: "Lana Steiner",
+    name: "Sample customer C",
     initials: "LS",
-    email: "lana@example.com",
+    email: "lana@sample.invalid",
     company: "Catalog",
     status: "New lead",
     channel: "Website",
@@ -95,9 +95,9 @@ export const demoCustomers = [
   },
   {
     id: "demi",
-    name: "Demi Wilkinson",
+    name: "Sample customer D",
     initials: "DW",
-    email: "demi@example.com",
+    email: "demi@sample.invalid",
     company: "Circooles",
     status: "Customer",
     channel: "Website",
@@ -105,9 +105,9 @@ export const demoCustomers = [
   },
   {
     id: "drew",
-    name: "Drew Cano",
+    name: "Sample customer E",
     initials: "DC",
-    email: "drew@example.com",
+    email: "drew@sample.invalid",
     company: "Hourglass",
     status: "Qualified",
     channel: "Website",
@@ -118,7 +118,7 @@ export const demoCustomers = [
 export const demoConversations = [
   {
     id: "olivia",
-    name: "Olivia Rhye",
+    name: "Sample customer A",
     initials: "OR",
     subject: "A question about the enterprise plan",
     preview: "Could you help me understand the onboarding process?",
@@ -128,7 +128,7 @@ export const demoConversations = [
   },
   {
     id: "phoenix",
-    name: "Phoenix Baker",
+    name: "Sample customer B",
     initials: "PB",
     subject: "Getting started with an assistant",
     preview: "Thanks, that answers my question!",
@@ -138,7 +138,7 @@ export const demoConversations = [
   },
   {
     id: "lana",
-    name: "Lana Steiner",
+    name: "Sample customer C",
     initials: "LS",
     subject: "Connecting our knowledge base",
     preview: "Can I import content from our website?",
@@ -148,7 +148,7 @@ export const demoConversations = [
   },
   {
     id: "demi",
-    name: "Demi Wilkinson",
+    name: "Sample customer D",
     initials: "DW",
     subject: "Widget customization options",
     preview: "I would like to match our brand colors.",
@@ -158,7 +158,7 @@ export const demoConversations = [
   },
   {
     id: "drew",
-    name: "Drew Cano",
+    name: "Sample customer E",
     initials: "DC",
     subject: "Thank you for your help",
     preview: "Everything is working well now.",

@@ -878,14 +878,14 @@ function Knowledge({ pagePath }: { pagePath: string }) {
     {
       name: "Acme Help Center",
       type: "Website",
-      url: "help.example.com",
+      url: "help.sample.invalid",
       size: "84 pages",
       status: "Sample source",
     },
     {
       name: "Product documentation",
       type: "Website",
-      url: "docs.example.com",
+      url: "docs.sample.invalid",
       size: "58 pages",
       status: "Sample source",
     },
@@ -1190,7 +1190,7 @@ function ConversationInbox({ pagePath }: { pagePath: string }) {
               <h3>Customer details</h3>
               <span className="avatar large-avatar">{current.initials}</span>
               <h2>{current.name}</h2>
-              <p>{current.name.toLowerCase().split(" ")[0]}@example.com</p>
+              <p>{current.name.toLowerCase().split(" ")[0]}@sample.invalid</p>
               <dl>
                 <dt>Channel</dt>
                 <dd>Website</dd>
@@ -1639,7 +1639,7 @@ function TeamPage({ pagePath }: { pagePath: string }) {
           <span>Joined</span>
         </div>
         {[
-          ["Alex Mercer", "AM", "Admin"],
+          ["Sample admin", "AM", "Admin"],
           ["Sarah Wilson", "SW", "Admin"],
           ["James Chen", "JC", "Member"],
         ].map((m) => (
@@ -1702,7 +1702,7 @@ function Billing({ pagePath }: { pagePath: string }) {
 function SettingsPage({ pagePath }: { pagePath: string }) {
   const { workspace } = useWorkspace();
   const [saved, setSaved] = useState(false);
-  const [name, setName] = useState(pagePath.includes("/account") ? "Alex Mercer" : workspace);
+  const [name, setName] = useState(pagePath.includes("/account") ? "Sample admin" : workspace);
   const security = pagePath.includes("/security");
   if (pagePath.endsWith("/api-keys"))
     return (
@@ -1959,7 +1959,7 @@ function ActivityPage() {
             "12 minutes ago",
           ],
           ["New leads captured", "Website assistant · Sample lead activity", "34 minutes ago"],
-          ["Assistant configuration updated", "Alex Mercer · Sample configuration", "1 hour ago"],
+          ["Assistant configuration updated", "Sample admin · Sample configuration", "1 hour ago"],
           ["Workspace created", "Acme Corporation · Sample workspace event", "Yesterday"],
         ].map((r, i) => (
           <div className="activity-row" key={r[0]}>

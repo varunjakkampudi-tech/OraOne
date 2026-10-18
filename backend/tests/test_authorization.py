@@ -451,26 +451,6 @@ def test_metrics_use_backend_swaps_target():
         m.use_backend(original)
 
 
-def test_prometheus_backend_optional_dependency():
-    try:
-        import prometheus_client  # noqa: F401
-
-        assert m.PrometheusBackend().name == "prometheus"
-    except ImportError:
-        with pytest.raises(RuntimeError):
-            m.PrometheusBackend()
-
-
-def test_otel_backend_optional_dependency():
-    try:
-        from opentelemetry import metrics as _otel  # noqa: F401
-
-        assert m.OpenTelemetryBackend().name == "otel"
-    except ImportError:
-        with pytest.raises(RuntimeError):
-            m.OpenTelemetryBackend()
-
-
 # --------------------------------------------------------------------------- #
 # Cache backend abstraction                                                   #
 # --------------------------------------------------------------------------- #
