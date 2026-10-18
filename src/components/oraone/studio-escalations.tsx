@@ -90,8 +90,8 @@ export function EscalationsPage() {
     Promise.all([listEscalations(projectId, filter), getEscalationSummary(projectId)])
       .then(([rows, counts]) => {
         if (cancelled) return;
-        setItems(rows);
-        setSummary(counts);
+        setItems(Array.isArray(rows) ? rows : []);
+        setSummary(counts && typeof counts === "object" ? counts : null);
       })
       .catch((err) => {
         if (!cancelled) setError(messageOf(err, "Couldn't load escalations."));
