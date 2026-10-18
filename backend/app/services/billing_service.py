@@ -18,9 +18,11 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.billing import (
+    BillingWebhookEvent,
     BillingCycle,
     Invoice,
     InvoiceStatus,
@@ -463,30 +465,92 @@ async def create_portal(
     return {"mode": "stripe", "portal_url": ps["url"], "message": None}
 
 
-async def handle_webhook_event(session: AsyncSession, event: dict) -> None:
-    """Process a verified Stripe webhook event (real mode only)."""
+def _event_time(event: dict) -> datetime:
+    """Stripe's creation time of an event. Missing or invalid values count as the oldest possible."""
+    try:
+        return datetime.fromtimestamp(int(event.get("created") or 0), tz=timezone.utc)
+    except (TypeError, ValueError, OverflowError, OSError):
+        return datetime.fromtimestamp(0, tz=timezone.utc)
+
+
+async def handle_webhook_event(session: AsyncSession, event: dict) -> str:
+    """Process a verified Stripe webhook event (real mode only).
+
+    Returns the outcome:
+      - ``"duplicate"``: this event id was already processed; nothing runs again.
+      - ``"stale"``: the subscription already reflects a newer event; this one is ignored.
+      - ``"ignored"``: the event carries no organization or is not handled.
+      - ``"applied"``: the event changed the organization's billing state.
+    """
+    event_id = str(event.get("id") or "")
     etype = event.get("type", "")
     obj = (event.get("data") or {}).get("object") or {}
     meta = obj.get("metadata") or {}
+
+    # 1. Replay protection. The first delivery records the id; a repeat is a no-op.
+    #    A savepoint keeps the unique-violation from aborting the request transaction.
+    if not event_id:
+        return "ignored"
+    try:
+        async with session.begin_nested():
+            record = BillingWebhookEvent(
+                event_id=event_id, event_type=etype, outcome="received"
+            )
+            session.add(record)
+            await session.flush()
+    except IntegrityError:
+        # Only a real earlier record is a replay. Any other integrity failure must surface.
+        already = await session.scalar(
+            select(BillingWebhookEvent.id).where(
+                BillingWebhookEvent.event_id == event_id
+            )
+        )
+        if already is None:
+            raise
+        return "duplicate"
+
     org_id = meta.get("organization_id")
     if not org_id:
-        return
+        record.outcome = "ignored"
+        return "ignored"
     organization_id = uuid.UUID(org_id)
+    record.organization_id = organization_id
+
+    # 2. Ordering. An event older than the newest one already applied is stale.
+    created = _event_time(event)
+    sub = await get_or_create_subscription(session, organization_id)
+    if (
+        sub.stripe_event_created_at is not None
+        and created < sub.stripe_event_created_at
+    ):
+        record.outcome = "stale"
+        return "stale"
 
     if etype == "checkout.session.completed":
         plan = await session.scalar(
             select(Plan).where(Plan.code == meta.get("plan_code", "free"))
         )
-        if plan is not None:
-            await _activate(
-                session,
-                organization_id,
-                plan,
-                _cycle(meta.get("billing_cycle", "monthly")),
-                stripe_customer_id=obj.get("customer"),
-                stripe_subscription_id=obj.get("subscription"),
-            )
+        if plan is None:
+            record.outcome = "ignored"
+            return "ignored"
+        await _activate(
+            session,
+            organization_id,
+            plan,
+            _cycle(meta.get("billing_cycle", "monthly")),
+            stripe_customer_id=obj.get("customer"),
+            stripe_subscription_id=obj.get("subscription"),
+        )
     elif etype == "customer.subscription.deleted":
         free = await session.scalar(select(Plan).where(Plan.code == PlanCode.free))
-        if free is not None:
-            await _activate(session, organization_id, free, BillingCycle.monthly)
+        if free is None:
+            record.outcome = "ignored"
+            return "ignored"
+        await _activate(session, organization_id, free, BillingCycle.monthly)
+    else:
+        record.outcome = "ignored"
+        return "ignored"
+
+    sub.stripe_event_created_at = created
+    record.outcome = "applied"
+    return "applied"

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import enum
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import (
@@ -133,11 +133,35 @@ class Subscription(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     stripe_customer_id: Mapped[Optional[str]] = mapped_column(String(80))
     stripe_subscription_id: Mapped[Optional[str]] = mapped_column(String(80))
+    # Stripe's creation time of the newest event applied to this subscription.
+    # An older event that arrives later is ignored.
+    stripe_event_created_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True)
+    )
 
     plan: Mapped["Plan"] = relationship(lazy="joined")
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<Subscription org={self.organization_id} status={self.status}>"
+
+
+class BillingWebhookEvent(UUIDPrimaryKeyMixin, Base):
+    """A Stripe event the server has accepted. Its unique event id stops replays from running twice."""
+
+    __tablename__ = "billing_webhook_events"
+    __table_args__ = (
+        UniqueConstraint("event_id", name="uq_billing_webhook_events_event_id"),
+    )
+
+    event_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    event_type: Mapped[str] = mapped_column(String(120), nullable=False)
+    organization_id: Mapped[Optional[uuid.UUID]] = mapped_column(PG_UUID(as_uuid=True))
+    outcome: Mapped[str] = mapped_column(String(20), nullable=False, default="received")
+    received_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
 
 
 class Invoice(UUIDPrimaryKeyMixin, TimestampMixin, Base):
