@@ -73,3 +73,23 @@ See `blocker.txt`, "ROUND 10" G1 to G5, and ROUND 9 items 35a to 35d and 19.
 - Product rows: 4: OPEN 4
 
 Measured numerators and denominators per category are in `QUALITY_AUDIT.md`.
+
+## G. Workflow audit findings (read-only agent audit, 20 October 2026)
+
+Measured: 3 workflow files, 6 jobs, 15 `uses:` lines, 0 pinned to a commit SHA, 3 top-level `permissions:` blocks. Triggers: ci.yml on pull_request and push to main/dev; deploy.yml and fix-formatting.yml workflow_dispatch only. No workflow deploys on push.
+
+| ID    | Finding                                                                                                                                | Severity | Status          | Action                                                                                                          |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------- | --------------------------------------------------------------------------------------------------------------- |
+| WF-1  | deploy.yml has no `needs:` on CI; a manual dispatch from main deploys HEAD whatever its CI state                                       | Medium   | READY_FOR_OWNER | Owner decides whether to require a passing CI run before deploy; branch protection cannot be read from the repo |
+| WF-2  | deploy.yml host key comes from ssh-keyscan on each run (trust on first use)                                                            | Low      | OPEN            | Pin the production host key as a secret                                                                         |
+| WF-3  | fix-formatting.yml gives `contents: write` and `pull-requests: write` to the whole job, including dependency install scripts           | Medium   | OPEN            | Split into a read-only job and a write job                                                                      |
+| WF-4  | fix-formatting.yml checkout persists the token in .git/config                                                                          | Low      | OPEN            | Set persist-credentials: false                                                                                  |
+| WF-5  | fix-formatting.yml opens pull requests (peter-evans/create-pull-request)                                                               | Info     | READY_FOR_OWNER | Owner decides whether to keep it (see CI-8)                                                                     |
+| WF-6  | fix-formatting.yml swallows failures (`                                                                                                |          | true`)          | Low                                                                                                             | OPEN | Remove the ` |     | true` |
+| WF-7  | ruff unpinned in fix-formatting.yml; backend/requirements-dev.txt pins `ruff>=0.17,<1.0`                                               | Low      | OPEN            | Install from requirements-dev.txt                                                                               |
+| WF-8  | fix-formatting.yml has no timeout or concurrency                                                                                       | Low      | OPEN            | Add both                                                                                                        |
+| WF-9  | All 15 action references use mutable tags, none pinned to SHA                                                                          | Medium   | OPEN            | Pin to commit SHAs (CI-7)                                                                                       |
+| WF-10 | production-images job boots with ENVIRONMENT=development; backend/app/core/config.py treats production, prod and staging as production | Medium   | OPEN            | Boot with ENVIRONMENT=production and test-only secrets                                                          |
+| WF-11 | No dependency audit, secret scan, coverage, nightly schedule or manual test workflow                                                   | Medium   | OPEN            | See CI-2 to CI-6                                                                                                |
+
+Checked and compliant: least-privilege top-level permissions in ci.yml and deploy.yml; deploy job guarded by `refs/heads/main`; every package.json script the workflows call exists; Playwright projects 390 and 1280 exist; scripts/deploy-remote.sh has deploy and rollback modes.
