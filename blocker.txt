@@ -574,3 +574,9 @@ What the agent has done without approval (read-only or reversible):
   - Created a verified git bundle outside the repository (SHA-256 recorded in PROGRESS.md).
   - Created the local branch dev from 8eda186 (not pushed).
   - Wrote PROGRESS.md.
+
+G5 - RESOLVED (20 October 2026)
+  Owner confirmed the repository is https://github.com/varunjakkampudi-tech/oraone-prod.
+  Corrected in SECURITY.md (private vulnerability report link and repository line).
+  The archived goal and spec files still name varunjakkampudi-tech/OraOne. They are kept byte-for-byte
+  (SHA256SUMS.txt); that name is superseded by the confirmed repository above.

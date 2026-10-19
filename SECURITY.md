@@ -6,11 +6,11 @@ This policy covers the OraOne source repository and local application code. Loca
 
 ## Private vulnerability reporting
 
-Use the repository-scoped [GitHub private vulnerability report form](https://github.com/varunjakkampudi-tech/OraOne/security/advisories/new). This is the private-report endpoint for the verified repository and current GitHub remote.
+Use the repository-scoped [GitHub private vulnerability report form](https://github.com/varunjakkampudi-tech/oraone-prod/security/advisories/new). This is the private-report endpoint for the verified repository and current GitHub remote.
 
 The repository was checked on 14 October 2026:
 
-- Repository: varunjakkampudi-tech/OraOne
+- Repository: varunjakkampudi-tech/oraone-prod
 - Visibility: public
 - Owner: varunjakkampudi-tech
 - Issues: enabled
