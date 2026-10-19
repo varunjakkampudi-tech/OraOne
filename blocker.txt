@@ -626,3 +626,27 @@ R1 - CLOSED BY OWNER INSTRUCTION (20 October 2026)
   The approval statement is recorded in PROGRESS.md (Governance state), with the owner's words and date.
   docs/decisions/OWNER_APPROVALS.md is not required and was never created.
   Still OPEN: R2 (Hostinger auto-deploy setting), R3 to R7 as listed above.
+
+ROUND 12 - ALL FIVE SHARED FILES (recorded 20 October 2026)
+==========================================================
+Verified: the five files shared on 20 October match the archived copies (SHA256SUMS.txt in
+docs/governance/goals/2026-10-19/). No new archive entry was needed.
+
+S1. [OPEN, scope] "100% complete" is not achievable in one session
+  The program covers 30 standard categories, gates G01 to G30, and every product module (WhatsApp,
+  Instagram, voice, workflows, marketplace, billing, admin, analytics). Several items need the owner or
+  outside parties (see the owner items below). The agent will report measured progress only, with
+  numerators and denominators, and will not claim completion.
+
+S2. [OPEN, owner] Items that block "app ready" for live use
+  - Provider accounts and approvals: WhatsApp (Meta), Instagram (Meta app review), telephony and calling
+    rules (India DLT and TRAI/TCCCPR), Stripe live mode, Cognito production, AI provider budgets.
+  - Hostinger: confirm the auto-deploy setting (R2) and the production environment review on deploy.yml.
+  - Legal review: privacy (DPDP), consent for outbound messages and calls, terms.
+  - Staging host, if you want staging validation (R4).
+  See ROUND 9 (items 35a to 35d, 19) and ROUND 11 (R2 to R7) above for the step-by-step instructions.
+
+S3. [OPEN, agent] Tracked in GAP_MATRIX.md and QUALITY_AUDIT.md; the agent is working on them on main.
+  - Read-only audits in progress: tenant isolation and authorization, CI and workflows, frontend
+    accessibility and responsive. Their findings will be added as GAP_MATRIX rows with their evidence.
+  - Any wrong repository name or commit reference found in the codebase is skipped and recorded here.
