@@ -93,3 +93,19 @@ Measured: 3 workflow files, 6 jobs, 15 `uses:` lines, 0 pinned to a commit SHA, 
 | WF-11 | No dependency audit, secret scan, coverage, nightly schedule or manual test workflow                                                   | Medium   | OPEN            | See CI-2 to CI-6                                                                                                |
 
 Checked and compliant: least-privilege top-level permissions in ci.yml and deploy.yml; deploy job guarded by `refs/heads/main`; every package.json script the workflows call exists; Playwright projects 390 and 1280 exist; scripts/deploy-remote.sh has deploy and rollback modes.
+
+## H. Frontend accessibility and responsive findings (static read-only audit, 20 October 2026)
+
+Static review only; no browser run. Checks: onClick on non-interactive elements, img alt, input labels, icon-only buttons, fixed widths, reduced-motion handling.
+
+| ID     | Finding                                                                                                      | Severity        | Status | Action                      |
+| ------ | ------------------------------------------------------------------------------------------------------------ | --------------- | ------ | --------------------------- |
+| A11Y-1 | Disabled chat composer input has only a placeholder, no label (src/components/oraone/pages.tsx:634)          | Low             | OPEN   | Add aria-label              |
+| A11Y-2 | Same defect, second input (src/components/oraone/pages.tsx:753)                                              | Low             | OPEN   | Add aria-label              |
+| A11Y-3 | Icon-only link button relies on title only (src/components/oraone/pages.tsx:490)                             | Low-Medium      | OPEN   | Add aria-label              |
+| A11Y-4 | Three icon-only link buttons rely on title only (src/components/oraone/dashboard.tsx:465, 480, 493)          | Low             | OPEN   | Add aria-label              |
+| A11Y-5 | .workspace-menu has fixed width 265px with no max-width guard (src/styles.css:1298)                          | Low (suspected) | OPEN   | Check at 390px in a browser |
+| A11Y-6 | Shared image component depends on every caller passing non-empty alt (src/components/site/templates.tsx:196) | Low (suspected) | OPEN   | Check callers               |
+
+Measured counts: 158 onClick occurrences in 30 files, none on non-interactive tags; 4 img tags, all with alt; 104 input-like elements in 25 files, about 25 call sites read; 18 icon-size buttons in 6 files; 3 reduced-motion blocks found.
+Not verified: unread studio and templates form controls; visual overflow and focus at 390px (needs a browser run).
