@@ -13,7 +13,7 @@ Status log for the autonomous goal. Every number states its numerator and denomi
 
 ## Baseline record (Stage A, step 1)
 
-- Repository (owner confirmed 20 October 2026): https://github.com/varunjakkampudi-tech/oraone-prod. The archived goal and spec files name `varunjakkampudi-tech/OraOne`; they are kept verbatim for checksum verification and that name is superseded by this line.
+- Repository: confirmed by the owner on 20 October 2026. Name and link withheld in documents (CR-02).
 - Baseline `main` = `8eda186311ec95d81b68d688e9a46a0f59246c60` (`origin/main` identical)
 - Tags before work: none. Branches before work: `main` only
 - Working tree before work: `?? docs/governance/` only (no owner code changes)

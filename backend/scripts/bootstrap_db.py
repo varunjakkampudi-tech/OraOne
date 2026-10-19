@@ -1,4 +1,4 @@
-"""One-time bootstrap — `CREATE DATABASE oraone` on the RDS instance.
+"""One-time bootstrap — `CREATE DATABASE oraone` on the database server.
 
 `CREATE DATABASE` cannot run inside a transaction, so we connect to the
 default `postgres` maintenance database with autocommit isolation and

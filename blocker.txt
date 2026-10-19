@@ -566,7 +566,7 @@ G3. [OPEN, owner] Staging host (optional now, needed before staging validation)
 G4. [OPEN, owner] Provider accounts and budgets (unchanged from ROUND 9): items 35a to 35d and item 19.
 
 G5. [OPEN, owner] Repository name
-  The goal names varunjakkampudi-tech/OraOne. The configured remote is varunjakkampudi-tech/oraone-prod.
+  The goal names [repository name withheld, CR-02]. The configured remote is [repository name withheld, CR-02].
   Reply with the correct name if the remote is the one to use.
 
 What the agent has done without approval (read-only or reversible):
@@ -576,9 +576,9 @@ What the agent has done without approval (read-only or reversible):
   - Wrote PROGRESS.md.
 
 G5 - RESOLVED (20 October 2026)
-  Owner confirmed the repository is https://github.com/varunjakkampudi-tech/oraone-prod.
+  Owner confirmed the repository is https://github.com/[repository name withheld, CR-02].
   Corrected in SECURITY.md (private vulnerability report link and repository line).
-  The archived goal and spec files still name varunjakkampudi-tech/OraOne. They are kept byte-for-byte
+  The archived goal and spec files still name [repository name withheld, CR-02]. They are kept byte-for-byte
   (SHA256SUMS.txt); that name is superseded by the confirmed repository above.
 
 ROUND 11 - OPEN OWNER ITEMS (recorded 20 October 2026, after push 218919f)
@@ -591,7 +591,7 @@ R1. [OPEN, owner] Create the approval record in the repository
   Why the agent cannot do it: the approval must come from the owner. The agent may not write, backdate or
   self-certify it.
   Steps:
-    1. In GitHub, open the repository oraone-prod, go to Add file, then Create new file.
+    1. In GitHub, open this repository, go to Add file, then Create new file.
     2. Name it docs/decisions/OWNER_APPROVALS.md.
     3. Paste the approval text (date, approver name, the five documents with their SHA-256 values from
        docs/governance/goals/2026-10-19/SHA256SUMS.txt, and any exception you choose).
@@ -618,7 +618,7 @@ R6. [OPEN, owner] Decide whether to keep fix-formatting.yml = GAP_MATRIX CI-8.
   It opens pull requests, which the goal does not allow for agents. Keep it, change it, or remove it.
 
 R7. [OPEN, owner] Confirm the goal file slug mismatch is only a naming issue.
-  The archived goal and spec name varunjakkampudi-tech/OraOne. The repository is oraone-prod. The
+  The archived goal and spec name [repository name withheld, CR-02]. The repository is the one named in the owner statement (CR-02). The
   archived files stay verbatim (checksums), so this is recorded only; no action needed beyond awareness.
 
 R1 - CLOSED BY OWNER INSTRUCTION (20 October 2026)
@@ -663,3 +663,34 @@ R8 - CLOSED: Cognito and SMS sign-in code removed (20 October 2026)
   Open (owner): if you want SMS sign-in or SMS codes later, choose a provider and send the decision.
   Until then no SMS sign-in is built. Remove the old "Cognito production" entry from the owner list (S2):
   it no longer applies.
+
+ROUND 13 - AMENDMENT CR-02 (no AWS, no repository names or links) AND OPEN ITEMS (20 October 2026)
+=================================================================================================
+Index of every open item in this file. Each item lists the file to read, relative to the repository root.
+
+Done by the agent (no owner action):
+  - AWS: no AWS runtime code, SDK or dependency found in tracked source (boto, aws, cognito, s3, ses, sns checked).
+    Cognito removed earlier (migration 20261016_0051). Comment-only references to a managed database were reworded.
+    See GAP_MATRIX.md section J.
+  - Repository names and links removed from SECURITY.md, PROGRESS.md, GAP_MATRIX.md and this file.
+  - Amended documents archived in docs/governance/goals/2026-10-20/ with SHA256SUMS.txt.
+
+Owner decisions and actions (OPEN):
+  R9.  Archive copies still name the repository. Files: docs/governance/goals/2026-10-19/ and
+       docs/governance/goals/2026-10-20/. The files are kept byte-for-byte so their checksums match.
+       Choose one: (a) keep them as they are (recommended; they are your source documents), or
+       (b) move them outside the repository and keep only the checksum list inside. Reply "a" or "b".
+  R10. Commit messages in the history name the repository (commits made on 20 October 2026, for example the
+       one correcting the repository name). CR-02 forbids this for new commits. Rewriting history is forbidden by
+       the standard, so nothing will be rewritten. Reply "accept" to close this item.
+  R11. Decision D21 (sign-in method and email provider). Current state: sign-in by one-time code sent by email,
+       which is implemented (backend/app/services/auth_service.py). Owner to confirm the email provider and whether
+       TOTP MFA is required for administrators. Reply with the provider name (never the key).
+  R12. Container names in docker-compose.prod.yml and docker-compose.dev.yml begin with the repository slug. They are
+       not repository names as such, but they reveal it. Owner decides whether to rename them. Renaming changes
+       deployment; do it only in a planned change window. Reply "rename" or "keep".
+  R2.  (still open) Confirm Hostinger does not auto-deploy on push to main.
+  R3.  (still open) CI result for the latest main run.
+  R4 to R7: see ROUND 11.
+  Findings waiting for agent reports (dead code, dummy content, dummy tests): recorded in GAP_MATRIX.md section J
+  when the audits finish. Their deletions are made only after each item is proven unused.

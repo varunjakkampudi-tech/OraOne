@@ -4,14 +4,14 @@ Each gap has an ID, the requirement it breaks (source and section), its status, 
 
 ## A. Governance and workflow
 
-| ID   | Gap                                                                    | Requirement                   | Status          | Action                                                                    |
-| ---- | ---------------------------------------------------------------------- | ----------------------------- | --------------- | ------------------------------------------------------------------------- |
-| GV-1 | Owner approval of v2.1 not in repository                               | Standards 2.4; Goal 1.2       | BLOCKED (owner) | `blocker.txt` G1                                                          |
-| GV-2 | Hostinger auto-deploy-on-push setting unverified                       | Goal 1 (approval condition 2) | BLOCKED (owner) | `blocker.txt` G2                                                          |
-| GV-3 | Repository name in goal (`OraOne`) differs from remote (`oraone-prod`) | Goal header                   | READY_FOR_OWNER | `blocker.txt` G5                                                          |
-| GV-4 | Deploy workflow is `deploy.yml`, goal names `deploy-hostinger.yml`     | Goal 16B.1                    | OPEN            | Record the mapping in `PROGRESS.md`. Do not rename without owner approval |
-| GV-5 | No `docs/decisions/`, `docs/runbooks/`, `docs/investigations/`         | Goal 16B.8, 18                | OPEN            | Create with README stubs                                                  |
-| GV-6 | No `CHANGE_REGISTER.md`                                                | Standard 3.6                  | OPEN            | Create                                                                    |
+| ID   | Gap                                                                         | Requirement                   | Status          | Action                                                                    |
+| ---- | --------------------------------------------------------------------------- | ----------------------------- | --------------- | ------------------------------------------------------------------------- |
+| GV-1 | Owner approval of v2.1 not in repository                                    | Standards 2.4; Goal 1.2       | BLOCKED (owner) | `blocker.txt` G1                                                          |
+| GV-2 | Hostinger auto-deploy-on-push setting unverified                            | Goal 1 (approval condition 2) | BLOCKED (owner) | `blocker.txt` G2                                                          |
+| GV-3 | Goal names a repository that differs from the remote (name withheld, CR-02) | Goal header                   | READY_FOR_OWNER | `blocker.txt` G5                                                          |
+| GV-4 | Deploy workflow is `deploy.yml`, goal names `deploy-hostinger.yml`          | Goal 16B.1                    | OPEN            | Record the mapping in `PROGRESS.md`. Do not rename without owner approval |
+| GV-5 | No `docs/decisions/`, `docs/runbooks/`, `docs/investigations/`              | Goal 16B.8, 18                | OPEN            | Create with README stubs                                                  |
+| GV-6 | No `CHANGE_REGISTER.md`                                                     | Standard 3.6                  | OPEN            | Create                                                                    |
 
 ## B. CI/CD (Standard 27; Goal 16B)
 
@@ -130,3 +130,15 @@ Measured: 30 of 356 route decorators read (about 8%). 23 read by handler body, 7
 Checked and sound (VERIFIED): public API ownership helpers (_scoped, _owns); RAG chunk filter by organization_id; escalations and inbox scoped by org and project; chat thread access user-scoped; Twilio, Meta, SDK and Telegram signatures fail closed; Stripe signature and event-id replay protection; inbound dedupe on provider message id; constant-time OTP comparison with attempt limits; no secret logging found by grep.
 
 Recommended order: SEC-T1 first (it is the only HIGH), then SEC-T2 and SEC-T3, then the per-route audit of the other 326 routes (SEC-T9).
+
+## J. Amendment CR-02 (no AWS, no repository names or links) — status, 20 October 2026
+
+| ID    | Requirement                               | Measured status                                                                                                                                                                                                                                                                                 | Action                     |
+| ----- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| CR2-1 | No AWS runtime code, SDK or dependency    | DONE for code: tracked source checked for boto, aws, cognito, s3, ses, sns, cloudfront, rds; no SDK or dependency found. Remaining hits are comments (reworded), detection patterns for leaked AWS keys in the security scanner (kept on purpose), and alembic migration history (never edited) | none                       |
+| CR2-2 | Cognito removed                           | DONE: migration 20261016_0051 removed Cognito identity columns; sign-in is application-managed; no SMS sign-in path exists                                                                                                                                                                      | D21 decision (blocker R11) |
+| CR2-3 | No repository names or links in documents | PARTIAL: removed from SECURITY.md, PROGRESS.md, GAP_MATRIX.md, blocker.txt. Still present in archived source documents (blocker R9) and in earlier commit messages (blocker R10)                                                                                                                | blocker R9, R10            |
+| CR2-4 | Container names                           | OPEN: docker-compose files use the repository slug as a prefix (blocker R12)                                                                                                                                                                                                                    | owner decision             |
+| CR2-5 | Object storage S3-compatible, non-AWS     | Recorded: docs/architecture/SYSTEM-OVERVIEW.md states an S3-compatible service is optional; local disk is the development fallback                                                                                                                                                              | none                       |
+
+Counts: tracked files searched 1,064 (including binaries). AWS-specific matches in tracked source after the reword: 0 runtime, 2 detection patterns, 1 migration comment.

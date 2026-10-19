@@ -12,7 +12,7 @@ Two layers:
    users, and proves Org A literally cannot read or mutate Org B's
    ``agents`` / ``conversations`` / ``messages`` / ``integrations`` rows
    over HTTP. Skipped when Postgres is unreachable so the suite still
-   passes in the Emergent preview pod where the RDS instance is private.
+   passes in a preview environment where the database is private.
 """
 
 from __future__ import annotations
@@ -112,7 +112,7 @@ def test_org_scoped_repo_stamps_org_when_unset():
 
 
 def _postgres_reachable() -> bool:
-    """Best-effort probe so the suite skips when RDS is in a private VPC."""
+    """Best-effort probe so the suite skips when the database is on a private network."""
     import os
 
     import asyncpg
@@ -142,7 +142,7 @@ def _postgres_reachable() -> bool:
 
 REQUIRES_DB = pytest.mark.skipif(
     not _postgres_reachable(),
-    reason="Postgres is not reachable from this host (private VPC, etc).",
+    reason="Postgres is not reachable from this host (private network, etc).",
 )
 
 

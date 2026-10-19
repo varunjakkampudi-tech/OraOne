@@ -20,8 +20,8 @@ async def db_health() -> dict:
     """Postgres reachability probe.
 
     Returns 200 with `{status: 'healthy', database: 'connected'}` when the
-    engine can run `SELECT 1` against RDS. Returns 503 with a clear error
-    detail otherwise (e.g. when the preview pod can't see the private VPC).
+    engine can run `SELECT 1` against the database. Returns 503 with a clear error
+    detail otherwise (e.g. when the app cannot reach the private database network).
     """
     try:
         engine = init_engine()

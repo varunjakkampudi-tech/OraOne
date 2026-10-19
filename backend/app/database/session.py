@@ -1,8 +1,8 @@
 """Async SQLAlchemy engine + session management.
 
 The engine is created lazily on first use so the FastAPI app can boot
-even when the database is unreachable (e.g. RDS sitting in a private VPC
-the preview pod can't see). Routes that actually need the DB will fail
+even when the database is unreachable (e.g. a database on a private network
+the app cannot reach). Routes that actually need the DB will fail
 fast with a clear error; everything else keeps working.
 """
 
