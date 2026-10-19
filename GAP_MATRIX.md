@@ -53,12 +53,12 @@ Least-privilege permissions: 3 of 3 workflow files declare `permissions:` (DONE)
 
 ## E. Product and matrices (Spec v2.1 sections 5, 9, 12; Goal sections 5, 9)
 
-| ID   | Gap                                                                                       | Status | Action                                                                                      |
-| ---- | ----------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------- |
-| PM-1 | `FEATURE_MATRIX.md`, `APP_SCREEN_MATRIX.md`, `JOURNEY_MATRIX.md`, `TEST_MATRIX.md` absent | OPEN   | Build from the routes, screens and tests in the repo; mark unverified items NOT_ASSESSED    |
-| PM-2 | `PROVIDER_PERMISSION_MATRIX.md` absent                                                    | OPEN   | list WhatsApp, Instagram, telephony, Stripe, Cognito with status BLOCKED or READY_FOR_OWNER |
-| PM-3 | `MIGRATION_AUDIT.md`, `COST_MODEL.md`, `RISK_REGISTER.md` absent                          | OPEN   | create                                                                                      |
-| PM-4 | 25 go/no-go gates (Goal 21) not tracked                                                   | OPEN   | track in `QUALITY_AUDIT.md` with NOT_DUE mapped by release slice                            |
+| ID   | Gap                                                                                       | Status | Action                                                                                   |
+| ---- | ----------------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| PM-1 | `FEATURE_MATRIX.md`, `APP_SCREEN_MATRIX.md`, `JOURNEY_MATRIX.md`, `TEST_MATRIX.md` absent | OPEN   | Build from the routes, screens and tests in the repo; mark unverified items NOT_ASSESSED |
+| PM-2 | `PROVIDER_PERMISSION_MATRIX.md` absent                                                    | OPEN   | list WhatsApp, Instagram, telephony, Stripe with status BLOCKED or READY_FOR_OWNER       |
+| PM-3 | `MIGRATION_AUDIT.md`, `COST_MODEL.md`, `RISK_REGISTER.md` absent                          | OPEN   | create                                                                                   |
+| PM-4 | 25 go/no-go gates (Goal 21) not tracked                                                   | OPEN   | track in `QUALITY_AUDIT.md` with NOT_DUE mapped by release slice                         |
 
 ## F. Owner-only items (not agent work)
 

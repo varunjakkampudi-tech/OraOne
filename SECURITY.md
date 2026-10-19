@@ -30,7 +30,7 @@ This repository does not currently publish a supported-version matrix. Report ag
 
 ## Security boundaries
 
-- Cognito access tokens are accepted only after issuer, JWKS signature, expiry, client binding, and token-use validation.
+- OraOne-issued access tokens are accepted only after signature, expiry, issuer, and token-use validation (backend/app/core/security.py).
 - PostgreSQL is authoritative for users, platform roles, organization memberships, tenant scope, and audit records.
 - Frontend role state and request payloads are untrusted.
 - Webhook destinations are validated at configuration and delivery time; redirects are disabled.

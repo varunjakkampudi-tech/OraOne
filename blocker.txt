@@ -650,3 +650,16 @@ S3. [OPEN, agent] Tracked in GAP_MATRIX.md and QUALITY_AUDIT.md; the agent is wo
   - Read-only audits in progress: tenant isolation and authorization, CI and workflows, frontend
     accessibility and responsive. Their findings will be added as GAP_MATRIX rows with their evidence.
   - Any wrong repository name or commit reference found in the codebase is skipped and recorded here.
+
+R8 - CLOSED: Cognito and SMS sign-in code removed (20 October 2026)
+  Verified: the app no longer uses Cognito. Migration 20261016_0051_remove_cognito_and_object_storage
+  removed the Cognito identity columns; sign-in is self-hosted (auth_subject, email one-time codes).
+  Verified: there is no SMS sign-in or SMS one-time-code path in the code. Login codes are sent by email
+  (backend/app/services/auth_service.py).
+  Removed in this step: the stale SECURITY.md line that said Cognito tokens are accepted, and the
+  Cognito entry in the GAP_MATRIX provider list.
+  Not changed: alembic migrations (applied history, never edited). Twilio is used only for channel
+  messaging and voice, not for sign-in.
+  Open (owner): if you want SMS sign-in or SMS codes later, choose a provider and send the decision.
+  Until then no SMS sign-in is built. Remove the old "Cognito production" entry from the owner list (S2):
+  it no longer applies.
