@@ -1,0 +1,7 @@
+3192c9c0a7deb8dd0c184c6fa298b59e25686e5ed19be730e8fdf7c7d844c438 *OraOne-OS-Autonomous-Goal-v2.1.md
+65f6f07b9355b1f241123ada939cfd24b2e89bf5ee88ef87b1c2314d4b3672e7 *OraOne-OS-Engineering-Standards-v2.1.md
+e6e82b18ac5546b7554289d73ace91d531080ed59218b8e9b3ba16cfbb8ca293 *OraOne-OS-Master-Product-Spec-v2.1.md
+9421280dac8d38daccd26378d378a862751f7dcc9bb0d8392a408cb50a1f90ec *Viswatra-Global-Engineering-Completion-Program-v1.1.md
+429b54c2003d8e5bf4a2949507f5a8a2c5284820f6588c4b1e3266fe18112066 *Viswatra-Global-Engineering-Quality-Standard-v1.1.md
+44613c26c31291c3737fe92d659728595fe889b3f0319973660f7d3a4d67b191 *OraOne-Autonomous-Goal.md
+3a688e1b169d261600f891a74fad0620f5fa1eacfd6ca2f3c65fe6c9b08e5e5a *MASTER-PROMPT.md

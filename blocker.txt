@@ -534,3 +534,43 @@ STILL NEEDS YOU OR A LIVE ACCOUNT:
      dashboard (item 12, step 4). Replays and ordering are tested without Stripe.
 35d. Staff reply screen: the reply API exists; the inbox page still needs a reply box. I will build it
      when you confirm the layout you want (or say "build it as the other inbox screens").
+
+ROUND 10 - GOVERNANCE AND NEW GOAL (recorded 20 October 2026)
+==============================================================
+Owner chat message on 20 October: "I am approving everything ... I want everything completed 100%".
+A chat approval is not a recorded approval. The v2.1 spec and the standards require the approval in the
+repository, with date and approver. The file was not on origin/main at commit 8eda186.
+
+G1. [OPEN, owner] Record the approval in the repository
+  Module: governance. Requirement: Standards 2.4; Goal 1.2.
+  Verified fact: docs/decisions/OWNER_APPROVALS.md does not exist on origin/main (checked 20 October).
+  Why the agent cannot do it: an approval record must come from the owner. The agent may not create or
+  self-certify it.
+  Steps:
+    1. Create docs/decisions/OWNER_APPROVALS.md with the approval text (date, approver, documents, and any
+       exception). Commit it to main.
+    2. Reply "approval pushed" with the commit SHA.
+  Expected result: the agent verifies the SHA and then treats v2.1 as ACTIVE.
+
+G2. [OPEN, owner] Confirm the Hostinger auto-deploy setting (before any push to main)
+  Module: deployment. Requirement: Goal 1 and the approval condition 2.
+  Verified fact: .github/workflows/deploy.yml runs only on workflow_dispatch and only for refs/heads/main.
+  Not verified: whether Hostinger's panel deploys automatically when main changes. The agent cannot see that.
+  Steps: in hPanel, open the Git deployment settings for the site. If auto-deploy on push is ON, turn it OFF
+  (or tell the agent), then reply "auto-deploy off". If it is off, reply "auto-deploy off, verified".
+  Expected result: a push to main changes no live site.
+
+G3. [OPEN, owner] Staging host (optional now, needed before staging validation)
+  Requirement: Goal 16B.4. Without it, validation runs in ephemeral CI and staging is BLOCKED.
+
+G4. [OPEN, owner] Provider accounts and budgets (unchanged from ROUND 9): items 35a to 35d and item 19.
+
+G5. [OPEN, owner] Repository name
+  The goal names varunjakkampudi-tech/OraOne. The configured remote is varunjakkampudi-tech/oraone-prod.
+  Reply with the correct name if the remote is the one to use.
+
+What the agent has done without approval (read-only or reversible):
+  - Verified the five shared documents against SHA256SUMS.txt (7 files archived).
+  - Created a verified git bundle outside the repository (SHA-256 recorded in PROGRESS.md).
+  - Created the local branch dev from 8eda186 (not pushed).
+  - Wrote PROGRESS.md.
