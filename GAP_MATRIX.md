@@ -142,3 +142,21 @@ Recommended order: SEC-T1 first (it is the only HIGH), then SEC-T2 and SEC-T3, t
 | CR2-5 | Object storage S3-compatible, non-AWS     | Recorded: docs/architecture/SYSTEM-OVERVIEW.md states an S3-compatible service is optional; local disk is the development fallback                                                                                                                                                              | none                       |
 
 Counts: tracked files searched 1,064 (including binaries). AWS-specific matches in tracked source after the reword: 0 runtime, 2 detection patterns, 1 migration comment.
+
+## K. Frontend dead-code and dummy-content audit (read-only, 20 October 2026)
+
+Method: textual reference search. 465 export declarations in src/lib and src/components (464 unique names), 19 end-to-end specs and 30 unit test files read. Textual search can hide dead code when names repeat, and dynamic imports were not analysed separately. No code was deleted in this round.
+
+| ID   | Finding                                                                                | Status                | Action                                                                                                           |
+| ---- | -------------------------------------------------------------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| FE-1 | 88 export names with no reference outside their file: 19 values, 69 type-only          | OPEN                  | Verify each with a symbol-level check, then delete. Do not delete on textual evidence alone                      |
+| FE-2 | Test-style onboarding route "/onboarding/test"                                         | FALSE POSITIVE (kept) | It is step 3 of the onboarding journey (src/lib/phase2.ts:8) and is covered by src/test/phase2.test.ts. Keep     |
+| FE-3 | Sample figures (78.4%, 9,788, "Acme" names, sample counts) in dashboard and pages      | LABELLED SAMPLE       | Confirm every surface shows the "Sample data" label; add a test that fails if a sample figure appears without it |
+| FE-4 | Demo company name in src/lib/oraone.ts                                                 | LABELLED SAMPLE       | Keep; check it never renders as a real customer                                                                  |
+| FE-5 | Smoke, sanity and route-health end-to-end tests check only status, title or headings   | OPEN (weak tests)     | Strengthen: assert a specific element and content per route                                                      |
+| FE-6 | Control sweep swallows click errors (controls.spec.ts)                                 | OPEN (weak test)      | Remove the swallow; a dead button must fail                                                                      |
+| FE-7 | Visual tests are screenshot-only                                                       | OPEN                  | Add explicit content assertions beside the screenshots                                                           |
+| FE-8 | Unit tests with one assertion (src/test/app-routing.test.tsx, getting-started.test.ts) | OPEN                  | Assert the real route and step targets                                                                           |
+| FE-9 | src/routes/onboarding.test.tsx contains no tests (route file)                          | NOT A TEST FILE       | Rename is not needed; the name is misleading. Owner decision on naming (blocker)                                 |
+
+Counts: 464 unique export names checked; 88 with no textual reference; 30 unit test files and 19 end-to-end specs read.
