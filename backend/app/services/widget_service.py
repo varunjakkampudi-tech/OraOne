@@ -18,7 +18,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.agent import Agent, AgentStatus
-from app.database.models.widget import Widget, WidgetStatus
+from app.database.models.widget import Widget
 from app.database.models.widget_domain import WidgetDomain
 from app.database.models.widget_event import WidgetEvent
 from app.services.cache import get_shared_cache
@@ -191,10 +191,6 @@ def public_config_dict(widget: Widget, domains: list[str]) -> dict:
         "agent_name": settings.agent_name,
         "has_knowledge": widget.knowledge_base_id is not None,
     }
-
-
-def is_live(widget: Widget) -> bool:
-    return widget.status == WidgetStatus.published
 
 
 def now_utc() -> datetime:

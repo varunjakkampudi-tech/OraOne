@@ -187,13 +187,6 @@ async def get_current_organization(
     return ctx
 
 
-async def get_current_organization_id(
-    ctx: OrgContext = Depends(get_current_organization),
-) -> uuid.UUID:
-    """Convenience: just the org UUID, for endpoints that don't need role."""
-    return ctx.organization_id
-
-
 def require_role(*allowed: str):
     """Dependency factory: 403 unless caller's role is in ``allowed``.
 

@@ -135,17 +135,6 @@ def _revoke_family_id(family_id: str) -> None:
     _cache().delete(_family_key(family_id))
 
 
-def revoke_all_for_family(refresh_token: str) -> None:
-    """Revoke every token descended from the same login (logout everywhere)."""
-    record = _cache().get(f"token:{refresh_token}")
-    if not record:
-        tombstone = _cache().get(_used_key(refresh_token))
-        record = tombstone if isinstance(tombstone, dict) else None
-    if not record:
-        return
-    _revoke_family_id(record["family_id"])
-
-
 def revoke_all_for_user(user_id: str) -> None:
     """Revoke every session for a user (password reset / security event)."""
     families = _cache().get(_user_families_key(user_id)) or []

@@ -83,10 +83,3 @@ async def get_current_user_claims(request: Request) -> Dict[str, Any]:
     # Pseudonymous actor label for log lines and error records (never the raw subject).
     request.state.actor_hash = subject_fingerprint(claims.get("sub"))
     return claims
-
-
-async def get_current_access_token(request: Request) -> str:
-    """FastAPI dependency: validate the access token and return the raw string."""
-    token = _extract_bearer_token(request)
-    verify_access_token(token, request=request)
-    return token

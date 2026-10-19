@@ -12,30 +12,6 @@ from pydantic import BaseModel, ConfigDict, Field
 # ──────────────── Agents ────────────────
 
 
-class AgentIn(BaseModel):
-    name: str = Field(..., min_length=1, max_length=160)
-    type: str
-    description: Optional[str] = None
-    model: str = "openai/gpt-5.5"
-    status: str = "draft"
-    avatar_url: Optional[str] = None
-
-
-class AgentOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: uuid.UUID
-    organization_id: uuid.UUID
-    name: str
-    type: str
-    status: str
-    description: Optional[str] = None
-    model: str
-    avatar_url: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
-
-
 # ──────────────── Conversations ────────────────
 
 
@@ -87,15 +63,6 @@ class MessageIn(BaseModel):
     message: str
     audio_url: Optional[str] = None
     metadata: dict[str, Any] = Field(default_factory=dict)
-
-
-class MessageCitation(BaseModel):
-    title: Optional[str] = None
-    source_type: Optional[str] = None
-    url: Optional[str] = None
-    document_id: Optional[str] = None
-    chunk_id: Optional[str] = None
-    score: Optional[float] = None
 
 
 class MessageOut(BaseModel):

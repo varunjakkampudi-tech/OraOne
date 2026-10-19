@@ -168,13 +168,6 @@ def detect_prompt_injection(text: str) -> dict[str, Any]:
     return {"injection": bool(flags), "flags": flags}
 
 
-def sanitize_prompt(text: str) -> dict[str, Any]:
-    """Return ``{safe, text, flags}`` — neutralises terminator tokens."""
-    result = detect_prompt_injection(text)
-    cleaned = INJECTION_PATTERNS[-1][1].sub(" ", text or "")  # strip terminators
-    return {"safe": not result["injection"], "text": cleaned, "flags": result["flags"]}
-
-
 # ─────────────────────────── content moderation ───────────────────────────
 MODERATION_LEXICON: dict[str, list[str]] = {
     "violence": ["kill", "murder", "attack", "bomb", "shoot", "assault", "terror"],

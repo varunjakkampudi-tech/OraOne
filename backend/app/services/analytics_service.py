@@ -385,21 +385,6 @@ async def _token_sum(
     return int(await session.scalar(stmt) or 0)
 
 
-async def _daily_token_sum(
-    session: AsyncSession, org_id: uuid.UUID, since: datetime
-) -> list[tuple[date, int]]:
-    day = cast(Message.created_at, Date).label("day")
-    stmt = (
-        select(day, func.coalesce(func.sum(Message.token_count), 0))
-        .select_from(Message)
-        .join(Conversation, Message.conversation_id == Conversation.id)
-        .where(Conversation.organization_id == org_id, Message.created_at >= since)
-        .group_by(day)
-        .order_by(day)
-    )
-    return [(r[0], int(r[1])) for r in (await session.execute(stmt)).all()]
-
-
 async def _feedback_counts(session: AsyncSession, org_id: uuid.UUID) -> dict[str, int]:
     up = await _count(
         session,

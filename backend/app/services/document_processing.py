@@ -35,7 +35,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, Optional
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.document import Document, DocumentStatus
@@ -699,14 +699,3 @@ async def _run_pipeline(session: AsyncSession, document_id: uuid.UUID) -> None:
             fresh.processing_completed_at = datetime.now(timezone.utc)
             fresh.processing_error = f"{type(e).__name__}: {e}"[:1000]
             await session.commit()
-
-
-async def chunk_count_for(session: AsyncSession, document_id: uuid.UUID) -> int:
-    from sqlalchemy import func
-
-    n = await session.scalar(
-        select(func.count(DocumentChunk.id)).where(
-            DocumentChunk.document_id == document_id
-        )
-    )
-    return int(n or 0)

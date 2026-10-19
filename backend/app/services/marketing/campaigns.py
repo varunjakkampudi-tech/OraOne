@@ -19,7 +19,6 @@ from __future__ import annotations
 import logging
 import re
 import uuid
-from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional, Sequence
 
@@ -80,12 +79,6 @@ class CampaignNotFound(CampaignError):
 
 class CampaignConflict(CampaignError):
     pass
-
-
-@dataclass(frozen=True)
-class PlannedOutcome:
-    allowed: bool
-    reason: Optional[str]
 
 
 def _utcnow() -> datetime:

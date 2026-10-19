@@ -71,11 +71,6 @@ class IntegrationCatalogResponse(BaseModel):
     total: int
 
 
-class IntegrationListResponse(BaseModel):
-    items: list[IntegrationRead]
-    total: int
-
-
 class ConnectRequest(BaseModel):
     provider: str = Field(..., min_length=1, max_length=60)
     # OAuth authorization code for the callback leg of a real flow.

@@ -158,12 +158,6 @@ def unsupported_sentences(
     return flagged
 
 
-def is_grounded(
-    answer: str, passages: Iterable[str], *, threshold: float = 0.75
-) -> bool:
-    return not unsupported_sentences(answer, passages, threshold=threshold)
-
-
 FALLBACK_PREFIX = (
     "I could not confirm that from the knowledge base. The closest source says:"
 )

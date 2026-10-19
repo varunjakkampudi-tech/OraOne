@@ -69,3 +69,9 @@ Status vocabulary: NOT_ASSESSED, NOT_APPLICABLE_WITH_REASON, PLANNED, IMPLEMENTE
 ## 4. Not done in this session (carried to GAP_MATRIX.md)
 
 Dependency audit, secret scan, SBOM, nightly workflow, manual test workflow, coverage thresholds, SHA pinning of actions, CODEOWNERS, Dependabot, and all matrices other than this file and `GAP_MATRIX.md`.
+
+## Backend dead-code removal check (20 October 2026)
+
+- Backend suite after removal: `python -m pytest -q -p no:cacheprovider` → 1630 passed, 0 failed, 10 warnings (8 min 21 s).
+- Ruff check and format check on backend: pass.
+- Removed items and proof: see GAP_MATRIX.md section L.

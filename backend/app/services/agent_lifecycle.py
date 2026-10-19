@@ -12,7 +12,7 @@ them.
 
 from __future__ import annotations
 
-from app.database.models.agent import Agent, AgentStatus
+from app.database.models.agent import Agent
 
 
 def missing_requirements(agent: Agent) -> list[str]:
@@ -28,8 +28,3 @@ def missing_requirements(agent: Agent) -> list[str]:
 def is_ready(agent: Agent) -> bool:
     """True when the agent meets the minimum requirements to serve traffic."""
     return not missing_requirements(agent)
-
-
-def can_serve(agent: Agent) -> bool:
-    """True only when the agent is published and actively answering."""
-    return agent.status == AgentStatus.active

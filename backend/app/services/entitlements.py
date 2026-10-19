@@ -556,19 +556,6 @@ async def evaluate_features(
     return gated
 
 
-async def is_feature_enabled(
-    session: AsyncSession, organization_id: uuid.UUID, feature_name: str
-) -> bool:
-    """Whether a single feature is on for an org (fail-closed on unknown)."""
-    snapshot = await get_cached_snapshot(session, organization_id)
-    features = snapshot.get("features", {})
-    if feature_name in features:
-        return bool(features[feature_name])
-    # Fail-closed: a feature with no flag row and not in the known catalogue is
-    # denied rather than silently allowed.
-    return False
-
-
 # --------------------------------------------------------------------------- #
 # Snapshot (single resolution path) + cache                                    #
 # --------------------------------------------------------------------------- #
@@ -630,34 +617,6 @@ async def entitlements_snapshot(
 ) -> dict[str, Any]:
     """Public snapshot for the frontend (cached)."""
     return await get_cached_snapshot(session, organization_id)
-
-
-async def is_product_enabled(
-    session: AsyncSession, organization_id: uuid.UUID, product_key: str
-) -> bool:
-    """Whether ``organization_id`` may use ``product_key`` right now.
-
-    **Fail-closed:** an unknown product key (not in the catalog) resolves to
-    ``False``. Known catalog products fall back to their ``default_enabled``.
-    """
-    snapshot = await get_cached_snapshot(session, organization_id)
-    products = snapshot.get("products", {})
-    if product_key not in products:
-        return False
-    return bool(products[product_key])
-
-
-async def is_product_in_maintenance(
-    session: AsyncSession, organization_id: uuid.UUID, product_key: str
-) -> bool:
-    snapshot = await get_cached_snapshot(session, organization_id)
-    return bool(snapshot.get("maintenance", {}).get(product_key, False))
-
-
-def _product_status_from_snapshot(
-    snapshot: dict[str, Any], product_key: str
-) -> Optional[str]:
-    return snapshot.get("statuses", {}).get(product_key)
 
 
 # --------------------------------------------------------------------------- #

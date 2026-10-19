@@ -160,3 +160,18 @@ Method: textual reference search. 465 export declarations in src/lib and src/com
 | FE-9 | src/routes/onboarding.test.tsx contains no tests (route file)                          | NOT A TEST FILE       | Rename is not needed; the name is misleading. Owner decision on naming (blocker)                                 |
 
 Counts: 464 unique export names checked; 88 with no textual reference; 30 unit test files and 19 end-to-end specs read.
+
+## L. Backend dead-code removal (20 October 2026)
+
+Method: a read-only audit listed 260 backend modules and 2,151 top-level definitions. Each candidate was then checked by a word search over backend, frontend, end-to-end, scripts and docs. Only the definition matched, so each was removed.
+
+| Removed                                                                                                                                                                                                                                                                                         | Count | Proof                                                            |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ---------------------------------------------------------------- |
+| Unused functions and classes in app/ (email_service send_* ×8, jwt_auth, org_context, schemas integrations and v2 ×4, agent_lifecycle, analytics_service, document_processing, entitlements ×4, grounding, security_service, token_service, widget_service, marketing/campaigns PlannedOutcome) | 26    | word search: definition only                                     |
+| Unused module app/database/repositories/project_scoped.py                                                                                                                                                                                                                                       | 1     | no imports; only a stale ruff cache matched                      |
+| Email templates with no reference (welcome, verify_email, password_reset, lead_captured, conversation_escalated, usage_warning, subscription_receipt, weekly_digest)                                                                                                                            | 8     | templates load only by explicit name; no reference in any source |
+| Imports left unused by the removals                                                                                                                                                                                                                                                             | 4     | ruff F401 fix                                                    |
+
+Kept after review: 9 no-raise tests with no assert (each checks that a call does not raise; they are valid, not dummy); route handlers are not removed because decorators register them.
+
+Checks after the change: ruff check and ruff format check on backend (see QUALITY_AUDIT.md); backend test suite run (result recorded in QUALITY_AUDIT.md).
