@@ -580,3 +580,43 @@ G5 - RESOLVED (20 October 2026)
   Corrected in SECURITY.md (private vulnerability report link and repository line).
   The archived goal and spec files still name varunjakkampudi-tech/OraOne. They are kept byte-for-byte
   (SHA256SUMS.txt); that name is superseded by the confirmed repository above.
+
+ROUND 11 - OPEN OWNER ITEMS (recorded 20 October 2026, after push 218919f)
+==========================================================================
+Status of every item below: OPEN. The agent will not mark any of them done. Each one needs the owner.
+
+R1. [OPEN, owner] Create the approval record in the repository
+  Requirement: Standards 2.4 and Goal 1.2. The v2.1 set stays AWAITING_OWNER_APPROVAL until this exists.
+  Verified fact: docs/decisions/OWNER_APPROVALS.md is absent on origin/main at 218919f (checked 20 October).
+  Why the agent cannot do it: the approval must come from the owner. The agent may not write, backdate or
+  self-certify it.
+  Steps:
+    1. In GitHub, open the repository oraone-prod, go to Add file, then Create new file.
+    2. Name it docs/decisions/OWNER_APPROVALS.md.
+    3. Paste the approval text (date, approver name, the five documents with their SHA-256 values from
+       docs/governance/goals/2026-10-19/SHA256SUMS.txt, and any exception you choose).
+    4. Commit it to main.
+    5. Reply with the commit SHA.
+  Expected result: the agent confirms the file on origin/main and records v2.1 as ACTIVE in PROGRESS.md.
+
+R2. [OPEN, owner] Confirm Hostinger does not auto-deploy on push to main (= G2)
+  Verified fact: deploy.yml runs only on workflow_dispatch, and only for refs/heads/main.
+  Not verified: the Hostinger panel setting. The agent cannot see it.
+  Steps: in hPanel, open the Git deployment settings. If auto-deploy on push is ON, turn it OFF. Reply
+  "auto-deploy off, verified".
+
+R3. [OPEN, owner] Confirm the CI result for 218919f
+  Run ID 39309762292 (CI, main) was in progress when last checked. The agent will record its result in
+  QUALITY_AUDIT.md once it is complete. Owner action: none, unless the run fails. If it fails, reply with
+  the run link.
+
+R4. [OPEN, owner] Staging host (optional now; required before staging validation) = G3.
+
+R5. [OPEN, owner] Provider accounts, budgets and data decisions = ROUND 9 items 35a to 35d and item 19.
+
+R6. [OPEN, owner] Decide whether to keep fix-formatting.yml = GAP_MATRIX CI-8.
+  It opens pull requests, which the goal does not allow for agents. Keep it, change it, or remove it.
+
+R7. [OPEN, owner] Confirm the goal file slug mismatch is only a naming issue.
+  The archived goal and spec name varunjakkampudi-tech/OraOne. The repository is oraone-prod. The
+  archived files stay verbatim (checksums), so this is recorded only; no action needed beyond awareness.
