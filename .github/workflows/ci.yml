@@ -1,4 +1,4 @@
-# Continuous integration for pull requests and pushes to main.
+# Continuous integration for pull requests and pushes to main and dev.
 # Lint, typecheck, unit tests and build for the web app; lint and tests for the backend.
 # This workflow never deploys. Production is deployed only by deploy.yml, on manual dispatch.
 name: CI
@@ -6,7 +6,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, dev]
 
 permissions:
   contents: read

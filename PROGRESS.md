@@ -4,12 +4,12 @@ Status log for the autonomous goal. Every number states its numerator and denomi
 
 ## Governance state (2026-10-20)
 
-| Item | State | Evidence |
-|---|---|---|
+| Item                                                | State                      | Evidence                                                                                                                                             |
+| --------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Owner approval of v2.1 set and main-branch workflow | NOT RECORDED IN REPOSITORY | `docs/decisions/OWNER_APPROVALS.md` is absent from `origin/main` at `8eda186`. Chat approval is not a recorded approval (Spec v2.1 / Standards 2.4). |
-| Active authorization | v1.1 L0 goal (only) | `docs/governance/goals/2026-10-19/OraOne-Autonomous-Goal.md` |
-| Archived source documents | Recorded, uncommitted | `docs/governance/goals/2026-10-19/SHA256SUMS.txt` (7 files, all verified) |
-| Push to `main` | Not performed | Blocked on the approval record and on verifying that nothing deploys on push |
+| Active authorization                                | v1.1 L0 goal (only)        | `docs/governance/goals/2026-10-19/OraOne-Autonomous-Goal.md`                                                                                         |
+| Archived source documents                           | Recorded, uncommitted      | `docs/governance/goals/2026-10-19/SHA256SUMS.txt` (7 files, all verified)                                                                            |
+| Push to `main`                                      | Not performed              | Blocked on the approval record and on verifying that nothing deploys on push                                                                         |
 
 ## Baseline record (Stage A, step 1)
 
