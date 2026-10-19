@@ -620,3 +620,9 @@ R6. [OPEN, owner] Decide whether to keep fix-formatting.yml = GAP_MATRIX CI-8.
 R7. [OPEN, owner] Confirm the goal file slug mismatch is only a naming issue.
   The archived goal and spec name varunjakkampudi-tech/OraOne. The repository is oraone-prod. The
   archived files stay verbatim (checksums), so this is recorded only; no action needed beyond awareness.
+
+R1 - CLOSED BY OWNER INSTRUCTION (20 October 2026)
+  Owner instruction: do not use a separate approvals file; blocker.txt is the register.
+  The approval statement is recorded in PROGRESS.md (Governance state), with the owner's words and date.
+  docs/decisions/OWNER_APPROVALS.md is not required and was never created.
+  Still OPEN: R2 (Hostinger auto-deploy setting), R3 to R7 as listed above.

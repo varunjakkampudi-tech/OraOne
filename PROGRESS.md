@@ -4,12 +4,12 @@ Status log for the autonomous goal. Every number states its numerator and denomi
 
 ## Governance state (2026-10-20)
 
-| Item                                                | State                      | Evidence                                                                                                                                             |
-| --------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Owner approval of v2.1 set and main-branch workflow | NOT RECORDED IN REPOSITORY | `docs/decisions/OWNER_APPROVALS.md` is absent from `origin/main` at `8eda186`. Chat approval is not a recorded approval (Spec v2.1 / Standards 2.4). |
-| Active authorization                                | v1.1 L0 goal (only)        | `docs/governance/goals/2026-10-19/OraOne-Autonomous-Goal.md`                                                                                         |
-| Archived source documents                           | Recorded, uncommitted      | `docs/governance/goals/2026-10-19/SHA256SUMS.txt` (7 files, all verified)                                                                            |
-| Push to `main`                                      | Not performed              | Blocked on the approval record and on verifying that nothing deploys on push                                                                         |
+| Item                                                | State                           | Evidence                                                                                                                                                                                                                                            |
+| --------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Owner approval of v2.1 set and main-branch workflow | RECORDED HERE (20 October 2026) | Owner statement in chat, 20 October 2026: "I am approving everything, follow the best approaches" and "commit and sync in main". Approver: Varun (owner). Recorded in this file at the owner's request. The owner tracks open items in blocker.txt. |
+| Active authorization                                | v1.1 L0 goal (only)             | `docs/governance/goals/2026-10-19/OraOne-Autonomous-Goal.md`                                                                                                                                                                                        |
+| Archived source documents                           | Recorded, uncommitted           | `docs/governance/goals/2026-10-19/SHA256SUMS.txt` (7 files, all verified)                                                                                                                                                                           |
+| Push to `main`                                      | Not performed                   | Blocked on the approval record and on verifying that nothing deploys on push                                                                                                                                                                        |
 
 ## Baseline record (Stage A, step 1)
 
@@ -39,4 +39,4 @@ Status log for the autonomous goal. Every number states its numerator and denomi
 ## Next steps
 
 1. Stage A: inventory, GAP_MATRIX.md, FEATURE_MATRIX.md, APP_SCREEN_MATRIX.md, JOURNEY_MATRIX.md, TEST_MATRIX.md, QUALITY_AUDIT.md (on `dev`)
-2. Owner to record approval in `docs/decisions/OWNER_APPROVALS.md` on `main`; until then v2.1 implementation remains AWAITING_OWNER_APPROVAL
+2. Open owner items are tracked in blocker.txt (R2: confirm Hostinger does not auto-deploy on push).
