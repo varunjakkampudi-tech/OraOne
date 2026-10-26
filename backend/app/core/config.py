@@ -44,6 +44,33 @@ class Settings:
     jwt_leeway_seconds: int = int(os.environ.get("JWT_LEEWAY_SECONDS", "60"))
     jwt_issuer_name: str = os.environ.get("JWT_ISSUER", "oraone-api")
 
+    # Transactional email for sign-in codes (Resend). The key is server-side only:
+    # it is never sent to a browser, logged, or returned by an API.
+    resend_api_key: str = os.environ.get("RESEND_API_KEY", "").strip()
+    resend_from: str = os.environ.get("RESEND_FROM", "OraOne <auth@oraone.in>").strip()
+
+    # Legal document versions shown at signup. A version starting with "draft" is not approved:
+    # production refuses to create accounts until the owner sets approved versions.
+    legal_terms_version: str = os.environ.get(
+        "LEGAL_TERMS_VERSION", "draft-2026-10-20"
+    ).strip()
+    legal_privacy_version: str = os.environ.get(
+        "LEGAL_PRIVACY_VERSION", "draft-2026-10-20"
+    ).strip()
+    legal_marketing_version: str = os.environ.get(
+        "LEGAL_MARKETING_VERSION", "draft-2026-10-20"
+    ).strip()
+
+    @property
+    def legal_versions_approved(self) -> bool:
+        """True only when all three signup documents have an owner-approved version."""
+        versions = (
+            self.legal_terms_version,
+            self.legal_privacy_version,
+            self.legal_marketing_version,
+        )
+        return all(v and not v.lower().startswith("draft") for v in versions)
+
     def __init__(self) -> None:
         """Validate the security-critical settings before the app starts."""
         if len(self.jwt_secret_key) < _MIN_JWT_SECRET_LENGTH:

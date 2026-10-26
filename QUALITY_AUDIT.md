@@ -75,3 +75,11 @@ Dependency audit, secret scan, SBOM, nightly workflow, manual test workflow, cov
 - Backend suite after removal: `python -m pytest -q -p no:cacheprovider` → 1630 passed, 0 failed, 10 warnings (8 min 21 s).
 - Ruff check and format check on backend: pass.
 - Removed items and proof: see GAP_MATRIX.md section L.
+
+## Backend suite baseline, 20 October 2026 (current working tree, not committed)
+
+- Command: `python -m pytest -q -p no:cacheprovider -rs` in `backend/`
+- Result: **1670 passed, 1 skipped, 0 failed, 0 errors**, 10 warnings, 867.80 s (14 min 27 s).
+- Skipped (1): `tests/test_email_code_auth.py` sign-in timing measurement, skipped by design unless `ORAONE_TIMING_EVIDENCE=1`. Timing parity is **UNVERIFIED** and is a pre-production authentication gate.
+- Not run in this baseline: Redis cross-instance tests (`tests/test_redis_multi_instance.py`, skipped without `REDIS_URL`; 8 passed when run separately against a local Redis), and the frontend suite (run separately: 255 passed).
+- Runtime diagnosis (slowest tests, fixture and database bottlenecks): **NOT_TESTED**. This needs a `--durations` run, which has not been done.

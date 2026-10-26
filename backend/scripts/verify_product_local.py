@@ -123,9 +123,11 @@ def run(base: str, email: str, results: list[dict], *, skip_ai: bool = False) ->
         "/api/auth/email-code/request",
         json={"email": email, "name": "Local integration test"},
     )
-    code = auth_service._cache().get(auth_service._code_key(email))
+    code = os.environ.get("VERIFY_LOGIN_CODE", "").strip()
     if not code:
-        raise RuntimeError("Sign-in code missing from shared Redis.")
+        raise RuntimeError(
+            "Set VERIFY_LOGIN_CODE to the six-digit code from the sign-in email."
+        )
     tokens = check(
         "POST", "/api/auth/email-code/verify", json={"email": email, "code": code}
     )

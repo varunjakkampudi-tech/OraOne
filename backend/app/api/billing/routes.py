@@ -227,5 +227,8 @@ async def stripe_webhook(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid webhook: {e}"
         )
 
-    await billing_service.handle_webhook_event(session, dict(event))
-    return {"received": True}
+    outcome = await billing_service.handle_webhook_event(session, dict(event))
+    # Acknowledge only once the replay record and the subscription change are committed.
+    # If the commit fails, the error propagates as a 5xx and Stripe retries the event.
+    await session.commit()
+    return {"received": True, "outcome": outcome}

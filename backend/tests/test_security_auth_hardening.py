@@ -55,7 +55,11 @@ async def test_code_is_locked_after_five_failed_attempts(otp_stores):
 
     codes, _guard = otp_stores
     email = "lockout@example.com"
-    codes.set(auth_service._code_key(email), "123456", ttl_seconds=600)
+    codes.set(
+        auth_service._code_key(email),
+        {"digest": auth_service._digest(email, "123456")},
+        ttl_seconds=600,
+    )
 
     for _ in range(5):
         with pytest.raises(HTTPException) as exc:
@@ -84,7 +88,11 @@ async def test_correct_code_within_attempt_budget_is_single_use(
 
     codes, _guard = otp_stores
     email = "budget@example.com"
-    codes.set(auth_service._code_key(email), "654321", ttl_seconds=600)
+    codes.set(
+        auth_service._code_key(email),
+        {"digest": auth_service._digest(email, "654321")},
+        ttl_seconds=600,
+    )
 
     class _Users:
         def __init__(self, session):
@@ -102,13 +110,32 @@ async def test_correct_code_within_attempt_budget_is_single_use(
         )
     assert exc.value.status_code == 400
 
-    # The correct code is accepted and consumed. The account lookup then
-    # reports "no account", which is past the code check we are testing.
-    with pytest.raises(HTTPException) as exc:
-        await auth_service.verify_email_code(
-            None, VerifyLoginOtpRequest(email=email, code="654321")
-        )
-    assert exc.value.status_code == 404
+    # The correct code is accepted and consumed. A new address gets its account
+    # now, at first verification, and the session is issued.
+    class _Session:
+        def add(self, obj):
+            self.added = obj
+
+        async def flush(self):
+            return None
+
+        async def commit(self):
+            return None
+
+    from app.core.config import settings
+
+    tokens = await auth_service.verify_email_code(
+        _Session(),
+        VerifyLoginOtpRequest(
+            email=email,
+            code="654321",
+            terms_accepted=True,
+            privacy_accepted=True,
+            terms_version=settings.legal_terms_version,
+            privacy_version=settings.legal_privacy_version,
+        ),
+    )
+    assert tokens.access_token
     assert codes.get(auth_service._code_key(email)) is None
 
 
@@ -148,6 +175,8 @@ async def test_send_limit_caps_codes_per_email_and_hides_the_limit(
     session = SimpleNamespace(add=lambda obj: None, commit=_noop)
     caplog.set_level("INFO", logger="app.auth.service")
     for _ in range(7):
+        # The resend cooldown is tested separately; clear it so this test reaches the send limit.
+        auth_service._guard_cache().delete(auth_service._cooldown_key(email))
         # Every call returns None, so the limit is not visible to the caller.
         result = await auth_service.request_email_code(
             session, EmailCodeRequest(email=email)
@@ -156,8 +185,8 @@ async def test_send_limit_caps_codes_per_email_and_hides_the_limit(
 
     assert len(sent) == auth_service.MAX_CODE_SENDS
     assert auth_service._code_key(email) in codes._store
-    # Logs carry the internal user id, never the address itself.
-    assert "sub-send-limit" in caplog.text
+    # Logs carry a redacted address, never the address itself.
+    assert "email_code_send_limited" in caplog.text
     assert email not in caplog.text
 
 

@@ -31,3 +31,16 @@ def _ai_budget_allows_by_default(monkeypatch):
 
     monkeypatch.setattr(_usage_service, "reserve_metered", _reserve)
     monkeypatch.setattr(_usage_service, "settle_metered", _settle)
+
+
+@pytest.fixture(autouse=True)
+def _no_live_mail_provider(monkeypatch):
+    """Tests never reach the mail provider.
+
+    A developer machine may have a real Resend key in its environment. Clearing it
+    here means no test can send email; tests that exercise Resend pass an explicit
+    stub or a mock transport.
+    """
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "resend_api_key", "")

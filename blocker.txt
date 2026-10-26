@@ -68,7 +68,7 @@ Step 3. On the server, edit /opt/oraone/backend/.env and add these lines (replac
 Step 4. Restart the services (see "How to use" above).
 Step 5. Test: open https://oraone.in/auth/sign-in, enter your own email, and ask for a code.
         The code should arrive within a minute. If it does not, check the spam folder, then run:
-            docker logs oraone-prod-backend --tail 200 | grep -i smtp
+            docker logs OraOne-backend --tail 200 | grep -i smtp
         Look for "email sent via SMTP". Do not paste log lines that contain a password.
 
 Tell me: "SMTP done" and the sender address you used (non-secret).
@@ -209,7 +209,7 @@ Why: in production, API key rate limits are shared through Redis. Without Redis,
      returns 503. This is deliberate: a limit is never skipped.
 
 Step 1. On the server, check that the Redis container is running:
-            docker ps --filter name=oraone-prod-redis
+            docker ps --filter name=OraOne-redis
 Step 2. In /opt/oraone/backend/.env, make sure this line exists:
 
         REDIS_URL=redis://redis:6379/0
@@ -694,3 +694,129 @@ Owner decisions and actions (OPEN):
   R4 to R7: see ROUND 11.
   Findings waiting for agent reports (dead code, dummy content, dummy tests): recorded in GAP_MATRIX.md section J
   when the audits finish. Their deletions are made only after each item is proven unused.
+
+ROUND 14 - RESEND SIGN-IN CODE EMAIL (recorded 20 October 2026)
+===============================================================
+What the agent built and verified (no owner action needed for this part):
+  - Sign-in codes go through Resend when RESEND_API_KEY is set; SMTP is still used when it is not.
+  - Codes: six digits from the operating-system random source; stored only as a keyed HMAC-SHA256 digest;
+    valid for 5 minutes; single use (the accepted code is taken with an atomic consume); 5 attempts per window;
+    resend cooldown of 60 seconds per address; the same response whether or not the address has an account.
+  - Delivery failure clears the stored code and the cooldown, so the user can ask again at once.
+  - Legacy plain codes (stored before this change) never match and expire within 10 minutes.
+  - Existing accounts and sessions are unchanged. No database migration was needed.
+  - Tests: tests/test_email_code_auth.py (new rules, DB-backed where a database is needed),
+    tests/test_security_auth_hardening.py and tests/test_auth_cookies.py (updated to the digest).
+  - Mail body: the existing branded login_otp.html plus a plain-text part. No tracking pixels or tracked links.
+
+What is NOT verified (genuine external steps):
+  X1. A real email has not been sent. The agent has no RESEND_API_KEY and no network access to the provider.
+      All Resend behaviour is tested against a mock HTTP transport only. Mock results are not delivery evidence.
+  X2. Resend's Tokyo region and the domain verification are set in the Resend dashboard; the agent cannot read them.
+
+OWNER STEPS (do these in order; never paste the key into chat):
+  O1. Resend dashboard, Domains, oraone.in: confirm status "Verified" and region "Tokyo" as you set it.
+      Turn OFF open tracking and click tracking for this domain (domain settings). OraOne sends no tracking.
+  O2. Resend dashboard, API Keys: create a key with "Sending access" only, limited to the oraone.in domain.
+      Copy it once and keep it in your password manager.
+  O3. On the production server, edit the backend environment file (/opt/oraone/backend/.env) and add:
+        RESEND_API_KEY=<the key from O2>
+        RESEND_FROM=OraOne <auth@oraone.in>
+      Do not commit this file. Do not put the key in GitHub, a chat message or a log.
+  O4. Restart the backend and the workers so they read the new settings (see docs/operations/DEPLOYMENT.md).
+  O5. Live test, using an address you control: open the sign-in page, request a code, then check:
+      (a) the email arrives from auth@oraone.in within one minute; (b) it contains a six-digit code;
+      (c) entering the code signs you in; (d) entering it a second time is refused;
+      (e) the Resend dashboard shows the message as Delivered. Reply "live email verified" with the time.
+  O6. If the email does not arrive, check the Resend Logs page for the message. A rejected request means the
+      key or the sender domain is wrong; a missing message means the spam folder or the domain verification.
+  O7. Deployment itself stays owner-only: the code must be on main and deployed through the production
+      workflow by you (see blocker R2 for the Hostinger auto-deploy check).
+
+Decision D21 (identity and email provider): recorded here. Sign-in method: email one-time code (implemented).
+Email provider: Resend, once O2 and O3 are done. TOTP for administrators remains open (blocker R11).
+
+ROUND 15 - SIGN-IN HARDENING BEFORE ANY COMMIT (recorded 20 October 2026; nothing pushed or deployed)
+=====================================================================================================
+Built and checked by the agent (see the test evidence in the report):
+  - Production never falls back to SMTP for sign-in codes. Without RESEND_API_KEY the request returns the
+    same "temporarily unavailable" response, and the error is logged without the address or the code.
+  - Account enumeration: a request does the same work for an existing, a new, and a disabled address (one
+    read, one code, one stored digest, one send). Accounts are created when a correct code is entered, not on
+    request. A statistical timing test (25 rounds per group, local Postgres, stub sender) gave medians of about
+    27 to 31 ms and 90th percentiles of about 31 to 37 ms across the three groups. The bounds are 15 ms for the
+    median and 30 ms for the 90th percentile. This is evidence against a timing oracle in this environment, not
+    a proof for the internet. No fixed delay was added.
+  - Rate limits and single use across instances: tested against a real Redis with two separate clients (tests/
+    test_redis_multi_instance.py, 8 tests). The send limit, the attempt limit, the cooldown, and the single-use
+    take all hold across the two clients. Three simultaneous correct submissions give exactly one success. A
+    burst of 12 never gives two sessions.
+  - Redis outage in production: the auth, ai and api tiers now return 503 (fail closed). The webhook tier stays
+    fail-open, as documented, so signed provider deliveries are not dropped. See decision D-RL below.
+
+Decision D-RL (owner, please confirm or reverse):
+  The general API tier used to fail open. In production it now fails closed. Result: if Redis is down, signed-in
+  users see "Request limits are temporarily unavailable" on ordinary API calls until Redis returns. Webhooks still
+  fail open. Reply "keep" or "reverse webhooks to fail closed too".
+
+Required production environment variables (names only; values never in the repository or chat):
+  ENVIRONMENT=production
+  JWT_SECRET_KEY              (already required; at least the minimum length the app enforces)
+  REDIS_URL                   (required in production; without it sign-in and the limits fail closed with 503)
+  RESEND_API_KEY              (required for sign-in codes; without it sign-in is unavailable, by design)
+  RESEND_FROM=OraOne <auth@oraone.in>
+  Existing: DATABASE_URL, FRONTEND_URL, CORS_ORIGINS and the rest of .env.example.
+  SMTP_* stays as it is for other mail; it is not used for sign-in codes in production.
+
+IMPORTANT, from the test runs on this developer machine:
+  The machine has a RESEND_API_KEY set. An earlier test run reached the Resend API (HTTP 500, then connection
+  errors) before the tests were stopped from calling the provider. The test recipients were generated addresses
+  on example.com. Action for you: open the Resend dashboard, Logs, and check for requests from 20 October 2026
+  to the example.com addresses. Delete nothing; tell me what you see. The tests now clear the key, so they cannot
+  reach the provider.
+  Also consider rotating that key, because it was used from a test process: create a new key, replace it on the
+  server, and revoke the old one.
+
+Still open (external, unchanged): a real Resend OTP login on the live site (ROUND 14 steps O1 to O7).
+Not claimed: real delivery, provider log results, production configuration, or any deployment.
+
+ROUND 16 - APPROVED DECISIONS APPLIED (recorded 20 October 2026; nothing committed, pushed or deployed)
+========================================================================================================
+Approved by the owner, now implemented:
+  A1. Webhooks are fail-open for RATE LIMITING only. The Stripe sink (/api/billing/webhook), voice and channel
+      inbound paths use the webhook tier. Signatures, timestamps, replay checks and authorization are unchanged.
+  A2. General API fails closed in production during a Redis outage, with a controlled 503 (RATE_LIMIT_UNAVAILABLE).
+      Health probes (/api/health, /health) are never rate-limited, so readiness keeps answering.
+  A3. Production sign-in codes are sent by Resend only. No SMTP fallback in production.
+  A5. Automated tests cannot reach the live mail provider. The guard refuses any live send inside pytest unless
+      ORAONE_LIVE_EMAIL_TEST=1 AND the recipient is listed in ORAONE_LIVE_EMAIL_RECIPIENTS. Mock transports are
+      always allowed. A test asserts that no connection is opened without opt-in.
+  Stripe fix (found while applying A1): the Stripe sink now commits after handling the event and returns 200 only
+      after the commit. Before this, the final state change (the subscription ordering marker and the outcome) was
+      not committed by the handler, and the sink acknowledged anyway. A failed commit is now a 5xx, so Stripe retries.
+
+NOT yet verified (open, owner decision or further work):
+  A4. Account creation after a correct code: the account is created with the name given at the code request and
+      is_email_verified=True. The backend has NO consent, terms or privacy acceptance step at sign-up, and no
+      recorded consent version. The existing product has no signup consent to reuse. This does not comply yet with
+      a consent-at-signup requirement. Owner decision needed: (a) which terms and privacy versions apply, (b) whether
+      a consent record is required at first sign-in, and (c) the wording the user sees before verifying. Reply with
+      the texts and the rule; the agent then builds the consent record and the gate.
+  A6. Live Resend email and the end-to-end OTP login stay open. Steps are in ROUND 14 (O1 to O7). The guard above is
+      what keeps tests from sending by accident; a live test must use ORAONE_LIVE_EMAIL_TEST=1 and an approved address.
+  A7. Durable acceptance of other inbound webhooks is NOT yet audited end to end. Stripe is fixed. Still to audit,
+      each must commit before it acknowledges and return a 5xx when it cannot persist:
+        - app/api/omnichannel/routes.py (Telegram, Meta, Instagram, email, SDK and Twilio inbound)
+        - app/api/voice/routes.py (Twilio voice callbacks)
+        - app/api/integrations/routes.py and app/api/public_api/routes.py (where they accept deliveries)
+      Owner action: none. The agent continues this audit next.
+
+R-NAME. Repository name updated to OraOne (20 October 2026)
+  Changed: container names in docker-compose.prod.yml and docker-compose.dev.yml (previous prefix -> OraOne-*),
+  DEPLOYMENT.md, RUNBOOK.md and the commands in this file. The remote is now the OraOne repository.
+  Owner action before the next production deploy (owner-only): the running containers are still named
+  previous prefix. Stop and remove the old stack first, then deploy the new names:
+    docker compose -f docker-compose.prod.yml down
+    (then the owner's normal production deploy from the main branch)
+  Check afterwards: docker ps --format '{{.Names}}' should list only OraOne-* names.
+  Owner-only: production deployment. The agent did not run it.
