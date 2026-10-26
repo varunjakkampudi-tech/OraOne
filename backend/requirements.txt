@@ -43,7 +43,7 @@ python-pptx>=0.6,<1.1          # PPTX extraction (R2 knowledge)
 
 # ---- JWT / crypto for self-hosted access tokens ----
 PyJWT>=2.15.0,<3.0             # security fixes through PYSEC-2026-4183
-cryptography>=42.0,<47.0
+cryptography>=50.0,<51.0
 argon2-cffi>=23.1,<24.0        # password hashing (self-hosted auth)
 
 # ---- Timezones (business-hours calculations) ----
