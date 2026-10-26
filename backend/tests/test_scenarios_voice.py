@@ -17,6 +17,7 @@ from twilio.request_validator import RequestValidator
 
 from app.api.voice import routes as voice_routes
 from app.database.session import get_db
+from app.services import omnichannel_service
 from app.services.voice import tts
 from app.services.voice import twiml
 from scenario_support import FakeSession, channels_config
@@ -48,11 +49,15 @@ def voice(monkeypatch):
     monkeypatch.setattr(voice_routes, "get_channels_config", lambda: cfg)
 
     bindings = {
-        BUSINESS_A: SimpleNamespace(agent_id=AGENT_A, organization_id="org-a"),
-        BUSINESS_B: SimpleNamespace(agent_id=AGENT_B, organization_id="org-b"),
+        BUSINESS_A: SimpleNamespace(
+            agent_id=AGENT_A, organization_id="org-a", project_id=None
+        ),
+        BUSINESS_B: SimpleNamespace(
+            agent_id=AGENT_B, organization_id="org-b", project_id=None
+        ),
     }
     names = {AGENT_A: "Ada Assistant", AGENT_B: "Bruno Bot"}
-    state = SimpleNamespace(resolved=[], cfg=cfg)
+    state = SimpleNamespace(resolved=[], cfg=cfg, events=[], fail_commit=False)
 
     async def resolve(db, business_number):
         state.resolved.append(business_number)
@@ -61,12 +66,31 @@ def voice(monkeypatch):
     async def agent_name(db, agent_id):
         return names[agent_id]
 
+    session = FakeSession()
+
+    async def commit():
+        state.events.append("commit")
+        if state.fail_commit:
+            raise RuntimeError("scenario database outage")
+        session.commits += 1
+
+    session.commit = commit
+    state.session = session
+
     monkeypatch.setattr(voice_routes, "_resolve_binding", resolve)
     monkeypatch.setattr(voice_routes, "_agent_name", agent_name)
 
+    async def handle(db, msg):
+        state.events.append("handled")
+        return SimpleNamespace(
+            handled=True, text="Your order is on its way.", opted_out=False
+        )
+
+    monkeypatch.setattr(omnichannel_service, "handle_inbound", handle)
+
     app = FastAPI()
     app.include_router(voice_routes.router)
-    app.dependency_overrides[get_db] = lambda: FakeSession()
+    app.dependency_overrides[get_db] = lambda: session
     state.client = TestClient(app)
     return state
 
@@ -77,6 +101,27 @@ def _inbound_form(to_number: str = BUSINESS_A) -> dict:
 
 def _outbound_form(business: str = BUSINESS_A, contact: str = CALLER) -> dict:
     return {"From": business, "To": contact, "CallSid": "CAscenario2"}
+
+
+def test_signed_voice_turn_commits_before_acknowledging(voice):
+    path = "/api/voice/gather"
+    form = {**_inbound_form(), "SpeechResult": "Where is my order?"}
+    response = voice.client.post(path, data=form, headers=_signed(path, form))
+
+    assert response.status_code == 200
+    assert voice.events == ["handled", "commit"]
+    assert voice.session.commits == 1
+
+
+def test_voice_turn_persistence_failure_returns_retryable_server_error(voice):
+    voice.fail_commit = True
+    path = "/api/voice/gather"
+    form = {**_inbound_form(), "SpeechResult": "Where is my order?"}
+
+    response = voice.client.post(path, data=form, headers=_signed(path, form))
+
+    assert response.status_code == 503
+    assert voice.events == ["handled", "commit"]
 
 
 # ───────────────────────── happy path ─────────────────────────

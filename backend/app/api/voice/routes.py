@@ -213,11 +213,16 @@ async def gather_speech(request: Request, db: AsyncSession = Depends(get_db)):
     )
     try:
         reply = await omnichannel_service.handle_inbound(db, msg)
-        await db.commit()
     except Exception:  # noqa: BLE001
         await db.rollback()
         log.exception("voice turn failed")
         return _xml(twiml.goodbye(twiml.ERROR_TEXT, voice=_voice()))
+    try:
+        await db.commit()
+    except Exception:  # noqa: BLE001
+        await db.rollback()
+        log.exception("voice turn persistence failed")
+        return Response(status_code=503)
 
     if reply.opted_out:
         # The caller asked not to be contacted: close the call without an AI answer.

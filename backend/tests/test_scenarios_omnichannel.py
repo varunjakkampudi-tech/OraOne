@@ -107,6 +107,8 @@ def pipeline(monkeypatch, channels):
             confidence=0.91,
             generated=True,
         ),
+        events=[],
+        fail_commit=False,
     )
 
     async def resolve(db, parsed):
@@ -118,7 +120,19 @@ def pipeline(monkeypatch, channels):
 
     async def handle(db, msg):
         state.handled.append(msg)
+        state.events.append("handled")
         return state.reply
+
+    session = FakeSession()
+
+    async def commit():
+        state.events.append("commit")
+        if state.fail_commit:
+            raise RuntimeError("scenario database outage")
+        session.commits += 1
+
+    session.commit = commit
+    state.session = session
 
     async def post(self, url, data=None, auth=None, **_):
         state.twilio_posts.append({"url": url, "data": data, "auth": auth})
@@ -132,7 +146,7 @@ def pipeline(monkeypatch, channels):
 
     app = FastAPI()
     app.include_router(omni_routes.router)
-    app.dependency_overrides[get_db] = lambda: FakeSession()
+    app.dependency_overrides[get_db] = lambda: session
     state.client = TestClient(app)
     return state
 
@@ -181,6 +195,17 @@ def test_authenticated_sdk_message_gets_its_reply_in_the_same_response(pipeline)
     assert body["generated"] is True
     assert [m.organization_id for m in pipeline.handled] == [ORG_A]
     assert [m.channel for m in pipeline.handled] == ["mobile"]
+    assert pipeline.events == ["handled", "commit"]
+    assert pipeline.session.commits == 1
+
+
+def test_sdk_persistence_failure_returns_retryable_server_error(pipeline):
+    pipeline.fail_commit = True
+
+    response = _post_sdk(pipeline.client, _sdk_body())
+
+    assert response.status_code == 503
+    assert pipeline.events == ["handled", "commit"]
 
 
 # ───────────────────────── refusals ─────────────────────────
