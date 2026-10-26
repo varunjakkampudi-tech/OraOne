@@ -209,7 +209,12 @@ async def _process(
         meta=parsed.meta,
     )
     reply = await omnichannel_service.handle_inbound(db, msg)
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception:  # noqa: BLE001
+        await db.rollback()
+        log.exception("inbound persistence failed provider=%s", provider)
+        return Response(status_code=503), None, None
     return None, (adapter, binding, parsed), reply
 
 
