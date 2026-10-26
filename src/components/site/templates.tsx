@@ -295,7 +295,7 @@ function Hero({
               {eyebrow}
             </p>
           )}
-          <h1 className="mt-6 text-5xl font-bold leading-[1.05] tracking-tight text-balance md:text-7xl">
+          <h1 className="mt-6 text-5xl font-bold leading-[1.05] tracking-tight text-balance md:text-6xl xl:text-7xl">
             {title}
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-300 md:text-xl">{lead}</p>
