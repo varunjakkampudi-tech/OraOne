@@ -22,8 +22,8 @@ Denominator: 16B.2 trigger matrix has 8 rows.
 | CI-1  | Push trigger: `main` only                                                    | DONE on `dev` (ci.yml now `[main, dev]`, not yet run) | verify with a real `dev` push                                                    |
 | CI-2  | No nightly schedule                                                          | OPEN                                                  | add `schedule` to a new workflow that runs the existing commands                 |
 | CI-3  | No `workflow_dispatch` test workflow with suite selection                    | OPEN                                                  | add with allowlisted commands only; never production                             |
-| CI-4  | No dependency audit (`bun audit`, `pip-audit`)                               | OPEN                                                  | add to CI on `dev`; list findings in QUALITY_AUDIT                               |
-| CI-5  | No secret scan (gitleaks)                                                    | OPEN                                                  | add; the goal allows CI-only scanners                                            |
+| CI-4  | No dependency audit (`bun audit`, `pip-audit`)                               | DONE (ea83aa2)                                        | bun audit (high) and pip-audit run on every push; CI green 6/6 on ea83aa2 |
+| CI-5  | No secret scan (gitleaks)                                                    | DONE (ea83aa2)                                        | gitleaks full-history job; CI green on ea83aa2, unallowlisted |
 | CI-6  | No coverage measurement or threshold                                         | OPEN                                                  | measure first, then set thresholds from the baseline. Do not lower any threshold |
 | CI-7  | Actions pinned by tag, not commit SHA: 0 of 15 `uses:` lines                 | OPEN                                                  | pin with SHAs taken from the upstream repositories                               |
 | CI-8  | `fix-formatting.yml` opens pull requests (`peter-evans/create-pull-request`) | READY_FOR_OWNER                                       | goal says no agent-created PRs; owner decides whether to keep it                 |
@@ -45,17 +45,17 @@ Least-privilege permissions: 3 of 3 workflow files declare `permissions:` (DONE)
 
 | ID    | Gap                                                 | Status                | Action                                                      |
 | ----- | --------------------------------------------------- | --------------------- | ----------------------------------------------------------- |
-| SEC-1 | No dependency or secret scan in CI                  | OPEN (see CI-4, CI-5) |                                                             |
+| SEC-1 | No dependency or secret scan in CI                  | DONE (ea83aa2)        | see CI-4, CI-5 |
 | SEC-2 | No SBOM, license policy, provenance                 | OPEN                  | generate SBOM (CycloneDX) in CI                             |
-| SEC-3 | No threat model (`docs/security/THREAT_MODEL.md`)   | OPEN                  | write from code review of auth, tenancy, widget, webhooks   |
-| SEC-4 | No `RISK_EXCEPTIONS.md`                             | OPEN                  | agents cannot approve exceptions; create the empty register |
+| SEC-3 | No threat model (`docs/security/THREAT_MODEL.md`)   | DONE (3c44c7a)        | docs/security/THREAT_MODEL.md; citations spot-checked |
+| SEC-4 | No `RISK_EXCEPTIONS.md`                             | DONE (3c44c7a)        | docs/security/RISK_EXCEPTIONS.md, empty register |
 | SEC-5 | Cross-tenant and webhook tests exist (prior rounds) | PARTIAL               | re-run in CI and record                                     |
 
 ## E. Product and matrices (Spec v2.1 sections 5, 9, 12; Goal sections 5, 9)
 
 | ID   | Gap                                                                                       | Status | Action                                                                                   |
 | ---- | ----------------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
-| PM-1 | `FEATURE_MATRIX.md`, `APP_SCREEN_MATRIX.md`, `JOURNEY_MATRIX.md`, `TEST_MATRIX.md` absent | OPEN   | Build from the routes, screens and tests in the repo; mark unverified items NOT_ASSESSED |
+| PM-1 | `FEATURE_MATRIX.md`, `APP_SCREEN_MATRIX.md`, `JOURNEY_MATRIX.md`, `TEST_MATRIX.md` absent | PARTIAL (3c44c7a) | FEATURE_MATRIX.md done; APP_SCREEN, JOURNEY, TEST matrices still open |
 | PM-2 | `PROVIDER_PERMISSION_MATRIX.md` absent                                                    | OPEN   | list WhatsApp, Instagram, telephony, Stripe with status BLOCKED or READY_FOR_OWNER       |
 | PM-3 | `MIGRATION_AUDIT.md`, `COST_MODEL.md`, `RISK_REGISTER.md` absent                          | OPEN   | create                                                                                   |
 | PM-4 | 25 go/no-go gates (Goal 21) not tracked                                                   | OPEN   | track in `QUALITY_AUDIT.md` with NOT_DUE mapped by release slice                         |

@@ -47,6 +47,16 @@ Status log for the autonomous goal. Every number states its numerator and denomi
 - Full backend suite on `dev` with the patch: 1545 passed, 7 failed, 80 skipped, 1 error (of 1633 collected). The same 8 tests fail without the patch. They need a Postgres database, which this machine does not have, so the failures are environmental and the suite is not yet clean.
 - CI on `dev`: NOT RUN. Requires a push to `origin`, which the owner has not approved.
 
+## Loop 2 (26 October 2026)
+
+- Merged to `dev`: Codex CI branch (bun audit gate, gitleaks secret scan, vite 8.1.6 and zod 4.6.6 upgrades), owner WIP work (`e0f7c71`, docs formatted in `dec6a03`), Antigravity security docs (`4e370ea`), cryptography 50.0.2 (`90f4d52`), pip-audit gate restored (`ea83aa2`).
+- Backend pin: `cryptography` 46.0.7 -> 50.0.2 fixes 7 advisories (PYSEC-2026-3552, PYSEC-2026-3553, PYSEC-2026-3554, GHSA-537c-gmf6-5ccf). `pip-audit -r requirements.txt` on the new pin: 0 findings.
+- CI on `ea83aa2`: 6 of 6 jobs passed (web, backend, browser, production images, dependency audit, secret scan).
+- Limitation: the pip-audit gate fails on ANY finding. It has no severity filter, so it is stricter than the owner's high/critical rule. Keep it strict until a severity filter exists; do not weaken it.
+- Earlier runs on `fdb6e7e`, `d444ca2` were cancelled by newer pushes; not counted.
+- Not verified: the Postgres-backed backend suite was only run in CI on `ea83aa2`; local runs need Postgres.
+- Still open: CI-7 (pin actions to commit SHAs), SEC-2 (SBOM), QA-2 (knip, jscpd, dependency-cruiser), PM-1 remaining matrices, all owner-only items in blocker.txt.
+
 ## Next steps
 
 1. Stage A: inventory, GAP_MATRIX.md, FEATURE_MATRIX.md, APP_SCREEN_MATRIX.md, JOURNEY_MATRIX.md, TEST_MATRIX.md, QUALITY_AUDIT.md (on `dev`)
