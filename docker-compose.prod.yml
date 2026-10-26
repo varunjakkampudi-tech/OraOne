@@ -22,7 +22,7 @@ x-backend-environment: &backend-environment
 services:
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: oraone-prod-postgres
+    container_name: OraOne-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: oraone_admin
@@ -38,7 +38,7 @@ services:
 
   redis:
     image: redis:7.4.11-alpine
-    container_name: oraone-prod-redis
+    container_name: OraOne-redis
     restart: unless-stopped
     volumes:
       - oraone_redis_data:/data
@@ -55,7 +55,7 @@ services:
       args:
         APP_VERSION: ${ORAONE_VERSION:-v1.0.0}
     image: oraone-backend:${ORAONE_VERSION:-v1.0.0}
-    container_name: oraone-prod-migrate
+    container_name: OraOne-migrate
     restart: "no"
     env_file:
       - ./backend/.env
@@ -73,7 +73,7 @@ services:
       args:
         APP_VERSION: ${ORAONE_VERSION:-v1.0.0}
     image: oraone-backend:${ORAONE_VERSION:-v1.0.0}
-    container_name: oraone-prod-backend
+    container_name: OraOne-backend
     restart: unless-stopped
     env_file:
       - ./backend/.env
@@ -99,7 +99,7 @@ services:
   workers:
     # Same image as the API, built once by the backend service.
     image: oraone-backend:${ORAONE_VERSION:-v1.0.0}
-    container_name: oraone-prod-workers
+    container_name: OraOne-workers
     restart: unless-stopped
     env_file:
       - ./backend/.env
@@ -127,7 +127,7 @@ services:
       args:
         APP_VERSION: ${ORAONE_VERSION:-v1.0.0}
     image: oraone-frontend:${ORAONE_VERSION:-v1.0.0}
-    container_name: oraone-prod-frontend
+    container_name: OraOne-frontend
     restart: unless-stopped
     depends_on:
       - backend
@@ -135,7 +135,7 @@ services:
   proxy:
     # Single public entry point: TLS termination, compression and security headers.
     image: caddy:2.11.7-alpine
-    container_name: oraone-prod-proxy
+    container_name: OraOne-proxy
     restart: unless-stopped
     environment:
       CADDY_DOMAIN: ${CADDY_DOMAIN:?CADDY_DOMAIN is required}

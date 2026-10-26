@@ -9,13 +9,13 @@ never written in this document.
 
 | Container              | Image source                                              | Role                                                                                                                                                             |
 | ---------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `oraone-prod-proxy`    | `caddy:2.11.7-alpine` with [`Caddyfile`](../../Caddyfile) | The only public entry point. Ports 80 and 443. Obtains the TLS certificate for `CADDY_DOMAIN`. Sends `/api/*` to the backend and everything else to the web app. |
-| `oraone-prod-frontend` | [`frontend.Dockerfile`](../../frontend.Dockerfile)        | Web application (Node server on port 8080). Not published.                                                                                                       |
-| `oraone-prod-backend`  | [`backend/Dockerfile`](../../backend/Dockerfile)          | API under Gunicorn (port 8000). Not published. Runs `alembic upgrade head`, then starts.                                                                         |
-| `oraone-prod-workers`  | same image as backend                                     | Runs `worker.py`: the workflow scheduler and the webhook outbox. No HTTP port.                                                                                   |
-| `oraone-prod-migrate`  | same image as backend                                     | One-shot. Runs `alembic upgrade head`. The API and workers start only after it exits with code 0.                                                                |
-| `oraone-prod-postgres` | `pgvector/pgvector:pg16`                                  | Database. Not published.                                                                                                                                         |
-| `oraone-prod-redis`    | `redis:7.4.11-alpine`                                     | Shared cache, rate limits, sign-in codes. Not published.                                                                                                         |
+| `OraOne-proxy`    | `caddy:2.11.7-alpine` with [`Caddyfile`](../../Caddyfile) | The only public entry point. Ports 80 and 443. Obtains the TLS certificate for `CADDY_DOMAIN`. Sends `/api/*` to the backend and everything else to the web app. |
+| `OraOne-frontend` | [`frontend.Dockerfile`](../../frontend.Dockerfile)        | Web application (Node server on port 8080). Not published.                                                                                                       |
+| `OraOne-backend`  | [`backend/Dockerfile`](../../backend/Dockerfile)          | API under Gunicorn (port 8000). Not published. Runs `alembic upgrade head`, then starts.                                                                         |
+| `OraOne-workers`  | same image as backend                                     | Runs `worker.py`: the workflow scheduler and the webhook outbox. No HTTP port.                                                                                   |
+| `OraOne-migrate`  | same image as backend                                     | One-shot. Runs `alembic upgrade head`. The API and workers start only after it exits with code 0.                                                                |
+| `OraOne-postgres` | `pgvector/pgvector:pg16`                                  | Database. Not published.                                                                                                                                         |
+| `OraOne-redis`    | `redis:7.4.11-alpine`                                     | Shared cache, rate limits, sign-in codes. Not published.                                                                                                         |
 
 The production host (Hostinger VPS, DNS, firewall, the `/opt/oraone` layout and rollback status)
 is described in [HOSTINGER-DEPLOYMENT](../HOSTINGER-DEPLOYMENT.md). The image tags above are
@@ -136,7 +136,7 @@ The API trusts `X-Forwarded-For` only when the request comes from an address lis
 `TRUSTED_PROXY_IPS`. Find the proxy container's address on the Compose network:
 
 ```bash
-docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' oraone-prod-proxy
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' OraOne-proxy
 ```
 
 Put that address (or a CIDR range that contains it) in `TRUSTED_PROXY_IPS` in

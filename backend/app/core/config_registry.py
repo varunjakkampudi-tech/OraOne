@@ -360,6 +360,18 @@ REGISTRY: tuple[ConfigKey, ...] = (
         "Auth and email",
         "Whether mail is sent over an encrypted connection. Set to false only for local test servers.",
     ),
+    _key(
+        "RESEND_API_KEY",
+        "Auth and email",
+        "Resend API key that sends sign-in codes. When set, sign-in codes go through Resend instead of SMTP. Server-side only; never shown in the console.",
+        secret=True,
+        console_managed=False,
+    ),
+    _key(
+        "RESEND_FROM",
+        "Auth and email",
+        "Sender for sign-in codes, for example OraOne <auth@oraone.in>. The domain must be verified in Resend.",
+    ),
     # ---- AI models --------------------------------------------------------
     _key(
         "OPENROUTER_API_KEY",

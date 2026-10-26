@@ -15,6 +15,8 @@ Routes stay thin (see ``app/api/auth/routes.py``); this module holds the rules.
 
 from __future__ import annotations
 
+import asyncio
+import hashlib
 import hmac
 import logging
 import os
@@ -28,8 +30,10 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.log_redaction import redact_email
 from app.core.security import generate_numeric_code, hash_password, verify_password
 from app.database.models.user import User
+from app.database.models.signup_consent import SignupConsent
 from app.database.repositories.user_repository import UserRepository
 from app.schemas.auth import (
     EmailCodeRequest,
@@ -43,10 +47,13 @@ from app.services.cache import get_shared_cache
 
 log = logging.getLogger("app.auth.service")
 
-#: How long an emailed sign-in code stays valid.
-_LOGIN_CODE_TTL_SECONDS = 10 * 60
+#: How long an emailed sign-in code stays valid (5 minutes). Single use.
+_LOGIN_CODE_TTL_SECONDS = 5 * 60
+#: Minimum gap between two codes for the same address (resend cooldown).
+RESEND_COOLDOWN_SECONDS = 60
 _CODE_CACHE_NAMESPACE = "auth"
 _GUARD_CACHE_NAMESPACE = "auth-guard"
+_LOGIN_OTP_DIGEST_CONTEXT = b"oraone-login-otp-v1\x00"
 
 #: Failed code checks allowed per email before the pending code is invalidated.
 MAX_CODE_ATTEMPTS = 5
@@ -78,6 +85,29 @@ def _attempt_key(email: str) -> str:
 
 def _send_key(email: str) -> str:
     return f"otp_sends:{email.strip().lower()}:{_window_bucket()}"
+
+
+def _cooldown_key(email: str) -> str:
+    return f"otp_cooldown:{email.strip().lower()}"
+
+
+def _guard_cache():
+    return get_shared_cache(_GUARD_CACHE_NAMESPACE)
+
+
+def _digest(email: str, code: str) -> str:
+    """Keyed digest of a sign-in code. Only this digest is stored, never the code.
+
+    HMAC-SHA256 with a key derived from the server secret, so a leaked cache
+    cannot be replayed offline into valid codes. The address is part of the
+    message, so a digest for one address does not match another.
+    """
+    secret = settings.jwt_secret_key
+    if not secret:
+        raise RuntimeError("JWT_SECRET_KEY is required to hash sign-in codes")
+    key = hashlib.sha256(_LOGIN_OTP_DIGEST_CONTEXT + secret.encode("utf-8")).digest()
+    message = f"{email}\x1f{code}".encode("utf-8")
+    return hmac.new(key, message, hashlib.sha256).hexdigest()
 
 
 @contextmanager
@@ -120,64 +150,103 @@ class EmailDeliveryError(RuntimeError):
 async def request_email_code(session: AsyncSession, data: EmailCodeRequest) -> None:
     """Start a passwordless sign-in by emailing a one-time code.
 
-    Unknown addresses get a new account with an unusable random password, so
-    the emailed code is the only way in. Callers receive the same response
-    whether or not the address has an account. The one exception is delivery
-    failure: that is an outage of the mail service, not of the account, and
-    raises EmailDeliveryError with the stored code removed.
+    The response is the same whatever the address is: the same work runs for an
+    existing account, a new address and an inactive account (one read, one code,
+    one stored digest, one email). Accounts are created when a correct code is
+    entered, not when a code is requested, so a request never writes a row.
+    Requests held back by the cooldown or the send limit are silent too.
+
+    The one exception is delivery failure. That is an outage of the mail
+    service, not of any account, so it is reported and the stored code removed.
     """
     from app.services.email_service import send_login_otp
 
     email = data.email.strip().lower()
     with _guard_store() as guard:
+        # Cooldown: at most one code per address per RESEND_COOLDOWN_SECONDS.
+        if not guard.set_if_not_exists(
+            _cooldown_key(email), 1, ttl_seconds=RESEND_COOLDOWN_SECONDS
+        ):
+            log.info("email_code_cooldown")
+            return
         sends = guard.increment(_send_key(email), ttl_seconds=_LIMIT_WINDOW_SECONDS)
     if sends > MAX_CODE_SENDS:
-        # Same silent response as every other request, so the limit does not
-        # reveal whether the address has an account.
         log.info("email_code_send_limited")
         return
 
-    users = UserRepository(session)
-    user = await users.get_by_email(email)
-    if user is None:
-        display_name = (data.name or "").strip() or email.split("@", 1)[0]
-        user = User(
-            auth_subject=str(uuid.uuid4()),
-            email=email,
-            full_name=display_name[:120],
-            password_hash=hash_password(secrets.token_urlsafe(48)),
-            is_email_verified=False,
-        )
-        subject = user.auth_subject
-        session.add(user)
-        await session.commit()
-    else:
-        subject = user.auth_subject
-        if user.status.value != "active":
-            log.info("email_code_skipped_inactive user=%s", subject)
-            return
+    # The same read for every address, so a request costs the same database work
+    # whether or not an account exists.
+    await UserRepository(session).get_by_email(email)
 
-    code = generate_numeric_code()
+    code = generate_numeric_code()  # six digits from the OS CSPRNG
+    pending = {
+        "digest": _digest(email, code),
+        "name": (data.name or "").strip()[:120] or None,
+    }
     with _guard_store():
-        _cache().set(_code_key(email), code, ttl_seconds=_LOGIN_CODE_TTL_SECONDS)
-    if not send_login_otp(email, code=code):
-        # Never report a code as issued when no email left the server.
+        _cache().set(_code_key(email), pending, ttl_seconds=_LOGIN_CODE_TTL_SECONDS)
+    try:
+        delivered = await asyncio.to_thread(send_login_otp, email, code=code)
+    except Exception as exc:  # noqa: BLE001 - any sender failure means no code left the server
+        log.error(
+            "email_code_send_error email=%s err=%s",
+            redact_email(email),
+            type(exc).__name__,
+        )
+        delivered = False
+    if not delivered:
+        # Never report a code as issued when no email left the server. Clear the
+        # code and the cooldown so the user can ask again straight away.
         with _guard_store():
             _cache().delete(_code_key(email))
-        log.error("email_code_not_delivered user=%s", subject)
+            _guard_cache().delete(_cooldown_key(email))
+        log.error("email_code_not_delivered email=%s", redact_email(email))
         raise EmailDeliveryError("sign-in code could not be delivered")
-    log.info("email_code_sent user=%s", subject)
+    log.info("email_code_sent email=%s", redact_email(email))
+
+
+def _require_signup_acceptance(data: VerifyLoginOtpRequest) -> None:
+    """Refuse to create an account unless the signup legal terms were accepted as shown.
+
+    Runs after the code matched and before it is spent, so a missing tick box does not
+    burn a valid code. The client must send the exact versions it displayed.
+    """
+    if settings.is_production and not settings.legal_versions_approved:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Sign-up is temporarily unavailable. Please try again later.",
+        )
+    if not (data.terms_accepted and data.privacy_accepted):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Accept the Terms of Service and the Privacy Policy to create an account.",
+        )
+    if (
+        data.terms_version != settings.legal_terms_version
+        or data.privacy_version != settings.legal_privacy_version
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="The legal documents have changed. Review them again and continue.",
+        )
 
 
 async def verify_email_code(
     session: AsyncSession, data: VerifyLoginOtpRequest
 ) -> TokensResponse:
-    """Check the emailed code, mark the address verified and issue tokens.
+    """Check the emailed code, then sign the address in.
 
     Every check counts as an attempt, reserved atomically before the code is
     compared. After ``MAX_CODE_ATTEMPTS`` attempts in a window the pending code
-    is invalidated and further attempts are refused. A code is single-use: it
-    is deleted as soon as it is accepted.
+    is invalidated and further attempts are refused. A code is single use: it is
+    spent with an atomic consume, so two concurrent requests with the right code
+    cannot both sign in. A stored value that is not a digest (for example a plain
+    code written before this change) never matches.
+
+    A new address gets its account here, in the same transaction as its signup
+    consent records, and only after the required acceptances were sent as shown.
+    Existing active accounts sign in exactly as before. Disabled accounts get the
+    same generic error as a wrong code.
     """
     email = data.email.strip().lower()
     with _guard_store() as guard:
@@ -186,33 +255,81 @@ async def verify_email_code(
         )
         if attempt > MAX_CODE_ATTEMPTS:
             _cache().delete(_code_key(email))
+            log.warning("email_code_locked email=%s", redact_email(email))
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Too many incorrect attempts. Request a new code later.",
             )
 
-        stored = _cache().get(_code_key(email))
-        if stored and hmac.compare_digest(str(stored), str(data.code)):
-            _cache().delete(_code_key(email))
-            guard.delete(_attempt_key(email))
-        else:
+        pending = _cache().get(_code_key(email))
+        matched = isinstance(pending, dict) and hmac.compare_digest(
+            str(pending.get("digest", "")), _digest(email, str(data.code))
+        )
+        if not matched:
             if attempt >= MAX_CODE_ATTEMPTS:
                 _cache().delete(_code_key(email))
+            log.info("email_code_rejected attempt=%d", attempt)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Incorrect or expired code.",
             )
+        name = pending.get("name")
 
     users = UserRepository(session)
     user = await users.get_by_email(email)
     if user is None:
+        _require_signup_acceptance(data)
+
+    with _guard_store() as guard:
+        # Atomic spend: only one request can take the pending code.
+        if _cache().consume(_code_key(email)) is None:
+            log.info("email_code_already_used")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Incorrect or expired code.",
+            )
+        guard.delete(_attempt_key(email))
+
+    now = datetime.now(timezone.utc)
+    if user is None:
+        user = User(
+            auth_subject=str(uuid.uuid4()),
+            email=email,
+            full_name=(name or email.split("@", 1)[0])[:120],
+            password_hash=hash_password(secrets.token_urlsafe(48)),
+            is_email_verified=True,
+        )
+        session.add(user)
+        await session.flush()  # the consent rows need the new user id
+        for document, version, granted in (
+            ("terms", settings.legal_terms_version, True),
+            ("privacy", settings.legal_privacy_version, True),
+            (
+                "marketing",
+                settings.legal_marketing_version,
+                bool(data.marketing_consent),
+            ),
+        ):
+            session.add(
+                SignupConsent(
+                    user_id=user.id,
+                    document=document,
+                    version=version,
+                    granted=granted,
+                    recorded_at=now,
+                )
+            )
+        log.info("signup_recorded user=%s", user.auth_subject)
+    elif user.status.value != "active":
+        log.info("email_code_refused_inactive email=%s", redact_email(email))
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No account found with this email.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect or expired code.",
         )
     user.is_email_verified = True
-    user.last_login_at = datetime.now(timezone.utc)
+    user.last_login_at = now
     await session.commit()
+    log.info("email_code_verified user=%s", user.auth_subject)
     return _issue_tokens(user)
 
 

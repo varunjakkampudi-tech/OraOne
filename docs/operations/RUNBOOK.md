@@ -225,7 +225,7 @@ $DC up -d backend workers
 
 ## 12. Workflow runs do not start
 
-- Scheduled workflows run only in the `workers` process (or in an API process where `RUN_BACKGROUND_WORKERS=true`). Check that `oraone-prod-workers` is running.
+- Scheduled workflows run only in the `workers` process (or in an API process where `RUN_BACKGROUND_WORKERS=true`). Check that `OraOne-workers` is running.
 - Event workflows need an event the engine supports: `lead.created` or `message.received`. Other names are rejected when the workflow is saved.
 - The workflow must be active. A draft workflow never runs. Marketplace installs of workflows always start as drafts.
 

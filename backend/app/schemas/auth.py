@@ -18,10 +18,19 @@ class EmailCodeRequest(BaseModel):
 
 
 class VerifyLoginOtpRequest(BaseModel):
-    """Exchange an emailed one-time code for a session."""
+    """Exchange an emailed one-time code for a session.
+
+    The acceptance fields are required only when the code creates a new account. The
+    versions must match the documents currently in force, as the person saw them.
+    """
 
     email: EmailStr
     code: str = Field(..., min_length=6, max_length=6, pattern=SIGN_IN_CODE_PATTERN)
+    terms_accepted: bool = False
+    privacy_accepted: bool = False
+    marketing_consent: bool = False
+    terms_version: Optional[str] = Field(default=None, max_length=64)
+    privacy_version: Optional[str] = Field(default=None, max_length=64)
 
 
 class LoginRequest(BaseModel):

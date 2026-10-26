@@ -95,17 +95,43 @@ def _caller_id(request: Request) -> str:
     return f"ip:{_client_ip(request)}"
 
 
-#: Tiers that must not run unthrottled when the shared store is down.
+#: Tiers that must not run unthrottled when the shared store is down, in every environment.
 FAIL_CLOSED_TIERS = frozenset({"auth", "ai"})
+#: In production the general API tier also fails closed, so a Redis outage cannot
+#: remove the request limits. Webhooks stay fail-open: provider deliveries are
+#: signed and retried by the provider, and a limit outage must not drop them.
+PRODUCTION_FAIL_CLOSED_TIERS = FAIL_CLOSED_TIERS | {"api"}
+
+
+def _fails_closed(tier_name: str) -> bool:
+    from app.core.config import settings
+
+    tiers = (
+        PRODUCTION_FAIL_CLOSED_TIERS if settings.is_production else FAIL_CLOSED_TIERS
+    )
+    return tier_name in tiers
+
+
+#: Health probes must answer during a Redis outage, so they are never limited.
+_UNLIMITED_PATHS = ("/api/health", "/health")
+
+
+def _is_unlimited(path: str) -> bool:
+    return any(path == p or path.startswith(p + "/") for p in _UNLIMITED_PATHS)
 
 
 def _is_provider_webhook(path: str) -> bool:
-    """Inbound provider deliveries: Twilio voice, and channel webhooks.
+    """Inbound provider deliveries: Stripe, Twilio voice, and channel webhooks.
 
     Channel webhooks are ``/api/channels/{provider}/inbound`` (Telegram, Meta,
     Instagram, email, SDK, Twilio SMS/WhatsApp). Voice callbacks live under
-    ``/api/voice/``.
+    ``/api/voice/``. The Stripe sink is ``/api/billing/webhook``.
+
+    Webhooks are fail-open for rate limiting only. Their signatures, timestamps,
+    replay checks and durable acceptance are enforced by the handlers themselves.
     """
+    if path == "/api/billing/webhook":
+        return True
     if path.startswith("/api/voice/"):
         return True
     return path.startswith("/api/channels/") and path.rstrip("/").endswith("/inbound")
@@ -223,6 +249,8 @@ TIERS: list[RateLimitTier] = [
 
 async def rate_limit_middleware(request: Request, call_next):
     path = request.url.path
+    if _is_unlimited(path):
+        return await call_next(request)
     tier = next((t for t in TIERS if t.matches(path, request.method)), None)
     if tier is None:
         return await call_next(request)
@@ -250,7 +278,7 @@ async def rate_limit_middleware(request: Request, call_next):
             )
     except Exception:  # noqa: BLE001 — the store itself failed
         log.warning("rate_limit_check_failed tier=%s", tier.name, exc_info=True)
-        if tier.name in FAIL_CLOSED_TIERS:
+        if _fails_closed(tier.name):
             return JSONResponse(
                 status_code=503,
                 content={

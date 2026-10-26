@@ -12,6 +12,7 @@ where each body template is injected.
 
 from __future__ import annotations
 
+import hashlib
 import html
 import logging
 import os
@@ -24,7 +25,9 @@ from email.mime.text import MIMEText
 from functools import lru_cache
 from pathlib import Path
 
+from app.core.config import settings
 from app.core.log_redaction import redact_email
+from app.services import resend_client
 
 log = logging.getLogger("app.email")
 
@@ -157,13 +160,57 @@ def send_email(
 # ── typed convenience wrappers (one per template) ──────────────────────────
 
 
-def send_login_otp(to: str, *, code: str, expires_in: str = "10 minutes") -> bool:
+#: Sign-in codes expire after this long. Keep in step with ``auth_service``.
+LOGIN_OTP_EXPIRES_IN = "5 minutes"
+
+
+def _login_otp_text(code: str, expires_in: str) -> str:
+    """Plain-text part of the sign-in email (clients that do not render HTML)."""
+    return (
+        f"Your OraOne sign-in code is {code}.\n\n"
+        f"It expires in {expires_in} and works once. Do not share it with anyone.\n\n"
+        "If you did not ask to sign in, you can ignore this email. "
+        "No one can sign in without this code.\n"
+    )
+
+
+def send_login_otp(
+    to: str, *, code: str, expires_in: str = LOGIN_OTP_EXPIRES_IN
+) -> bool:
+    """Email a sign-in code. Uses Resend when ``RESEND_API_KEY`` is set, else SMTP.
+
+    Returns True only when the provider accepted the message. The caller treats
+    False as "no code was delivered".
+    """
+    subject = f"{code} is your OraOne sign-in code"
+    preheader = "Enter this code to finish signing in."
+    context = {"code": code, "expires_in": expires_in}
+    api_key = settings.resend_api_key
+    if api_key:
+        html_body = render("login_otp.html", subject, context, preheader=preheader)
+        # Same recipient and code always map to the same key, so a retried request
+        # cannot send a second copy of an identical code.
+        idempotency_key = hashlib.sha256(f"login-otp|{to}|{code}".encode()).hexdigest()
+        return resend_client.send(
+            api_key=api_key,
+            from_address=settings.resend_from,
+            to=to,
+            subject=subject,
+            html=html_body,
+            text=_login_otp_text(code, expires_in),
+            idempotency_key=idempotency_key,
+        )
+    if settings.is_production:
+        # Production sign-in codes go through Resend only. Falling back to SMTP here
+        # would send codes through a second, unaudited provider, so refuse instead.
+        log.error("login_otp_not_sent reason=resend_not_configured")
+        return False
     return send_email(
         to=to,
-        subject=f"{code} is your OraOne sign-in code",
+        subject=subject,
         template="login_otp.html",
-        preheader="Enter this code to finish signing in.",
-        context={"code": code, "expires_in": expires_in},
+        preheader=preheader,
+        context=context,
     )
 
 

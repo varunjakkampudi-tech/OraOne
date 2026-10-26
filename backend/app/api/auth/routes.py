@@ -65,6 +65,23 @@ async def email_code_request(
     )
 
 
+@router.get("/legal")
+async def legal_versions():
+    """The signup document versions currently in force, for the sign-up form.
+
+    ``approved`` is false while any document is still a draft. Production refuses
+    to create accounts until it is true.
+    """
+    from app.core.config import settings
+
+    return {
+        "terms_version": settings.legal_terms_version,
+        "privacy_version": settings.legal_privacy_version,
+        "marketing_version": settings.legal_marketing_version,
+        "approved": settings.legal_versions_approved,
+    }
+
+
 @router.post("/email-code/verify", response_model=TokensResponse)
 async def email_code_verify(
     payload: VerifyLoginOtpRequest,

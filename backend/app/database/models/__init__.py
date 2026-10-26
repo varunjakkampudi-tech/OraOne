@@ -1,6 +1,7 @@
 """SQLAlchemy ORM models. Import this package to register tables with Base."""
 
 from app.database.models.user import User, UserRole, UserStatus
+from app.database.models.signup_consent import SignupConsent  # noqa: F401 - registers the table
 from app.database.models.organization import Organization, OrgPlan
 from app.database.models.organization_member import (
     OrganizationMember,
