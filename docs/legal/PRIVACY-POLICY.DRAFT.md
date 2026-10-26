@@ -33,16 +33,16 @@ This draft describes what the current code does. Items marked OWNER TO CONFIRM a
 
 ## 3. Providers that process your data
 
-| Provider | Purpose | Data sent | Where it runs |
-|---|---|---|---|
-| Resend | Sends one-time sign-in codes by email | Your email address and the code | [OWNER TO CONFIRM: region and DPA] |
-| OpenRouter (AI models) | Generates assistant answers and embeddings | Question, retrieved passages, instructions | [OWNER TO CONFIRM: underlying model providers and their data-retention terms] |
-| Reranker provider (if enabled: Cohere, Jina or a local model) | Ranks search passages | Question and passages | [OWNER TO CONFIRM] |
-| Meta (WhatsApp, Instagram), Telegram, Twilio | Messages and calls on channels you connect | Messages and phone numbers for those channels | Provider regions |
-| ElevenLabs (if enabled) | Text-to-speech for voice | Text to be spoken | [OWNER TO CONFIRM] |
-| Google (sign-in to connected integrations, if enabled) | Connects Google accounts you authorise | Data you authorise | Google |
-| Stripe (only if billing is enabled) | Payments | Billing details | Stripe |
-| Hosting provider (Hostinger VPS) | Runs the servers, databases and file storage | All stored data | [OWNER TO CONFIRM: the VPS location] |
+| Provider                                                      | Purpose                                      | Data sent                                     | Where it runs                                                                 |
+| ------------------------------------------------------------- | -------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------- |
+| Resend                                                        | Sends one-time sign-in codes by email        | Your email address and the code               | [OWNER TO CONFIRM: region and DPA]                                            |
+| OpenRouter (AI models)                                        | Generates assistant answers and embeddings   | Question, retrieved passages, instructions    | [OWNER TO CONFIRM: underlying model providers and their data-retention terms] |
+| Reranker provider (if enabled: Cohere, Jina or a local model) | Ranks search passages                        | Question and passages                         | [OWNER TO CONFIRM]                                                            |
+| Meta (WhatsApp, Instagram), Telegram, Twilio                  | Messages and calls on channels you connect   | Messages and phone numbers for those channels | Provider regions                                                              |
+| ElevenLabs (if enabled)                                       | Text-to-speech for voice                     | Text to be spoken                             | [OWNER TO CONFIRM]                                                            |
+| Google (sign-in to connected integrations, if enabled)        | Connects Google accounts you authorise       | Data you authorise                            | Google                                                                        |
+| Stripe (only if billing is enabled)                           | Payments                                     | Billing details                               | Stripe                                                                        |
+| Hosting provider (Hostinger VPS)                              | Runs the servers, databases and file storage | All stored data                               | [OWNER TO CONFIRM: the VPS location]                                          |
 
 We do not sell personal data. We do not use Customer Content to train AI models. [OWNER TO CONFIRM and counsel to verify each provider's no-training setting before this sentence is published.]
 

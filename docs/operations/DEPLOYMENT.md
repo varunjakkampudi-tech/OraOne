@@ -7,8 +7,8 @@ never written in this document.
 
 ## What runs
 
-| Container              | Image source                                              | Role                                                                                                                                                             |
-| ---------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Container         | Image source                                              | Role                                                                                                                                                             |
+| ----------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OraOne-proxy`    | `caddy:2.11.7-alpine` with [`Caddyfile`](../../Caddyfile) | The only public entry point. Ports 80 and 443. Obtains the TLS certificate for `CADDY_DOMAIN`. Sends `/api/*` to the backend and everything else to the web app. |
 | `OraOne-frontend` | [`frontend.Dockerfile`](../../frontend.Dockerfile)        | Web application (Node server on port 8080). Not published.                                                                                                       |
 | `OraOne-backend`  | [`backend/Dockerfile`](../../backend/Dockerfile)          | API under Gunicorn (port 8000). Not published. Runs `alembic upgrade head`, then starts.                                                                         |
