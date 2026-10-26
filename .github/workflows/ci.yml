@@ -231,6 +231,14 @@ jobs:
           bun-version: "1.4.2"
       - name: Audit web dependencies
         run: bun audit --audit-level=high
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pip-audit
+        run: python -m pip install pip-audit==2.10.1
+      - name: Audit backend dependencies
+        working-directory: backend
+        run: pip-audit -r requirements.txt
 
   secret-scan:
     name: Secret scan (full history)
