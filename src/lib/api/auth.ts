@@ -27,7 +27,18 @@ export function requestEmailCode(input: { email: string; name?: string }) {
   });
 }
 
-export function verifyEmailCode(input: { email: string; code: string }) {
+/** Signup acceptance, sent only when the code creates a new account. */
+export type SignupAcceptance = {
+  terms_accepted: boolean;
+  privacy_accepted: boolean;
+  marketing_consent: boolean;
+  terms_version: string;
+  privacy_version: string;
+};
+
+export function verifyEmailCode(
+  input: { email: string; code: string } & Partial<SignupAcceptance>,
+) {
   return apiRequest<{ token_type: string; expires_in: number }>("/auth/email-code/verify", {
     method: "POST",
     body: input,
@@ -56,4 +67,16 @@ export function getIdentity() {
 
 export function logout() {
   return apiRequest<{ message: string }>("/auth/logout", { method: "POST", body: {} });
+}
+
+/** Signup document versions currently in force. Sign-up sends back exactly these versions. */
+export type LegalVersions = {
+  terms_version: string;
+  privacy_version: string;
+  marketing_version: string;
+  approved: boolean;
+};
+
+export function getLegalVersions() {
+  return apiRequest<LegalVersions>("/auth/legal");
 }

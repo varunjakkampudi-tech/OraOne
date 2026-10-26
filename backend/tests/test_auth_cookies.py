@@ -113,16 +113,26 @@ async def _login_via_otp(client, *, email: str, password: str):
     checking the inbox. ``password`` is accepted for signature compatibility
     with the seeding helper and is not used by the product sign-in.
     """
-    from app.services import auth_service
 
     del password
-    request_resp = await client.post(
-        "/api/auth/email-code/request", json={"email": email}
-    )
+    from unittest.mock import patch
+
+    from app.services import email_service
+
+    sent: dict[str, str] = {}
+
+    def _capture(to: str, *, code: str, expires_in: str = "5 minutes") -> bool:
+        sent[to] = code
+        return True
+
+    with patch.object(email_service, "send_login_otp", _capture):
+        request_resp = await client.post(
+            "/api/auth/email-code/request", json={"email": email}
+        )
     assert request_resp.status_code == 200, request_resp.text
 
-    code = auth_service._cache().get(auth_service._code_key(email))
-    assert code, "sign-in code was not stored in cache"
+    code = sent.get(email.strip().lower())
+    assert code, "sign-in code was not emailed"
 
     return await client.post(
         "/api/auth/email-code/verify", json={"email": email, "code": code}

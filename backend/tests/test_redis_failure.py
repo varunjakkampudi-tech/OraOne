@@ -124,7 +124,10 @@ async def test_login_fails_safely_when_token_store_unreachable(monkeypatch):
 
     class _FakeOtpCache:
         def get(self, key):
-            return "123456"
+            return {"digest": auth_service._digest("a@b.com", "123456"), "name": None}
+
+        def consume(self, key):
+            return self.get(key)
 
         def delete(self, key):
             return None
